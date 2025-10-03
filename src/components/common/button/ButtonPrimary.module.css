@@ -1,0 +1,372 @@
+/* ButtonPrimary.module.css
+   - Variants: solid | subtle | outline | ghost | gradient | glass
+   - Tones:    brand | neutral | success | danger
+   - Sizes:    sm | md | lg | xl
+   - Shapes:   rounded | pill
+   - States:   hover | active | focus-visible | disabled | [aria-busy="true"]
+   - Extras:   iconOnly | block
+*/
+
+:root {
+    /* defaults = light theme */
+    --btn-bg: var(--button-primary-bg-light);
+    --btn-bg-hover: var(--button-primary-bg-hover-light);
+    --btn-bg-pressed: var(--button-primary-bg-pressed-light);
+    --btn-fg: var(--button-primary-fg-light);
+    --btn-border: var(--boder-soft-light, rgba(0, 0, 0, 0.08));
+    --btn-focus: var(--focus-ring-light, rgb(75, 163, 195));
+
+    /* neutrals */
+    --btn-neutral-bg: var(--palette-columbia-blue-700);
+    --btn-neutral-fg: var(--text-primary-light, #0b1520);
+    --btn-neutral-border: var(--boder-strong-light, rgba(0, 0, 0, 0.12));
+
+    /* success / danger */
+    --btn-success-bg: var(--color-green-500);
+    --btn-success-bg-hover: var(--color-green-600);
+    --btn-success-fg: #fff;
+
+    --btn-danger-bg: var(--status-danger-500-light);
+    --btn-danger-bg-hover: var(--status-danger-600-light);
+    --btn-danger-fg: #fff;
+
+    /* glass & subtle */
+    --btn-glass-bg: rgba(255, 255, 255, 0.12);
+    --btn-glass-border: var(
+        --container-border-light,
+        rgba(255, 255, 255, 0.35)
+    );
+
+    --btn-subtle-bg: var(--palette-lapis-lazuli-900);
+    --btn-subtle-fg: var(--brand-primary-600-light, #1e6ea3);
+
+    /* outline/ghost */
+    --btn-outline-border: var(--brand-primary-600-light, #2484b5);
+    --btn-ghost-hover: var(--palette-lapis-lazuli-900);
+}
+
+[data-theme='dark'] {
+    --btn-bg: var(--button-primary-bg-dark);
+    --btn-bg-hover: var(--button-primary-bg-hover-dark);
+    --btn-bg-pressed: var(--button-primary-bg-pressed-dark);
+    --btn-fg: var(--button-primary-fg-dark);
+    --btn-border: var(--boder-soft-dark, rgba(255, 255, 255, 0.14));
+    --btn-focus: var(--focus-ring-dark, rgb(111, 181, 207));
+
+    --btn-neutral-bg: var(--surface-raised-dark);
+    --btn-neutral-fg: var(--text-primary-dark, #f5fafd);
+    --btn-neutral-border: var(--boder-strong-dark, rgba(255, 255, 255, 0.16));
+
+    --btn-glass-bg: rgba(0, 0, 0, 0.26);
+    --btn-glass-border: var(--container-border-dark, rgba(255, 255, 255, 0.12));
+
+    --btn-subtle-bg: var(--surface-card-dark);
+    --btn-subtle-fg: var(--brand-primary-600-dark, #2484b5);
+
+    --btn-outline-border: var(--brand-primary-600-dark, #2484b5);
+    --btn-ghost-hover: rgba(255, 255, 255, 0.08);
+}
+
+/* ========== Base ========== */
+.btn {
+    --pad-y: var(--button-vertical-padding-medium, 6px);
+    --pad-x: var(--button-horizontal-padding-medium, 16px);
+    --gap: var(--button-gap-medium, 8px);
+    --radius: var(--button-corner-radius-medium, 8px);
+    --icon: var(--button-icon-size-medium, 16px);
+
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gap);
+    padding: var(--pad-y) var(--pad-x);
+    border-radius: var(--radius);
+    border: 1px solid var(--btn-border);
+    background: var(--btn-bg);
+    color: var(--btn-fg);
+    font: inherit;
+    line-height: 1;
+    cursor: pointer;
+    text-decoration: none;
+    user-select: none;
+    white-space: nowrap;
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease,
+        border-color 0.15s ease,
+        box-shadow 0.15s ease,
+        transform 0.05s ease;
+    box-shadow:
+        0 1px 0 rgba(0, 0, 0, 0.05),
+        0 4px 4px rgba(0, 0, 0, 0.05),
+        0 10px 10px rgba(0, 0, 0, 0.1);
+    backdrop-filter: saturate(120%) blur(8px);
+}
+
+.btn:where(:hover):not(:disabled, [aria-busy='true']) {
+    background: var(--btn-bg-hover);
+}
+.btn:where(:active):not(:disabled, [aria-busy='true']) {
+    background: var(--btn-bg-pressed);
+    transform: translateY(1px);
+}
+.btn:focus-visible {
+    outline: 2px solid var(--btn-focus);
+    outline-offset: 2px;
+}
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    filter: grayscale(0.1);
+}
+
+/* Loading spinner (uses aria-busy) */
+.btn[aria-busy='true'] {
+    pointer-events: none;
+}
+.btn[aria-busy='true']::after {
+    content: '';
+    position: absolute;
+    right: calc(var(--pad-x) - 2px);
+    width: 1em;
+    height: 1em;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    animation: btn-spin 0.8s linear infinite;
+}
+@keyframes btn-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.label {
+    display: inline-block;
+}
+.icon {
+    width: var(--icon);
+    height: var(--icon);
+    display: inline-grid;
+    place-items: center;
+}
+
+/* ========== Sizes ========== */
+.sm {
+    --pad-y: var(--button-vertical-padding-regular, 4px);
+    --pad-x: var(--button-horizontal-padding-regular, 12px);
+    --icon: var(--button-icon-size-regular, 16px);
+    --radius: var(--button-corner-radius-regular, 8px);
+}
+.md {
+}
+.lg {
+    --pad-y: var(--button-vertical-padding-large, 8px);
+    --pad-x: var(--button-horizontal-padding-large, 16px);
+    --icon: var(--button-icon-size-large, 16px);
+    --radius: var(--button-corner-radius-large, 8px);
+}
+.xl {
+    --pad-y: var(--button-vertical-padding-extra-large, 10px);
+    --pad-x: var(--button-horizontal-padding-extra-large, 20px);
+    --icon: var(--button-icon-size-extra-large, 24px);
+    --radius: var(--radius-xl, 24px);
+}
+
+/* Shapes */
+.rounded {
+    border-radius: var(--radius-lg, 16px);
+}
+.pill {
+    border-radius: var(--radius-full, 9999px);
+}
+
+/* Full width */
+.block {
+    display: inline-flex;
+    width: 100%;
+}
+
+/* Icon-only button (square) */
+.iconOnly {
+    padding: var(--pad-y);
+    width: var(--button-size-medium, 32px);
+    aspect-ratio: 1 / 1;
+}
+.sm.iconOnly {
+    width: var(--button-size-regular, 28px);
+}
+.lg.iconOnly {
+    width: var(--button-size-large, 36px);
+}
+.xl.iconOnly {
+    width: var(--button-size-extra-large, 44px);
+}
+
+/* ========== Variants ========== */
+
+/* 1) Solid primary (default) */
+.solid {
+    background: var(--btn-bg);
+    color: var(--btn-fg);
+}
+.solid:hover:not(:disabled, [aria-busy='true']) {
+    background: var(--btn-bg-hover);
+}
+.solid:active:not(:disabled, [aria-busy='true']) {
+    background: var(--btn-bg-pressed);
+}
+
+/* 2) Subtle (soft fill) */
+.subtle {
+    background: var(--btn-subtle-bg);
+    color: var(--btn-subtle-fg);
+    border-color: transparent;
+    box-shadow: inset 0 0 0 1px var(--btn-outline-border, transparent);
+}
+.subtle:hover:not(:disabled, [aria-busy='true']) {
+    filter: brightness(1.04);
+}
+.subtle:active:not(:disabled, [aria-busy='true']) {
+    filter: brightness(0.98);
+}
+
+/* 3) Outline */
+.outline {
+    background: transparent;
+    color: var(--btn-fg);
+    border-color: var(--btn-outline-border);
+}
+.outline:hover:not(:disabled, [aria-busy='true']) {
+    background: color-mix(in oklab, var(--btn-outline-border) 12%, transparent);
+}
+.outline:active:not(:disabled, [aria-busy='true']) {
+    background: color-mix(in oklab, var(--btn-outline-border) 18%, transparent);
+}
+
+/* 4) Ghost */
+.ghost {
+    background: transparent;
+    color: var(--btn-fg);
+    border-color: transparent;
+    box-shadow: none;
+}
+.ghost:hover:not(:disabled, [aria-busy='true']) {
+    background: var(--btn-ghost-hover);
+}
+.ghost:active:not(:disabled, [aria-busy='true']) {
+    background: color-mix(in oklab, var(--btn-ghost-hover) 85%, black 0%);
+}
+
+/* 5) Gradient (brand accent → cyan) */
+.gradient {
+    color: #fff;
+    border-color: transparent;
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.45) 0%,
+            rgba(255, 255, 255, 0.24) 100%
+        ),
+        linear-gradient(
+            120deg,
+            var(--brand-secondary-600-light) 0%,
+            var(--brand-accent1-600-light) 45%,
+            var(--brand-primary-700-light) 100%
+        );
+    box-shadow:
+        0 10px 24px rgba(0, 0, 0, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+[data-theme='dark'] .gradient {
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.2) 0%,
+            rgba(255, 255, 255, 0.06) 100%
+        ),
+        linear-gradient(
+            120deg,
+            var(--brand-secondary-600-dark) 0%,
+            var(--brand-accent1-600-dark) 45%,
+            var(--brand-primary-700-dark) 100%
+        );
+}
+.gradient:hover:not(:disabled, [aria-busy='true']) {
+    filter: brightness(1.04) saturate(1.05);
+}
+.gradient:active:not(:disabled, [aria-busy='true']) {
+    filter: brightness(0.97);
+    transform: translateY(1px);
+}
+
+/* 6) Glass (frosted, see-through) */
+.glass {
+    color: var(--btn-fg);
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.5) 0%,
+            rgba(255, 255, 255, 0.25) 100%
+        ),
+        var(--btn-glass-bg);
+    border-color: var(--btn-glass-border);
+    box-shadow:
+        0 1px 0 rgba(0, 0, 0, 0.05),
+        0 4px 4px rgba(0, 0, 0, 0.05),
+        0 10px 10px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+}
+.glass:hover:not(:disabled, [aria-busy='true']) {
+    filter: brightness(1.06);
+}
+.glass:active:not(:disabled, [aria-busy='true']) {
+    filter: brightness(0.98);
+}
+
+/* ========== Tones (override colors) ========== */
+.toneBrand {
+}
+
+.toneNeutral {
+    --btn-bg: var(--btn-neutral-bg);
+    --btn-bg-hover: color-mix(in oklab, var(--btn-neutral-bg) 92%, black 8%);
+    --btn-bg-pressed: color-mix(in oklab, var(--btn-neutral-bg) 85%, black 15%);
+    --btn-fg: var(--btn-neutral-fg);
+    --btn-border: var(--btn-neutral-border);
+}
+
+.toneSuccess {
+    --btn-bg: var(--btn-success-bg);
+    --btn-bg-hover: var(--btn-success-bg-hover);
+    --btn-bg-pressed: color-mix(
+        in oklab,
+        var(--btn-success-bg-hover) 85%,
+        black 15%
+    );
+    --btn-fg: var(--btn-success-fg);
+    --btn-outline-border: var(--btn-success-bg);
+}
+
+.toneDanger {
+    --btn-bg: var(--btn-danger-bg);
+    --btn-bg-hover: var(--btn-danger-bg-hover);
+    --btn-bg-pressed: color-mix(
+        in oklab,
+        var(--btn-danger-bg-hover) 85%,
+        black 15%
+    );
+    --btn-fg: var(--btn-danger-fg);
+    --btn-outline-border: var(--btn-danger-bg);
+}
+
+/* Optional “elevated/flat” presets */
+.elevated {
+    box-shadow:
+        0 8px 20px rgba(0, 0, 0, 0.2),
+        0 2px 6px rgba(0, 0, 0, 0.08);
+}
+.flat {
+    box-shadow: none;
+}

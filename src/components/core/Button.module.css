@@ -1,0 +1,16 @@
+.btn {
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    border: 1px solid transparent;
+}
+
+.primary {
+    background: var(--brand-600);
+    color: var(--text);
+}
+
+.btn:focus-visible {
+    outline: 2px solid var(--brand-700);
+    outline-offset: 2px;
+}

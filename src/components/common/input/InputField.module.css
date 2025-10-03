@@ -1,0 +1,189 @@
+/* ===== base wrapper ===== */
+.wrapper {
+    --pad-y: 10px;
+    --pad-x: 20px;
+    --radius: 8px;
+    --gap: 10px;
+    --pl: var(--pad-x);
+    --pr: var(--pad-x);
+    --bgA: rgba(255, 255, 255, 0.5);
+    --bgB: rgba(255, 255, 255, 0.05);
+    --bd: rgba(255, 255, 255, 0.1);
+    --shadow:
+        0px 10px 10px rgba(0, 0, 0, 0.1), 0px 4px 4px rgba(0, 0, 0, 0.05),
+        0px 1px 0px rgba(0, 0, 0, 0.05);
+
+    width: 100%;
+}
+
+.block {
+    display: block;
+    width: 100%;
+}
+
+.label {
+    display: inline-block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--label-color, #fff);
+    opacity: 0.9;
+}
+
+.fieldRow {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input {
+    width: 100%;
+    padding: var(--pad-y) var(--pr) var(--pad-y) var(--pl);
+    font-size: 16px;
+    line-height: 1.2;
+    color: #000;
+
+    background: linear-gradient(360deg, var(--bgA) 0%, var(--bgB) 100%);
+    border: 1px solid var(--bd);
+    border-radius: var(--radius);
+    backdrop-filter: blur(2px);
+    box-shadow: var(--shadow);
+
+    outline: none;
+    transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease,
+        background 0.15s ease;
+}
+
+.input::placeholder {
+    color: rgba(0, 0, 0, 0.5);
+    font-weight: 500;
+    font-size: 16px;
+}
+
+/* hover/focus */
+.input:hover {
+    background: linear-gradient(
+        360deg,
+        rgba(255, 255, 255, 0.55) 0%,
+        rgba(255, 255, 255, 0.1) 100%
+    );
+    border-color: rgba(255, 255, 255, 0.2);
+}
+.input:focus-visible {
+    box-shadow:
+        0 0 0 3px rgba(83, 195, 255, 0.5),
+        var(--shadow);
+    border-color: rgba(83, 195, 255, 0.8);
+}
+
+/* prefix/suffix */
+.prefix,
+.suffix,
+.suffixBtn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 20px;
+    display: inline-grid;
+    place-items: center;
+    color: rgba(0, 0, 0, 0.6);
+}
+.prefix {
+    left: 12px;
+}
+.suffix,
+.suffixBtn {
+    right: 12px;
+}
+.suffixBtn {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    color: rgba(0, 0, 0, 0.65);
+}
+.suffixBtn:hover {
+    color: rgba(0, 0, 0, 0.9);
+}
+
+/* adjust padding when icon present */
+.withPrefix {
+    --pl: 40px;
+}
+.withSuffix {
+    --pr: 40px;
+}
+
+/* size */
+.size-sm {
+    --pad-y: 8px;
+    --pad-x: 14px;
+    --radius: 6px;
+}
+.size-md {
+    /* default */
+}
+.size-lg {
+    --pad-y: 12px;
+    --pad-x: 24px;
+    --radius: 10px;
+}
+
+/* variants */
+.variant-glass {
+    /* dùng đúng style mẫu bạn gửi */
+}
+.variant-neutral {
+    --bgA: rgba(255, 255, 255, 0.8);
+    --bgB: rgba(255, 255, 255, 0.3);
+    --bd: rgba(0, 0, 0, 0.08);
+}
+:global([data-theme='dark']) .variant-neutral {
+    --bgA: rgba(255, 255, 255, 0.2);
+    --bgB: rgba(255, 255, 255, 0.06);
+    --bd: rgba(255, 255, 255, 0.16);
+}
+
+/* states */
+.invalid .input,
+.wrapper[data-invalid='true'] .input {
+    border-color: rgba(214, 40, 57, 0.6); /* crimson-500 */
+    box-shadow:
+        0 0 0 2px rgba(214, 40, 57, 0.25),
+        var(--shadow);
+}
+
+.valid .input {
+    border-color: rgba(32, 167, 116, 0.55);
+    box-shadow:
+        0 0 0 2px rgba(32, 167, 116, 0.25),
+        var(--shadow);
+}
+
+.input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* messages */
+.hint {
+    margin-top: 6px;
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.6);
+}
+.error {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #d62839; /* crimson-500 */
+}
+
+.icon {
+    position: relative;
+    place-items: center;
+    z-index: 1;
+    width: 28px;
+    height: 28px;
+    color: var(--icon);
+}
