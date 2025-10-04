@@ -7,8 +7,8 @@ export function AppBootstrap({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         ;(async () => {
             try {
-                const data = await me()
-                setUser(data.user)
+                const user = await me()
+                setUser(user)
             } catch {
                 setUser(null)
             }
