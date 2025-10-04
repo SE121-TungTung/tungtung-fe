@@ -6,14 +6,20 @@ export type LoginPayload = {
     password: string
     remember?: boolean
 }
-export type LoginResponse = { user: User }
+export type LoginResponse = {
+    access_token: string
+}
 
 export const login = (body: LoginPayload) =>
-    api<LoginResponse>('/api/auth/login', {
+    api<LoginResponse>('/api/v1/auth/login-json', {
         method: 'POST',
-        body: JSON.stringify(body),
+        body: JSON.stringify({
+            email: body.email,
+            password: body.password,
+            remember_me: body.remember ?? false,
+        }),
     })
 
-export const me = () => api<{ user: User }>('/api/auth/me', { method: 'GET' })
+export const me = () => api<User>('/api/v1/users/me', { method: 'GET' })
 
-export const logout = () => api<void>('/api/auth/logout', { method: 'POST' })
+export const logout = () => api<void>('/api/v1/auth/logout', { method: 'POST' })

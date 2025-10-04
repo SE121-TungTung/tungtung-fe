@@ -1,4 +1,6 @@
-const API = import.meta.env.VITE_API_URL || ''
+const API =
+    import.meta.env.VITE_API_URL ||
+    'https://tungtung-be-production.up.railway.app'
 
 async function parseError(res: Response) {
     let msg = 'Đã có lỗi, vui lòng thử lại'
@@ -14,13 +16,16 @@ async function parseError(res: Response) {
 }
 
 export async function api<T>(path: string, init?: RequestInit): Promise<T> {
+    const token = localStorage.getItem('token')
+
     const url = path.startsWith('http')
         ? path
         : `${API.replace(/\/$/, '')}${path}`
     const res = await fetch(url, {
-        credentials: 'include', // nhận/gửi cookie httpOnly
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
             ...(init?.headers || {}),
         },
         ...init,

@@ -1,4 +1,3 @@
-// src/components/common/button/ButtonPrimary.tsx
 import React from 'react'
 import s from './ButtonPrimary.module.css'
 

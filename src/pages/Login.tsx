@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { loginSchema, type LoginValues } from '@/forms/login.schema'
 import { useMutation } from '@tanstack/react-query'
-import { login } from '@/lib/auth'
+import { login, me } from '@/lib/auth'
 import { useSession } from '@/stores/session.store'
 import { useNavigate } from 'react-router-dom'
 import { homePathByRole } from '@/utils/role'
@@ -29,13 +29,20 @@ export function LoginPage() {
 
     const mut = useMutation({
         mutationFn: (v: LoginValues) => login(v),
-        onSuccess: ({ user }) => {
-            setUser(user)
-            if (user.isFirstLogin)
-                return navigate('/change-password', { replace: true })
-            navigate(homePathByRole(user.role), { replace: true })
+        onSuccess: async ({ access_token }) => {
+            localStorage.setItem('token', access_token)
+            try {
+                const user = await me()
+                setUser(user)
+                if (user.isFirstLogin)
+                    return navigate('/forgot-password', { replace: true })
+                navigate(homePathByRole(user.role), { replace: true })
+            } catch (error) {
+                console.log(error)
+            }
         },
-        onError: () => {
+        onError: (e: any) => {
+            console.log(e)
             setApiError(
                 'Thông tin đăng nhập không chính xác hoặc tài khoản bị khóa.'
             )
@@ -123,10 +130,11 @@ export function LoginPage() {
                 <ButtonPrimary
                     type="submit"
                     variant="glass"
+                    shape="rounded"
                     loading={isSubmitting}
                     disabled={isSubmitting || mut.isPending}
                     onClick={() => onSubmit}
-                    style={{ width: '100%', height: '100%' }}
+                    style={{ width: '100%', height: '100%', padding: '10px' }}
                 >
                     Đăng nhập
                 </ButtonPrimary>

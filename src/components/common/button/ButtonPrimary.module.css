@@ -176,7 +176,7 @@
 
 /* Shapes */
 .rounded {
-    border-radius: var(--radius-lg, 16px);
+    border-radius: var(--radius-lg, 200px);
 }
 .pill {
     border-radius: var(--radius-full, 9999px);
