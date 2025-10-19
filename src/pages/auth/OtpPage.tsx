@@ -11,6 +11,8 @@ import FieldMessage from '@/components/common/typography/FieldMessage'
 import { validatePasswordResetOtp } from '@/lib/auth'
 import { useState } from 'react'
 import LiquidEther from '@/components/effect/LiquidEther'
+import { TextHorizontal } from '@/components/common/text/TextHorizontal'
+import ChatSquare from '@/assets/Chat Square Exclamation.svg'
 
 const schema = z.object({
     otp: z.string().regex(/^\d+$/, 'OTP chỉ gồm chữ số'),
@@ -79,6 +81,27 @@ export default function OtpPage() {
                             Nhập <span className={s.h1_inside}>OTP</span> đã gửi
                             qua Email
                         </h1>
+                    </div>
+                    <div className="frame">
+                        <TextHorizontal
+                            className="text-horizontal-instance"
+                            icon={
+                                <img
+                                    src={ChatSquare}
+                                    className="chat-square"
+                                    alt="chat icon"
+                                />
+                            }
+                            iconStyle="glass"
+                            description="Website quản lý trung tâm Anh ngữ số 1 Việt Nam, cung cấp hệ sinh thái đa dạng cho người dạy lẫn người học."
+                            ctaText="Tìm hiểu thêm"
+                            onCtaClick={() =>
+                                window.open(
+                                    'https://tungtung-fe.vercel.app',
+                                    '_blank'
+                                )
+                            }
+                        />
                     </div>
                 </div>
 

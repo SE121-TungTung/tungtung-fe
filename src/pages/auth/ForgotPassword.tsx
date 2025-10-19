@@ -75,16 +75,25 @@ export function ForgotPasswordPage() {
                             <span className={s.h1_inside}>để nhận</span> mã OTP
                         </h1>
                     </div>
-                    <div className={s.frame}>
+                    <div className="frame">
                         <TextHorizontal
-                            buttonLogoIcon={
-                                <img src={ChatSquare} className="chat-square" />
-                            }
-                            buttonLogoStyle="glass"
-                            buttonPrimaryClassName="text-horizontal-2"
                             className="text-horizontal-instance"
-                            text="TungTung - Website quản lý trung tâm Anh ngữ số 1 Việt Nam, cung cấp hệ sinh thái đa dạng cho người dạy lẫn người học"
-                            text1="Tìm hiểu thêm"
+                            icon={
+                                <img
+                                    src={ChatSquare}
+                                    className="chat-square"
+                                    alt="chat icon"
+                                />
+                            }
+                            iconStyle="glass"
+                            description="Website quản lý trung tâm Anh ngữ số 1 Việt Nam, cung cấp hệ sinh thái đa dạng cho người dạy lẫn người học."
+                            ctaText="Tìm hiểu thêm"
+                            onCtaClick={() =>
+                                window.open(
+                                    'https://tungtung-fe.vercel.app',
+                                    '_blank'
+                                )
+                            }
                         />
                     </div>
                 </div>

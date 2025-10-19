@@ -103,7 +103,7 @@ export function LoginPage() {
                             ctaText="Tìm hiểu thêm"
                             onCtaClick={() =>
                                 window.open(
-                                    'https://your-homepage-url.com',
+                                    'https://tungtung-fe.vercel.app',
                                     '_blank'
                                 )
                             }
