@@ -24,7 +24,7 @@ import ExamIcon from '@/assets/Card Question.svg'
 import RoadmapIcon from '@/assets/Merge.svg'
 
 import type { Lesson } from '@/components/common/typography/LessonItem'
-import Chatbot from '@/components/feature/chatbot/ChatBot'
+import Chatbot from '@/components/feature/chatbot/Chatbot'
 import { TextHorizontal } from '@/components/common/text/TextHorizontal'
 import TextType from '@/components/common/text/TextType'
 

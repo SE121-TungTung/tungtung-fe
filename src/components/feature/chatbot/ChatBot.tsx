@@ -29,7 +29,6 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
         setMessages(newMessages)
         setInputValue('')
 
-        // Giả lập câu trả lời của bot
         setTimeout(() => {
             setMessages((prev) => [
                 ...prev,
