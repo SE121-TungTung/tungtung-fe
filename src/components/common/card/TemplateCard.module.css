@@ -1,0 +1,126 @@
+.templateCard {
+    --text-color: #0e3448;
+    --subtext-color: rgba(0, 0, 0, 0.7);
+    --divider-color: rgba(0, 0, 0, 0.1);
+    --progress-bar-bg: #000;
+    --card-bg: rgba(255, 255, 255, 1);
+
+    --radius: var(--radius-md, 12px);
+    --grad-red: var(--brand-secondary-500-light);
+    --grad-blue: var(--brand-primary-600-light);
+    --border-width: 2px;
+
+    position: relative;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: transparent;
+    border: var(--border-width) solid transparent;
+    z-index: 1;
+}
+
+.templateCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: -2;
+    margin: calc(var(--border-width) * -1);
+    border-radius: inherit;
+    background: linear-gradient(
+        111deg,
+        var(--brand-secondary-500-light) 0%,
+        #ef325f 49.15%,
+        var(--brand-primary-500-light) 100%
+    );
+}
+
+.templateCard::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border-radius: inherit;
+    margin: var(--border-width);
+}
+
+.media {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    display: block;
+}
+
+.content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.tagRow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+.title {
+    margin: 0;
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: clamp(15px, 1.6vw, 16px);
+    line-height: 1.35;
+}
+
+.divider {
+    height: 1px;
+    width: 100%;
+    border-radius: 8px;
+    background: var(--divider-color);
+}
+
+.excerpt {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: inherit;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.footer {
+    margin-top: 4px;
+}
+
+/* --- Light & Dark Modes --- */
+.light {
+    --bg: var(--surface-card-light);
+    --divider-color: rgba(0, 0, 0, 0.1);
+    --text-primary: var(--text-primary-light);
+    --text-secondary: var(--text-secondary-light);
+}
+
+.dark {
+    --bg: var(--surface-card-dark);
+    --divider-color: rgba(255, 255, 255, 0.15);
+    --text-primary: var(--text-primary-dark);
+    --text-secondary: var(--text-secondary-dark);
+}
+
+@media (max-width: 640px) {
+    .content {
+        padding: 12px;
+        gap: 10px;
+    }
+}

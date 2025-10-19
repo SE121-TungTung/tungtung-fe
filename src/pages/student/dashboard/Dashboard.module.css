@@ -1,0 +1,246 @@
+.dashboard {
+    background: linear-gradient(115deg, #e4ecf7, #fff);
+    padding: 24px clamp(24px, 5vw, 80px);
+    min-height: 100vh;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    margin-bottom: 40px;
+    position: relative;
+    z-index: 10;
+    width: 70%;
+    align-self: center;
+}
+
+.avatarWrapper {
+    position: relative;
+}
+
+.avatarButton {
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
+
+.avatarButton[data-active='true'] {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(100, 150, 255, 0.5);
+    border-color: var(--brand-primary-600-light);
+}
+.avatarButton[data-active='true']::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    background: linear-gradient(
+        45deg,
+        var(--brand-secondary-500-light),
+        var(--brand-primary-500-light)
+    );
+    z-index: -1;
+}
+
+.menusContainer {
+    position: absolute;
+    top: 100%;
+    margin-top: 12px;
+    z-index: 100;
+    pointer-events: none;
+}
+
+.menusContainer > * {
+    pointer-events: auto;
+    animation: slideDownFade 0.2s ease-out;
+}
+
+.menuPopover {
+    position: absolute;
+    z-index: 100;
+    animation: slideDownFade 0.2s ease-out;
+}
+
+@keyframes slideDownFade {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.userMenu {
+    position: absolute;
+    right: 0;
+}
+
+.studyMenu {
+    position: absolute;
+    left: 0;
+}
+
+.welcomeMessage {
+    font-size: clamp(2.2rem, 5vw, 3rem);
+    font-weight: 700;
+    text-align: center;
+    color: var(--text-primary-light);
+    letter-spacing: -0.04em;
+    margin: 0 auto 40px;
+    overflow: visible;
+    display: block;
+    min-height: 1em;
+    line-height: 1.15;
+}
+
+.gradientText {
+    background: linear-gradient(
+        111deg,
+        var(--brand-secondary-500-light) 0%,
+        #ef325f 49.15%,
+        var(--brand-primary-500-light) 100%
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline;
+    line-height: 1.15;
+}
+
+.mainContent {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.mainRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: stretch;
+    width: 100%;
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.suggestionBody {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    align-items: flex-end;
+}
+
+.suggestionTip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.fab {
+    position: fixed;
+    bottom: 40px;
+    right: 40px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(
+        111deg,
+        var(--brand-secondary-500-light),
+        #ef325f 49.15%,
+        var(--brand-primary-500-light)
+    );
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
+    z-index: 40;
+}
+
+.fab:hover {
+    transform: scale(1.1);
+}
+
+.fab img {
+    width: 28px;
+    height: 28px;
+    filter: invert(1) brightness(2);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .suggestionBody {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .mainRow {
+        grid-template-columns: 1fr;
+    }
+
+    .suggestionBody {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .statsGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .welcomeMessage {
+        margin-bottom: 24px;
+    }
+
+    .fab {
+        bottom: 20px;
+        right: 20px;
+    }
+
+    .suggestionBody {
+        grid-template-columns: 1fr;
+    }
+
+    .menusContainer {
+        right: 0;
+        left: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .statsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .mainRow {
+        grid-template-columns: 1fr;
+    }
+
+    .suggestionBody {
+        grid-template-columns: 1fr;
+    }
+}

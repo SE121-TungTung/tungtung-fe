@@ -1,0 +1,125 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(2px);
+    z-index: 1000;
+}
+
+.root {
+    --radius: 12px;
+    --pad: 16px;
+    --w: 360px;
+    --fg: #0b1520;
+    --bg: rgba(255, 255, 255, 0.75);
+    --bd: rgba(0, 0, 0, 0.12);
+    position: relative;
+    width: var(--w);
+    max-width: calc(100% - 32px);
+    color: var(--fg);
+    background: var(--bg);
+    border: 1px solid var(--bd);
+    border-radius: var(--radius);
+    box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.25),
+        0 10px 20px rgba(0, 0, 0, 0.15),
+        0 2px 6px rgba(0, 0, 0, 0.08);
+    padding: calc(var(--pad) + 6px) var(--pad) var(--pad);
+}
+
+.header {
+    margin-bottom: 8px;
+}
+.title {
+    margin: 0 28px 6px 0;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+}
+.desc {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    opacity: 0.9;
+}
+.body {
+    margin: 8px 0;
+}
+.footer {
+    margin-top: 12px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+/* sizes */
+.sm {
+    --w: 300px;
+    --pad: 12px;
+}
+.md {
+    /* default */
+}
+.lg {
+    --w: 420px;
+    --pad: 20px;
+}
+
+/* mode */
+.light {
+    --fg: #0b1520;
+}
+.dark {
+    --fg: #fff;
+    --bg: rgba(0, 0, 0, 0.55);
+    --bd: rgba(255, 255, 255, 0.18);
+}
+
+/* variants */
+.glass {
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.45) 0%,
+            rgba(255, 255, 255, 0.22) 100%
+        ),
+        var(--bg);
+    backdrop-filter: blur(10px) saturate(120%);
+}
+.flat {
+    background: var(--bg);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
+}
+.outline {
+    background: var(--bg);
+    border-color: color-mix(in oklab, var(--bd) 65%, transparent);
+}
+
+/* close button */
+.close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 28px;
+    height: 28px;
+    border-radius: 9999px;
+    display: grid;
+    place-items: center;
+    border: 1px solid color-mix(in oklab, var(--bd) 70%, transparent);
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.35),
+        rgba(255, 255, 255, 0.16)
+    );
+    color: inherit;
+    cursor: pointer;
+}
+.close:hover {
+    filter: brightness(1.05);
+}
+.close:focus-visible {
+    outline: 2px solid rgba(83, 195, 255, 0.7);
+    outline-offset: 2px;
+}

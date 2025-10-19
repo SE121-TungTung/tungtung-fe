@@ -1,0 +1,56 @@
+.card {
+    flex: 1;
+    background: var(--card);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+    padding: 40px;
+    min-width: 300px;
+    max-width: 400px;
+}
+
+.grid {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.rowCompact {
+    margin: 2px 0 8px;
+    line-height: 1.1;
+    gap: 10px;
+}
+
+.actions {
+    margin-top: 6px;
+    display: flex;
+    gap: 12px;
+}
+.actions-stretch > * {
+    width: 100%;
+}
+.actions-left {
+    justify-content: flex-start;
+}
+.actions-center {
+    justify-content: center;
+}
+.actions-right {
+    justify-content: flex-end;
+}
+
+@media (max-width: 640px) {
+    .card {
+        margin: 0;
+        width: 100%;
+        max-width: 100%;
+        min-width: unset;
+        order: 1;
+        flex: none;
+    }
+}
