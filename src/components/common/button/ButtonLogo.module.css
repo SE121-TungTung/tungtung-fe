@@ -13,18 +13,16 @@
     border-radius: var(--radius);
     transform: rotate(45deg);
 
-    --bg: rgba(255, 255, 255, 0.06);
-    --bg-hover: rgba(255, 255, 255, 0.08);
-    --bg-active: rgba(255, 255, 255, 0.05);
-
-    --stroke: rgba(255, 255, 255, 0.28);
-    --inner-hi: rgba(255, 255, 255, 0.25);
-
+    /* Default shadows for extra-large size */
     --shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
     --shadow-hover: 0 10px 28px rgba(0, 0, 0, 0.45);
     --shadow-active: 0 4px 14px rgba(0, 0, 0, 0.35);
 
-    --icon: #fff;
+    --bg: rgba(255, 255, 255, 0.06);
+    --bg-hover: rgba(255, 255, 255, 0.08);
+    --bg-active: rgba(255, 255, 255, 0.05);
+    --stroke: rgba(255, 255, 255, 0.28);
+    --inner-hi: rgba(255, 255, 255, 0.25);
 
     background: var(--bg);
     backdrop-filter: blur(12px) saturate(120%);
@@ -38,26 +36,36 @@
         filter 0.18s ease;
 }
 
-/* Sizes */
+/* Sizes & Shadow overrides */
 .button-logo.small {
     width: 32px;
     height: 32px;
     --radius: 12px;
+    --shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    --shadow-hover: 0 3px 6px rgba(0, 0, 0, 0.25);
+    --shadow-active: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 .button-logo.medium {
     width: 40px;
     height: 40px;
     --radius: 16px;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    --shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.3);
+    --shadow-active: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 .button-logo.large {
     width: 48px;
     height: 48px;
     --radius: 20px;
+    --shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.35);
+    --shadow-active: 0 3px 12px rgba(0, 0, 0, 0.3);
 }
 .button-logo.extra-large {
     width: 56px;
     height: 56px;
     --radius: 22px;
+    /* Uses default shadows */
 }
 
 /* Icon */
@@ -67,7 +75,7 @@
     width: 28px;
     height: 28px;
     transform: rotate(-45deg);
-    color: var(--icon);
+    color: var(--icon-color, #fff);
 }
 .button-logo.small .icon {
     width: 16px;
@@ -86,15 +94,27 @@
     height: 28px;
 }
 
-/* Raster icons: tint to white */
 .icon img {
     width: 100%;
     height: 100%;
     display: block;
+}
+
+/* Icon color modes */
+.light {
+    --icon-color: #000;
+}
+.light .icon img {
+    filter: invert(0);
+}
+.dark {
+    --icon-color: #fff;
+}
+.dark .icon img {
     filter: invert(1) brightness(1.8);
 }
 
-/* Glass overlay + top highlight (inside shape) */
+/* Glass overlay */
 .button-logo::before {
     content: '';
     position: absolute;
@@ -147,14 +167,13 @@
     filter: grayscale(0.2);
     pointer-events: none;
 }
-
 .button-logo.is-clickable {
     cursor: pointer;
 }
 
 /* -------- Variants -------- */
-
 .button-logo.glass {
+    /* Default style */
 }
 
 .button-logo.outline {
@@ -169,7 +188,6 @@
     display: none;
 }
 .button-logo.outline:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
     background: rgba(255, 255, 255, 0.02);
 }
 
@@ -177,7 +195,12 @@
     background: var(--bg);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+}
+.button-logo.flat .icon {
+    color: #000;
+}
+.button-logo.flat .icon img {
+    filter: none;
 }
 .button-logo.flat::after {
     background: linear-gradient(
@@ -192,31 +215,26 @@
         rgba(255, 255, 255, 0.16),
         rgba(255, 255, 255, 0.03)
     );
-    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.36);
 }
 
-.button-logo.dark {
+.dark {
     --bg: rgba(20, 20, 24, 0.55);
     --bg-hover: rgba(22, 22, 26, 0.65);
     --bg-active: rgba(18, 18, 22, 0.5);
-
     --stroke: rgba(255, 255, 255, 0.22);
     --inner-hi: rgba(255, 255, 255, 0.18);
-
     --shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
     --shadow-hover: 0 10px 28px rgba(0, 0, 0, 0.65);
     --shadow-active: 0 4px 14px rgba(0, 0, 0, 0.55);
-
-    --icon: #fff;
 }
 
-.button-logo.dark.glass {
+.dark.glass {
     backdrop-filter: blur(14px) saturate(120%);
     -webkit-backdrop-filter: blur(14px) saturate(120%);
 }
 
-.button-logo.light {
-    --icon: #fff;
+.light {
+    /* Styles for light mode button, if needed */
 }
 
 .button-logo.shine::after {
@@ -235,6 +253,7 @@
     mix-blend-mode: screen;
     animation: logo-shine 1.15s linear;
 }
+
 @keyframes logo-shine {
     from {
         transform: translateX(-80%) rotate(0deg);

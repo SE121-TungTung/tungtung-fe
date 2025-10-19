@@ -1,0 +1,186 @@
+.button-check {
+    --radius: 8px;
+    --bg: rgba(255, 255, 255, 0.06);
+    --bg-hover: rgba(255, 255, 255, 0.1);
+    --bg-active: rgba(255, 255, 255, 0.05);
+    --stroke: rgba(255, 255, 255, 0.22);
+    --inner-hi: rgba(255, 255, 255, 0.18);
+    --icon: #fff;
+
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--icon);
+    cursor: pointer;
+
+    backdrop-filter: blur(12px) saturate(120%);
+    -webkit-backdrop-filter: blur(12px) saturate(120%);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        background-color 0.15s ease,
+        filter 0.15s ease;
+}
+
+.button-check::before {
+    content: '';
+    position: absolute;
+    inset: 1px;
+    border-radius: inherit;
+    box-shadow:
+        inset 0 0 0 1px var(--stroke),
+        inset 0 1px 0 var(--inner-hi);
+    pointer-events: none;
+}
+.button-check::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 42%;
+    border-top-left-radius: inherit;
+    border-top-right-radius: inherit;
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.4),
+        rgba(255, 255, 255, 0)
+    );
+    pointer-events: none;
+}
+
+/* sizes */
+.small {
+    width: 28px;
+    height: 28px;
+    --radius: 7px;
+}
+.medium {
+    width: 32px;
+    height: 32px;
+    --radius: 8px;
+}
+.large {
+    width: 36px;
+    height: 36px;
+    --radius: 9px;
+}
+.extra-large {
+    width: 44px;
+    height: 44px;
+    --radius: 12px;
+}
+
+/* icon */
+.icon {
+    width: 18px;
+    height: 18px;
+    display: inline-grid;
+    place-items: center;
+    transform: scale(0.9);
+    opacity: 0;
+    transition:
+        transform 0.15s ease,
+        opacity 0.15s ease,
+        filter 0.15s ease;
+}
+.small .icon {
+    width: 16px;
+    height: 16px;
+}
+.large .icon {
+    width: 20px;
+    height: 20px;
+}
+.extra-large .icon {
+    width: 22px;
+    height: 22px;
+}
+
+/* interactions */
+.button-check:hover {
+    background: var(--bg-hover);
+    transform: translateY(-1px);
+}
+.button-check:active {
+    background: var(--bg-active);
+    transform: translateY(0) scale(0.985);
+}
+.button-check:focus {
+    outline: none;
+}
+.button-check:focus-visible {
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.35),
+        0 0 0 3px rgba(255, 255, 255, 0.25);
+}
+.button-check[disabled],
+.button-check[aria-disabled='true'] {
+    opacity: 0.55;
+    filter: grayscale(0.1);
+    pointer-events: none;
+}
+
+/* variants */
+.outline {
+    background: transparent;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+.outline::before {
+    box-shadow: inset 0 0 0 1.5px var(--stroke);
+}
+.outline::after {
+    display: none;
+}
+.flat {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+}
+.flat::after {
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.18),
+        rgba(255, 255, 255, 0)
+    );
+}
+
+/* modes */
+.dark {
+    --bg: rgba(20, 20, 24, 0.55);
+    --bg-hover: rgba(22, 22, 26, 0.65);
+    --bg-active: rgba(18, 18, 22, 0.5);
+    --stroke: rgba(255, 255, 255, 0.22);
+    --inner-hi: rgba(255, 255, 255, 0.18);
+    --icon: #fff;
+}
+.light {
+    --icon: #fff;
+}
+
+/* checked state */
+.checked {
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.45),
+            rgba(255, 255, 255, 0.22)
+        ),
+        linear-gradient(
+            0deg,
+            rgba(255, 255, 255, 0.12),
+            rgba(255, 255, 255, 0.12)
+        );
+}
+.checked .icon {
+    opacity: 1;
+    transform: scale(1);
+}

@@ -1,0 +1,86 @@
+.root {
+    --radius: 12px;
+    --pad-x: 24px;
+    --pad-y: 20px;
+    --bg: var(--surface-card-light);
+    --bd: rgba(255, 255, 255, 0.12);
+    --text-primary: var(--text-primary-light);
+    --text-secondary: var(--text-secondary-light);
+
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 24px;
+
+    border-radius: var(--radius-sm);
+    padding: var(--pad-y) var(--pad-x);
+    border: 1px solid var(--bd);
+    background: var(--bg);
+    box-shadow:
+        0 1px 0 rgba(0, 0, 0, 0.05),
+        0 4px 4px rgba(0, 0, 0, 0.05),
+        0 10px 10px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(20px);
+    color: #0e3448;
+}
+
+.horizontal {
+    flex-direction: row;
+}
+
+.vertical {
+    flex-direction: column;
+}
+
+.header {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-self: flex-start;
+    margin-bottom: 20px;
+}
+
+.h {
+    margin: 0;
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--text-primary);
+}
+
+.underline {
+    width: 36px;
+    height: 4px;
+    border-radius: 8px;
+    background: var(--text-primary);
+    margin-top: 8px;
+}
+
+.body {
+    flex: 1;
+}
+.footer {
+    margin-top: 12px;
+}
+
+.glass {
+    background: linear-gradient(90deg, var(--bg), var(--bd)), var(--bg);
+}
+.outline {
+    background: var(--bg);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+.flat {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: transparent;
+}
+
+.light {
+    color: #0e3448;
+}
+.dark {
+    color: #fff;
+    --bg: rgba(0, 0, 0, 0.55);
+    --bd: rgba(255, 255, 255, 0.18);
+}

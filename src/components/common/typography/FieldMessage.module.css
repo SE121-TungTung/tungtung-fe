@@ -1,0 +1,84 @@
+.root {
+    --pad-y: 6px;
+    --pad-x: 10px;
+    --radius: 8px;
+    --fg: #fff;
+    --bg: rgba(255, 255, 255, 0.1);
+    --bd: rgba(255, 255, 255, 0.18);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+}
+.icon {
+    width: 14px;
+    height: 14px;
+    display: inline-grid;
+    place-items: center;
+}
+.text {
+    font-size: 13px;
+    line-height: 1.2;
+}
+
+/* size */
+.root[data-size='md'] {
+    --pad-y: 8px;
+    --pad-x: 12px;
+}
+.root[data-size='md'] .text {
+    font-size: 14px;
+}
+
+/* variant: chip (viên thủy tinh) / text (chỉ chữ) */
+.root[data-variant='chip'] {
+    padding: var(--pad-y) var(--pad-x);
+    border-radius: var(--radius);
+    color: var(--fg);
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.35) 0%,
+            rgba(255, 255, 255, 0.16) 100%
+        ),
+        linear-gradient(0deg, var(--bg), var(--bg));
+    border: 1px solid var(--bd);
+    backdrop-filter: blur(8px) saturate(120%);
+    box-shadow:
+        0 4px 10px rgba(0, 0, 0, 0.15),
+        0 1px 0 rgba(0, 0, 0, 0.06);
+}
+.root[data-variant='text'] {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+/* tones */
+.root[data-tone='error'] {
+    --fg: #ffe9ec;
+    --bg: rgba(214, 40, 57, 0.12);
+    --bd: rgba(214, 40, 57, 0.35);
+    color: #ffd9de;
+}
+.root[data-tone='warning'] {
+    --fg: #fff7e6;
+    --bg: rgba(255, 184, 0, 0.12);
+    --bd: rgba(255, 184, 0, 0.35);
+    color: #fff2cc;
+}
+.root[data-tone='success'] {
+    --fg: #eafff6;
+    --bg: rgba(32, 167, 116, 0.12);
+    --bd: rgba(32, 167, 116, 0.35);
+    color: #d6fff0;
+}
+.root[data-tone='info'] {
+    --fg: #e7f5ff;
+    --bg: rgba(83, 195, 255, 0.12);
+    --bd: rgba(83, 195, 255, 0.35);
+    color: #d5eeff;
+}

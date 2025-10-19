@@ -1,0 +1,157 @@
+.item {
+    --status-color: var(--palette-gray-3); /* Màu mặc định cho trạng thái */
+
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    transition: all 0.2s ease-out;
+}
+
+.light {
+    --bg: var(--background-primary-light);
+    --bd: rgba(0, 0, 0, 0.08);
+    --text-primary: var(--text-primary-light);
+    --text-secondary: var(--text-secondary-light);
+    background: var(--bg);
+    border-color: var(--bd);
+}
+
+.dark {
+    --bg: var(--background-primary-dark);
+    --bd: rgba(255, 255, 255, 0.15);
+    --text-primary: var(--text-primary-dark);
+    --text-secondary: var(--text-secondary-dark);
+    background: var(--bg);
+    border-color: var(--bd);
+}
+
+.item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    border-color: rgba(0, 0, 0, 0.15);
+}
+
+.dark.item:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.timeColumn {
+    display: flex;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.statusBar {
+    width: 4px;
+    height: auto;
+    border-radius: 99px;
+    background-color: var(--status-color);
+}
+
+.time {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+.time span:first-child {
+    opacity: 0.9;
+}
+.time span:last-child {
+    opacity: 0.6;
+    font-size: 13px;
+}
+
+.detailsColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.meta {
+    font-size: 13px;
+    color: var(--text-secondary);
+    opacity: 0.8;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+}
+
+.tag {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+    flex-shrink: 0;
+    border: 1px solid;
+}
+
+.attendanceTag {
+    font-size: 11px;
+    color: var(--color-green-600);
+    font-weight: 500;
+}
+
+.item[data-status='scheduled'] {
+    --status-color: var(--palette-gray-4);
+}
+.item[data-status='in_progress'] {
+    --status-color: var(--color-green-500);
+}
+.item[data-status='completed'] {
+    --status-color: var(--color-blue-500);
+}
+.item[data-status='cancelled'] {
+    --status-color: var(--color-red-500);
+}
+.item[data-status='postponed'] {
+    --status-color: var(--color-orange-500);
+}
+
+.tag.gray {
+    background-color: rgba(130, 130, 130, 0.15);
+    border-color: rgba(130, 130, 130, 0.2);
+    color: var(--text-secondary);
+}
+.tag.green {
+    background-color: rgba(52, 199, 89, 0.15);
+    border-color: rgba(52, 199, 89, 0.2);
+    color: #16a34a;
+}
+.tag.blue {
+    background-color: rgba(0, 122, 255, 0.15);
+    border-color: rgba(0, 122, 255, 0.2);
+    color: #00438c;
+}
+.tag.red {
+    background-color: rgba(214, 40, 57, 0.15);
+    border-color: rgba(214, 40, 57, 0.2);
+    color: #811822;
+}
+.tag.yellow {
+    background-color: rgba(255, 149, 0, 0.15);
+    border-color: rgba(255, 149, 0, 0.2);
+    color: #8c6000;
+}

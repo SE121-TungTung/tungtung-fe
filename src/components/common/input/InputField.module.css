@@ -41,7 +41,7 @@
     padding: var(--pad-y) var(--pr) var(--pad-y) var(--pl);
     font-size: 16px;
     line-height: 1.2;
-    color: #000;
+    color: #ffffff;
 
     background: linear-gradient(360deg, var(--bgA) 0%, var(--bgB) 100%);
     border: 1px solid var(--bd);
@@ -186,4 +186,12 @@
     width: 28px;
     height: 28px;
     color: var(--icon);
+}
+
+.dark {
+    --text-color: #fff;
+}
+
+.light {
+    --text-color: #000;
 }

@@ -69,8 +69,8 @@
 
 /* ========== Base ========== */
 .btn {
-    --pad-y: var(--button-vertical-padding-medium, 6px);
-    --pad-x: var(--button-horizontal-padding-medium, 16px);
+    --pad-y: var(--button-vertical-padding-extra-large, 20px);
+    --pad-x: var(--button-horizontal-padding-extra-large, 16px);
     --gap: var(--button-gap-medium, 8px);
     --radius: var(--button-corner-radius-medium, 8px);
     --icon: var(--button-icon-size-medium, 16px);

@@ -6,6 +6,7 @@ async function parseError(res: Response) {
     let msg = 'Đã có lỗi, vui lòng thử lại'
     try {
         const data = await res.json()
+        console.error('Backend error:', data)
         msg = data?.message || msg
     } catch {
         // ignore
@@ -22,9 +23,12 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
         ? path
         : `${API.replace(/\/$/, '')}${path}`
     const res = await fetch(url, {
-        credentials: 'include',
+        credentials: init?.credentials ?? 'include',
         headers: {
-            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            ...(init?.body != null
+                ? { 'Content-Type': 'application/json' }
+                : {}),
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
             ...(init?.headers || {}),
         },

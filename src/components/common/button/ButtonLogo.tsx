@@ -23,7 +23,7 @@ export const ButtonLogo = ({
             className={`${s['button-logo']} ${s[style]} ${s[mode]} ${s[size]} ${className}`}
             data-spacing-mode={size}
         >
-            <span className={s.icon}>{icon}</span>
+            <span className={`${s.icon} ${s[mode]}`}>{icon}</span>
         </button>
     )
 }

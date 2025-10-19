@@ -1,0 +1,260 @@
+.listCard {
+    width: 100%;
+    position: relative;
+    box-shadow:
+        0px 1px 0px rgba(0, 0, 0, 0.05),
+        0px 4px 4px rgba(0, 0, 0, 0.05),
+        0px 10px 10px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(20px);
+    border-radius: 8px;
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.6),
+        rgba(255, 255, 255, 0.5)
+    );
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-sizing: border-box;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-start;
+    padding: 10px;
+    gap: 10px;
+    min-width: 320px;
+    text-align: left;
+    font-size: 16px;
+    color: #000;
+    font-family: Inter;
+}
+.description {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px;
+    gap: 10px;
+    font-size: 24px;
+}
+.heading524Semibold {
+    display: flex;
+    align-items: flex-start;
+}
+.heading5 {
+    position: relative;
+    letter-spacing: -0.04em;
+    font-weight: 600;
+    mix-blend-mode: normal;
+}
+.sLiuPhn {
+    width: 135px;
+    position: relative;
+    font-size: 12px;
+    line-height: 18px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.7);
+    display: -webkit-inline-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+}
+.progress {
+    height: 5px;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 1px;
+    box-sizing: border-box;
+}
+.value {
+    width: 30px;
+    height: 3px;
+    position: relative;
+    border-radius: 4px;
+    background-color: #000;
+}
+.listCard2 {
+    align-self: stretch;
+    backdrop-filter: blur(20px);
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.6);
+    border: 1px solid #d62839;
+    box-sizing: border-box;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    gap: 10px;
+    min-width: 320px;
+}
+.listCardDescription {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px;
+    gap: 10px;
+}
+.buttonLogo {
+    width: 36px;
+    height: 36px;
+    position: relative;
+}
+.polygonIcon {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+    border-radius: 9px;
+    max-width: 100%;
+    overflow: hidden;
+    max-height: 100%;
+}
+.chartBarIcon {
+    position: absolute;
+    top: calc(50% - 8px);
+    left: calc(50% - 8px);
+    width: 16px;
+    height: 16px;
+}
+.reminders {
+    width: 135px;
+    position: relative;
+    line-height: 24px;
+    font-weight: 500;
+    display: inline-block;
+}
+.divider {
+    align-self: stretch;
+    height: 1px;
+    position: relative;
+}
+.line {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 0%;
+    right: 0%;
+    bottom: 0%;
+    left: 0%;
+    border-radius: 10px;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+.listCardProgress {
+    align-self: stretch;
+    height: 5px;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1px;
+    box-sizing: border-box;
+}
+.listCardValue {
+    width: 10px;
+    height: 3px;
+    position: relative;
+    border-radius: 4px;
+    background-color: #000;
+}
+.textPrice {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    font-size: 24px;
+    color: rgba(0, 0, 0, 0.7);
+}
+.price {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.div {
+    position: relative;
+    font-size: 40px;
+    letter-spacing: -0.04em;
+    font-weight: 600;
+    color: #0e3448;
+    text-align: center;
+    flex-shrink: 0;
+}
+.listCardDiv {
+    position: relative;
+    letter-spacing: -0.04em;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+.fullPrice {
+    height: 73px;
+    width: 50px;
+    display: none;
+    flex-direction: column;
+    align-items: flex-start;
+    flex-shrink: 0;
+}
+.container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    position: relative;
+    gap: 10px;
+}
+.strokeIcon {
+    height: calc(100% - 9px);
+    width: 100%;
+    position: absolute;
+    margin: 0 !important;
+    top: 4.5px;
+    right: 0px;
+    bottom: 4.5px;
+    left: 0px;
+    max-width: 100%;
+    overflow: hidden;
+    max-height: 100%;
+    z-index: 0;
+}
+.div2 {
+    position: relative;
+    letter-spacing: -0.04em;
+    font-weight: 600;
+    z-index: 1;
+}
+.description2 {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 10px;
+    gap: 10px;
+}
+.listCardTextPrice {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    text-align: center;
+    font-size: 40px;
+    color: #0e3448;
+}
+.listCardFullPrice {
+    height: 73px;
+    width: 50px;
+    display: none;
+    flex-direction: column;
+    align-items: flex-start;
+    flex-shrink: 0;
+    text-align: left;
+    font-size: 24px;
+    color: rgba(0, 0, 0, 0.7);
+}

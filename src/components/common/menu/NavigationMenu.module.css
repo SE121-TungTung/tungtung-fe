@@ -1,0 +1,200 @@
+.root {
+    --nav-h: clamp(44px, 6vw, 56px);
+    --radius: 9999px;
+    --pad-x: clamp(8px, 1.2vw, 14px);
+    --pad-y: clamp(6px, 0.9vw, 10px);
+    --gap: clamp(10px, 2vw, 24px);
+
+    --fg: #0b1520;
+    --bd: rgba(0, 0, 0, 0.12);
+    --bg: var(--surface-card-light);
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: var(--nav-h);
+    padding: var(--pad-y) var(--pad-x);
+    border-radius: var(--radius);
+    background: var(--bg);
+    border: 1px solid var(--bd);
+    box-shadow:
+        0 10px 24px rgba(0, 0, 0, 0.12),
+        0 4px 8px rgba(0, 0, 0, 0.08);
+    color: var(--fg);
+    overflow: visible;
+}
+.block {
+    width: 100%;
+}
+.left {
+    display: flex;
+    align-items: center;
+    gap: var(--gap);
+    min-width: 0;
+    flex: 1;
+}
+.brand {
+    font-weight: 800;
+    font-size: clamp(16px, 1.6vw, 18px);
+    letter-spacing: -0.2px;
+}
+
+.menu {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    list-style: none;
+    margin: 0 100px;
+    padding: 0;
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: visible;
+    scrollbar-width: none;
+}
+.menu::-webkit-scrollbar {
+    display: none;
+}
+
+.li {
+    display: block;
+    position: relative;
+    padding: 6px 0;
+}
+
+.item {
+    --px: clamp(12px, 1.4vw, 16px);
+    --py: clamp(6px, 0.9vw, 8px);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: var(--py) var(--px);
+    border-radius: 999px;
+    border: 1px solid transparent;
+    position: relative;
+    background: transparent;
+    color: inherit;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: clamp(13px, 1.2vw, 14px);
+    line-height: 20px;
+    cursor: pointer;
+    transition:
+        background-color 0.15s,
+        border-color 0.15s,
+        color 0.15s,
+        transform 0.05s;
+}
+.item:hover {
+    background: rgba(0, 0, 0, 0.06);
+}
+.item:active {
+    transform: translateY(1px);
+}
+.item:focus-visible {
+    outline: 2px solid rgba(83, 195, 255, 0.75);
+    outline-offset: 2px;
+}
+.active {
+    color: #0b1520;
+    position: relative;
+    z-index: 10;
+}
+.active::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: #fff;
+    border-radius: inherit;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 5px 5px rgba(0, 0, 0, 0.2);
+}
+
+.icon {
+    width: 16px;
+    height: 16px;
+    display: inline-grid;
+    place-items: center;
+}
+.icon > * {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+.text {
+    white-space: nowrap;
+}
+
+.right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    overflow: hidden;
+    display: block;
+}
+.avatar > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.glass {
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.6) 0%,
+            rgba(255, 255, 255, 0.5) 100%
+        ),
+        var(--bg);
+    backdrop-filter: blur(10px) saturate(120%);
+    border-color: rgba(255, 255, 255, 0.35);
+}
+.outline {
+    background: var(--bg);
+    border-color: rgba(0, 0, 0, 0.18);
+}
+.flat {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: transparent;
+}
+
+.dark {
+    --fg: #fff;
+    --bg: rgba(0, 0, 0, 0.55);
+    --bd: rgba(255, 255, 255, 0.18);
+}
+.dark .item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+.dark .active {
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.35),
+        rgba(255, 255, 255, 0.18)
+    );
+    color: #0b1520;
+}
+
+.desktop {
+    --nav-h: 56px;
+}
+.tablet {
+    --nav-h: 52px;
+}
+.mobile {
+    --nav-h: 48px;
+}
+@media (max-width: 640px) {
+    .item {
+        --px: 12px;
+        --py: 6px;
+    }
+}
