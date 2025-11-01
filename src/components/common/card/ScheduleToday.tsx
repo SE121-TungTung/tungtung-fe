@@ -11,6 +11,7 @@ export interface ScheduleTodayCardProps {
     sessions: Lesson[]
     onCheckIn?: () => void
     mode?: 'light' | 'dark'
+    controls?: React.ReactNode
 }
 
 export default function ScheduleTodayCard({
@@ -18,6 +19,7 @@ export default function ScheduleTodayCard({
     sessions,
     onCheckIn,
     mode = 'light',
+    controls,
 }: ScheduleTodayCardProps) {
     return (
         <section className={`${s.root} ${s[mode]}`}>
@@ -26,17 +28,20 @@ export default function ScheduleTodayCard({
                     <h3 className={s.h}>{title}</h3>
                     <span className={s.underline} />
                 </div>
-                {onCheckIn && (
-                    <ButtonGlow
-                        size="sm"
-                        variant="outline"
-                        mode={mode}
-                        onClick={onCheckIn}
-                        rightIcon={<img src={Icon} alt="refresh icon" />}
-                    >
-                        Điểm danh ngay
-                    </ButtonGlow>
-                )}
+                <div className={s.controls}>
+                    {controls}
+                    {onCheckIn && (
+                        <ButtonGlow
+                            size="sm"
+                            variant="outline"
+                            mode={mode}
+                            onClick={onCheckIn}
+                            rightIcon={<img src={Icon} alt="refresh icon" />}
+                        >
+                            Điểm danh ngay
+                        </ButtonGlow>
+                    )}
+                </div>
             </header>
 
             <div className={s.panel}>

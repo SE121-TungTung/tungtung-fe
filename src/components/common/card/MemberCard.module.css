@@ -1,0 +1,80 @@
+.card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    border-radius: var(--radius-md);
+    background: var(--surface-raised-light);
+    border: 1px solid var(--boder-soft-light);
+    transition: all 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.info {
+    flex: 1;
+    min-width: 0;
+}
+
+.nameWrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.name {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text-primary-light);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.statusIndicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.statusIndicator.online {
+    background-color: var(--status-success-500-light);
+    box-shadow: 0 0 3px 1px
+        color-mix(in srgb, var(--status-success-500-light) 50%, transparent);
+}
+
+.statusIndicator.offline {
+    background-color: var(--palette-gray-3);
+}
+
+.role {
+    font-size: 13px;
+    color: var(--text-secondary-light);
+    margin: 0;
+}
+
+.actions {
+    flex-shrink: 0;
+}
+
+.messageButton {
+    /* Ví dụ: có thể giảm padding nếu cần */
+    /* padding: 4px 8px; */
+}

@@ -1,0 +1,32 @@
+.summaryText {
+    font-size: 14px;
+    line-height: 2; /* Tăng dãn dòng để dễ đọc và điền */
+    color: var(--text-primary-light);
+}
+
+.summaryText strong {
+    /* Style cho số câu hỏi */
+    display: inline-block;
+    min-width: 20px; /* Đảm bảo số 10, 11... không làm xô layout */
+    margin: 0 4px;
+}
+
+.inputField {
+    padding: 4px 8px;
+    border: 1px solid #ccc;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    min-width: 140px;
+    margin: 0 4px; /* Khoảng cách với text */
+    /* Hiệu ứng focus */
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.inputField:focus {
+    outline: none;
+    border-color: var(--brand-primary-light);
+    box-shadow: 0 0 0 2px
+        color-mix(in srgb, var(--brand-primary-light) 20%, transparent);
+}

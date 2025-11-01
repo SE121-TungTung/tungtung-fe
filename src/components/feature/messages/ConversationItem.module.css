@@ -1,0 +1,57 @@
+.item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm);
+    border-radius: var(--rounded-md);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.item:hover {
+    background-color: var(--gray-50);
+}
+
+.item.active {
+    background-color: var(--brand-100);
+}
+
+.avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.content {
+    flex: 1;
+    min-width: 0; /* Cho phép text-overflow hoạt động */
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.name {
+    font-weight: var(--font-weight-medium);
+    color: var(--gray-900);
+    font-size: var(--font-size-md);
+}
+
+.timestamp {
+    font-size: var(--font-size-xs);
+    color: var(--gray-500);
+    flex-shrink: 0;
+    margin-left: var(--spacing-sm);
+}
+
+.lastMessage {
+    font-size: var(--font-size-sm);
+    color: var(--gray-600);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

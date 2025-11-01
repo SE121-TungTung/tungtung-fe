@@ -1,0 +1,156 @@
+.root {
+    --radius: var(--radius-sm, 8px);
+    --fg: var(--Text-primary, #0b1520);
+    --muted: var(--Text-secondary, rgba(0, 0, 0, 0.7));
+    --bg: var(--Container-background, rgba(255, 255, 255, 0.6));
+    --bd: var(--Border-glass, rgba(255, 255, 255, 0.1));
+    --accent: var(--Accent-blue, #0066ff);
+
+    color: var(--fg);
+    border-radius: var(--radius);
+    padding: 6px 0 0;
+    width: max-content;
+}
+
+.block {
+    width: 100%;
+}
+
+.block .row {
+    display: flex;
+    width: 100%;
+}
+
+.block .tab {
+    flex: 1;
+    text-align: center;
+}
+
+.row {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.row::-webkit-scrollbar {
+    display: none;
+}
+
+.tab {
+    position: relative;
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    padding: 12px 16px;
+    font:
+        500 13px/20px Inter,
+        system-ui,
+        sans-serif;
+    cursor: pointer;
+    outline: none;
+    min-width: 96px;
+    text-align: left;
+}
+.tab:hover {
+    color: var(--fg);
+}
+.tab.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.active-underline {
+    color: var(--fg);
+}
+.active-underline::before {
+    font-weight: bold;
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 2px;
+    height: 5px;
+    background: var(--accent);
+    filter: blur(5px);
+}
+.active-underline::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0px;
+    height: 0.5px;
+    background: var(--accent);
+}
+
+/* Thêm style cho active-filled (kiểu thứ 3 trong ảnh) */
+.active-filled {
+    color: var(--fg);
+    background: color-mix(in oklab, var(--accent) 25%, transparent);
+    border-radius: var(--radius);
+}
+
+/* divider dưới hàng tab */
+.divider {
+    height: 1px;
+    margin-top: 6px;
+    border-radius: 10px;
+    background: radial-gradient(
+        50% 50% at 50% 50%,
+        rgba(0, 0, 0, 0.2),
+        rgba(0, 0, 0, 0)
+    );
+}
+
+/* variants */
+.glass {
+    background:
+        linear-gradient(
+            0deg,
+            rgba(255, 255, 255, 0.2),
+            rgba(255, 255, 255, 0) 60%
+        ),
+        var(--bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--bd);
+    box-shadow:
+        0 1px 0 #0001,
+        0 4px 8px #0001;
+    padding: 6px 8px 0;
+    border-radius: var(--radius);
+}
+.flat {
+    /* no extra bg */
+}
+
+/* modes */
+.dark {
+    --fg: #fff;
+    --muted: rgba(255, 255, 255, 0.85);
+    --bg: rgba(0, 0, 0, 0.5);
+    --bd: rgba(255, 255, 255, 0.08);
+}
+.dark .divider {
+    background: radial-gradient(
+        50% 50% at 50% 50%,
+        rgba(255, 255, 255, 0.2),
+        rgba(255, 255, 255, 0)
+    );
+}
+/* trong dark, underline trắng như mock */
+.dark {
+    --accent: #fff;
+}
+
+/* sizes */
+.sm .tab {
+    padding: 8px 12px;
+    font-size: 12px;
+    min-width: 84px;
+}
+.lg .tab {
+    padding: 14px 18px;
+    font-size: 14px;
+    min-width: 114px;
+}

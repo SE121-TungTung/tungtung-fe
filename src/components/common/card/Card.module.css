@@ -1,45 +1,40 @@
 .root {
-    --radius: 12px;
+    --radius: var(--radius-xl);
     --pad-x: 24px;
     --pad-y: 20px;
     --bg: var(--surface-card-light);
-    --bd: rgba(255, 255, 255, 0.12);
+    --bd: rgba(0, 0, 0, 0.08);
     --text-primary: var(--text-primary-light);
     --text-secondary: var(--text-secondary-light);
 
     position: relative;
     display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 24px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
 
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius);
     padding: var(--pad-y) var(--pad-x);
     border: 1px solid var(--bd);
     background: var(--bg);
     box-shadow:
-        0 1px 0 rgba(0, 0, 0, 0.05),
-        0 4px 4px rgba(0, 0, 0, 0.05),
-        0 10px 10px rgba(0, 0, 0, 0.1);
+        0 1px 2px rgba(0, 0, 0, 0.04),
+        0 4px 8px rgba(0, 0, 0, 0.04),
+        0 10px 20px rgba(0, 0, 0, 0.04);
     backdrop-filter: blur(20px);
-    color: #0e3448;
-}
-
-.horizontal {
-    flex-direction: row;
-}
-
-.vertical {
-    flex-direction: column;
+    color: var(--text-primary);
 }
 
 .header {
-    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.titleGroup {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    align-self: flex-start;
-    margin-bottom: 20px;
 }
 
 .h {
@@ -49,38 +44,78 @@
     color: var(--text-primary);
 }
 
+.subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 4px 0 0;
+}
+
 .underline {
+    display: block;
     width: 36px;
     height: 4px;
     border-radius: 8px;
     background: var(--text-primary);
+    opacity: 0.8;
     margin-top: 8px;
+}
+
+.controls {
+    flex-shrink: 0;
 }
 
 .body {
     flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 .footer {
     margin-top: 12px;
+    align-self: center;
 }
 
 .glass {
-    background: linear-gradient(90deg, var(--bg), var(--bd)), var(--bg);
+    --bg: rgba(255, 255, 255, 0.6);
+    --bd: rgba(255, 255, 255, 0.2);
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.6) 0%,
+            rgba(255, 255, 255, 0.5) 100%
+        ),
+        var(--bg);
 }
 .outline {
     background: var(--bg);
     border-color: rgba(0, 0, 0, 0.1);
 }
 .flat {
-    background: rgba(255, 255, 255, 0.9);
-    border-color: transparent;
+    background: #fff;
+    border-color: var(--bd);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
 }
 
 .light {
-    color: #0e3448;
+    --text-primary: var(--text-primary-light);
+    --text-secondary: var(--text-secondary-light);
 }
 .dark {
-    color: #fff;
-    --bg: rgba(0, 0, 0, 0.55);
-    --bd: rgba(255, 255, 255, 0.18);
+    --text-primary: var(--text-primary-dark);
+    --text-secondary: var(--text-secondary-dark);
+    --bg: var(--surface-card-dark);
+    --bd: var(--boder-soft-dark);
+}
+.dark.flat {
+    background: var(--surface-raised-dark);
+}
+
+@media (max-width: 640px) {
+    .header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+    .controls {
+        align-self: flex-start;
+    }
 }

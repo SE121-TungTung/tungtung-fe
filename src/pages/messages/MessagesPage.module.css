@@ -1,0 +1,51 @@
+.page {
+    padding: var(--spacing-xl);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    height: 100%;
+    max-height: calc(100vh - 80px); /* Giả định chiều cao header/nav là 80px */
+}
+
+.title {
+    font-size: var(--font-size-xxl);
+    font-weight: var(--font-weight-bold);
+    color: var(--gray-900);
+}
+
+.container {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: var(--spacing-lg);
+    flex: 1; /* Cho phép container lấp đầy không gian còn lại */
+    height: 100%;
+    min-height: 0; /* Quan trọng để flexbox/grid hoạt động đúng với overflow */
+    background-color: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--rounded-lg);
+    overflow: hidden; /* Ẩn overflow ở container cha */
+}
+
+.conversationPanel {
+    border-right: 1px solid var(--gray-200);
+    padding: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto; /* Cho phép cuộn nếu danh sách dài */
+}
+
+.chatPanel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden; /* Đảm bảo ChatWindow không tràn */
+}
+
+.noChatSelected {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--gray-500);
+    font-size: var(--font-size-md);
+}

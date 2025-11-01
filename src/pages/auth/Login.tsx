@@ -130,6 +130,7 @@ export function LoginPage() {
                         label="Email"
                         type="email"
                         placeholder="Nhập email"
+                        mode="dark"
                         aria-describedby={errors.email ? emailMsgId : undefined}
                         {...register('email', {
                             required: 'Email không hợp lệ',
@@ -150,7 +151,9 @@ export function LoginPage() {
                     <InputField
                         label="Password"
                         type="password"
+                        enablePasswordToggle={true}
                         placeholder="Nhập password"
+                        mode="dark"
                         aria-describedby={
                             errors.password ? passMsgId : undefined
                         }

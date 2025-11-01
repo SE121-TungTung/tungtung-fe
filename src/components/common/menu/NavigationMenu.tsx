@@ -1,9 +1,7 @@
-import React from 'react'
-import s from './NavigationMenu.module.css'
-
-type Mode = 'light' | 'dark'
-type Variant = 'glass' | 'outline' | 'flat'
-type Size = 'desktop' | 'tablet' | 'mobile'
+import React, { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
+import styles from './NavigationMenu.module.css'
+import SideMenuSet, { type SideMenuItem } from './SideMenuSet'
 
 export type NavItem = {
     id?: string
@@ -12,108 +10,212 @@ export type NavItem = {
     onClick?: (e: React.MouseEvent) => void
     active?: boolean
     leftIcon?: React.ReactNode
-    ref?: React.RefObject<HTMLLIElement>
+    dropdownItems?: SideMenuItem[]
 }
 
-export interface NavigationMenuProps
-    extends Omit<React.HTMLAttributes<HTMLElement>, 'onSelect'> {
+export interface NavigationMenuProps {
     brand?: React.ReactNode
     items?: NavItem[]
-    mode?: Mode
-    variant?: Variant
-    size?: Size
     rightSlot?: React.ReactNode
+    rightSlotDropdownItems?: SideMenuItem[]
     onItemSelect?: (index: number, item: NavItem, e: React.MouseEvent) => void
-    block?: boolean
+    className?: string
 }
 
 export default function NavigationMenu({
-    brand = <span className={s.brand}>TungTung</span>,
+    brand = <span className={styles.brand}>TungTung</span>,
     items = [],
-    mode = 'light',
-    variant = 'glass',
-    size = 'desktop',
     rightSlot,
-    block,
-    className = '',
+    rightSlotDropdownItems = [],
     onItemSelect,
-    ...rest
+    className = '',
 }: NavigationMenuProps) {
+    const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
+    const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({})
+    const triggerRefs = useRef<Record<string, HTMLElement | null>>({})
+
+    const idFor = (it: NavItem, i: number) => it.id ?? `item-${i}`
+
+    const updatePosition = () => {
+        if (!activeDropdown) return
+        const el = triggerRefs.current[activeDropdown]
+        if (!el) return
+        const rect = el.getBoundingClientRect()
+        if (activeDropdown === 'rightSlot') {
+            setMenuStyle({
+                top: `${rect.bottom + 12}px`,
+                right: `${window.innerWidth - rect.right}px`,
+            })
+        } else {
+            setMenuStyle({
+                top: `${rect.bottom + 12}px`,
+                left: `${rect.left}px`,
+            })
+        }
+    }
+
+    useEffect(() => {
+        updatePosition()
+    }, [activeDropdown])
+
+    useEffect(() => {
+        if (!activeDropdown) return
+        const onWin = () => updatePosition()
+        window.addEventListener('resize', onWin)
+        window.addEventListener('scroll', onWin, {
+            capture: false,
+            passive: true,
+        })
+        return () => {
+            window.removeEventListener('resize', onWin)
+            window.removeEventListener('scroll', onWin, { capture: false })
+        }
+    }, [activeDropdown])
+
+    useEffect(() => {
+        if (!activeDropdown) return
+        const handleClickOutside = (e: MouseEvent) => {
+            const target = e.target as HTMLElement
+            if (!target.closest('[data-dropdown-trigger]'))
+                setActiveDropdown(null)
+        }
+        document.addEventListener('mousedown', handleClickOutside)
+        return () =>
+            document.removeEventListener('mousedown', handleClickOutside)
+    }, [activeDropdown])
+
+    const handleItemClick =
+        (item: NavItem, index: number) => (e: React.MouseEvent) => {
+            if (item.dropdownItems?.length) {
+                e.preventDefault()
+                const id = idFor(item, index)
+                setActiveDropdown(activeDropdown === id ? null : id)
+            }
+            item.onClick?.(e)
+            onItemSelect?.(index, item, e)
+        }
+
+    const getDropdownTitle = (id: string) => {
+        if (id === 'rightSlot') return 'Tài khoản'
+        const idx = items.findIndex((it, i) => idFor(it, i) === id)
+        return idx >= 0 ? items[idx].label : 'Menu'
+    }
+
     return (
-        <nav
-            role="navigation"
-            {...rest}
-            className={[
-                s.root,
-                s[mode],
-                s[variant],
-                s[size],
-                block ? s.block : '',
-                className,
-            ].join(' ')}
-        >
-            <div className={s.left}>
-                {brand}
-                {(size === 'desktop' || size === 'tablet') && (
-                    <ul className={s.menu}>
+        <>
+            <nav className={`${styles.root} ${className}`}>
+                <div className={styles.left}>
+                    {brand}
+                    <ul className={styles.menu} role="menubar">
                         {items.map((it, i) => {
-                            const cls = [
-                                s.item,
-                                it.active ? s.active : '',
-                            ].join(' ')
-                            const handle = (e: React.MouseEvent) => {
-                                if (onItemSelect) onItemSelect(i, it, e)
-                                else it.onClick?.(e)
+                            const id = idFor(it, i)
+                            const hasDropdown = !!(
+                                it.dropdownItems && it.dropdownItems.length
+                            )
+                            const isLink = !!it.href
+                            const commonProps = {
+                                ref: (el: HTMLElement | null) => {
+                                    triggerRefs.current[id] = el
+                                },
+                                'data-dropdown-trigger':
+                                    hasDropdown || undefined,
+                                className: `${styles.item} ${it.active ? styles.itemActive : ''}`,
+                                onClick: handleItemClick(it, i),
+                                'aria-haspopup': hasDropdown
+                                    ? 'menu'
+                                    : undefined,
+                                'aria-expanded':
+                                    activeDropdown === id || undefined,
                             }
 
-                            const content = (
-                                <>
-                                    {it.leftIcon && (
-                                        <span className={s.icon}>
-                                            {it.leftIcon}
-                                        </span>
-                                    )}
-                                    <span className={s.text}>{it.label}</span>
-                                </>
-                            )
-
                             return (
-                                <li
-                                    key={it.id ?? i}
-                                    className={s.li}
-                                    ref={it.ref}
-                                >
-                                    {it.href ? (
+                                <li key={id} role="none">
+                                    {isLink ? (
                                         <a
+                                            {...(commonProps as any)}
                                             href={it.href}
-                                            onClick={handle}
-                                            className={cls}
-                                            aria-current={
-                                                it.active ? 'page' : undefined
-                                            }
+                                            role="menuitem"
                                         >
-                                            {content}
+                                            {it.leftIcon && (
+                                                <span className={styles.icon}>
+                                                    {it.leftIcon}
+                                                </span>
+                                            )}
+                                            <span>{it.label}</span>
                                         </a>
                                     ) : (
                                         <button
                                             type="button"
-                                            onClick={handle}
-                                            className={cls}
-                                            aria-current={
-                                                it.active ? 'page' : undefined
-                                            }
+                                            {...(commonProps as any)}
+                                            role="menuitem"
                                         >
-                                            {content}
+                                            {it.leftIcon && (
+                                                <span className={styles.icon}>
+                                                    {it.leftIcon}
+                                                </span>
+                                            )}
+                                            <span>{it.label}</span>
                                         </button>
                                     )}
                                 </li>
                             )
                         })}
                     </ul>
-                )}
-            </div>
+                </div>
 
-            <div className={s.right}>{rightSlot}</div>
-        </nav>
+                <div className={styles.right}>
+                    {rightSlotDropdownItems.length > 0 ? (
+                        <button
+                            type="button"
+                            ref={(el) => {
+                                triggerRefs.current['rightSlot'] = el
+                            }}
+                            data-dropdown-trigger
+                            className={styles.avatarBtn}
+                            data-active={activeDropdown === 'rightSlot'}
+                            aria-haspopup="menu"
+                            aria-expanded={
+                                activeDropdown === 'rightSlot' || undefined
+                            }
+                            onClick={() =>
+                                setActiveDropdown(
+                                    activeDropdown === 'rightSlot'
+                                        ? null
+                                        : 'rightSlot'
+                                )
+                            }
+                        >
+                            {rightSlot}
+                        </button>
+                    ) : (
+                        rightSlot
+                    )}
+                </div>
+            </nav>
+
+            {activeDropdown &&
+                createPortal(
+                    <div
+                        style={{
+                            position: 'fixed',
+                            zIndex: 1000,
+                            ...menuStyle,
+                        }}
+                    >
+                        <SideMenuSet
+                            title={getDropdownTitle(activeDropdown)}
+                            items={
+                                activeDropdown === 'rightSlot'
+                                    ? rightSlotDropdownItems
+                                    : (items.find(
+                                          (it, i) =>
+                                              idFor(it, i) === activeDropdown
+                                      )?.dropdownItems ?? [])
+                            }
+                        />
+                    </div>,
+                    document.body
+                )}
+        </>
     )
 }

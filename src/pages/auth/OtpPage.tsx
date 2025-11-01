@@ -130,6 +130,7 @@ export default function OtpPage() {
                         label="Mã OTP"
                         inputMode="numeric"
                         placeholder="Nhập OTP"
+                        mode="dark"
                         {...register('otp')}
                     />
                     {errors.otp && (

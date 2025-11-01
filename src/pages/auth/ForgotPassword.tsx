@@ -128,6 +128,7 @@ export function ForgotPasswordPage() {
                         label="Email"
                         type="email"
                         placeholder="Nhập Email"
+                        mode="dark"
                         {...register('email')}
                         aria-describedby={
                             errors.email ? 'fp-email-msg' : undefined

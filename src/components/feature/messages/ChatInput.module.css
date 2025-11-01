@@ -1,0 +1,19 @@
+.wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.inputField {
+    flex: 1;
+    /* Ghi đè style mặc định của InputField nếu cần */
+    /* Ví dụ: làm cho nó tròn hơn */
+    border-radius: var(--rounded-full) !important;
+    background-color: var(--white) !important;
+}
+
+.sendButton {
+    /* Style cho nút Gửi, đảm bảo nó phù hợp */
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-md);
+}

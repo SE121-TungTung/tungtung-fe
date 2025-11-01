@@ -1,0 +1,81 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.headingsListCard {
+    border: 1px solid var(--boder-soft-light);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    background-color: var(--surface-raised-light);
+}
+
+.headingsListTitle {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #eee;
+    color: var(--text-primary-light);
+}
+
+.headingsList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.headingItem {
+    display: flex;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.headingLabel {
+    /* i, ii, iii */
+    font-weight: 600;
+    color: var(--text-secondary-light);
+    min-width: 25px;
+}
+
+.headingText {
+    color: var(--text-primary-light);
+}
+
+.paragraphMatching {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.matchItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.paragraphLabel {
+    font-weight: 600;
+    min-width: 100px;
+    font-size: 14px;
+}
+
+.selectHeading {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    min-width: 150px;
+    background-color: #fff;
+    cursor: pointer;
+}
+.selectHeading:focus {
+    outline: none;
+    border-color: var(--brand-primary-light);
+    box-shadow: 0 0 0 2px
+        color-mix(in srgb, var(--brand-primary-light) 20%, transparent);
+}

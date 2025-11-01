@@ -1,0 +1,31 @@
+.questionBlock {
+    margin-bottom: 20px;
+}
+
+.questionText {
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: var(--text-primary-light);
+    line-height: 1.6;
+    display: flex; /* Để input nằm cùng dòng */
+    align-items: center;
+    gap: 8px; /* Khoảng cách giữa text và input */
+    flex-wrap: wrap; /* Cho phép xuống dòng nếu cần */
+}
+
+.inputField {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    min-width: 150px; /* Chiều rộng tối thiểu */
+    max-width: 250px; /* Chiều rộng tối đa */
+    flex-grow: 1; /* Cho phép co giãn */
+}
+
+.inputField:focus {
+    outline: none;
+    border-color: var(--brand-primary-light);
+    box-shadow: 0 0 0 2px
+        color-mix(in srgb, var(--brand-primary-light) 20%, transparent);
+}
