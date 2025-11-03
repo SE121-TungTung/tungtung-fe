@@ -122,18 +122,18 @@
     --brand-secondary-600-dark: rgb(223, 83, 97);
 
     /* dimension */
-    --space-2: 2;
-    --space-4: 4;
-    --space-8: 8;
-    --space-12: 12;
-    --space-16: 16;
-    --space-20: 20;
-    --space-24: 24;
-    --space-32: 32;
-    --space-40: 40;
-    --space-48: 48;
-    --space-60: 60;
-    --space-80: 80;
+    --space-2: 2px;
+    --space-4: 4px;
+    --space-8: 8px;
+    --space-12: 12px;
+    --space-16: 16px;
+    --space-20: 20px;
+    --space-24: 24px;
+    --space-32: 32px;
+    --space-40: 40px;
+    --space-48: 48px;
+    --space-60: 60px;
+    --space-80: 80px;
     --radius-xs: 6px;
     --radius-sm: 8px;
     --radius-md: 12px;

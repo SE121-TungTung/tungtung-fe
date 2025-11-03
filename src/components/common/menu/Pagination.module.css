@@ -1,0 +1,30 @@
+/* src/components/common/navigation/Pagination.module.css */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px; /* Khoảng cách giữa các phần tử */
+    padding: 12px 0; /* Chỉ cần padding trên dưới */
+    user-select: none; /* Tránh chọn text khi bấm nhanh */
+}
+
+.pageInfo {
+    font-size: 14px;
+    color: var(--text-secondary-light);
+    min-width: 80px; /* Đảm bảo đủ chỗ cho text "Trang X / Y" */
+    text-align: center;
+}
+
+.navButton {
+    /* Có thể thêm style riêng nếu ButtonGhost mặc định không đủ */
+    /* Ví dụ: đảm bảo icon và text căn giữa */
+    display: inline-flex;
+    align-items: center;
+}
+
+.navButton img,
+.navButton svg {
+    width: 16px;
+    height: 16px;
+    opacity: 0.8;
+}

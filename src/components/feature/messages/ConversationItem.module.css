@@ -1,0 +1,89 @@
+.item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    user-select: none;
+}
+
+.item:hover {
+    background-color: var(--surface-hover-light);
+}
+
+.item.active {
+    background-color: var(--brand-primary-light-accent, #eef4ff);
+}
+.item.active:hover {
+    background-color: var(--brand-primary-light-accent, #eef4ff);
+}
+
+.avatarWrapper {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.avatarImg {
+    width: 48px; /* Tăng kích thước avatar */
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.onlineBadge {
+    position: absolute;
+    bottom: 1px; /* Căn chỉnh lại */
+    right: 1px;
+    width: 14px; /* To hơn 1 chút */
+    height: 14px;
+    background-color: var(--status-success-500-light, #22c55e);
+    border: 3px solid #fff; /* Border dày */
+    border-radius: 50%;
+}
+.item.active .onlineBadge {
+    border-color: var(--brand-primary-light-accent, #eef4ff);
+}
+
+.content {
+    flex: 1;
+    min-width: 0;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.name {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text-primary-light);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.timestamp {
+    font-size: 12px;
+    color: var(--text-secondary-light);
+    flex-shrink: 0;
+    margin-left: 8px;
+}
+
+.lastMessage {
+    font-size: 14px;
+    color: var(--text-secondary-light);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+}
+.item.active .lastMessage {
+    color: var(--text-primary-light);
+    font-weight: 500;
+}

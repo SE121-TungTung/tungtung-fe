@@ -1,0 +1,78 @@
+.pageWrapper {
+    background: linear-gradient(115deg, #e4ecf7, #fff);
+    min-height: 100vh;
+    padding: 24px clamp(24px, 5vw, 80px);
+}
+
+.header {
+    margin-bottom: 40px;
+    position: relative;
+    z-index: 10;
+    width: 70%;
+    align-self: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
+
+.mainContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+    width: 100%;
+    max-width: 1024px;
+    margin: 0 auto;
+}
+
+.pageTitle {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    text-align: center;
+    color: var(--text-primary-light);
+    letter-spacing: -0.04em;
+    line-height: 1.15;
+    min-height: 1.15em;
+    white-space: nowrap;
+}
+
+.gradientText {
+    background: var(
+        --gradient-text,
+        linear-gradient(
+            135deg,
+            var(--brand-secondary-500-light) 0%,
+            var(--brand-accent2-500-light) 69.5%,
+            var(--brand-primary-500-light) 141.42%
+        )
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline;
+}
+
+.tabControls {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 12px 20px;
+    background: var(--surface-card-light);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--boder-soft-light);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.tabContent {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}

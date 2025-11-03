@@ -1,0 +1,29 @@
+.cardBody {
+    padding: 0;
+    margin: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.examList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 4px 16px 16px;
+}
+
+.emptyState {
+    flex: 1;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-secondary-light);
+    opacity: 0.8;
+    font-size: 14px;
+    min-height: 200px;
+}

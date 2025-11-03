@@ -1,0 +1,78 @@
+.bubbleWrapper {
+    display: flex;
+    gap: 10px;
+    max-width: 75%;
+}
+
+.avatarColumn {
+    width: 32px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.bubbleGroup {
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+}
+
+.sent {
+    flex-direction: row-reverse;
+    align-self: flex-end;
+}
+.sent .avatarColumn {
+    display: none;
+}
+.sent .bubble {
+    background-color: var(--brand-primary-500-light, #0066ff);
+    color: #fff;
+    border-radius: 18px 18px 4px 18px;
+}
+.sent .bubbleGroup {
+    align-items: flex-end;
+}
+
+.received {
+    flex-direction: row;
+    align-self: flex-start;
+}
+.received .bubble {
+    background-color: var(--surface-raised-light, #f0f2f5);
+    color: var(--text-primary-light);
+    border-radius: 4px 18px 18px 18px;
+}
+.received .bubbleGroup {
+    align-items: flex-start;
+}
+.received.noAvatar .bubbleGroup {
+    margin-left: 42px;
+}
+
+.bubble {
+    padding: 10px 14px;
+    font-size: 15px;
+    line-height: 1.5;
+    word-wrap: break-word;
+    width: fit-content;
+    transition: opacity 0.3s ease;
+}
+
+.bubble.sending {
+    opacity: 0.7;
+}
+
+.senderAvatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.senderName {
+    font-size: 12px;
+    color: var(--text-secondary-light);
+    margin-bottom: 4px;
+    margin-left: 4px;
+}

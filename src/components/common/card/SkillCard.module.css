@@ -1,0 +1,51 @@
+.card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    gap: 16px;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(145deg, #ffffff, #f0f4f9);
+    border: 1px solid var(--boder-soft-light);
+    box-shadow: var(--shadow-md-light);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s ease-out;
+    min-height: 150px;
+}
+
+.card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: var(--shadow-lg-light);
+    background: linear-gradient(145deg, #f5f9ff, #e8eff6);
+}
+
+.iconWrapper {
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background-color: color-mix(
+        in srgb,
+        var(--brand-primary-light) 15%,
+        transparent
+    );
+    margin-bottom: 8px;
+}
+
+.iconWrapper img,
+.iconWrapper svg {
+    width: 24px;
+    height: 24px;
+    color: var(--brand-primary-light);
+    opacity: 0.9;
+}
+
+.skillName {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary-light);
+    margin: 0;
+}

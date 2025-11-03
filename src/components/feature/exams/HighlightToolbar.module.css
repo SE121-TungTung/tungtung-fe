@@ -1,0 +1,48 @@
+.toolbar {
+    position: absolute;
+    background-color: #333;
+    border-radius: var(--radius-sm);
+    padding: 4px 8px;
+    display: flex;
+    gap: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    z-index: 100;
+    transform: translateX(-50%);
+}
+
+.colorButton {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: transform 0.1s ease;
+}
+.colorButton:hover {
+    transform: scale(1.1);
+    border-color: #fff;
+}
+
+.colorButton.yellow {
+    background-color: #fffb00;
+}
+.colorButton.pink {
+    background-color: #ff99cc;
+}
+.colorButton.blue {
+    background-color: #99ccff;
+}
+.colorButton.remove {
+    background-color: #f5f5f5;
+    display: grid;
+    place-items: center;
+}
+.colorButton.remove img {
+    width: 16px;
+    height: 16px;
+    opacity: 0.7;
+}
+.colorButton.remove:hover {
+    background-color: #eee;
+    border-color: #fff;
+}

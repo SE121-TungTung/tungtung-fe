@@ -1,13 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
+import React, { useState } from 'react'
 import s from './Dashboard.module.css'
 
 import NavigationMenu, {
     type NavItem,
 } from '@/components/common/menu/NavigationMenu'
-import SideMenu, {
-    type SideMenuItem,
-} from '@/components/common/menu/SideMenuSet'
 import Card from '@/components/common/card/Card'
 import StatCard from '@/components/common/card/StatCard'
 import ScheduleTodayCard from '@/components/common/card/ScheduleToday'
@@ -27,6 +23,7 @@ import type { Lesson } from '@/components/common/typography/LessonItem'
 import Chatbot from '@/components/feature/chatbot/Chatbot'
 import { TextHorizontal } from '@/components/common/text/TextHorizontal'
 import TextType from '@/components/common/text/TextType'
+import type { SideMenuItem } from '@/components/common/menu/SideMenuSet'
 
 const userMenuItems: SideMenuItem[] = [
     { id: 'profile', label: 'Hồ sơ' },
@@ -91,157 +88,58 @@ const todaySessions: Lesson[] = [
     },
 ]
 
-// Menu Portal Component
-function MenuPortal({
-    isOpen,
-    activeMenu,
-    menuStyle,
-    onClose,
-}: {
-    isOpen: boolean
-    activeMenu: 'user' | 'study' | null
-    menuStyle: React.CSSProperties
-    onClose: () => void
-}) {
-    useEffect(() => {
-        if (!isOpen) return
-
-        const handleClickOutside = (event: MouseEvent) => {
-            const target = event.target as HTMLElement
-            if (!target.closest('[data-menu-trigger]')) {
-                onClose()
-            }
-        }
-
-        document.addEventListener('mousedown', handleClickOutside)
-        return () =>
-            document.removeEventListener('mousedown', handleClickOutside)
-    }, [isOpen, onClose])
-
-    if (!isOpen) return null
-
-    return createPortal(
-        <div
-            style={{
-                position: 'fixed',
-                ...menuStyle,
-                zIndex: 1000,
-            }}
-            className={s.menuPopover}
-        >
-            {activeMenu === 'user' && (
-                <SideMenu title="Tài khoản" items={userMenuItems} />
-            )}
-            {activeMenu === 'study' && (
-                <SideMenu title="Học tập" items={studyMenuItems} />
-            )}
-        </div>,
-        document.body
-    )
-}
-
 export default function StudentDashboard() {
     const [isChatOpen, setIsChatOpen] = useState(false)
-    const [activeMenu, setActiveMenu] = useState<'user' | 'study' | null>(null)
-    const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({})
-    const avatarRef = useRef<HTMLButtonElement>(null)
-    const studyNavItemRef = useRef<HTMLLIElement>(null!)
 
     const navItems: NavItem[] = [
         {
-            id: '1',
+            id: 'nav-dashboard',
             label: 'Dashboard',
-            href: '#',
+            href: '/student/dashboard',
             active: true,
         },
         {
-            id: '2',
+            id: 'nav-study',
             label: 'Học tập',
-            onClick: () =>
-                setActiveMenu(activeMenu === 'study' ? null : 'study'),
-            ref: studyNavItemRef,
+            href: '/student/schedule',
+            dropdownItems: studyMenuItems,
         },
         {
-            id: '3',
+            id: 'nav-notification',
             label: 'Thông báo',
             href: '#',
         },
         {
-            id: '4',
+            id: 'nav-message',
             label: 'Tin nhắn',
             href: '#',
         },
     ]
 
-    const updateMenuPosition = () => {
-        if (activeMenu === 'user' && avatarRef.current) {
-            const rect = avatarRef.current.getBoundingClientRect()
-            setMenuStyle({
-                top: `${rect.bottom + 12}px`,
-                right: `${window.innerWidth - rect.right}px`,
-            })
-        } else if (activeMenu === 'study' && studyNavItemRef.current) {
-            const rect = studyNavItemRef.current.getBoundingClientRect()
-            setMenuStyle({
-                top: `${rect.bottom + 12}px`,
-                left: `${rect.left}px`,
-            })
-        }
-    }
-
-    useEffect(() => {
-        updateMenuPosition()
-    }, [activeMenu])
-
-    useEffect(() => {
-        if (!activeMenu) return
-
-        window.addEventListener('resize', updateMenuPosition)
-        window.addEventListener('scroll', updateMenuPosition, true)
-
-        return () => {
-            window.removeEventListener('resize', updateMenuPosition)
-            window.removeEventListener('scroll', updateMenuPosition, true)
-        }
-    }, [activeMenu])
-
     return (
         <div className={s.dashboard}>
+            {/* Navigation */}
             <header className={s.header}>
                 <NavigationMenu
                     items={navItems}
+                    rightSlotDropdownItems={userMenuItems}
                     rightSlot={
-                        <div className={s.avatarWrapper}>
-                            <button
-                                ref={avatarRef}
-                                className={s.avatarButton}
-                                data-menu-trigger
-                                data-active={activeMenu === 'user'}
-                                onClick={() =>
-                                    setActiveMenu(
-                                        activeMenu === 'user' ? null : 'user'
-                                    )
-                                }
-                                aria-label="User menu"
-                            >
-                                <img
-                                    src={AvatarImg}
-                                    className={s.avatar}
-                                    alt="User Avatar"
-                                />
-                            </button>
-                        </div>
+                        <img
+                            src={AvatarImg}
+                            style={{
+                                width: '36px',
+                                height: '36px',
+                                borderRadius: '50%',
+                                objectFit: 'cover',
+                                display: 'block',
+                            }}
+                            alt="User Avatar"
+                        />
                     }
                 />
             </header>
 
-            <MenuPortal
-                isOpen={!!activeMenu}
-                activeMenu={activeMenu}
-                menuStyle={menuStyle}
-                onClose={() => setActiveMenu(null)}
-            />
-
+            {/* Welcome Message */}
             <h1 className={s.welcomeMessage}>
                 <TextType
                     text={[
@@ -274,6 +172,7 @@ export default function StudentDashboard() {
                 />
             </h1>
 
+            {/* Main Content */}
             <main className={s.mainContent}>
                 <Card
                     title="Tổng quan"
@@ -344,6 +243,7 @@ export default function StudentDashboard() {
                 </div>
             </main>
 
+            {/* Chatbot FAB */}
             <button
                 className={s.fab}
                 aria-label="Open chatbot"

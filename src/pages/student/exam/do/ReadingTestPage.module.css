@@ -1,0 +1,310 @@
+.pageWrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    background-color: #f0f2f5;
+    color: var(--text-primary-light, #222);
+}
+
+.header {
+    background-color: #fff;
+    border-bottom: 1px solid #d9d9d9;
+    padding: 12px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.headerInfo {
+    font-size: 14px;
+    font-weight: 600;
+    color: inherit;
+}
+
+.timer {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--status-danger-500-light);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.timer img,
+.timer svg {
+    width: 18px;
+    height: 18px;
+    opacity: 0.8;
+}
+
+.mainContent {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    padding: 16px;
+    gap: 16px;
+}
+
+.passageContainer {
+    flex: 1;
+    min-width: 400px;
+    background-color: #fff;
+    border: 1px solid #d9d9d9;
+    border-radius: var(--radius-md);
+    padding: 20px;
+    overflow-y: auto;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.passageTitle {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eee;
+    color: var(--text-primary-light);
+}
+
+.passageContent {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text-primary-light);
+    white-space: pre-wrap;
+}
+
+.passageContent p {
+    margin-bottom: 1em;
+}
+
+.questionContainer {
+    flex: 1;
+    min-width: 400px;
+    background-color: #fff;
+    border: 1px solid #d9d9d9;
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.questionScrollArea {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    color: var(--text-primary-light);
+}
+
+.questionGroupBlock {
+    margin-bottom: 32px;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 24px;
+}
+
+.questionGroupBlock:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.questionInstruction {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eee;
+    color: var(--text-primary-light);
+    line-height: 1.5;
+}
+
+.footer {
+    background-color: #fff;
+    border-top: 1px solid #d9d9d9;
+    padding: 12px 20px;
+    display: flex;
+    flex-direction: column; /* 2 hàng xếp chồng */
+    gap: 12px;
+    flex-shrink: 0;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.footerRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+/* Hàng 1: Nút Passage (Style giống IDP) */
+.passageNav {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.passageButton {
+    padding: 6px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    border: 1px solid #ccc;
+    background-color: #f5f5f5;
+    color: var(--text-primary-light, #595959);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.passageButton:hover {
+    background-color: #eee;
+}
+
+.passageButton.active {
+    background-color: #555;
+    color: #fff;
+    border-color: #555;
+    font-weight: 600;
+}
+.passageButton:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.footerActions {
+    display: flex;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.questionNav {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 6px;
+    width: 100%;
+    overflow-x: auto;
+    padding: 4px;
+
+    scrollbar-width: thin;
+    scrollbar-color: #ccc #eee;
+}
+.questionNav::-webkit-scrollbar {
+    height: 6px;
+}
+.questionNav::-webkit-scrollbar-track {
+    background: #eee;
+    border-radius: 3px;
+}
+.questionNav::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}
+.questionNav::-webkit-scrollbar-thumb:hover {
+    background: #bbb;
+}
+
+.navButton {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    font-size: 13px;
+    border-radius: var(--radius-sm);
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+.navButton:hover {
+    background-color: #eee;
+    border-color: #bbb;
+}
+.navButton.current {
+    background-color: #555;
+    color: #fff;
+    border-color: #555;
+    font-weight: 600;
+}
+.navButton.reviewed {
+    border-radius: 50%;
+    border-color: #555;
+    font-weight: 600;
+}
+.navButton.answered {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.navButton.current.reviewed {
+    background-color: #555;
+    border-radius: 50%;
+}
+.navButton.current.answered {
+    background-color: #555;
+    color: #fff;
+}
+
+.footerActions {
+    display: flex;
+    gap: 12px;
+    flex-shrink: 0;
+    align-items: center;
+}
+
+.passageContent ::selection {
+    background-color: color-mix(
+        in srgb,
+        var(--brand-primary-light, #0066ff) 30%,
+        transparent
+    );
+}
+span[data-highlight-id] {
+    border-radius: 3px;
+    padding: 0.1em 0;
+    margin: -0.1em 0;
+}
+span[data-highlight-id][data-color='yellow'] {
+    background-color: rgba(255, 251, 0, 0.45);
+}
+span[data-highlight-id][data-color='pink'] {
+    background-color: rgba(255, 153, 204, 0.45);
+}
+span[data-highlight-id][data-color='blue'] {
+    background-color: rgba(153, 204, 255, 0.45);
+}
+
+.loadingContainer,
+.errorContainer {
+    display: grid;
+    place-items: center;
+    height: 100vh;
+    font-size: 1.2rem;
+    color: var(--text-primary-light);
+}
+
+.errorContainer {
+    color: var(--status-danger-light);
+}
+
+.submitOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: grid;
+    place-items: center;
+    z-index: 1100;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 600;
+    backdrop-filter: blur(4px);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

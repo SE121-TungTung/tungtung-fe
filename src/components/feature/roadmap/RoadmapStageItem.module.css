@@ -1,0 +1,116 @@
+.item {
+    display: flex;
+    gap: 20px;
+    position: relative;
+    padding: 0 0 32px 20px;
+}
+
+.item::before {
+    content: '';
+    position: absolute;
+    top: 18px;
+    left: 17px;
+    bottom: -18px;
+    width: 2px;
+    background-color: var(--boder-soft-light);
+}
+.item:last-child::before {
+    display: none;
+}
+
+.iconWrapper {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 1px solid var(--boder-soft-light);
+    z-index: 1;
+    transition: all 0.3s ease;
+}
+
+.iconWrapper img,
+.iconWrapper svg {
+    width: 18px;
+    height: 18px;
+}
+
+.content {
+    padding-top: 6px;
+}
+
+.order {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary-light);
+    margin-bottom: 4px;
+    display: block;
+}
+
+.title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary-light);
+    margin: 0 0 8px;
+}
+
+.description {
+    font-size: 14px;
+    color: var(--text-secondary-light);
+    line-height: 1.6;
+    margin: 0 0 16px;
+}
+
+.skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.skillTag {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    background-color: var(--surface-raised-light);
+    border: 1px solid var(--boder-soft-light);
+    text-transform: capitalize;
+}
+
+.pending {
+    /* (Mặc định) */
+}
+.pending .iconWrapper {
+    background-color: var(--surface-raised-light);
+}
+
+.inProgress .iconWrapper {
+    background-color: var(--brand-primary-light-accent);
+    border-color: var(--brand-primary-light);
+}
+.inProgress .iconWrapper img {
+    opacity: 1;
+    filter: invert(39%) sepia(57%) saturate(6869%) hue-rotate(211deg)
+        brightness(100%) contrast(104%);
+}
+.inProgress .title {
+    color: var(--brand-primary-light);
+}
+
+.completed {
+    opacity: 0.7;
+}
+.completed .title {
+    text-decoration: line-through;
+    color: var(--text-secondary-light);
+}
+.completed .iconWrapper {
+    background-color: var(--status-success-light-accent);
+    border-color: var(--status-success-light);
+}
+.completed .iconWrapper img {
+    opacity: 1;
+    filter: invert(61%) sepia(91%) saturate(353%) hue-rotate(85deg)
+        brightness(89%) contrast(92%);
+}

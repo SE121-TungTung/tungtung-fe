@@ -12,6 +12,7 @@ export interface CardProps
     subtitle?: React.ReactNode
     footer?: React.ReactNode
     direction?: 'vertical' | 'horizontal'
+    controls?: React.ReactNode
 }
 
 export default function Card({
@@ -23,6 +24,7 @@ export default function Card({
     direction = 'vertical',
     className = '',
     children,
+    controls,
     ...rest
 }: CardProps) {
     return (
@@ -38,9 +40,12 @@ export default function Card({
         >
             {title && (
                 <header className={s.header}>
-                    <h3 className={s.h}>{title}</h3>
-                    {subtitle && <p className={s.subtitle}>{subtitle}</p>}
-                    <span className={s.underline} />
+                    <div>
+                        <h3 className={s.h}>{title}</h3>
+                        {subtitle && <p className={s.subtitle}>{subtitle}</p>}
+                        <span className={s.underline} />
+                    </div>
+                    <div className={s.controls}>{controls}</div>
                 </header>
             )}
             <div className={s.body}>{children}</div>

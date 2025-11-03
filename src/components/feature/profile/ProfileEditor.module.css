@@ -1,0 +1,36 @@
+/* src/components/feature/profile/ProfileEditor.module.css */
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.formGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Layout 2 cột */
+    gap: 16px 20px;
+}
+
+.gridItem {
+    /* Mặc định chiếm 1 cột */
+}
+
+.fullWidth {
+    grid-column: 1 / -1; /* Chiếm 2 cột */
+}
+
+.formActions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 12px;
+}
+
+/* Responsive cho 1 cột trên mobile */
+@media (max-width: 600px) {
+    .formGrid {
+        grid-template-columns: 1fr;
+    }
+    .gridItem {
+        grid-column: 1 / -1; /* Tất cả về 1 cột */
+    }
+}

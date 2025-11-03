@@ -227,6 +227,7 @@
 }
 .subtle:hover:not(:disabled, [aria-busy='true']) {
     filter: brightness(1.04);
+    color: #0b1520;
 }
 .subtle:active:not(:disabled, [aria-busy='true']) {
     filter: brightness(0.98);

@@ -1,0 +1,74 @@
+.item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    border-radius: var(--radius-md);
+    background: var(--surface-raised-light);
+    border: 1px solid var(--boder-soft-light);
+    transition: all 0.2s ease;
+}
+
+.item:hover {
+    background: var(--surface-hover-light);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.iconWrapper {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-sm);
+    background: var(--surface-page-light);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.iconWrapper img,
+.iconWrapper svg {
+    width: 22px;
+    height: 22px;
+    opacity: 0.8;
+}
+
+.content {
+    flex: 1;
+    min-width: 0;
+}
+
+.title {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text-primary-light);
+    margin: 0 0 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--text-secondary-light);
+    margin: 0;
+}
+
+.meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.meta img,
+.meta svg {
+    width: 14px;
+    height: 14px;
+    opacity: 0.7;
+}
+
+.actions {
+    flex-shrink: 0;
+}

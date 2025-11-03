@@ -1,0 +1,80 @@
+/* exams/QuestionBottomNav.module.css */
+
+.navContainer {
+    display: flex;
+    width: 100%;
+    background-color: #f0f0f0;
+    border-top: 1px solid #ccc;
+    padding: 8px;
+    overflow-x: auto;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 10;
+}
+
+.partWrapper {
+    display: flex;
+    align-items: flex-start;
+    margin-right: 16px;
+}
+
+.partButton {
+    background: var(--brand-100, #e0e7ff);
+    border: 1px solid var(--brand-300, #a5b4fc);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-weight: 600;
+    color: var(--brand-700, #4338ca);
+    cursor: pointer;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+.partButton.activePart {
+    background: var(--brand-600, #4f46e5);
+    color: white;
+    border-color: var(--brand-700, #4338ca);
+}
+
+.questionWrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-width: 400px; /* Giới hạn chiều rộng để không quá dài */
+}
+
+.questionButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%; /* Nút tròn */
+    border: 1px solid #aaa;
+    background-color: #fff;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.questionButton:hover {
+    background-color: #f0f0f0;
+    border-color: #000;
+}
+
+/* Trạng thái: Đã trả lời */
+.questionButton.attempted {
+    background-color: #e0e0e0;
+    border-color: #888;
+}
+
+/* Trạng thái: Đang active (trong tầm nhìn) */
+.questionButton.active {
+    background-color: var(--brand-600, #4f46e5);
+    color: white;
+    border-color: var(--brand-700, #4338ca);
+    font-weight: 700;
+    box-shadow: 0 0 0 2px var(--brand-300, #a5b4fc);
+}

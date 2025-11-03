@@ -1,0 +1,99 @@
+.pageWrapper {
+    background: linear-gradient(115deg, #e4ecf7, #fff);
+    min-height: 100vh;
+    padding: 24px clamp(24px, 5vw, 80px);
+}
+
+.header {
+    margin-bottom: 40px;
+    position: relative;
+    z-index: 10;
+    width: 70%;
+    align-self: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
+
+.mainContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+    width: 100%;
+    max-width: 1200px; /* Giới hạn chiều rộng tối đa */
+    margin: 0 auto; /* Căn giữa */
+}
+
+.pageTitle {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    text-align: center;
+    color: var(--text-primary-light);
+    letter-spacing: -0.04em;
+    line-height: 1.15;
+    min-height: 1.15em;
+    white-space: nowrap;
+}
+.gradientText {
+    background: var(
+        --gradient-text,
+        linear-gradient(
+            135deg,
+            var(--brand-secondary-500-light) 0%,
+            var(--brand-accent2-500-light) 69.5%,
+            var(--brand-primary-500-light) 141.42%
+        )
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline;
+}
+
+.controlsBar {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 16px;
+    background: var(--surface-card-light);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--boder-soft-light);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    flex-wrap: wrap; /* Cho phép xuống dòng */
+}
+
+.searchWrapper {
+    flex-grow: 1; /* Cho phép input co giãn */
+    max-width: 400px; /* Giới hạn chiều rộng input */
+    min-width: 250px;
+}
+
+.viewModeControl {
+    flex-shrink: 0; /* Không cho segment co lại */
+}
+
+.contentArea {
+    width: 100%;
+}
+
+.skillGrid {
+    display: grid;
+    /* 4 cột trên desktop, 2 cột trên tablet, 1 cột trên mobile */
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 24px;
+    width: 100%;
+}
+
+.examListContainer {
+    margin-top: 24px;
+}

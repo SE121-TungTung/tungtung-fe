@@ -1,0 +1,173 @@
+.root {
+    --radius: var(--radius-pill, 999px);
+    --h: 32px;
+    --px: 10px;
+    --fs: 13px;
+    --fg: var(--Text-primary, #0b1520);
+    --muted: var(--Text-secondary, rgba(0, 0, 0, 0.7));
+    --bg: var(--Container-background, rgba(255, 255, 255, 0.6));
+    --bd: var(--Border-glass, rgba(255, 255, 255, 0.1));
+
+    color: var(--fg);
+    width: max-content;
+    border-radius: var(--radius);
+    padding: 2px 2px 0;
+}
+
+.block {
+    width: 100%;
+}
+
+.row {
+    position: relative;
+    display: flex;
+    gap: 0;
+}
+
+.tab {
+    position: relative;
+    z-index: 1;
+    flex: 1 1 0;
+    height: var(--h);
+    padding: 0 var(--px);
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font:
+        500 var(--fs) / 20px Inter,
+        system-ui,
+        sans-serif;
+    cursor: pointer;
+    border-radius: var(--radius);
+    white-space: nowrap;
+    text-align: center;
+}
+.tab:hover {
+    color: var(--fg);
+}
+.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.active {
+    color: var(--fg);
+}
+
+.label {
+    pointer-events: none;
+}
+
+.indicator {
+    position: absolute;
+    left: 2px;
+    top: 2px;
+    height: calc(var(--h) - 4px);
+    border-radius: var(--radius);
+    transition:
+        transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1),
+        width 240ms;
+}
+.indicator::after {
+    content: '';
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 2px;
+    height: 2px;
+    border-radius: 2px;
+    filter: blur(3px);
+}
+
+/* divider dưới dãy tab */
+.divider {
+    height: 1px;
+    margin-top: 6px;
+    border-radius: 10px;
+    background: radial-gradient(
+        50% 50% at 50% 50%,
+        rgba(0, 0, 0, 0.2),
+        rgba(0, 0, 0, 0)
+    );
+}
+
+/* variants */
+.glass {
+    background:
+        linear-gradient(
+            0deg,
+            rgba(255, 255, 255, 0.2),
+            rgba(255, 255, 255, 0) 60%
+        ),
+        var(--bg);
+    border: 1px solid var(--bd);
+    box-shadow:
+        0 1px 0 #0001,
+        0 4px 8px #0001;
+    backdrop-filter: blur(12px);
+}
+.glass .indicator {
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.95) 0%,
+        rgba(255, 255, 255, 0.7) 100%
+    );
+    outline: 1px solid color-mix(in oklab, var(--fg) 10%, transparent);
+}
+.flat {
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid color-mix(in oklab, var(--fg) 15%, transparent);
+}
+.flat .indicator {
+    background: #fff;
+    outline: 1px solid color-mix(in oklab, var(--fg) 12%, transparent);
+}
+
+/* modes */
+.dark {
+    --fg: #fff;
+    --muted: rgba(255, 255, 255, 0.85);
+    --bg: rgba(0, 0, 0, 0.5);
+    --bd: rgba(255, 255, 255, 0.08);
+}
+.dark .divider {
+    background: radial-gradient(
+        50% 50% at 50% 50%,
+        rgba(255, 255, 255, 0.2),
+        rgba(255, 255, 255, 0)
+    );
+}
+.dark.flat {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+.dark.flat .indicator {
+    background: rgba(255, 255, 255, 0.08);
+    outline: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* sizes */
+.xs {
+    --h: 24px;
+    --px: 6px;
+    --fs: 12px;
+}
+.sm {
+    --h: 28px;
+    --px: 8px;
+    --fs: 12px;
+}
+.md {
+    /* default */
+}
+.lg {
+    --h: 36px;
+    --px: 12px;
+    --fs: 14px;
+}
+
+/* disabled root */
+.isDisabled {
+    opacity: 0.6;
+    pointer-events: none;
+}

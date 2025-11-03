@@ -1,0 +1,49 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 100%;
+}
+
+.controls {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.searchWrapper {
+    flex: 1;
+    min-width: 200px;
+}
+
+.filterSelect {
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--boder-hard-light);
+    background-color: var(--surface-raised-light);
+    color: var(--text-primary-light);
+    font-size: 14px;
+    min-width: 150px;
+    cursor: pointer;
+}
+
+.filterSelect:focus {
+    outline: 2px solid var(--brand-primary-light);
+    outline-offset: 1px;
+}
+
+.list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+}
+
+.emptyState {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-secondary-light);
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: var(--radius-lg);
+    border: 1px dashed var(--boder-soft-light);
+}

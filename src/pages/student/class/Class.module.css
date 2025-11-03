@@ -1,0 +1,173 @@
+.pageWrapper {
+    background: linear-gradient(115deg, #e4ecf7, #fff);
+    min-height: 100vh;
+    padding: 24px clamp(24px, 5vw, 80px);
+}
+
+.header {
+    margin-bottom: 40px;
+    position: relative;
+    z-index: 10;
+    width: 70%;
+    align-self: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
+
+.mainContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+    width: 100%;
+}
+
+.pageTitle {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    text-align: center;
+    color: var(--text-primary-light);
+    letter-spacing: -0.04em;
+    line-height: 1.15;
+    min-height: 1.15em;
+    white-space: nowrap;
+}
+
+.gradientText {
+    background: var(
+        --gradient-text,
+        linear-gradient(
+            135deg,
+            var(--brand-secondary-500-light) 0%,
+            var(--brand-accent2-500-light) 69.5%,
+            var(--brand-primary-500-light) 141.42%
+        )
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline;
+}
+
+.tabs {
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    justify-content: center;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.card {
+    display: block;
+    gap: 24px;
+    align-items: stretch;
+    width: 100%;
+    height: auto;
+    min-height: 500px;
+}
+
+/* --- Card Grid - 1:1 Layout --- */
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: stretch;
+    width: 100%;
+    height: auto;
+    min-height: 500px;
+}
+
+/* Ensure both cards have equal height */
+.grid > * {
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- Placeholder Content --- */
+.placeholderContent {
+    width: 100%;
+    max-width: 1280px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 500px;
+}
+
+.placeholderBox {
+    text-align: center;
+    padding: 60px 40px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.placeholderBox h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary-light);
+    margin: 0 0 12px 0;
+}
+
+.placeholderBox p {
+    font-size: 14px;
+    color: var(--text-secondary-light);
+    margin: 0;
+}
+
+.memberControls {
+    display: flex;
+    gap: 12px; /* Giảm khoảng cách */
+    align-items: center;
+}
+
+/* Style cho select filter trong Class.tsx */
+.memberFilterSelect {
+    padding: 8px 12px; /* Đồng bộ với input size sm */
+    border-radius: var(--radius-md);
+    border: 1px solid var(--boder-hard-light);
+    background-color: var(--surface-raised-light);
+    color: var(--text-primary-light);
+    font-size: 13px; /* Đồng bộ với input size sm */
+    min-width: 130px;
+    cursor: pointer;
+    height: 38px; /* Đồng bộ chiều cao với input size sm */
+    box-sizing: border-box;
+}
+
+.memberFilterSelect:focus {
+    outline: 2px solid var(--brand-primary-light);
+    outline-offset: 1px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .grid {
+        grid-template-columns: 1fr;
+        min-height: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .header {
+        width: 100%;
+    }
+    .pageTitle {
+        white-space: normal;
+    }
+    .memberControls {
+        flex-direction: column;
+        align-items: stretch; /* Cho các control chiếm full chiều rộng */
+    }
+    .memberFilterSelect {
+        min-width: unset; /* Bỏ min-width trên mobile */
+    }
+}

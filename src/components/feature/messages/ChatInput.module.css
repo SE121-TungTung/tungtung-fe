@@ -1,0 +1,34 @@
+/* src/components/feature/messages/ChatInput.module.css */
+.inputWrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sendButton {
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    border-radius: 50% !important;
+    flex-shrink: 0;
+
+    display: grid;
+    place-items: center;
+    background-color: var(--brand-primary-500-light) !important;
+}
+.sendButton:not(:disabled) {
+    background-color: var(--brand-primary-500-light);
+    color: #fff;
+}
+.sendButton:not(:disabled):hover {
+    background-color: var(--brand-primary-500-dark);
+}
+
+.sendButton img {
+    width: 20px;
+    height: 20px;
+    transform: translateX(1px);
+}
+.sendButton:not(:disabled) img {
+    filter: brightness(0) invert(1);
+}
