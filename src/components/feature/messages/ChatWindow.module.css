@@ -2,51 +2,102 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    background-color: var(--white);
+    overflow: hidden;
+    background-color: var(--surface-page-light);
 }
 
 .header {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-md);
-    border-bottom: 1px solid var(--gray-200);
+    padding: 0 20px;
+    border-bottom: 1px solid var(--boder-soft-light);
+    background-color: var(--surface-card-light);
+    flex-shrink: 0;
+    gap: 12px;
+
+    height: var(--chat-header-height);
+    box-sizing: border-box;
+}
+
+.userInfo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+}
+
+.avatarWrapper {
+    position: relative;
     flex-shrink: 0;
 }
 
-.avatar {
-    width: 40px;
-    height: 40px;
+.avatarImg {
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
     object-fit: cover;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.onlineBadge {
+    position: absolute;
+    bottom: 1px;
+    right: 1px;
+    width: 14px;
+    height: 14px;
+    background-color: var(--status-success-500-light, #22c55e);
+    border: 3px solid #fff;
+    border-radius: 50%;
+}
+.item.active .onlineBadge {
+    border-color: var(--brand-primary-light-accent, #eef4ff);
 }
 
 .name {
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-bold);
-    color: var(--gray-900);
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--text-primary-light);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.messageList {
+.status {
+    font-size: 13px;
+    color: var(--text-secondary-light);
+}
+
+.menuButton {
+    flex-shrink: 0;
+}
+
+.backButton {
+    display: none;
+}
+
+@media (max-width: 800px) {
+    .backButton {
+        display: inline-flex;
+    }
+    .header {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+}
+
+.body {
     flex: 1;
     overflow-y: auto;
-    padding: var(--spacing-md);
+    padding: 20px;
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
+    gap: 4px;
 }
 
-.inputArea {
-    border-top: 1px solid var(--gray-200);
-    padding: var(--spacing-md);
+.footer {
+    padding: 16px 20px;
+    border-top: 1px solid var(--boder-soft-light);
+    background-color: var(--surface-card-light);
     flex-shrink: 0;
-    background-color: var(--gray-25, #fcfcfc);
-}
-
-.noChat {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: var(--gray-500);
 }

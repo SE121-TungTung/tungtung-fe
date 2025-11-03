@@ -1,51 +1,155 @@
-.page {
-    padding: var(--spacing-xl);
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-lg);
-    height: 100%;
-    max-height: calc(100vh - 80px); /* Giả định chiều cao header/nav là 80px */
+.pageWrapper {
+    background: linear-gradient(115deg, #e4ecf7, #fff);
+    min-height: 100vh;
+    padding: 24px clamp(24px, 5vw, 80px);
 }
 
-.title {
-    font-size: var(--font-size-xxl);
-    font-weight: var(--font-weight-bold);
-    color: var(--gray-900);
+.header {
+    margin-bottom: 40px;
+    position: relative;
+    z-index: 10;
+    width: 70%;
+    align-self: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
+
+.mainContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+    width: 100%;
+}
+
+.pageTitle {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    text-align: center;
+    color: var(--text-primary-light);
+    letter-spacing: -0.04em;
+    line-height: 1.15;
+    min-height: 1.15em;
+    white-space: nowrap;
+}
+
+.gradientText {
+    background: linear-gradient(
+        111deg,
+        var(--brand-secondary-500-light) 0%,
+        #ef325f 49.15%,
+        var(--brand-primary-500-light) 100%
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline;
+    line-height: 1.15;
+}
+
+.chatContainerCard {
+    width: 100%;
+    max-width: 1400px;
+    height: 75vh;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .container {
     display: grid;
-    grid-template-columns: 340px 1fr;
-    gap: var(--spacing-lg);
-    flex: 1; /* Cho phép container lấp đầy không gian còn lại */
+    grid-template-columns: 360px 1fr;
     height: 100%;
-    min-height: 0; /* Quan trọng để flexbox/grid hoạt động đúng với overflow */
-    background-color: var(--white);
-    border: 1px solid var(--gray-200);
-    border-radius: var(--rounded-lg);
-    overflow: hidden; /* Ẩn overflow ở container cha */
+    width: 100%;
+    overflow: hidden;
+    transition: grid-template-columns 0.3s ease-out;
+    --chat-header-height: 73px;
+}
+
+.container.isDetailsActive {
+    grid-template-columns: 360px 1fr 320px;
 }
 
 .conversationPanel {
-    border-right: 1px solid var(--gray-200);
-    padding: var(--spacing-md);
+    border-right: 1px solid var(--boder-soft-light);
     display: flex;
     flex-direction: column;
-    overflow-y: auto; /* Cho phép cuộn nếu danh sách dài */
+    overflow: hidden;
+    background-color: var(--surface-card-light);
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
 }
 
 .chatPanel {
     display: flex;
     flex-direction: column;
     height: 100%;
-    overflow: hidden; /* Đảm bảo ChatWindow không tràn */
+    background-color: var(--surface-page-light);
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
+    overflow: hidden;
 }
 
 .noChatSelected {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: grid;
+    place-items: center;
     height: 100%;
-    color: var(--gray-500);
-    font-size: var(--font-size-md);
+    color: var(--text-secondary-light);
+    text-align: center;
+    font-size: 15px;
+    background-color: var(--surface-raised-light);
+}
+
+.detailsPanel {
+    grid-column: 3 / 4;
+    grid-row: 1 / 2;
+    overflow: hidden;
+}
+
+@media (max-width: 1200px) {
+    .container.isDetailsActive {
+        grid-template-columns: 300px 1fr 280px;
+    }
+}
+
+@media (max-width: 800px) {
+    .container {
+        grid-template-columns: 1fr;
+    }
+
+    .chatPanel {
+        display: none;
+    }
+    .detailsPanel {
+        display: none;
+    }
+
+    .container.isChatActive .conversationPanel {
+        display: none;
+    }
+    .container.isChatActive .chatPanel {
+        display: flex;
+    }
+    .container.isChatActive .detailsPanel {
+        display: none;
+    }
+
+    .container.isDetailsActive .conversationPanel {
+        display: none;
+    }
+    .container.isDetailsActive .chatPanel {
+        display: none;
+    }
+    .container.isDetailsActive .detailsPanel {
+        display: flex;
+    }
 }

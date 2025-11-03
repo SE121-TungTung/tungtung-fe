@@ -1,42 +1,48 @@
-import { useState } from 'react'
-import clsx from 'clsx'
-import type { Message } from '@/pages/messages/mockData'
-import styles from './MessageBubble.module.css'
-import ButtonCircle from '@/components/common/button/ButtonCircle'
+import React from 'react'
+import s from './MessageBubble.module.css'
+import type { Message, Participant } from '@/types/message.types'
+import AvatarImg from '@/assets/avatar-placeholder.png'
 
 interface MessageBubbleProps {
     message: Message
-    isSentByCurrentUser: boolean
+    isSent: boolean
+    sender?: Participant
+    showSenderName: boolean
+    showAvatar: boolean
 }
 
-export function MessageBubble({
+export const MessageBubble: React.FC<MessageBubbleProps> = ({
     message,
-    isSentByCurrentUser,
-}: MessageBubbleProps) {
-    const [isHovered, setIsHovered] = useState(false)
-
+    isSent,
+    sender,
+    showSenderName,
+    showAvatar,
+}) => {
+    const isSending = message.timestamp === 'Đang gửi...'
     return (
-        <div
-            className={clsx(
-                styles.wrapper,
-                isSentByCurrentUser ? styles.sent : styles.received
-            )}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-        >
-            <div className={styles.bubble}>
-                <p className={styles.text}>{message.text}</p>
-                <span className={styles.timestamp}>{message.timestamp}</span>
-
-                {isHovered && (
-                    <ButtonCircle
-                        className={styles.reactionButton}
-                        onClick={() => alert('React!')}
-                        size="sm"
-                    >
-                        {<span>🙂</span>}
-                    </ButtonCircle>
+        <div className={`${s.bubbleWrapper} ${isSent ? s.sent : s.received}`}>
+            <div className={s.avatarColumn}>
+                {showAvatar && (
+                    <img
+                        src={sender?.avatarUrl || AvatarImg}
+                        alt={sender?.name || 'Avatar'}
+                        className={s.senderAvatar}
+                        title={sender?.name}
+                    />
                 )}
+            </div>
+
+            <div className={s.bubbleGroup}>
+                {showSenderName && (
+                    <span className={s.senderName}>{sender?.name}</span>
+                )}
+
+                <div
+                    className={`${s.bubble} ${isSending ? s.sending : ''}`}
+                    title={message.timestamp}
+                >
+                    {message.text}
+                </div>
             </div>
         </div>
     )

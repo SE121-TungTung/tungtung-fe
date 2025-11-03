@@ -1,19 +1,26 @@
 .root {
-    --radius: var(--radius-sm, 8px);
-    --fg: var(--Text-primary, #0b1520);
-    --muted: var(--Text-secondary, rgba(0, 0, 0, 0.7));
+    --fg: var(--text-primary-light, #0b1520);
+    --muted: var(--text-muted-light, rgba(0, 0, 0, 0.7));
     --bg: var(--Container-background, rgba(255, 255, 255, 0.6));
     --bd: var(--Border-glass, rgba(255, 255, 255, 0.1));
-    --accent: var(--Accent-blue, #0066ff);
+    --accent: var(--text-on-accent-light, #0066ff);
 
     color: var(--fg);
-    border-radius: var(--radius);
     padding: 6px 0 0;
     width: max-content;
 }
 
+.label {
+    font:
+        600 14px/20px Inter,
+        system-ui,
+        sans-serif;
+    margin-bottom: 4px;
+}
+
 .block {
     width: 100%;
+    text-align: center;
 }
 
 .block .row {
@@ -50,7 +57,7 @@
     cursor: pointer;
     outline: none;
     min-width: 96px;
-    text-align: left;
+    text-align: center;
 }
 .tab:hover {
     color: var(--fg);
@@ -84,18 +91,21 @@
     background: var(--accent);
 }
 
-/* Thêm style cho active-filled (kiểu thứ 3 trong ảnh) */
 .active-filled {
     color: var(--fg);
-    background: color-mix(in oklab, var(--accent) 25%, transparent);
-    border-radius: var(--radius);
+    font-weight: 600;
+    background: linear-gradient(
+        180deg,
+        color-mix(in oklab, var(--brand-primary-700-light) 8%, transparent) 0%,
+        color-mix(in oklab, var(--brand-primary-700-light) 80%, transparent)
+            100%
+    );
+    box-shadow: inset 0 -2px 0 var(--fg);
 }
 
-/* divider dưới hàng tab */
 .divider {
     height: 1px;
     margin-top: 6px;
-    border-radius: 10px;
     background: radial-gradient(
         50% 50% at 50% 50%,
         rgba(0, 0, 0, 0.2),
@@ -103,7 +113,6 @@
     );
 }
 
-/* variants */
 .glass {
     background:
         linear-gradient(
@@ -118,10 +127,8 @@
         0 1px 0 #0001,
         0 4px 8px #0001;
     padding: 6px 8px 0;
-    border-radius: var(--radius);
 }
 .flat {
-    /* no extra bg */
 }
 
 /* modes */

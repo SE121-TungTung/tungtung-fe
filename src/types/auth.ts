@@ -11,5 +11,6 @@ export type User = {
     firstName: string
     lastName: string
     role: Role
+    avatarUrl?: string
     isFirstLogin?: boolean
 }

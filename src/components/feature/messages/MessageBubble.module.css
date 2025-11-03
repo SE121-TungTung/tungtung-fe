@@ -1,65 +1,78 @@
-.wrapper {
+.bubbleWrapper {
     display: flex;
+    gap: 10px;
     max-width: 75%;
 }
 
-/* Tin nhắn gửi đi (bên phải) */
-.sent {
-    align-self: flex-end;
-}
-.sent .bubble {
-    background-color: var(--brand-500);
-    color: var(--white);
-    border-radius: var(--rounded-lg) var(--rounded-lg) 0 var(--rounded-lg);
-}
-.sent .timestamp {
-    color: var(--brand-100);
+.avatarColumn {
+    width: 32px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
 }
 
-/* Tin nhắn nhận (bên trái) */
+.bubbleGroup {
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+}
+
+.sent {
+    flex-direction: row-reverse;
+    align-self: flex-end;
+}
+.sent .avatarColumn {
+    display: none;
+}
+.sent .bubble {
+    background-color: var(--brand-primary-500-light, #0066ff);
+    color: #fff;
+    border-radius: 18px 18px 4px 18px;
+}
+.sent .bubbleGroup {
+    align-items: flex-end;
+}
+
 .received {
+    flex-direction: row;
     align-self: flex-start;
 }
 .received .bubble {
-    background-color: var(--gray-100);
-    color: var(--gray-900);
-    border-radius: var(--rounded-lg) var(--rounded-lg) var(--rounded-lg) 0;
+    background-color: var(--surface-raised-light, #f0f2f5);
+    color: var(--text-primary-light);
+    border-radius: 4px 18px 18px 18px;
 }
-.received .timestamp {
-    color: var(--gray-500);
+.received .bubbleGroup {
+    align-items: flex-start;
+}
+.received.noAvatar .bubbleGroup {
+    margin-left: 42px;
 }
 
 .bubble {
-    padding: var(--spacing-sm) var(--spacing-md);
-    position: relative;
-}
-
-.text {
-    margin: 0;
+    padding: 10px 14px;
+    font-size: 15px;
     line-height: 1.5;
-    font-size: var(--font-size-md);
-    /* Cho phép ngắt dòng nếu từ quá dài */
-    word-break: break-word;
+    word-wrap: break-word;
+    width: fit-content;
+    transition: opacity 0.3s ease;
 }
 
-.timestamp {
-    display: block;
-    font-size: var(--font-size-xs);
-    margin-top: var(--spacing-xs);
-    text-align: right;
-    opacity: 0.9;
+.bubble.sending {
+    opacity: 0.7;
 }
 
-.reactionButton {
-    position: absolute;
-    top: -16px;
-    right: var(--spacing-sm);
-    background-color: var(--white) !important;
-    border: 1px solid var(--gray-200);
-    box-shadow: var(--shadow-sm);
+.senderAvatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
 }
 
-.received .reactionButton {
-    left: var(--spacing-sm);
-    right: auto;
+.senderName {
+    font-size: 12px;
+    color: var(--text-secondary-light);
+    margin-bottom: 4px;
+    margin-left: 4px;
 }

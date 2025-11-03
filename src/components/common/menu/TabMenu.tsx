@@ -120,7 +120,6 @@ export default function TabMenu({
                     )
                 })}
             </div>
-            {/* {activeStyle === 'underline' && <div className={s.divider} />} */}
         </div>
     )
 }

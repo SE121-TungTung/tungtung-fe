@@ -18,13 +18,12 @@ import type {
     Passage,
     QuestionGroup,
     Question,
-    QuestionType,
 } from '@/types/exam.types'
 import React from 'react'
 import MatchingQuestionGroup from '@/components/feature/exams/MatchingQuestionGroup'
 import SummaryCompletionGroup from '@/components/feature/exams/SummaryCompletionGroup'
 import MultipleChoiceQuestion from '@/components/feature/exams/MultipleChoiceQuestion'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 
 const STORAGE_KEY_PREFIX = 'readingHighlights_'
 
@@ -470,7 +469,6 @@ const ReadingFooter = ({
 
 export default function ReadingTestPage() {
     const { testId } = useParams<{ testId: string }>()
-    const navigate = useNavigate()
 
     const [testData, setTestData] = useState<ReadingTest | null>(null)
     const [timeLeft, setTimeLeft] = useState(0)
@@ -483,7 +481,7 @@ export default function ReadingTestPage() {
         new Set()
     )
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [showSubmitConfirm, setShowSubmitConfirm] = useState(false)
+    const [, setShowSubmitConfirm] = useState(false)
     const [testFinished, setTestFinished] = useState(false)
 
     const questionElementRefs = useRef<Map<string, HTMLElement | null>>(

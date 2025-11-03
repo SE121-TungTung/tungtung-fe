@@ -1,9 +1,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import s from './Class.module.css'
 
-import NavigationMenu, {
-    type NavItem,
-} from '@/components/common/menu/NavigationMenu'
+import NavigationMenu from '@/components/common/menu/NavigationMenu'
 import TabMenu, { type TabItem } from '@/components/common/menu/TabMenu'
 import SegmentedControl, {
     type SegItem,
@@ -14,12 +12,8 @@ import TextType from '@/components/common/text/TextType'
 import type { Lesson } from '@/components/common/typography/LessonItem'
 
 import AvatarImg from '@/assets/avatar-placeholder.png'
-import ClassIcon from '@/assets/Book 2.svg'
-import ExamIcon from '@/assets/Card Question.svg'
-import RoadmapIcon from '@/assets/Merge.svg'
 import SearchIcon from '@/assets/Book Search.svg'
 
-import type { SideMenuItem } from '@/components/common/menu/SideMenuSet'
 import type { Assignment } from '@/components/common/card/AssignmentCard'
 import type { Activity } from '@/components/common/card/RecentActivityCard'
 import RecentActivityCard from '@/components/common/card/RecentActivityCard'
@@ -28,19 +22,8 @@ import MemberList from './MemberList'
 import type { ClassMember } from '@/components/common/card/MemberCard'
 import Card from '@/components/common/card/Card'
 import InputField from '@/components/common/input/InputField'
-
-const userMenuItems: SideMenuItem[] = [
-    { id: 'profile', label: 'Hồ sơ' },
-    { id: 'settings', label: 'Cài đặt' },
-    { id: 'help', label: 'Trợ giúp' },
-    { id: 'logout', label: 'Đăng xuất' },
-]
-
-const studyMenuItems: SideMenuItem[] = [
-    { id: 'classes', label: 'Lớp học', icon: <img src={ClassIcon} /> },
-    { id: 'exams', label: 'Luyện thi', icon: <img src={ExamIcon} /> },
-    { id: 'roadmap', label: 'Lộ trình', icon: <img src={RoadmapIcon} /> },
-]
+import { useSession } from '@/stores/session.store'
+import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
 
 const tabItems: TabItem[] = [
     { label: 'Lịch học', value: 'schedule' },
@@ -267,6 +250,9 @@ const mockClassMembers: ClassMember[] = [
 ]
 
 export default function ClassPage() {
+    const sessionState = useSession()
+    const userRole = sessionState?.user?.role || 'student'
+
     const [activeTab, setActiveTab] = useState('schedule')
     const [viewMode, setViewMode] = useState('week')
     const [showGradientName, setShowGradientName] = useState(false)
@@ -277,36 +263,14 @@ export default function ClassPage() {
         'all' | 'student' | 'teacher'
     >('all')
     // State để reset trang của MemberList khi filter/search thay đổi
-    const [memberListPage, setMemberListPage] = useState(0)
+    const [, setMemberListPage] = useState(0)
 
     const handleGreetingComplete = useCallback(() => {
         setShowGradientName(true)
     }, [])
 
-    const navItems: NavItem[] = [
-        {
-            id: '1',
-            label: 'Dashboard',
-            href: '/student/dashboard',
-        },
-        {
-            id: '2',
-            label: 'Học tập',
-            href: '/student/schedule',
-            active: true,
-            dropdownItems: studyMenuItems,
-        },
-        {
-            id: '3',
-            label: 'Thông báo',
-            href: '#',
-        },
-        {
-            id: '4',
-            label: 'Tin nhắn',
-            href: '#',
-        },
-    ]
+    const navItems = getNavItems(userRole as any, '/student/classes')
+    const userMenuItems = getUserMenuItems(userRole as any)
 
     useEffect(() => {
         setMemberListPage(0)

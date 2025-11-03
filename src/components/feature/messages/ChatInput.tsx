@@ -1,68 +1,49 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
+import s from './ChatInput.module.css'
 import InputField from '@/components/common/input/InputField'
-import { Button } from '@/components/core/Button'
-import ButtonCircle from '@/components/common/button/ButtonCircle'
-import styles from './ChatInput.module.css'
+import ButtonGhost from '@/components/common/button/ButtonGhost'
+import SendIcon from '@/assets/Send Paper Plane.svg'
 
 interface ChatInputProps {
-    onSend: (text: string) => void
+    onSendMessage: (text: string) => void
 }
 
-// Giả sử bạn có SVG icons hoặc component Icon
-// import { PaperclipIcon, SmileIcon, SendIcon } from '@/components/core/Icons'
-
-export function ChatInput({ onSend }: ChatInputProps) {
+export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage }) => {
     const [text, setText] = useState('')
 
-    const handleSend = (e: React.FormEvent) => {
-        e.preventDefault()
-        if (text.trim()) {
-            onSend(text.trim())
+    const handleSubmit = (e?: React.FormEvent) => {
+        e?.preventDefault()
+        const messageToSend = text.trim()
+        if (messageToSend) {
+            onSendMessage(messageToSend)
             setText('')
         }
     }
 
     return (
-        <form className={styles.wrapper} onSubmit={handleSend}>
-            {/* Nút đính kèm (cải tiến) */}
-            <ButtonCircle
-                type="button"
-                onClick={() => alert('Đính kèm file')}
-                aria-label="Đính kèm file"
-            >
-                {<span>📎</span>}
-            </ButtonCircle>
-            {/* Nút icon (cải tiến) */}
-            <ButtonCircle
-                type="button"
-                onClick={() => alert('Chọn icon')}
-                aria-label="Chọn biểu cảm"
-            >
-                {<span>🙂</span>}
-            </ButtonCircle>
-
-            {/* Ô nhập liệu */}
+        <form className={s.inputWrapper} onSubmit={handleSubmit}>
             <InputField
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 placeholder="Nhập tin nhắn..."
-                className={styles.inputField}
+                variant="soft"
+                mode="light"
+                fullWidth
                 onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
-                        handleSend(e)
+                        e.preventDefault()
+                        handleSubmit()
                     }
                 }}
             />
-
-            {/* Nút gửi - Tái sử dụng Button core */}
-            <Button
+            <ButtonGhost
                 type="submit"
-                className={styles.sendButton}
-                disabled={!text.trim()}
+                size="md"
+                className={s.sendButton}
+                aria-label="Gửi tin nhắn"
             >
-                Gửi
-                {/* Hoặc dùng Icon: <SendIcon /> */}
-            </Button>
+                <img src={SendIcon} alt="Send" />
+            </ButtonGhost>
         </form>
     )
 }
