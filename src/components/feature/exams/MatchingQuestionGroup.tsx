@@ -1,5 +1,5 @@
 import s from './MatchingQuestionGroup.module.css'
-import type { QuestionGroup, Question } from '@/types/exam.types'
+import type { QuestionGroup } from '@/types/exam.types'
 
 // Kiểu cho câu trả lời: { "q1": "A", "q2": "B" }
 type AnswerMap = { [questionId: string]: string }

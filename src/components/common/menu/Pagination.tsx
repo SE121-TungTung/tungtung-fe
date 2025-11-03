@@ -1,4 +1,3 @@
-import React from 'react'
 import ButtonGhost from '@/components/common/button/ButtonGhost'
 import s from './Pagination.module.css'
 

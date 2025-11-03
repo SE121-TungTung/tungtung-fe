@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react'
-import s from './SessionList.module.css' // CSS module riêng
+import { useState, useMemo } from 'react'
+import s from './SessionList.module.css'
 import Card from '@/components/common/card/Card'
 import NavigationOutline from '@/components/common/menu/NavigationOutline'
 import LessonItem, {
@@ -10,7 +10,7 @@ interface SessionListProps {
     sessions: Lesson[]
 }
 
-const SESSIONS_PER_PAGE = 5 // Số buổi học mỗi trang
+const SESSIONS_PER_PAGE = 5
 
 export default function SessionList({ sessions }: SessionListProps) {
     const [currentPage, setCurrentPage] = useState(0)
@@ -37,8 +37,7 @@ export default function SessionList({ sessions }: SessionListProps) {
             title="Danh sách buổi học"
             mode="light"
             variant="outline"
-            className={s.sessionCard} // Class để làm cho card co giãn
-            // Slot cho các nút điều khiển
+            className={s.sessionCard}
             footer={
                 <NavigationOutline
                     size="sm"

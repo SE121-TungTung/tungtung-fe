@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import styles from './QuestionBottomNav.module.css'
 import { type Passage, type QuestionGroup } from '@/types/exam.types'
 
@@ -25,7 +25,6 @@ function isGroupAttempted(
     group: QuestionGroup,
     dirtyFields: Record<string, boolean>
 ): boolean {
-    // `dirtyFields` giờ đây là `dirtyFields.questions` được truyền vào
     return group.questions.some((q) => dirtyFields[q.id])
 }
 
@@ -45,7 +44,7 @@ export function QuestionBottomNav({
     const [activePartIndex, setActivePartIndex] = useState(0)
 
     // Lấy tất cả question groups từ tất cả passages
-    const allGroups = passages.flatMap((p) => p.questionGroups)
+    // const allGroups = passages.flatMap((p) => p.questionGroups)
 
     return (
         <nav className={styles.navContainer}>

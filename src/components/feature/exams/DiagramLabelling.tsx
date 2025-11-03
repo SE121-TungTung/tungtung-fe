@@ -1,6 +1,4 @@
-// src/components/feature/exams/DiagramLabelling.tsx
-import React from 'react'
-import s from './SummaryCompletionGroup.module.css' // Tái sử dụng CSS
+import s from './SummaryCompletionGroup.module.css'
 import type {
     QuestionGroup,
     DiagramLabellingQuestion,
@@ -13,7 +11,7 @@ interface DiagramGroupProps {
     answers: AnswerMap
     onAnswerChange: (questionId: string, value: string) => void
     registerRef: (id: string, element: HTMLElement | null) => void
-    diagramUrl: string // URL của ảnh sơ đồ
+    diagramUrl: string
 }
 
 export default function DiagramLabellingGroup({

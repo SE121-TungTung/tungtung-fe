@@ -81,5 +81,11 @@ export const getNavItems = (role: Role, activeHref?: string): NavItem[] => {
 }
 
 export const getUserMenuItems = (role: Role): SideMenuItem[] => {
+    if (role === 'student') {
+        return [...commonUserMenu]
+    }
+    if (role === 'teacher') {
+        return [...commonUserMenu]
+    }
     return commonUserMenu
 }

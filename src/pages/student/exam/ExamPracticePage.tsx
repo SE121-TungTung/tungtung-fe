@@ -1,8 +1,7 @@
 import { useState, useMemo, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom' // Để xử lý khi bấm nút "Bắt đầu"
+// import { useNavigate } from 'react-router-dom'
 import s from './ExamPracticePage.module.css'
 
-// Import components
 import NavigationMenu, {
     type NavItem,
 } from '@/components/common/menu/NavigationMenu'
@@ -15,7 +14,6 @@ import SkillCard from '@/components/common/card/SkillCard'
 import ExamListCard from './ExamListCard'
 import type { ExamInfo } from '@/components/common/list/ExamItem'
 
-// Import icons
 import AvatarPlaceholder from '@/assets/avatar-placeholder.png'
 import SearchIcon from '@/assets/Action Eye Tracking.svg'
 import ListeningIcon from '@/assets/Action Ear Normal.svg'
@@ -29,7 +27,6 @@ import RoadmapIcon from '@/assets/Merge.svg'
 import type { SideMenuItem } from '@/components/common/menu/SideMenuSet'
 
 const mockExams: ExamInfo[] = [
-    // Listening
     {
         id: 'l1',
         title: 'IELTS Listening Practice Test 1',
@@ -44,7 +41,6 @@ const mockExams: ExamInfo[] = [
         durationMinutes: 25,
         questionCount: 39,
     },
-    // Reading
     {
         id: 'r1',
         title: 'IELTS Reading Academic Test 1',
@@ -59,7 +55,6 @@ const mockExams: ExamInfo[] = [
         durationMinutes: 20,
         questionCount: 10,
     },
-    // Writing
     {
         id: 'w1',
         title: 'IELTS Writing Task 1 (Academic)',
@@ -74,7 +69,6 @@ const mockExams: ExamInfo[] = [
         durationMinutes: 40,
         questionCount: 1,
     },
-    // Speaking
     {
         id: 's1',
         title: 'IELTS Speaking Part 1 Practice',
@@ -82,7 +76,6 @@ const mockExams: ExamInfo[] = [
         durationMinutes: 5,
         questionCount: 10,
     },
-    // Full Tests
     {
         id: 'f1',
         title: 'Full IELTS Academic Mock Test 1',
@@ -141,7 +134,7 @@ const studyMenuItems: SideMenuItem[] = [
 ]
 
 export default function ExamPracticePage() {
-    const navigate = useNavigate()
+    // const navigate = useNavigate()
     const [viewMode, setViewMode] = useState<'skill' | 'exam'>('skill')
     const [selectedSkill, setSelectedSkill] = useState<string | null>(null)
     const [searchTerm, setSearchTerm] = useState('')

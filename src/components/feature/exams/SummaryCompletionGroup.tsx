@@ -1,9 +1,6 @@
 import React from 'react'
 import s from './SummaryCompletionGroup.module.css'
-import type {
-    QuestionGroup,
-    SummaryCompletionQuestion,
-} from '@/types/exam.types'
+import type { QuestionGroup, CompletionQuestion } from '@/types/exam.types'
 
 type AnswerMap = { [questionId: string]: string }
 
@@ -26,7 +23,7 @@ export default function SummaryCompletionGroup({
         let questionIndex = 0
 
         // Giả sử câu hỏi đầu tiên trong nhóm có cấu trúc "parts"
-        const mainQuestion = group.questions[0] as SummaryCompletionQuestion
+        const mainQuestion = group.questions[0] as CompletionQuestion
         if (!mainQuestion || !mainQuestion.parts)
             return <p>Lỗi dữ liệu tóm tắt.</p>
 
