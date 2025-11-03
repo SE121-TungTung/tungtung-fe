@@ -88,17 +88,20 @@
 }
 
 /* --- Icons --- */
+.fieldRow {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
 .icon {
     position: absolute;
-    top: 0;
-    bottom: 0;
+    top: 50%;
+    transform: translateY(-50%);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     color: var(--input-icon);
     opacity: 0.7;
-    margin-top: auto;
-    margin-bottom: auto;
     z-index: 1;
 }
 .icon img,
@@ -131,17 +134,13 @@
     right: var(--pad-x);
 }
 
-/* adjust padding when icon present */
 .withPrefix .input {
-    /* Đẩy padding trái input khi có icon trái */
     --pl: calc(var(--pad-x) * 2 + 18px); /* padding + icon_width + padding */
 }
 .withSuffix .input {
-    /* Đẩy padding phải input khi có icon phải */
     --pr: calc(var(--pad-x) * 2 + 18px); /* padding + icon_width + padding */
 }
 
-/* --- Size --- */
 .size-sm .input.withPrefix {
     padding-left: calc(var(--pad-x) * 2 + 16px); /* 16px icon size sm */
 }

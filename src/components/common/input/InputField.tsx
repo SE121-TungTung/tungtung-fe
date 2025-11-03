@@ -87,43 +87,55 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
                         {label}
                     </label>
                 )}
-                {/* Icons are positioned absolutely relative to the wrapper */}
-                {leftIcon && (
-                    <span className={[s.icon, s.prefix].join(' ')}>
-                        {leftIcon}
-                    </span>
-                )}
-                <input
-                    ref={ref}
-                    id={inputId}
-                    type={inputType}
-                    className={inputCls}
-                    aria-invalid={!!error}
-                    aria-describedby={error ? `${inputId}-error` : undefined}
-                    {...rest}
-                />
-                {isPassword && enablePasswordToggle ? (
-                    <button
-                        type="button"
-                        className={[s.icon, s.suffix, s.toggle].join(' ')}
-                        onClick={() => setReveal(!reveal)}
-                        aria-label={reveal ? 'Hide password' : 'Show password'}
-                        title={reveal ? 'Hide password' : 'Show password'}
-                    >
-                        {/* Render SVGs inside an <img> tag */}
-                        {reveal ? (
-                            <img src={ActionEyeVisable} alt="Hide password" />
-                        ) : (
-                            <img src={ActionEyeInvisable} alt="Show password" />
-                        )}
-                    </button>
-                ) : (
-                    rightIcon && (
-                        <span className={[s.icon, s.suffix].join(' ')}>
-                            {rightIcon}
+                <div className={s.fieldRow}>
+                    {leftIcon && (
+                        <span className={[s.icon, s.prefix].join(' ')}>
+                            {leftIcon}
                         </span>
-                    )
-                )}
+                    )}
+
+                    <input
+                        ref={ref}
+                        id={inputId}
+                        type={inputType}
+                        className={inputCls} // vẫn gồm s.withPrefix / s.withSuffix
+                        aria-invalid={!!error}
+                        aria-describedby={
+                            error ? `${inputId}-error` : undefined
+                        }
+                        {...rest}
+                    />
+
+                    {isPassword && enablePasswordToggle ? (
+                        <button
+                            type="button"
+                            className={[s.icon, s.suffix, s.toggle].join(' ')}
+                            onClick={() => setReveal(!reveal)}
+                            aria-label={
+                                reveal ? 'Hide password' : 'Show password'
+                            }
+                            title={reveal ? 'Hide password' : 'Show password'}
+                        >
+                            {reveal ? (
+                                <img
+                                    src={ActionEyeVisable}
+                                    alt="Hide password"
+                                />
+                            ) : (
+                                <img
+                                    src={ActionEyeInvisable}
+                                    alt="Show password"
+                                />
+                            )}
+                        </button>
+                    ) : (
+                        rightIcon && (
+                            <span className={[s.icon, s.suffix].join(' ')}>
+                                {rightIcon}
+                            </span>
+                        )
+                    )}
+                </div>
                 {/* Field Messages */}
                 {error ? (
                     <FieldMessage id={`${inputId}-error`} variant="chip">
