@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import s from './Class.module.css'
 
 import NavigationMenu from '@/components/common/menu/NavigationMenu'
@@ -24,6 +24,9 @@ import Card from '@/components/common/card/Card'
 import InputField from '@/components/common/input/InputField'
 import { useSession } from '@/stores/session.store'
 import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import type { Role } from '@/types/auth'
 
 const tabItems: TabItem[] = [
     { label: 'Lịch học', value: 'schedule' },
@@ -34,33 +37,6 @@ const tabItems: TabItem[] = [
 const viewModeItems: SegItem[] = [
     { label: 'Tuần', value: 'week' },
     { label: 'Tháng', value: 'month' },
-]
-
-const todaySessions: Lesson[] = [
-    {
-        id: '1',
-        sessionDate: '2025-10-27',
-        startTime: '08:00',
-        endTime: '09:30',
-        className: 'IELTS Intermediate A',
-        courseName: 'IELTS Intermediate A',
-        teacherName: 'Mr. John',
-        roomName: 'A1',
-        status: 'in_progress',
-        attendanceTaken: false,
-    },
-    {
-        id: '2',
-        sessionDate: '2025-10-27',
-        startTime: '10:00',
-        endTime: '11:30',
-        className: 'TOEIC Advanced B',
-        courseName: 'TOEIC Advanced B',
-        teacherName: 'Ms. Jane',
-        roomName: 'B2',
-        status: 'scheduled',
-        attendanceTaken: false,
-    },
 ]
 
 const allSessions: Lesson[] = [
@@ -150,130 +126,137 @@ const upcomingAssignments: Assignment[] = [
     },
 ]
 
-const mockClassMembers: ClassMember[] = [
-    {
-        id: 'uuid-teacher-1',
-        firstName: 'John',
-        lastName: 'Doe',
-        role: 'teacher',
-        isOnline: true,
-        avatarUrl: null,
-    },
-    {
-        id: 'uuid-student-1',
-        firstName: 'Alice',
-        lastName: 'Smith',
-        role: 'student',
-        isOnline: true,
-        avatarUrl: 'https://randomuser.me/api/portraits/women/1.jpg',
-    },
-    {
-        id: 'uuid-student-2',
-        firstName: 'Bob',
-        lastName: 'Johnson',
-        role: 'student',
-        isOnline: false,
-        avatarUrl: 'https://randomuser.me/api/portraits/men/2.jpg',
-    },
-    {
-        id: 'uuid-student-3',
-        firstName: 'Charlie',
-        lastName: 'Brown',
-        role: 'student',
-        isOnline: true,
-        avatarUrl: 'https://randomuser.me/api/portraits/men/3.jpg',
-    },
-    {
-        id: 'uuid-student-4',
-        firstName: 'Diana',
-        lastName: 'Davis',
-        role: 'student',
-        isOnline: false,
-        avatarUrl: 'https://randomuser.me/api/portraits/women/4.jpg',
-    },
-    {
-        id: 'uuid-student-5',
-        firstName: 'Ethan',
-        lastName: 'Garcia',
-        role: 'student',
-        isOnline: true,
-        avatarUrl: null,
-    },
-    {
-        id: 'uuid-student-6',
-        firstName: 'Fiona',
-        lastName: 'Miller',
-        role: 'student',
-        isOnline: false,
-        avatarUrl: 'https://randomuser.me/api/portraits/women/6.jpg',
-    },
-    {
-        id: 'uuid-student-7',
-        firstName: 'George',
-        lastName: 'Rodriguez',
-        role: 'student',
-        isOnline: true,
-        avatarUrl: 'https://randomuser.me/api/portraits/men/7.jpg',
-    },
-    {
-        id: 'uuid-student-8',
-        firstName: 'Hannah',
-        lastName: 'Wilson',
-        role: 'student',
-        isOnline: true,
-        avatarUrl: 'https://randomuser.me/api/portraits/women/8.jpg',
-    },
-    {
-        id: 'uuid-student-9',
-        firstName: 'Ian',
-        lastName: 'Martinez',
-        role: 'student',
-        isOnline: false,
-        avatarUrl: null,
-    },
-    {
-        id: 'uuid-student-10',
-        firstName: 'Julia',
-        lastName: 'Anderson',
-        role: 'student',
-        isOnline: true,
-        avatarUrl: 'https://randomuser.me/api/portraits/women/10.jpg',
-    },
-    {
-        id: 'uuid-student-11',
-        firstName: 'Kevin',
-        lastName: 'Taylor',
-        role: 'student',
-        isOnline: false,
-        avatarUrl: 'https://randomuser.me/api/portraits/men/11.jpg',
-    },
-]
+interface MyClass {
+    id: string
+    name: string
+    start_date: string
+    end_date: string
+    status: string
+    max_students: number
+    current_students: number
+    teacher?: {
+        id: string
+        full_name: string
+        email: string
+        avatar_url?: string
+    }
+    students?: Array<{
+        id: string
+        full_name: string
+        email: string
+        avatar_url?: string | null
+    }>
+}
 
 export default function ClassPage() {
     const sessionState = useSession()
-    const userRole = sessionState?.user?.role || 'student'
+    const userRole = (sessionState?.user?.role as Role) || 'student'
+
+    const navigate = useNavigate()
+    const location = useLocation()
+    const currentPath = location.pathname
 
     const [activeTab, setActiveTab] = useState('schedule')
     const [viewMode, setViewMode] = useState('week')
     const [showGradientName, setShowGradientName] = useState(false)
 
-    // State cho search và filter của MemberList
     const [memberSearchTerm, setMemberSearchTerm] = useState('')
     const [memberFilterRole, setMemberFilterRole] = useState<
         'all' | 'student' | 'teacher'
     >('all')
-    // State để reset trang của MemberList khi filter/search thay đổi
-    const [, setMemberListPage] = useState(0)
+
+    // Fetch my classes
+    const {
+        data: myClasses,
+        isLoading: classesLoading,
+        // error: classesError,
+    } = useQuery({
+        queryKey: ['my-classes'],
+        queryFn: async () => {
+            const { getMyClasses } = await import('@/lib/users')
+            return getMyClasses()
+        },
+    })
+
+    // Get first class or default
+    const currentClass = myClasses?.[0] as MyClass | undefined
 
     const handleGreetingComplete = useCallback(() => {
         setShowGradientName(true)
     }, [])
 
-    const navItems = getNavItems(userRole as any, '/student/classes')
-    const userMenuItems = getUserMenuItems(userRole as any)
+    const navItems = useMemo(
+        () => getNavItems(userRole, currentPath, navigate),
+        [userRole, currentPath, navigate]
+    )
+    const userMenuItems = useMemo(
+        () => getUserMenuItems(userRole, navigate),
+        [userRole, navigate]
+    )
+
+    // Convert API data to ClassMember[]
+    const classMembers: ClassMember[] = useMemo(() => {
+        if (!currentClass) return []
+
+        const members: ClassMember[] = []
+
+        // Add teacher
+        if (currentClass.teacher) {
+            members.push({
+                id: currentClass.teacher.id,
+                firstName: currentClass.teacher.full_name.split(' ')[0],
+                lastName:
+                    currentClass.teacher.full_name
+                        .split(' ')
+                        .slice(1)
+                        .join(' ') || '',
+                role: 'teacher',
+                isOnline: true,
+                avatarUrl: currentClass.teacher.avatar_url || null,
+            })
+        }
+
+        // Add students
+        if (currentClass.students && Array.isArray(currentClass.students)) {
+            currentClass.students.forEach((student) => {
+                members.push({
+                    id: student.id,
+                    firstName: student.full_name.split(' ')[0],
+                    lastName:
+                        student.full_name.split(' ').slice(1).join(' ') || '',
+                    role: 'student',
+                    isOnline: Math.random() > 0.5, // Mock online status
+                    avatarUrl: student.avatar_url || null,
+                })
+            })
+        }
+
+        return members
+    }, [currentClass])
+
+    // Today's sessions - will be replaced with actual data from sessions endpoint
+    const todaySessions: Lesson[] = useMemo(() => {
+        if (!currentClass) return []
+
+        const today = new Date().toISOString().split('T')[0]
+        return [
+            {
+                id: '1',
+                sessionDate: today,
+                startTime: '08:00',
+                endTime: '09:30',
+                className: currentClass.name,
+                courseName: currentClass.name,
+                teacherName: currentClass.teacher?.full_name || 'N/A',
+                roomName: 'TBA',
+                status: 'scheduled',
+                attendanceTaken: false,
+            },
+        ]
+    }, [currentClass])
 
     useEffect(() => {
-        setMemberListPage(0)
+        // Reset to first page when search/filter changes
     }, [memberSearchTerm, memberFilterRole])
 
     const renderTabContent = () => {
@@ -319,11 +302,8 @@ export default function ClassPage() {
                             title="Thành viên lớp"
                             variant="outline"
                             mode="light"
-                            // Đưa search và filter vào controls của Card
                             controls={
                                 <div className={s.memberControls}>
-                                    {' '}
-                                    {/* Thêm class để style nếu cần */}
                                     <InputField
                                         placeholder="Tìm kiếm thành viên..."
                                         value={memberSearchTerm}
@@ -338,10 +318,10 @@ export default function ClassPage() {
                                         }
                                         variant="glass"
                                         mode="light"
-                                        uiSize="sm" // Chỉnh size nhỏ hơn
+                                        uiSize="sm"
                                     />
                                     <select
-                                        className={s.memberFilterSelect} // Thêm class để style nếu cần
+                                        className={s.memberFilterSelect}
                                         value={memberFilterRole}
                                         onChange={(e) =>
                                             setMemberFilterRole(
@@ -366,14 +346,11 @@ export default function ClassPage() {
                             }
                         >
                             <MemberList
-                                key={`${memberSearchTerm}-${memberFilterRole}`} // Thêm key để reset state nội bộ của MemberList khi filter/search
-                                members={mockClassMembers}
+                                key={`${memberSearchTerm}-${memberFilterRole}`}
+                                members={classMembers}
                                 itemsPerPage={6}
-                                searchTerm={memberSearchTerm} // Truyền state xuống
-                                filterRole={memberFilterRole} // Truyền state xuống
-                                // Nếu muốn kiểm soát page từ Class.tsx:
-                                // currentPage={memberListPage}
-                                // onPageChange={setMemberListPage}
+                                searchTerm={memberSearchTerm}
+                                filterRole={memberFilterRole}
                             />
                         </Card>
                     </div>
@@ -383,16 +360,18 @@ export default function ClassPage() {
         }
     }
 
+    const className = currentClass?.name || 'Lớp học'
+
     return (
         <div className={s.pageWrapper}>
-            {/* Navigation với integrated menus */}
+            {/* Navigation */}
             <header className={s.header}>
                 <NavigationMenu
                     items={navItems}
                     rightSlotDropdownItems={userMenuItems}
                     rightSlot={
                         <img
-                            src={AvatarImg}
+                            src={sessionState?.user?.avatarUrl || AvatarImg}
                             style={{
                                 width: '36px',
                                 height: '36px',
@@ -408,23 +387,31 @@ export default function ClassPage() {
 
             {/* Main Content */}
             <main className={s.mainContent}>
-                {/* Tiêu đề trang */}
+                {/* Title */}
                 <h1 className={s.pageTitle}>
-                    <TextType
-                        text="Đây là lớp "
-                        typingSpeed={50}
-                        loop={false}
-                        showCursor={!showGradientName}
-                        onSentenceComplete={handleGreetingComplete}
-                    />
-                    {showGradientName && (
-                        <TextType
-                            as="span"
-                            className={s.gradientText}
-                            text="IELTS 6.5"
-                            typingSpeed={70}
-                            loop={false}
-                        />
+                    {!classesLoading && currentClass ? (
+                        <>
+                            <TextType
+                                text="Đây là lớp "
+                                typingSpeed={50}
+                                loop={false}
+                                showCursor={!showGradientName}
+                                onSentenceComplete={handleGreetingComplete}
+                            />
+                            {showGradientName && (
+                                <TextType
+                                    as="span"
+                                    className={s.gradientText}
+                                    text={className}
+                                    typingSpeed={70}
+                                    loop={false}
+                                />
+                            )}
+                        </>
+                    ) : classesLoading ? (
+                        <span>Đang tải...</span>
+                    ) : (
+                        <span>Không có lớp học</span>
                     )}
                 </h1>
 
@@ -440,8 +427,18 @@ export default function ClassPage() {
                     />
                 </div>
 
-                {/* Nội dung thay đổi theo Tab */}
-                {renderTabContent()}
+                {/* Content */}
+                {classesLoading ? (
+                    <div style={{ padding: '2rem', textAlign: 'center' }}>
+                        <p>Đang tải dữ liệu lớp học...</p>
+                    </div>
+                ) : currentClass ? (
+                    renderTabContent()
+                ) : (
+                    <div style={{ padding: '2rem', textAlign: 'center' }}>
+                        <p>Bạn chưa được thêm vào lớp học nào</p>
+                    </div>
+                )}
             </main>
         </div>
     )

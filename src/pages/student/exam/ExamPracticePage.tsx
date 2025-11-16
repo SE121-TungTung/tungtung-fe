@@ -1,10 +1,7 @@
 import { useState, useMemo, useCallback } from 'react'
-// import { useNavigate } from 'react-router-dom'
 import s from './ExamPracticePage.module.css'
 
-import NavigationMenu, {
-    type NavItem,
-} from '@/components/common/menu/NavigationMenu'
+import NavigationMenu from '@/components/common/menu/NavigationMenu'
 import TextType from '@/components/common/text/TextType'
 import SegmentedControl, {
     type SegItem,
@@ -20,11 +17,10 @@ import ListeningIcon from '@/assets/Action Ear Normal.svg'
 import ReadingIcon from '@/assets/Book Open.svg'
 import WritingIcon from '@/assets/Edit Pen.svg'
 import SpeakingIcon from '@/assets/Microphone.svg'
-import ClassIcon from '@/assets/Book 2.svg'
-import ExamIcon from '@/assets/Card Question.svg'
-import RoadmapIcon from '@/assets/Merge.svg'
 
-import type { SideMenuItem } from '@/components/common/menu/SideMenuSet'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
+import { useSession } from '@/stores/session.store'
 
 const mockExams: ExamInfo[] = [
     {
@@ -120,25 +116,26 @@ const skills = [
     },
 ]
 
-const userMenuItems: SideMenuItem[] = [
-    { id: 'profile', label: 'Hồ sơ' },
-    { id: 'settings', label: 'Cài đặt' },
-    { id: 'help', label: 'Trợ giúp' },
-    { id: 'logout', label: 'Đăng xuất' },
-]
-
-const studyMenuItems: SideMenuItem[] = [
-    { id: 'classes', label: 'Lớp học', icon: <img src={ClassIcon} /> },
-    { id: 'exams', label: 'Luyện thi', icon: <img src={ExamIcon} /> },
-    { id: 'roadmap', label: 'Lộ trình', icon: <img src={RoadmapIcon} /> },
-]
-
 export default function ExamPracticePage() {
-    // const navigate = useNavigate()
+    const sessionState = useSession()
+    const userRole = sessionState?.user?.role || 'student'
+    const navigate = useNavigate()
+    const location = useLocation()
+    const currentPath = location.pathname
+
     const [viewMode, setViewMode] = useState<'skill' | 'exam'>('skill')
     const [selectedSkill, setSelectedSkill] = useState<string | null>(null)
     const [searchTerm, setSearchTerm] = useState('')
-    const [showGradientName, setShowGradientName] = useState(false) // For title animation
+    const [showGradientName, setShowGradientName] = useState(false)
+
+    const navItems = useMemo(
+        () => getNavItems(userRole as any, currentPath, navigate),
+        [userRole, currentPath, navigate]
+    )
+    const userMenuItems = useMemo(
+        () => getUserMenuItems(userRole as any, navigate),
+        [userRole, navigate]
+    )
 
     const handleGreetingComplete = useCallback(() => {
         setShowGradientName(true)
@@ -161,32 +158,6 @@ export default function ExamPracticePage() {
         alert(`Bắt đầu bài thi ID: ${examId}`)
     }
 
-    const navItems: NavItem[] = [
-        {
-            id: '1',
-            label: 'Dashboard',
-            href: '/student/dashboard',
-        },
-        {
-            id: '2',
-            label: 'Học tập',
-            href: '/student/schedule',
-            active: true,
-            dropdownItems: studyMenuItems,
-        },
-        {
-            id: '3',
-            label: 'Thông báo',
-            href: '#',
-        },
-        {
-            id: '4',
-            label: 'Tin nhắn',
-            href: '#',
-        },
-    ]
-
-    // Lọc danh sách bài thi dựa trên searchTerm và selectedSkill/viewMode
     const filteredExams = useMemo(() => {
         let examsToShow = mockExams
 
@@ -213,11 +184,9 @@ export default function ExamPracticePage() {
         return examsToShow
     }, [searchTerm, selectedSkill, viewMode])
 
-    // Render nội dung chính dựa trên state
     const renderContent = () => {
         if (viewMode === 'skill') {
             if (selectedSkill) {
-                // Hiển thị danh sách bài thi cho kỹ năng đã chọn
                 const skillInfo = skills.find((s) => s.value === selectedSkill)
                 return (
                     <div className={s.examListContainer}>
@@ -230,7 +199,6 @@ export default function ExamPracticePage() {
                     </div>
                 )
             } else {
-                // Hiển thị 4 thẻ kỹ năng
                 return (
                     <div className={s.skillGrid}>
                         {skills.map((skill) => (

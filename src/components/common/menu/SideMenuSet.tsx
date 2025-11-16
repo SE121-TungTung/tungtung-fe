@@ -74,7 +74,6 @@ export default function SideMenu({
                                     )}
                                     <span className={s.label}>{it.label}</span>
                                 </span>
-                                {/* chừa slot icon phải nếu muốn thêm sau */}
                             </Cmp>
                             {i !== items.length - 1 && (
                                 <div className={s.rowDivider} />

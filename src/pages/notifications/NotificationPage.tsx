@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react'
 import s from './NotificationPage.module.css'
 import { useSession } from '@/stores/session.store'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
 
@@ -90,8 +90,19 @@ const ITEMS_PER_PAGE = 5
 export default function NotificationPage() {
     const sessionState = useSession()
     const userRole = sessionState?.user?.role || 'student'
-
     const navigate = useNavigate()
+    const location = useLocation()
+    const currentPath = location.pathname
+
+    const navItems = useMemo(
+        () => getNavItems(userRole as any, currentPath, navigate),
+        [userRole, currentPath, navigate]
+    )
+    const userMenuItems = useMemo(
+        () => getUserMenuItems(userRole as any, navigate),
+        [userRole, navigate]
+    )
+
     const [showGradientName, setShowGradientName] = useState(false)
 
     const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS)
@@ -101,9 +112,6 @@ export default function NotificationPage() {
     const handleGreetingComplete = useCallback(() => {
         setShowGradientName(true)
     }, [])
-
-    const navItems = getNavItems(userRole as any, '/notifications')
-    const userMenuItems = getUserMenuItems(userRole as any)
 
     const filteredNotifications = useMemo(() => {
         if (activeTab === 'unread') {

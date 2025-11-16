@@ -1,0 +1,122 @@
+.pageWrapper {
+    background: linear-gradient(115deg, #e4ecf7, #fff);
+    min-height: 100vh;
+    padding: 24px clamp(24px, 5vw, 80px);
+}
+
+.header {
+    margin-bottom: 40px;
+    position: relative;
+    width: 70%;
+    align-self: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
+
+.mainContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.avatar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.pageTitle {
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    font-weight: 700;
+    color: var(--text-primary-light);
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    text-align: center;
+    width: 100%;
+    margin-bottom: var(--space-8);
+}
+
+.filterCard {
+    width: 100%;
+    padding: var(--space-20);
+    background: var(--surface-page-light);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--color-border-default);
+}
+
+.searchWrapper {
+    flex: 1;
+    max-width: 400px;
+}
+
+.filterControls {
+    display: flex;
+    gap: var(--space-24);
+    padding: var(--space-4) 0;
+}
+
+.filterCard > div {
+    display: flex;
+    gap: var(--space-16);
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.buttonIcon {
+    width: 18px;
+    height: 18px;
+    margin-right: var(--space-8);
+}
+
+.tableCard {
+    width: 100%;
+    padding: 10px;
+    overflow: hidden;
+    border-radius: var(--radius-xl);
+    background: var(--surface-page-light);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--color-border-default);
+}
+
+.filterCard,
+.tableCard {
+    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .mainContent {
+        padding: var(--space-24) var(--space-16) var(--space-40);
+    }
+
+    .filterCard > div {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .searchWrapper {
+        max-width: 100%;
+    }
+}

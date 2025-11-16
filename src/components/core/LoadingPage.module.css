@@ -1,0 +1,92 @@
+/* src/components/core/LoadingPage.module.css */
+.root {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background:
+        radial-gradient(
+            1200px 600px at 10% 10%,
+            rgba(0, 212, 255, 0.15),
+            transparent 60%
+        ),
+        radial-gradient(
+            1200px 600px at 90% 90%,
+            rgba(255, 64, 129, 0.14),
+            transparent 60%
+        ),
+        linear-gradient(180deg, #07080b 0%, #0b0e14 100%);
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.center {
+    position: absolute;
+    top: 8vh;
+    text-align: center;
+    z-index: 2;
+}
+
+.title {
+    margin: 0;
+    font-size: clamp(18px, 2.2vw, 28px);
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    color: #ffffff;
+}
+
+.subtitle {
+    margin-top: 6px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+}
+
+.scroller {
+    width: 100%;
+    display: grid;
+    place-items: center;
+    z-index: 1;
+    filter: drop-shadow(0 10px 40px rgba(0, 0, 0, 0.5));
+}
+
+/* Nhuộm màu từng item bằng biến CSS của InfiniteScroll */
+.infinite-scroll-item {
+    /* class đến từ InfiniteScroll.css */
+    --accent-color: #6ee7ff; /* mặc định */
+    background: color-mix(in oklab, var(--accent-color) 10%, transparent);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    border-color: color-mix(in oklab, var(--accent-color) 65%, white 0%);
+}
+
+.infinite-scroll-item:nth-child(8n + 1) {
+    --accent-color: #6ee7ff;
+}
+.infinite-scroll-item:nth-child(8n + 2) {
+    --accent-color: #7c4dff;
+}
+.infinite-scroll-item:nth-child(8n + 3) {
+    --accent-color: #ff4081;
+}
+.infinite-scroll-item:nth-child(8n + 4) {
+    --accent-color: #ffd740;
+}
+.infinite-scroll-item:nth-child(8n + 5) {
+    --accent-color: #69f0ae;
+}
+.infinite-scroll-item:nth-child(8n + 6) {
+    --accent-color: #40c4ff;
+}
+.infinite-scroll-item:nth-child(8n + 7) {
+    --accent-color: #ffab40;
+}
+.infinite-scroll-item:nth-child(8n + 8) {
+    --accent-color: #536dfe;
+}
+
+.itemText {
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+}

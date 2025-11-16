@@ -1,15 +1,13 @@
 .root {
-    /* tokens + fallback */
     --menu-w: 200px;
     --radius: var(--radius-md, 10px);
     --pad: 16px;
-    --bg: var(--Container-background, rgba(255, 255, 255, 0.6));
-    --bd: var(--Border-glass, rgba(255, 255, 255, 0.1));
-    --fg: var(--Text-primary, #0b1520);
-    --muted: var(--Text-secondary, rgba(0, 0, 0, 0.7));
+    --bg: var(--container-background, rgba(255, 255, 255, 0.6));
+    --bd: var(--border-glass, rgba(255, 255, 255, 0.1));
+    --fg: var(--text-primary-light, #0b1520);
+    --muted: var(--text-secondary-light, rgba(0, 0, 0, 0.7));
     --blue: var(--Accent-blue, #2670e9);
 
-    width: var(--menu-w);
     border-radius: var(--radius);
     color: var(--fg);
     position: relative;

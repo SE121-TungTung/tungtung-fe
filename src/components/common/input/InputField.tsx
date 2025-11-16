@@ -98,7 +98,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
                         ref={ref}
                         id={inputId}
                         type={inputType}
-                        className={inputCls} // vẫn gồm s.withPrefix / s.withSuffix
+                        className={inputCls}
                         aria-invalid={!!error}
                         aria-describedby={
                             error ? `${inputId}-error` : undefined
@@ -136,14 +136,21 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
                         )
                     )}
                 </div>
-                {/* Field Messages */}
                 {error ? (
-                    <FieldMessage id={`${inputId}-error`} variant="chip">
+                    <FieldMessage
+                        id={`${inputId}-error`}
+                        variant="chip"
+                        tone="error"
+                    >
                         {error}
                     </FieldMessage>
                 ) : (
                     hint && (
-                        <FieldMessage id={`${inputId}-hint`} variant="chip">
+                        <FieldMessage
+                            id={`${inputId}-hint`}
+                            variant="chip"
+                            tone="info"
+                        >
                             {hint}
                         </FieldMessage>
                     )

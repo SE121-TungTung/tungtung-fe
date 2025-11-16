@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { loginSchema, type LoginValues } from '@/forms/login.schema'
 import { useMutation } from '@tanstack/react-query'
-import { login, me } from '@/lib/auth'
+import { login } from '@/lib/auth'
 import { useSession } from '@/stores/session.store'
 import { Link, useNavigate } from 'react-router-dom'
 import { homePathByRole } from '@/utils/role'
@@ -16,6 +16,7 @@ import TextCheck from '@/components/common/text/TextCheck'
 import FieldMessage from '@/components/common/typography/FieldMessage'
 import FormCard from '@/components/common/form/FormCard'
 import LiquidEther from '@/components/effect/LiquidEther'
+import { getMe } from '@/lib/users'
 
 const emailMsgId = 'email-msg'
 const passMsgId = 'pass-msg'
@@ -40,7 +41,7 @@ export function LoginPage() {
             const storage = variables?.remember ? localStorage : sessionStorage
             storage.setItem('token', access_token)
             try {
-                const user = await me()
+                const user = await getMe()
                 setUser(user)
                 if (user.isFirstLogin)
                     return navigate('/forgot-password', { replace: true })

@@ -95,15 +95,15 @@
     --focus-ring-light: rgb(75, 163, 195);
     --focus-ring-dark: rgb(111, 181, 207);
     --status-danger-500-light: rgb(214, 40, 57);
-    --status-danger-500-dark: rgb(214, 40, 57);
+    --status-danger-500-dark: rgb(137, 17, 29);
     --status-danger-600-light: rgb(223, 83, 97);
     --status-danger-600-dark: rgb(223, 83, 97);
     --status-warning-500-light: rgb(255, 238, 0);
-    --status-warning-500-dark: rgb(255, 238, 0);
-    --status-info-500-light: rgb(75, 163, 195);
-    --status-info-500-dark: rgb(75, 163, 195);
+    --status-warning-500-dark: rgb(188, 178, 27);
+    --status-info-500-light: rgb(120, 183, 206);
+    --status-info-500-dark: rgb(37, 93, 113);
     --status-success-500-light: rgb(89, 255, 125);
-    --status-success-500-dark: rgb(89, 255, 125);
+    --status-success-500-dark: rgb(2, 188, 42);
     --button-primary-bg-light: rgb(23, 86, 118);
     --button-primary-bg-dark: rgb(23, 86, 118);
     --button-primary-bg-hover-light: rgb(36, 132, 181);
@@ -411,7 +411,7 @@
     --style-flat: Flat;
 
     --caption-medium-font-family: 'Inter', Helvetica;
-    --caption-medium-font-size: 13px;
+    --caption-medium-font-size: 14px;
     --caption-medium-font-style: normal;
     --caption-medium-font-weight: 500;
     --caption-medium-letter-spacing: 0px;

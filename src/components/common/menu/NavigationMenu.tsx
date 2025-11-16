@@ -1,7 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import styles from './NavigationMenu.module.css'
 import SideMenuSet, { type SideMenuItem } from './SideMenuSet'
+import { Link } from 'react-router-dom'
 
 export type NavItem = {
     id?: string
@@ -36,7 +37,7 @@ export default function NavigationMenu({
 
     const idFor = (it: NavItem, i: number) => it.id ?? `item-${i}`
 
-    const updatePosition = () => {
+    const updatePosition = useCallback(() => {
         if (!activeDropdown) return
         const el = triggerRefs.current[activeDropdown]
         if (!el) return
@@ -52,11 +53,11 @@ export default function NavigationMenu({
                 left: `${rect.left}px`,
             })
         }
-    }
+    }, [activeDropdown])
 
     useEffect(() => {
         updatePosition()
-    }, [activeDropdown])
+    }, [updatePosition])
 
     useEffect(() => {
         if (!activeDropdown) return
@@ -70,7 +71,7 @@ export default function NavigationMenu({
             window.removeEventListener('resize', onWin)
             window.removeEventListener('scroll', onWin, { capture: false })
         }
-    }, [activeDropdown])
+    }, [activeDropdown, updatePosition])
 
     useEffect(() => {
         if (!activeDropdown) return
@@ -79,9 +80,8 @@ export default function NavigationMenu({
             if (!target.closest('[data-dropdown-trigger]'))
                 setActiveDropdown(null)
         }
-        document.addEventListener('mousedown', handleClickOutside)
-        return () =>
-            document.removeEventListener('mousedown', handleClickOutside)
+        document.addEventListener('click', handleClickOutside)
+        return () => document.removeEventListener('click', handleClickOutside)
     }, [activeDropdown])
 
     const handleItemClick =
@@ -131,9 +131,9 @@ export default function NavigationMenu({
                             return (
                                 <li key={id} role="none">
                                     {isLink ? (
-                                        <a
+                                        <Link
                                             {...(commonProps as any)}
-                                            href={it.href}
+                                            to={it.href!}
                                             role="menuitem"
                                         >
                                             {it.leftIcon && (
@@ -142,7 +142,7 @@ export default function NavigationMenu({
                                                 </span>
                                             )}
                                             <span>{it.label}</span>
-                                        </a>
+                                        </Link>
                                     ) : (
                                         <button
                                             type="button"
@@ -204,14 +204,18 @@ export default function NavigationMenu({
                     >
                         <SideMenuSet
                             title={getDropdownTitle(activeDropdown)}
-                            items={
-                                activeDropdown === 'rightSlot'
-                                    ? rightSlotDropdownItems
-                                    : (items.find(
-                                          (it, i) =>
-                                              idFor(it, i) === activeDropdown
-                                      )?.dropdownItems ?? [])
-                            }
+                            items={(activeDropdown === 'rightSlot'
+                                ? rightSlotDropdownItems
+                                : (items.find(
+                                      (it, i) => idFor(it, i) === activeDropdown
+                                  )?.dropdownItems ?? [])
+                            ).map((it) => ({
+                                ...it,
+                                onClick: (e) => {
+                                    setActiveDropdown(null)
+                                    requestAnimationFrame(() => it.onClick?.(e))
+                                },
+                            }))}
                         />
                     </div>,
                     document.body
