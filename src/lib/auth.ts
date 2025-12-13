@@ -1,5 +1,4 @@
 import { api } from './api'
-import type { User } from '@/types/auth'
 
 export type LoginPayload = {
     email: string
@@ -19,8 +18,6 @@ export const login = (body: LoginPayload) =>
             remember_me: body.remember ?? false,
         }),
     })
-
-export const me = () => api<User>('/api/v1/users/me', { method: 'GET' })
 
 export const logout = () => api<void>('/api/v1/auth/logout', { method: 'POST' })
 

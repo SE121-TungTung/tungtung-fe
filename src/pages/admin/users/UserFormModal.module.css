@@ -1,0 +1,196 @@
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-24);
+    padding: var(--space-4) 0;
+}
+
+.grid2Cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-20);
+}
+
+.footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-12);
+    margin-top: var(--space-32);
+    padding-top: var(--space-24);
+    border-top: 1px solid var(--color-border-default);
+}
+
+.submitButton {
+    min-width: 140px;
+}
+
+.cancelButton {
+    min-width: 100px;
+}
+
+.inputGroup {
+    margin-bottom: 0;
+}
+
+.inputLabel {
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--space-8);
+    color: var(--color-text-primary);
+    display: block;
+}
+
+.inputLabel::after {
+    content: '*';
+    color: var(--color-danger-default);
+    margin-left: var(--space-4);
+    font-weight: 700;
+}
+
+.inputLabel.optional::after {
+    content: '(Tùy chọn)';
+    color: var(--color-text-secondary);
+    font-weight: 400;
+    font-size: var(--font-size-xs);
+    margin-left: var(--space-8);
+}
+
+.errorMessage {
+    color: var(--color-danger-default);
+    font-size: var(--font-size-xs);
+    margin-top: var(--space-8);
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+    font-weight: 500;
+}
+
+.errorMessage::before {
+    content: '⚠';
+    font-size: var(--font-size-sm);
+}
+
+.successMessage {
+    color: var(--color-success-default);
+    font-size: var(--font-size-xs);
+    margin-top: var(--space-8);
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+    font-weight: 500;
+}
+
+.successMessage::before {
+    content: '✓';
+    font-size: var(--font-size-sm);
+}
+
+.loadingSpinner {
+    margin-left: var(--space-8);
+}
+
+.fieldHelperText {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    margin-top: var(--space-6);
+    line-height: 1.4;
+}
+
+.sectionDivider {
+    margin: var(--space-24) 0;
+    border: none;
+    border-top: 1px solid var(--color-border-default);
+}
+
+.sectionTitle {
+    font-size: var(--font-size-md);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-16);
+    padding-bottom: var(--space-8);
+    border-bottom: 2px solid var(--color-border-strong);
+}
+
+/* Input focus styles enhancement */
+.form input:focus,
+.form select:focus,
+.form textarea:focus {
+    outline: none;
+    border-color: var(--brand-primary-500-light);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Disabled state */
+.form input:disabled,
+.form select:disabled,
+.form textarea:disabled {
+    background-color: var(--color-bg-muted);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Password strength indicator */
+.passwordStrength {
+    display: flex;
+    gap: var(--space-4);
+    margin-top: var(--space-8);
+    height: 4px;
+}
+
+.passwordStrength span {
+    flex: 1;
+    background-color: var(--color-border-default);
+    border-radius: var(--radius-full);
+    transition: background-color 0.3s ease;
+}
+
+.passwordStrength.weak span:first-child {
+    background-color: var(--color-danger-default);
+}
+
+.passwordStrength.medium span:nth-child(-n + 2) {
+    background-color: var(--color-warning-default);
+}
+
+.passwordStrength.strong span {
+    background-color: var(--color-success-default);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .grid2Cols {
+        grid-template-columns: 1fr;
+        gap: var(--space-16);
+    }
+
+    .form {
+        gap: var(--space-20);
+    }
+
+    .footer {
+        flex-direction: column-reverse;
+        gap: var(--space-12);
+    }
+
+    .submitButton,
+    .cancelButton {
+        width: 100%;
+        min-width: unset;
+    }
+}
+
+/* Animation for form appearance */
+.form {
+    animation: fadeInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

@@ -1,0 +1,112 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    overflow-x: auto;
+    background: var(--surface-card-light); /* Token từ project */
+    border-radius: var(--radius-md);
+    border: 1px solid var(--boder-soft-light);
+    backdrop-filter: blur(20px);
+}
+
+.headerRow {
+    display: grid;
+    grid-template-columns: 60px repeat(7, 1fr); /* Cột giờ + 7 ngày */
+    border-bottom: 1px solid var(--boder-soft-light);
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.timeHeader {
+    padding: 12px;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text-secondary-light);
+    text-align: center;
+    border-right: 1px solid var(--boder-soft-light);
+}
+
+.dayHeader {
+    padding: 12px;
+    text-align: center;
+    border-right: 1px solid var(--boder-soft-light);
+}
+
+.dayName {
+    font-weight: 700;
+    color: var(--text-primary-light);
+    display: block;
+}
+
+.date {
+    font-size: 12px;
+    color: var(--text-secondary-light);
+}
+
+.gridBody {
+    display: grid;
+    grid-template-columns: 60px repeat(7, 1fr);
+    /* Giả sử từ 7h sáng đến 9h tối = 14 tiếng -> height lớn */
+    height: 600px;
+    overflow-y: auto;
+    position: relative;
+}
+
+.timeColumn {
+    border-right: 1px solid var(--boder-soft-light);
+}
+
+.timeSlot {
+    height: 60px; /* 1 giờ = 60px */
+    border-bottom: 1px dashed var(--boder-soft-light);
+    font-size: 11px;
+    color: var(--text-secondary-light);
+    text-align: center;
+    padding-top: 4px;
+}
+
+.dayColumn {
+    border-right: 1px solid var(--boder-soft-light);
+    position: relative;
+    background: transparent;
+}
+
+/* Event Card Style */
+.sessionCard {
+    position: absolute;
+    left: 4px;
+    right: 4px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    background: rgba(48, 131, 255, 0.15); /* Brand Blue Tint */
+    border-left: 3px solid var(--brand-primary-500-light);
+    color: var(--text-primary-light);
+    font-size: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sessionCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+
+.sessionTitle {
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.sessionMeta {
+    font-size: 10px;
+    opacity: 0.8;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+/* Conflict Style */
+.conflict {
+    background: rgba(214, 40, 57, 0.15); /* Crimson Tint */
+    border-left-color: var(--palette-crimson-500);
+}

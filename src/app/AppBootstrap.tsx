@@ -1,14 +1,21 @@
 import { useEffect } from 'react'
 import { useSession } from '@/stores/session.store'
-import { me } from '@/lib/auth'
+import { getMe } from '@/lib/users'
+
+const getToken = () =>
+    localStorage.getItem('token') ?? sessionStorage.getItem('token')
 
 export function AppBootstrap({ children }: { children: React.ReactNode }) {
     const setUser = useSession((s) => s.setUser)
     useEffect(() => {
+        const token = getToken()
+        if (!token) {
+            setUser(null)
+            return
+        }
         ;(async () => {
             try {
-                const user = await me()
-                setUser(user)
+                setUser(await getMe())
             } catch {
                 setUser(null)
             }

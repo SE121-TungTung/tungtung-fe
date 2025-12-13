@@ -1,10 +1,8 @@
-// src/components/feature/profile/ProfileHeaderCard.tsx
 import React from 'react'
 import s from './ProfileHeaderCard.module.css'
 import Card from '@/components/common/card/Card'
 import AvatarImg from '@/assets/avatar-placeholder.png'
 
-// Icon
 import EmailIcon from '@/assets/Mail.svg'
 import RoleIcon from '@/assets/User Circle.svg'
 import JoinIcon from '@/assets/Calendar.svg'
@@ -14,7 +12,6 @@ interface ProfileHeaderCardProps {
     user: any
 }
 
-// Helper format vai trò
 const formatRole = (role: string) => {
     const roles: Record<string, string> = {
         student: 'Học sinh',
@@ -26,7 +23,6 @@ const formatRole = (role: string) => {
     return roles[role] || role
 }
 
-// Helper format ngày
 const formatDate = (dateString: string) => {
     try {
         return new Date(dateString).toLocaleDateString('vi-VN', {
@@ -34,7 +30,7 @@ const formatDate = (dateString: string) => {
             month: '2-digit',
             year: 'numeric',
         })
-    } catch (e) {
+    } catch {
         return 'N/A'
     }
 }
@@ -42,13 +38,13 @@ const formatDate = (dateString: string) => {
 export const ProfileHeaderCard: React.FC<ProfileHeaderCardProps> = ({
     user,
 }) => {
-    const fullName = `${user.first_name || ''} ${user.last_name || ''}`
+    const fullName = `${user.firstName || ''} ${user.lastName || ''}`
 
     return (
         <Card variant="flat" mode="light" className={s.card}>
             <div className={s.header}>
                 <img
-                    src={user.avatar_url || AvatarImg}
+                    src={user.avatarUrl || AvatarImg}
                     alt="Avatar"
                     className={s.avatar}
                 />
@@ -65,7 +61,7 @@ export const ProfileHeaderCard: React.FC<ProfileHeaderCardProps> = ({
                 <li className={s.infoItem}>
                     <img src={JoinIcon} alt="Join date" />
                     <span>Ngày tham gia:</span>
-                    <strong>{formatDate(user.created_at)}</strong>
+                    <strong>{formatDate(user.createdAt)}</strong>
                 </li>
                 <li className={s.infoItem}>
                     <img src={PhoneIcon} alt="Phone" />
@@ -76,8 +72,8 @@ export const ProfileHeaderCard: React.FC<ProfileHeaderCardProps> = ({
                     <img src={EmailIcon} alt="Email" />
                     <span>Ngày sinh:</span>
                     <strong>
-                        {user.date_of_birth
-                            ? formatDate(user.date_of_birth)
+                        {user.dateOfBirth
+                            ? formatDate(user.dateOfBirth)
                             : 'Chưa cập nhật'}
                     </strong>
                 </li>

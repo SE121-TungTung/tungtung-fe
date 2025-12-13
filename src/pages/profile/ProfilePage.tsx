@@ -1,17 +1,20 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import s from './ProfilePage.module.css'
 import { useSession } from '@/stores/session.store'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
 
 import NavigationMenu from '@/components/common/menu/NavigationMenu'
 import TextType from '@/components/common/text/TextType'
 import TabMenu, { type TabItem } from '@/components/common/menu/TabMenu'
-import AvatarImg from '@/assets/avatar-placeholder.png'
+import DefaultAvatar from '@/assets/avatar-placeholder.png'
 
 import { ProfileOverview } from '@/components/feature/profile/ProfileOverview'
 import { ProfileEditor } from '@/components/feature/profile/ProfileEditor'
+import { getMe, updateMe } from '@/lib/users'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import type { UserFormValues } from '@/forms/user.schema'
 
 const tabItems: TabItem[] = [
     { label: 'Tổng quan', value: 'overview' },
@@ -20,7 +23,11 @@ const tabItems: TabItem[] = [
 
 export default function ProfilePage() {
     const sessionState = useSession()
+    const setUser = useSession((s) => s.setUser)
+    const queryClient = useQueryClient()
+
     const location = useLocation()
+    const navigate = useNavigate()
 
     const userRole = sessionState?.user?.role || 'student'
     const currentPath = location.pathname
@@ -32,20 +39,47 @@ export default function ProfilePage() {
         setShowGradientName(true)
     }, [])
 
-    const navItems = getNavItems(userRole as any, currentPath)
-    const userMenuItems = getUserMenuItems(userRole as any)
+    const navItems = getNavItems(userRole as any, currentPath, navigate)
+    const userMenuItems = getUserMenuItems(userRole as any, navigate)
 
-    const userData = sessionState?.user || {
-        first_name: 'Người dùng',
-        last_name: 'Mới',
-        email: 'user@example.com',
-        role: userRole,
-        created_at: new Date().toISOString(),
-        avatar_url: null,
-        phone: null,
-        date_of_birth: null,
-        address: null,
+    const { data: meUser } = useQuery({
+        queryKey: ['me'],
+        queryFn: () => getMe(),
+        enabled: !sessionState?.user,
+    })
+    useEffect(() => {
+        if (meUser) setUser(meUser)
+    }, [meUser, setUser])
+
+    const { mutateAsync: updateMeMutate, isPending: isSaving } = useMutation({
+        mutationFn: (payload: Parameters<typeof updateMe>[0]) =>
+            updateMe(payload),
+        onSuccess: (updated) => {
+            setUser(updated)
+            queryClient.invalidateQueries({ queryKey: ['me'] })
+        },
+    })
+
+    const onSubmitForm = async (
+        values: UserFormValues & { avatarFile?: File | null }
+    ) => {
+        const payload = {
+            first_name: values.firstName || undefined,
+            last_name: values.lastName || undefined,
+            phone: values.phone || undefined,
+            address: values.address || undefined,
+            // Add other fields as necessary:
+            // emergency_contact: values.emergencyContact,
+            // preferences: values.preferences,
+            avatar_file: values.avatarFile ?? undefined,
+        }
+        await updateMeMutate(payload)
+        await queryClient.invalidateQueries({ queryKey: ['users'] })
+        setActiveTab('overview')
+        return
     }
+
+    const userData = sessionState?.user
 
     return (
         <div className={s.pageWrapper}>
@@ -56,7 +90,7 @@ export default function ProfilePage() {
                     rightSlotDropdownItems={userMenuItems}
                     rightSlot={
                         <img
-                            src={sessionState?.user?.avatarUrl || AvatarImg}
+                            src={sessionState?.user?.avatarUrl || DefaultAvatar}
                             className={s.avatar}
                             alt="User Avatar"
                         />
@@ -105,7 +139,13 @@ export default function ProfilePage() {
                             role={userRole as any}
                         />
                     )}
-                    {activeTab === 'edit' && <ProfileEditor user={userData} />}
+                    {activeTab === 'edit' && (
+                        <ProfileEditor
+                            user={userData}
+                            isSubmitting={isSaving}
+                            onSubmit={onSubmitForm}
+                        />
+                    )}
                 </div>
             </main>
         </div>

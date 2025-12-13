@@ -236,8 +236,9 @@
 /* 3) Outline */
 .outline {
     background: transparent;
-    color: var(--btn-fg);
+    color: var(--text-primary-light);
     border-color: var(--btn-outline-border);
+    box-shadow: none;
 }
 .outline:hover:not(:disabled, [aria-busy='true']) {
     background: color-mix(in oklab, var(--btn-outline-border) 12%, transparent);

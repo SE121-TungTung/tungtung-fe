@@ -1,0 +1,269 @@
+.container {
+    width: 100%;
+    background: var(--surface-card-light);
+    border-radius: var(--radius-lg);
+    padding: var(--space-24);
+    border: 1px solid var(--boder-soft-light);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-20);
+}
+
+.title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary-light);
+    margin: 0;
+}
+
+.legend {
+    display: flex;
+    gap: var(--space-16);
+    font-size: 12px;
+}
+
+.legendItem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+}
+
+.dotNormal,
+.dotConflict,
+.dotHover {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.dotNormal {
+    background: var(--color-green-300);
+}
+
+.dotConflict {
+    background: var(--status-danger-500-light);
+}
+
+.dotHover {
+    background: var(--brand-accent1-500-light);
+}
+
+.scheduleGrid {
+    display: grid;
+    grid-template-columns: 120px repeat(7, 1fr);
+    gap: 1px;
+    background: var(--boder-soft-light);
+    border: 1px solid var(--boder-soft-light);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.cornerCell {
+    background: var(--surface-raised-light);
+    padding: var(--space-12);
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--text-secondary-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.dayHeader {
+    background: var(--surface-raised-light);
+    padding: var(--space-12) var(--space-8);
+    text-align: center;
+}
+
+.dayName {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text-primary-light);
+    margin-bottom: var(--space-4);
+}
+
+.dayDate {
+    font-size: 11px;
+    color: var(--text-muted-light);
+}
+
+.rowGroup {
+    display: contents;
+}
+
+.slotLabel {
+    background: var(--surface-raised-light);
+    padding: var(--space-12);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.slotName {
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--text-primary-light);
+    margin-bottom: var(--space-4);
+}
+
+.slotTime {
+    font-size: 10px;
+    color: var(--text-muted-light);
+}
+
+.cell {
+    background: var(--background-primary-light);
+    min-height: 120px;
+    padding: var(--space-8);
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.cellHover {
+    background: var(--palette-pacific-cyan-900);
+    border: 2px dashed var(--brand-accent1-500-light);
+}
+
+.cellConflict {
+    background: var(--color-red-50);
+}
+
+.emptySlot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-muted-light);
+    font-size: 11px;
+    font-style: italic;
+}
+
+.sessionCard {
+    background: var(--background-primary-light);
+    border: 1px solid var(--boder-soft-light);
+    border-radius: var(--radius-sm);
+    padding: var(--space-8);
+    cursor: move;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.sessionCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.sessionCard:active {
+    cursor: grabbing;
+    opacity: 0.7;
+}
+
+.sessionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-8);
+}
+
+.sessionClass {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--brand-primary-500-light);
+}
+
+.sessionActions {
+    display: flex;
+    gap: var(--space-4);
+}
+
+.btnEdit,
+.btnDelete {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    padding: var(--space-2);
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.btnEdit:hover,
+.btnDelete:hover {
+    opacity: 1;
+}
+
+.sessionInfo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.infoRow {
+    font-size: 11px;
+    color: var(--text-secondary-light);
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+.sessionEditForm {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+}
+
+.selectField,
+.inputField {
+    width: 100%;
+    padding: var(--space-8);
+    font-size: 11px;
+    border: 1px solid var(--boder-soft-light);
+    border-radius: var(--radius-xs);
+    background: var(--background-primary-light);
+    color: var(--text-primary-light);
+}
+
+.selectField:focus,
+.inputField:focus {
+    outline: none;
+    border-color: var(--brand-primary-500-light);
+}
+
+.instructions {
+    margin-top: var(--space-20);
+    padding: var(--space-12);
+    background: var(--palette-columbia-blue-800);
+    border: 1px solid var(--palette-columbia-blue-600);
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    color: var(--brand-primary-500-light);
+    line-height: 1.5;
+}
+
+.instructions strong {
+    font-weight: 600;
+}
+.cellOccupied {
+    visibility: hidden;
+    min-height: 120px;
+}
+
+.slotInfo {
+    font-size: 10px;
+    color: var(--text-muted-light);
+    padding: var(--space-4);
+    background: var(--surface-raised-light);
+    border-radius: var(--radius-xs);
+    text-align: center;
+}
+
+.sessionCard[style*='grid-row'] {
+    min-height: auto;
+}

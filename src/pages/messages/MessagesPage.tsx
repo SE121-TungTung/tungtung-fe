@@ -1,52 +1,39 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import s from './MessagesPage.module.css'
 import { useSession } from '@/stores/session.store'
 
 import { ConversationList } from '@/components/feature/messages/ConversationList'
 import { ChatWindow } from '@/components/feature/messages/ChatWindow'
 
-import NavigationMenu, {
-    type NavItem,
-} from '@/components/common/menu/NavigationMenu'
+import NavigationMenu from '@/components/common/menu/NavigationMenu'
 import Card from '@/components/common/card/Card'
 import TextType from '@/components/common/text/TextType'
 import AvatarImg from '@/assets/avatar-placeholder.png'
-import type { SideMenuItem } from '@/components/common/menu/SideMenuSet'
 
 import { MOCK_CONVERSATIONS, MOCK_MESSAGES } from './mockData'
 import type { Conversation, Message } from '@/types/message.types'
 
-import ClassIcon from '@/assets/Book 2.svg'
-import ExamIcon from '@/assets/Card Question.svg'
-import RoadmapIcon from '@/assets/Merge.svg'
 import { ChatDetailsPanel } from '@/components/feature/messages/ChatDetailsPanel'
-
-const userMenuItems: SideMenuItem[] = [
-    { id: 'profile', label: 'Hồ sơ' },
-    { id: 'settings', label: 'Cài đặt' },
-    { id: 'help', label: 'Trợ giúp' },
-    { id: 'logout', label: 'Đăng xuất' },
-]
-const studyMenuItems: SideMenuItem[] = [
-    { id: 'classes', label: 'Lớp học', icon: <img src={ClassIcon} /> },
-    { id: 'exams', label: 'Luyện thi', icon: <img src={ExamIcon} /> },
-    { id: 'roadmap', label: 'Lộ trình', icon: <img src={RoadmapIcon} /> },
-]
-const navItems: NavItem[] = [
-    { id: '1', label: 'Dashboard', href: '/student/dashboard' },
-    {
-        id: '2',
-        label: 'Học tập',
-        href: '/student/schedule',
-        dropdownItems: studyMenuItems,
-    },
-    { id: '3', label: 'Thông báo', href: '#' },
-    { id: '4', label: 'Tin nhắn', href: '/student/messages', active: true },
-]
+import { useLocation, useNavigate } from 'react-router-dom'
+import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
 
 export default function MessagesPage() {
     const sessionState = useSession()
-    const currentUserId = sessionState?.user?.id || 'user_0'
+    const userRole = sessionState?.user?.role || 'student'
+    const navigate = useNavigate()
+    const location = useLocation()
+    const currentPath = location.pathname
+    const currentUserId = sessionState?.user?.id || 'user_1'
+
+    const navItems = useMemo(
+        () => getNavItems(userRole as any, currentPath, navigate),
+        [userRole, currentPath, navigate]
+    )
+    const userMenuItems = useMemo(
+        () => getUserMenuItems(userRole as any, navigate),
+        [userRole, navigate]
+    )
+
     const [conversations, setConversations] = useState<Conversation[]>([])
     const [messages, setMessages] = useState<Record<string, Message[]>>({})
     const [activeConversationId, setActiveConversationId] = useState<

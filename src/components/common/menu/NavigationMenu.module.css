@@ -103,7 +103,7 @@
 .itemActive {
     color: var(--fg);
     position: relative;
-    z-index: 10;
+    z-index: 1;
 }
 .itemActive::before {
     content: '';

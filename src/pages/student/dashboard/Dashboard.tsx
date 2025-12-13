@@ -1,9 +1,9 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import s from './Dashboard.module.css'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 
-import NavigationMenu, {
-    type NavItem,
-} from '@/components/common/menu/NavigationMenu'
+import NavigationMenu from '@/components/common/menu/NavigationMenu'
 import Card from '@/components/common/card/Card'
 import StatCard from '@/components/common/card/StatCard'
 import ScheduleTodayCard from '@/components/common/card/ScheduleToday'
@@ -15,28 +15,13 @@ import ChatIcon from '@/assets/Chat Square Double Text.svg'
 import YoutubeIcon from '@/assets/Arrow Right.svg'
 import TemplateImg from '@/assets/banner-placeholder.png'
 import RobotIcon from '@/assets/Robot.svg'
-import ClassIcon from '@/assets/Book 2.svg'
-import ExamIcon from '@/assets/Card Question.svg'
-import RoadmapIcon from '@/assets/Merge.svg'
-
 import type { Lesson } from '@/components/common/typography/LessonItem'
 import Chatbot from '@/components/feature/chatbot/Chatbot'
 import { TextHorizontal } from '@/components/common/text/TextHorizontal'
 import TextType from '@/components/common/text/TextType'
-import type { SideMenuItem } from '@/components/common/menu/SideMenuSet'
-
-const userMenuItems: SideMenuItem[] = [
-    { id: 'profile', label: 'Hồ sơ' },
-    { id: 'settings', label: 'Cài đặt' },
-    { id: 'help', label: 'Trợ giúp' },
-    { id: 'logout', label: 'Đăng xuất' },
-]
-
-const studyMenuItems: SideMenuItem[] = [
-    { id: 'classes', label: 'Lớp học', icon: <img src={ClassIcon} /> },
-    { id: 'exams', label: 'Luyện thi', icon: <img src={ExamIcon} /> },
-    { id: 'roadmap', label: 'Lộ trình', icon: <img src={RoadmapIcon} /> },
-]
+import { getMe } from '@/lib/users'
+import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
+import type { Role } from '@/types/auth'
 
 const stats = [
     {
@@ -89,32 +74,41 @@ const todaySessions: Lesson[] = [
 ]
 
 export default function StudentDashboard() {
+    const navigate = useNavigate()
+    const location = useLocation()
     const [isChatOpen, setIsChatOpen] = useState(false)
 
-    const navItems: NavItem[] = [
-        {
-            id: 'nav-dashboard',
-            label: 'Dashboard',
-            href: '/student/dashboard',
-            active: true,
-        },
-        {
-            id: 'nav-study',
-            label: 'Học tập',
-            href: '/student/schedule',
-            dropdownItems: studyMenuItems,
-        },
-        {
-            id: 'nav-notification',
-            label: 'Thông báo',
-            href: '#',
-        },
-        {
-            id: 'nav-message',
-            label: 'Tin nhắn',
-            href: '#',
-        },
-    ]
+    // Fetch current user
+    const { data: userData, isLoading: userLoading } = useQuery({
+        queryKey: ['me'],
+        queryFn: () => getMe(),
+    })
+
+    const userRole = 'student' as Role
+    const currentPath = location.pathname
+
+    // Get nav items from config
+    const navItems = useMemo(
+        () => getNavItems(userRole, currentPath, navigate),
+        [currentPath, navigate]
+    )
+
+    const userMenuItems = useMemo(
+        () => getUserMenuItems(userRole, navigate),
+        [navigate]
+    )
+
+    // Build greeting text with user's full name
+    const greetingTexts = userData
+        ? [
+              `Xin chào, ${userData.firstName} ${userData.lastName}!`,
+              `Chào mừng trở lại, ${userData.firstName} ${userData.lastName}!`,
+          ]
+        : ['Xin chào!', 'Chào mừng trở lại!']
+
+    const fullName = userData
+        ? `${userData.firstName} ${userData.lastName}`
+        : ''
 
     return (
         <div className={s.dashboard}>
@@ -125,7 +119,7 @@ export default function StudentDashboard() {
                     rightSlotDropdownItems={userMenuItems}
                     rightSlot={
                         <img
-                            src={AvatarImg}
+                            src={userData?.avatarUrl || AvatarImg}
                             style={{
                                 width: '36px',
                                 height: '36px',
@@ -141,35 +135,36 @@ export default function StudentDashboard() {
 
             {/* Welcome Message */}
             <h1 className={s.welcomeMessage}>
-                <TextType
-                    text={[
-                        'Xin chào, Phan Duy Minh!',
-                        'Chào mừng trở lại, Phan Duy Minh!',
-                    ]}
-                    typingSpeed={70}
-                    pauseDuration={5000}
-                    deletingSpeed={50}
-                    renderText={(text) => {
-                        const namePattern = /Phan Duy Minh/g
-                        const parts = text.split(namePattern)
-                        const names = text.match(namePattern) || []
+                {!userLoading && userData && (
+                    <TextType
+                        text={greetingTexts}
+                        typingSpeed={70}
+                        pauseDuration={5000}
+                        deletingSpeed={50}
+                        renderText={(text) => {
+                            const namePattern = new RegExp(fullName, 'g')
+                            const parts = text.split(namePattern)
+                            const names = text.match(namePattern) || []
 
-                        return (
-                            <>
-                                {parts.map((part, i) => (
-                                    <React.Fragment key={i}>
-                                        {part}
-                                        {names[i] && (
-                                            <span className={s.gradientText}>
-                                                {names[i]}
-                                            </span>
-                                        )}
-                                    </React.Fragment>
-                                ))}
-                            </>
-                        )
-                    }}
-                />
+                            return (
+                                <>
+                                    {parts.map((part, i) => (
+                                        <React.Fragment key={i}>
+                                            {part}
+                                            {names[i] && (
+                                                <span
+                                                    className={s.gradientText}
+                                                >
+                                                    {names[i]}
+                                                </span>
+                                            )}
+                                        </React.Fragment>
+                                    ))}
+                                </>
+                            )
+                        }}
+                    />
+                )}
             </h1>
 
             {/* Main Content */}
