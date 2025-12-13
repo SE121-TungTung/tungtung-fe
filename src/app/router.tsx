@@ -17,6 +17,9 @@ import LogoutPage from '@/pages/auth/Logout'
 import ClassManagementPage from '@/pages/admin/classes/ClassManagementPage'
 import MessagesPage from '@/pages/messages/MessagesPage'
 import ExamPracticePage from '@/pages/student/exam/ExamPracticePage'
+import ScheduleManagementPage from '@/pages/admin/schedule/ScheduleManagementPage'
+import ScheduleGeneratorPage from '@/pages/admin/schedule/ScheduleGeneratorPage'
+import ReadingTestPage from '@/pages/student/exam/do/ReadingTestPage'
 
 export const router = createBrowserRouter([
     { path: '/', element: <Navigate to="/login" replace /> },
@@ -24,7 +27,7 @@ export const router = createBrowserRouter([
     { path: '/forgot-password', element: <ForgotPasswordPage /> },
     { path: '/otp', element: <OtpPage /> },
     { path: '/logout', element: <LogoutPage /> },
-    { path: '/test', element: <ClassPage /> },
+    { path: '/test', element: <ReadingTestPage /> },
 
     // Profile (accessible to all authenticated users)
     {
@@ -142,6 +145,26 @@ export const router = createBrowserRouter([
                 allowedRoles={['office_admin', 'center_admin', 'system_admin']}
             >
                 <ClassManagementPage />
+            </ProtectedRoute>
+        ),
+    },
+    {
+        path: '/admin/schedule',
+        element: (
+            <ProtectedRoute
+                allowedRoles={['office_admin', 'center_admin', 'system_admin']}
+            >
+                <ScheduleManagementPage />
+            </ProtectedRoute>
+        ),
+    },
+    {
+        path: '/admin/schedule/generate',
+        element: (
+            <ProtectedRoute
+                allowedRoles={['office_admin', 'center_admin', 'system_admin']}
+            >
+                <ScheduleGeneratorPage />
             </ProtectedRoute>
         ),
     },

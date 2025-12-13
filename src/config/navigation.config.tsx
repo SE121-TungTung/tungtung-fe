@@ -108,7 +108,7 @@ const adminNavItems: AppNavItem[] = [
             {
                 id: 'schedules',
                 label: 'Quản lý lịch học',
-                href: '/admin/schedules',
+                href: '/admin/schedule',
             },
         ],
     },

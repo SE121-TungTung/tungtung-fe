@@ -20,7 +20,7 @@ export type BackendClass = {
     schedule: any
     max_students: number
     current_students: number
-    fee_amount?: number | null
+    fee_amount?: number | string | null
     sessions_per_week?: number | null
     notes?: string | null
     created_at: string
@@ -28,6 +28,9 @@ export type BackendClass = {
     deleted_at?: string | null
     created_by?: string
     updated_by?: string
+    course_name?: string
+    teacher_name?: string
+    room_name?: string
 }
 
 export type Class = {
@@ -52,24 +55,23 @@ export type Class = {
 const mapClass = (c: BackendClass): Class => ({
     id: c.id,
     name: c.name,
-    // Tạm thời dùng ID làm name, sẽ enrich sau bằng separate queries
-    course: { id: c.course_id, name: c.course_id },
-    teacher: { id: c.teacher_id, name: c.teacher_id },
-    room: { id: c.room_id, name: c.room_id },
+    course: { id: c.course_id, name: c.course_name || c.course_id },
+    teacher: { id: c.teacher_id, name: c.teacher_name || c.teacher_id },
+    room: { id: c.room_id, name: c.room_name || c.room_id },
     status: c.status,
-    startDate: c.start_date.split('T')[0],
-    endDate: c.end_date.split('T')[0],
+    startDate: c.start_date ? c.start_date.split('T')[0] : '',
+    endDate: c.end_date ? c.end_date.split('T')[0] : '',
     scheduleDefinition: c.schedule,
     maxStudents: c.max_students,
     currentStudents: c.current_students,
-    feeAmount: c.fee_amount,
+    feeAmount: c.fee_amount ? Number(c.fee_amount) : null,
     sessionsPerWeek: c.sessions_per_week,
     notes: c.notes,
     createdAt: c.created_at,
     updatedAt: c.updated_at,
 })
 
-const CLASSES_API_URL = '/api/v1/classes/'
+const CLASSES_API_URL = '/api/v1/classes'
 
 export interface ListClassesParams {
     page?: number
@@ -97,7 +99,7 @@ export const listClasses = async (
 ): Promise<PaginatedResponse<Class>> => {
     const {
         page = 1,
-        limit = 10,
+        limit = 100, // Tăng limit mặc định để load nhiều lớp hơn trong dropdown
         search,
         status,
         courseId,
@@ -118,13 +120,34 @@ export const listClasses = async (
     if (teacherId) queryParams.append('teacher_id', teacherId)
 
     const url = `${CLASSES_API_URL}?${queryParams.toString()}`
-    const data = await api<PaginatedResponse<BackendClass>>(url, {
+
+    const res = await api<any>(url, {
         method: 'GET',
     })
 
+    let rawItems: BackendClass[] = []
+    let total = 0
+    let totalPages = 1
+
+    if (Array.isArray(res)) {
+        rawItems = res
+        total = res.length
+        totalPages = Math.ceil(total / limit) || 1
+    } else if (res.items && Array.isArray(res.items)) {
+        rawItems = res.items
+        total = res.total ?? rawItems.length
+        totalPages = res.pages ?? Math.ceil(total / limit)
+    } else if (res.data && Array.isArray(res.data)) {
+        rawItems = res.data
+        total = res.total ?? rawItems.length
+    }
+
     return {
-        ...data,
-        items: data.items.map(mapClass),
+        items: rawItems.map(mapClass),
+        total: total,
+        page: res.page ?? page,
+        size: res.size ?? limit,
+        pages: totalPages,
     }
 }
 
@@ -159,7 +182,7 @@ export async function updateClass(
     id: string,
     body: UpdateClassDto
 ): Promise<Class> {
-    const res = await api<BackendClass>(`${CLASSES_API_URL}${id}`, {
+    const res = await api<BackendClass>(`${CLASSES_API_URL}/${id}`, {
         method: 'PUT',
         body: JSON.stringify(body),
     })
@@ -167,13 +190,13 @@ export async function updateClass(
 }
 
 export async function deleteClass(id: string): Promise<void> {
-    await api(`${CLASSES_API_URL}${id}`, {
+    await api(`${CLASSES_API_URL}/${id}`, {
         method: 'DELETE',
     })
 }
 
 export async function getClass(id: string): Promise<Class> {
-    const res = await api<BackendClass>(`${CLASSES_API_URL}${id}`, {
+    const res = await api<BackendClass>(`${CLASSES_API_URL}/${id}`, {
         method: 'GET',
     })
     return mapClass(res)
