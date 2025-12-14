@@ -7,6 +7,8 @@ export type LoginPayload = {
 }
 export type LoginResponse = {
     access_token: string
+    refresh_token: string
+    token_type: string
 }
 
 export const login = (body: LoginPayload) =>
@@ -37,3 +39,26 @@ export const validatePasswordResetOtp = (otp: string) =>
         `/api/v1/auth/password-reset/validate-token?token=${encodeURIComponent(otp)}`,
         { method: 'POST', credentials: 'omit' }
     )
+
+export const refreshAccessToken = async (refreshToken: string) => {
+    const API_URL =
+        import.meta.env.VITE_API_URL ||
+        'https://tungtung-be-production.up.railway.app'
+
+    const response = await fetch(
+        `${API_URL.replace(/\/$/, '')}/api/v1/auth/refresh`,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ refresh_token: refreshToken }),
+        }
+    )
+
+    if (!response.ok) {
+        throw new Error('Refresh token expired')
+    }
+
+    return (await response.json()) as LoginResponse
+}

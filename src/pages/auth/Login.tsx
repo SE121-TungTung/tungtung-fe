@@ -22,7 +22,7 @@ const emailMsgId = 'email-msg'
 const passMsgId = 'pass-msg'
 
 export function LoginPage() {
-    const setUser = useSession((st) => st.setUser)
+    const loginStore = useSession((st) => st.login)
     const navigate = useNavigate()
     const [apiError, setApiError] = useState<string | undefined>()
 
@@ -35,29 +35,26 @@ export function LoginPage() {
         defaultValues: { remember: true },
     })
 
-    const mut = useMutation({
+    const mutation = useMutation({
         mutationFn: login,
-        onSuccess: async ({ access_token }, variables) => {
-            const storage = variables?.remember ? localStorage : sessionStorage
-            storage.setItem('token', access_token)
+        onSuccess: async (data) => {
+            loginStore(data.access_token, data.refresh_token)
+
             try {
-                const user = await getMe()
-                setUser(user)
-                if (user.isFirstLogin)
-                    return navigate('/forgot-password', { replace: true })
-                navigate(homePathByRole(user.role), { replace: true })
-            } catch (error) {
-                console.log(error)
+                const me = await getMe()
+                useSession.getState().setUser(me)
+
+                const redirectPath = homePathByRole(me.role)
+                navigate(redirectPath)
+            } catch (e) {
+                console.error('Failed to fetch user info', e)
             }
         },
-        onError: () => {
-            setApiError(
-                'Thông tin đăng nhập không chính xác hoặc tài khoản bị khóa.'
-            )
+        onError: (error: any) => {
+            setApiError(error.message || 'Đăng nhập thất bại')
         },
     })
-
-    const onSubmit = (v: LoginValues) => mut.mutate(v)
+    const onSubmit = (v: LoginValues) => mutation.mutate(v)
 
     return (
         <div>
@@ -121,7 +118,7 @@ export function LoginPage() {
                             variant="glass"
                             shape="rounded"
                             loading={isSubmitting}
-                            disabled={isSubmitting || mut.isPending}
+                            disabled={isSubmitting}
                         >
                             Đăng nhập
                         </ButtonPrimary>

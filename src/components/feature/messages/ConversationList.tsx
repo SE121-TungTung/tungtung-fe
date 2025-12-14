@@ -1,25 +1,23 @@
-// src/components/feature/messages/ConversationList.tsx
 import React, { useState, useMemo } from 'react'
 import s from './ConversationList.module.css'
 import InputField from '@/components/common/input/InputField'
-import { ConversationItem } from './ConversationItem' // Component con
+import { ConversationItem } from './ConversationItem'
 import type { Conversation } from '@/types/message.types'
 
-// Icon
 import SearchIcon from '@/assets/Action Eye Tracking.svg'
 import EditIcon from '@/assets/Edit Pen.svg'
 import ButtonGhost from '@/components/common/button/ButtonGhost'
 
 interface ConversationListProps {
     conversations: Conversation[]
-    activeConversationId: string | null
+    activeId: string | null
     onSelectConversation: (id: string) => void
     currentUserId: string
 }
 
 export const ConversationList: React.FC<ConversationListProps> = ({
     conversations,
-    activeConversationId,
+    activeId,
     onSelectConversation,
     currentUserId,
 }) => {
@@ -27,14 +25,16 @@ export const ConversationList: React.FC<ConversationListProps> = ({
 
     const filteredConversations = useMemo(() => {
         if (!searchTerm) return conversations
-        return conversations.filter((convo) => {
-            const otherParticipant = convo.participants.find(
+        return conversations.filter((conversation) => {
+            const otherParticipant = conversation.participants.find(
                 (p) => p.id !== currentUserId
             )
-            const name = convo.isGroup
-                ? convo.groupName
-                : otherParticipant?.name
-            return name?.toLowerCase().includes(searchTerm.toLowerCase())
+
+            const displayName = conversation.isGroup
+                ? conversation.name
+                : `${otherParticipant?.firstName} ${otherParticipant?.lastName}`
+
+            return displayName?.toLowerCase().includes(searchTerm.toLowerCase())
         })
     }, [conversations, searchTerm, currentUserId])
 
@@ -70,7 +70,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
                         <ConversationItem
                             key={convo.id}
                             conversation={convo}
-                            isActive={convo.id === activeConversationId}
+                            isActive={convo.id === activeId}
                             onClick={() => onSelectConversation(convo.id)}
                             currentUserId={currentUserId}
                         />

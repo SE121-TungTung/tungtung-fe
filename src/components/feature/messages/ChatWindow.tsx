@@ -1,18 +1,18 @@
-import React, { useRef, useEffect, useState } from 'react'
+import React, { useRef, useEffect } from 'react'
 import s from './ChatWindow.module.css'
 import { MessageBubble } from './MessageBubble'
 import { ChatInput } from './ChatInput'
-import type { Conversation, Message, Participant } from '@/types/message.types'
+import type { Conversation } from '@/types/message.types'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { messageApi } from '@/lib/message'
 
-import AvatarImg from '@/assets/avatar-placeholder.png'
-import HamburgerIcon from '@/assets/Menu Circle.svg'
 import BackIcon from '@/assets/arrow-left.svg'
+import InfoIcon from '@/assets/Information.svg'
 import ButtonGhost from '@/components/common/button/ButtonGhost'
 import { GroupAvatar } from './GroupAvatar'
 
 interface ChatWindowProps {
     conversation: Conversation
-    messages: Message[]
     currentUserId: string
     onCloseChat: () => void
     onToggleDetails: () => void
@@ -20,152 +20,98 @@ interface ChatWindowProps {
 
 export const ChatWindow: React.FC<ChatWindowProps> = ({
     conversation,
-    messages: initialMessages,
     currentUserId,
     onCloseChat,
     onToggleDetails,
 }) => {
     const messagesEndRef = useRef<HTMLDivElement>(null)
+    const queryClient = useQueryClient()
 
-    const [messages, setMessages] = useState(initialMessages)
+    const { data: messages = [], isLoading } = useQuery({
+        queryKey: ['messages', conversation.id],
+        queryFn: () => messageApi.getMessages(conversation.id),
+        refetchInterval: 3000,
+    })
+
+    const sendMessageMutation = useMutation({
+        mutationFn: (content: string) =>
+            messageApi.sendMessage({
+                conversation_id: conversation.id,
+                content,
+            }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ['messages', conversation.id],
+            })
+            queryClient.invalidateQueries({ queryKey: ['conversations'] })
+        },
+    })
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
+    useEffect(() => {
+        scrollToBottom()
+    }, [messages])
 
     const otherParticipant = !conversation.isGroup
         ? conversation.participants.find((p) => p.id !== currentUserId)
         : null
-
     const displayName = conversation.isGroup
-        ? conversation.groupName
-        : otherParticipant?.name || 'Unknown'
-
-    const avatar = conversation.isGroup ? (
-        <GroupAvatar participants={conversation.participants} />
-    ) : (
-        <img
-            src={otherParticipant?.avatarUrl || AvatarImg}
-            alt={displayName}
-            className={s.avatarImg}
-        />
-    )
-
-    const displayStatus = conversation.isGroup
-        ? `${conversation.participants.length} thành viên`
-        : otherParticipant?.onlineStatus
-          ? 'Online'
-          : 'Offline'
-
-    const isOnline = !conversation.isGroup && otherParticipant?.onlineStatus
-
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'auto' })
-    }, [messages])
-
-    // --- Logic Gửi Tin Nhắn (Optimistic UI) ---
-    const handleSendMessage = (text: string) => {
-        // 1. Tạo tin nhắn giả (optimistic)
-        const optimisticMessage: Message = {
-            id: `temp_${Date.now()}`, // ID tạm
-            senderId: currentUserId,
-            text,
-            timestamp: 'Đang gửi...',
-            // status: 'sending',
-        }
-
-        // 2. Cập nhật UI ngay lập tức
-        setMessages((prevMessages) => [...prevMessages, optimisticMessage])
-
-        // 3. Gửi API (Mô phỏng)
-        console.log('API: Gửi tin nhắn...', optimisticMessage)
-        setTimeout(() => {
-            // 4. API trả về thành công
-            const realMessage: Message = {
-                ...optimisticMessage,
-                id: `m_${Date.now()}`, // ID thật từ server
-                timestamp: new Date().toLocaleTimeString('vi-VN', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                }), // Timestamp thật
-                // status: 'sent',
-            }
-
-            // Cập nhật lại tin nhắn "đang gửi" bằng tin nhắn "thật"
-            setMessages((prevMessages) =>
-                prevMessages.map((msg) =>
-                    msg.id === optimisticMessage.id ? realMessage : msg
-                )
-            )
-            console.log('API: Gửi thành công!', realMessage)
-
-            // 4b. Xử lý API thất bại (ví dụ)
-            // setMessages(prev => prev.map(msg =>
-            //     msg.id === optimisticMessage.id ? { ...msg, status: 'failed', timestamp: 'Gửi lỗi' } : msg
-            // ))
-        }, 1000)
-    }
+        ? conversation.name
+        : otherParticipant?.firstName + ' ' + otherParticipant?.lastName
 
     return (
-        <div className={s.window}>
+        <div className={s.wrapper}>
             <header className={s.header}>
-                <ButtonGhost
-                    size="sm"
-                    mode="light"
-                    className={s.backButton}
-                    onClick={onCloseChat}
-                >
-                    <img src={BackIcon} alt="Back" />
-                </ButtonGhost>
+                <div className={s.headerLeft}>
+                    <ButtonGhost onClick={onCloseChat} className={s.backButton}>
+                        <img src={BackIcon} alt="Back" />
+                    </ButtonGhost>
 
-                <div className={s.userInfo}>
-                    <div className={s.avatarWrapper}>
-                        {avatar}
-                        {isOnline && (
-                            <span
-                                className={s.onlineBadge}
-                                title="Online"
-                            ></span>
-                        )}
-                    </div>
+                    {conversation.isGroup ? (
+                        <GroupAvatar participants={conversation.participants} />
+                    ) : (
+                        <img
+                            src={
+                                otherParticipant?.avatarUrl ||
+                                '/default-avatar.png'
+                            }
+                            className={s.headerAvatar}
+                            alt=""
+                        />
+                    )}
 
-                    <div>
-                        <div className={s.name}>{displayName}</div>
-                        <div className={s.status}>{displayStatus}</div>
+                    <div className={s.headerInfo}>
+                        <h3 className={s.chatName}>{displayName}</h3>
                     </div>
                 </div>
-
-                <ButtonGhost
-                    size="sm"
-                    mode="light"
-                    className={s.menuButton}
-                    onClick={onToggleDetails}
-                >
-                    <img src={HamburgerIcon} alt="Menu" />
-                </ButtonGhost>
+                <div className={s.headerActions}>
+                    <ButtonGhost onClick={onToggleDetails}>
+                        <img src={InfoIcon} alt="Info" />
+                    </ButtonGhost>
+                </div>
             </header>
 
-            <div className={s.body}>
+            {/* Messages List */}
+            <div className={s.messageList}>
+                {isLoading && (
+                    <div className="text-center p-4 text-gray-400">
+                        Đang tải tin nhắn...
+                    </div>
+                )}
+
                 {messages.map((msg, index) => {
                     const isSent = msg.senderId === currentUserId
-                    let sender: Participant | undefined = undefined
                     let showSenderInfo = false
-
+                    const sender = conversation.participants.find(
+                        (p) => p.id === msg.senderId
+                    )
+                    if (!sender && !isSent) return null
                     if (!isSent) {
-                        if (conversation.isGroup) {
-                            sender = conversation.participants.find(
-                                (p) => p.id === msg.senderId
-                            )
-                            if (
-                                index === 0 ||
-                                messages[index - 1].senderId !== msg.senderId
-                            ) {
-                                showSenderInfo = true
-                            }
-                        } else {
-                            sender = otherParticipant!
-                            if (
-                                index === messages.length - 1 ||
-                                messages[index + 1].senderId === currentUserId
-                            ) {
-                                showSenderInfo = true
-                            }
+                        const nextMsg = messages[index + 1]
+                        if (!nextMsg || nextMsg.senderId !== msg.senderId) {
+                            showSenderInfo = true
                         }
                     }
 
@@ -174,7 +120,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                             key={msg.id}
                             message={msg}
                             isSent={isSent}
-                            sender={sender}
+                            sender={sender!}
                             showSenderName={
                                 conversation.isGroup && showSenderInfo
                             }
@@ -185,8 +131,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                 <div ref={messagesEndRef} />
             </div>
 
+            {/* Footer Input */}
             <footer className={s.footer}>
-                <ChatInput onSendMessage={handleSendMessage} />
+                <ChatInput
+                    onSendMessage={(text) => sendMessageMutation.mutate(text)}
+                    disabled={sendMessageMutation.isPending}
+                />
             </footer>
         </div>
     )

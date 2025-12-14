@@ -6,13 +6,19 @@ import SendIcon from '@/assets/Send Paper Plane.svg'
 
 interface ChatInputProps {
     onSendMessage: (text: string) => void
+    disabled?: boolean
 }
 
-export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage }) => {
+export const ChatInput: React.FC<ChatInputProps> = ({
+    onSendMessage,
+    disabled,
+}) => {
     const [text, setText] = useState('')
 
     const handleSubmit = (e?: React.FormEvent) => {
         e?.preventDefault()
+        if (disabled) return
+
         const messageToSend = text.trim()
         if (messageToSend) {
             onSendMessage(messageToSend)
@@ -29,6 +35,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage }) => {
                 variant="soft"
                 mode="light"
                 fullWidth
+                disabled={disabled}
                 onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault()
@@ -41,8 +48,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage }) => {
                 size="md"
                 className={s.sendButton}
                 aria-label="Gửi tin nhắn"
+                disabled={disabled}
             >
-                <img src={SendIcon} alt="Send" />
+                <img
+                    src={SendIcon}
+                    alt="Send"
+                    style={{ opacity: disabled ? 0.5 : 1 }}
+                />
             </ButtonGhost>
         </form>
     )

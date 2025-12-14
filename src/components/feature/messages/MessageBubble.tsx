@@ -15,33 +15,40 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
     message,
     isSent,
     sender,
-    showSenderName,
     showAvatar,
+    showSenderName,
 }) => {
-    const isSending = message.timestamp === 'Đang gửi...'
+    const senderName = sender
+        ? `${sender.firstName} ${sender.lastName}`
+        : 'Unknown'
+
     return (
         <div className={`${s.bubbleWrapper} ${isSent ? s.sent : s.received}`}>
             <div className={s.avatarColumn}>
                 {showAvatar && (
                     <img
                         src={sender?.avatarUrl || AvatarImg}
-                        alt={sender?.name || 'Avatar'}
+                        alt={'Avatar'}
                         className={s.senderAvatar}
-                        title={sender?.name}
+                        title={senderName}
                     />
                 )}
             </div>
 
             <div className={s.bubbleGroup}>
                 {showSenderName && (
-                    <span className={s.senderName}>{sender?.name}</span>
+                    <span className={s.senderName}>{senderName}</span>
                 )}
 
-                <div
-                    className={`${s.bubble} ${isSending ? s.sending : ''}`}
-                    title={message.timestamp}
-                >
-                    {message.text}
+                <div className={`${s.bubble}`}>
+                    <p className={s.text}>{message.content}</p>
+
+                    <span className={s.time}>
+                        {new Date(message.createdAt).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                        })}
+                    </span>
                 </div>
             </div>
         </div>

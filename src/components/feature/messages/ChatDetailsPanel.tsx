@@ -24,13 +24,15 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
     currentUserId,
     onClose,
 }) => {
-    const { isGroup, participants, groupName } = conversation
+    const { isGroup, participants } = conversation
 
     const otherParticipant = !isGroup
         ? participants.find((p) => p.id !== currentUserId)
         : null
 
-    const displayName = isGroup ? groupName : otherParticipant?.name
+    const displayName = conversation.isGroup
+        ? conversation.name
+        : 'Thông tin hội thoại'
     const displayAvatar = isGroup ? (
         <GroupAvatar participants={participants} size="lg" />
     ) : (
@@ -42,13 +44,12 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
     )
     const displayStatus = isGroup
         ? `${participants.length} thành viên`
-        : otherParticipant?.onlineStatus
+        : otherParticipant?.isOnline
           ? 'Online'
           : 'Offline'
 
     return (
         <div className={s.panel}>
-            {/* Header của Panel */}
             <header className={s.header}>
                 <h4 className={s.title}>Chi tiết</h4>
                 <ButtonGhost size="sm" mode="light" onClick={onClose}>
@@ -56,18 +57,34 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                 </ButtonGhost>
             </header>
 
-            {/* Thông tin chính */}
             <div className={s.profileSection}>
                 <div className={s.avatarWrapper}>{displayAvatar}</div>
                 <h3 className={s.displayName}>{displayName}</h3>
                 <p className={s.displayStatus}>{displayStatus}</p>
             </div>
 
-            {/* Danh sách hành động */}
             <ul className={s.menuList}>
+                <div className={s.memberList}>
+                    <h3>Thành viên ({conversation.participants.length})</h3>
+                    {conversation.participants.map((p) => (
+                        <div key={p.id} className={s.memberItem}>
+                            <img
+                                src={p.avatarUrl || '/default-avatar.png'}
+                                className={s.avatar}
+                            />
+                            <div>
+                                <div className={s.memberName}>
+                                    {p.firstName} {p.lastName}
+                                </div>
+                                <div className={s.memberStatus}>
+                                    {p.isOnline ? 'Trực tuyến' : 'Ngoại tuyến'}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
                 {isGroup ? (
                     <>
-                        {/* Menu Nhóm */}
                         <li
                             className={s.menuItem}
                             onClick={() => alert('Thêm...')}
@@ -100,7 +117,6 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                     </>
                 ) : (
                     <>
-                        {/* Menu 1-1 */}
                         <li
                             className={s.menuItem}
                             onClick={() => alert('Xem hồ sơ...')}

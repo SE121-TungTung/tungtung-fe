@@ -3,51 +3,64 @@ import { useSession } from '@/stores/session.store'
 import type { Role } from '@/types/auth'
 import { useEffect, useState } from 'react'
 import LoadingScreen from '@/components/core/LoadingPage'
+import { getMe } from '@/lib/users'
 
 interface ProtectedRouteProps {
     children?: React.ReactNode
     allowedRoles?: Role[]
 }
 
-const getToken = () =>
-    localStorage.getItem('token') ?? sessionStorage.getItem('token')
-
-const TOKEN_WAIT_MS = 5000
-const POLL_MS = 250
+const getToken = () => {
+    return (
+        localStorage.getItem('access_token') ??
+        localStorage.getItem('token') ??
+        sessionStorage.getItem('token')
+    )
+}
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     children,
     allowedRoles,
 }) => {
-    const [token, setToken] = useState<string | null>(getToken())
-    const [redirect, setRedirect] = useState(false)
+    const token = getToken()
     const user = useSession((state) => state.user)
+    const setUser = useSession((state) => state.setUser)
+    const [isChecking, setIsChecking] = useState(true)
 
     useEffect(() => {
-        if (token) return
-        let elapsed = 0
-        const iv = setInterval(() => {
-            const t = getToken()
-            if (t) {
-                setToken(t)
-                clearInterval(iv)
-            } else {
-                elapsed += POLL_MS
-                if (elapsed >= TOKEN_WAIT_MS) {
-                    setRedirect(true)
-                    clearInterval(iv)
-                }
+        const checkAuth = async () => {
+            if (!token) {
+                setIsChecking(false)
+                return
             }
-        }, POLL_MS)
-        return () => clearInterval(iv)
-    }, [token])
 
-    if (redirect) return <Navigate to="/login" replace />
+            if (user) {
+                setIsChecking(false)
+                return
+            }
 
-    if (!token)
-        return <LoadingScreen title="Đang kiểm tra phiên đăng nhập..." />
-    if (token && !user)
-        return <LoadingScreen title="Đang tải dữ liệu người dùng..." />
+            try {
+                const me = await getMe()
+                setUser(me)
+            } catch (error) {
+                console.error('Auth check failed:', error)
+                localStorage.removeItem('access_token')
+                localStorage.removeItem('token')
+            } finally {
+                setIsChecking(false)
+            }
+        }
+
+        checkAuth()
+    }, [token, user, setUser])
+
+    if (isChecking) {
+        return <LoadingScreen title="Đang tải dữ liệu..." />
+    }
+
+    if (!getToken() || !useSession.getState().user) {
+        return <Navigate to="/login" replace />
+    }
 
     if (allowedRoles?.length && user && !allowedRoles.includes(user.role)) {
         return <Navigate to="/" replace />

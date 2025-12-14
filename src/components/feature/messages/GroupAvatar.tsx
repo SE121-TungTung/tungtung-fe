@@ -17,12 +17,12 @@ export const GroupAvatar: React.FC<GroupAvatarProps> = ({
 
     return (
         <div className={`${s.stack} ${s[size]}`}>
-            {avatarsToShow.map((p, index) => (
+            {avatarsToShow.map((p) => (
                 <img
                     key={p.id}
-                    className={`${s.avatar} ${s['avatar' + (index + 1)]}`}
                     src={p.avatarUrl || AvatarImg}
-                    alt={p.name}
+                    alt={`${p.firstName} ${p.lastName}`}
+                    className={s.subAvatar}
                 />
             ))}
             {remainingCount > 0 && (

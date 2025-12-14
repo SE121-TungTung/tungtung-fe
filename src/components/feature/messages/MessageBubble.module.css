@@ -76,3 +76,10 @@
     margin-bottom: 4px;
     margin-left: 4px;
 }
+
+.time {
+    font-size: 11px;
+    color: var(--text-secondary-light);
+    margin-top: 4px;
+    align-self: flex-end;
+}
