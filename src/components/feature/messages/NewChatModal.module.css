@@ -1,111 +1,206 @@
 .overlay {
     position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 100;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
     display: flex;
     align-items: center;
     justify-content: center;
+    animation: fadeIn 0.2s ease-out;
 }
+
 .modal {
     background: white;
-    width: 400px;
-    max-width: 90vw;
+    width: 450px;
+    max-width: 95vw;
+    height: auto;
+    max-height: 80vh;
     border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
+    overflow: hidden;
+    animation: slideUp 0.3s ease-out;
 }
+
 .header {
-    padding: 16px;
+    padding: 16px 20px;
     border-bottom: 1px solid #eee;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
+
+.header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
 .closeBtn {
-    font-size: 24px;
     background: none;
     border: none;
+    font-size: 28px;
+    line-height: 1;
+    color: #999;
     cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
 }
+.closeBtn:hover {
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+.body {
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
 .tabs {
     display: flex;
-    border-bottom: 1px solid #eee;
+    background: #f5f7fa;
+    padding: 4px;
+    border-radius: 8px;
+    margin-bottom: 10px;
 }
-.tabs button {
+
+.tabBtn {
     flex: 1;
-    padding: 12px;
-    background: none;
+    padding: 8px;
     border: none;
+    background: transparent;
     cursor: pointer;
     font-weight: 500;
     color: #666;
+    border-radius: 6px;
+    transition: all 0.2s;
 }
-.tabs .activeTab {
-    border-bottom: 2px solid var(--brand-500);
-    color: var(--brand-500);
+
+.tabBtn.active {
+    background: white;
+    color: var(--brand-500, #3b82f6);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
-.body {
-    padding: 16px;
-    flex: 1;
-    overflow-y: auto;
-    max-height: 60vh;
-}
+
 .resultList {
-    margin-top: 12px;
     display: flex;
     flex-direction: column;
     gap: 8px;
+    max-height: 300px;
+    overflow-y: auto;
 }
+
 .userItem {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 8px;
+    gap: 12px;
+    padding: 10px;
     border-radius: 8px;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: background 0.1s;
+    border: 1px solid transparent;
 }
+
 .userItem:hover {
-    background: #f5f7fa;
+    background-color: #f0f7ff;
+    border-color: #e0eaff;
 }
+
+.userItem.selected {
+    background-color: #eff6ff;
+    border-color: var(--brand-200, #bfdbfe);
+}
+
 .avatar {
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     object-fit: cover;
-    background: #ddd;
+    background-color: #ddd;
 }
+
+.userInfo {
+    flex: 1;
+}
+
 .userName {
     font-weight: 600;
     font-size: 14px;
+    color: #333;
 }
+
 .userEmail {
     font-size: 12px;
     color: #888;
 }
-.selectedList {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    margin: 8px 0;
-}
-.selectedTag {
-    background: #eef2ff;
-    color: var(--brand-600);
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 12px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
+
 .footer {
-    padding: 12px 16px;
+    padding: 16px 20px;
     border-top: 1px solid #eee;
     display: flex;
     justify-content: flex-end;
-    gap: 8px;
+    gap: 12px;
+    background: #fff;
+}
+
+/* Selected Tags Area */
+.selectedContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.selectedTag {
+    background: #eef2ff;
+    color: var(--brand-600, #2563eb);
+    padding: 4px 10px;
+    border-radius: 16px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+}
+
+.removeTag {
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+}
+.removeTag:hover {
+    color: red;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }

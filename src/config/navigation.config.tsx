@@ -77,7 +77,7 @@ const adminNavItems: AppNavItem[] = [
     {
         id: 'dashboard',
         label: 'Tổng quan',
-        href: '/admin/dashboard',
+        href: '/coming-soon',
         allowedRoles: ['office_admin', 'center_admin', 'system_admin'],
     },
     {

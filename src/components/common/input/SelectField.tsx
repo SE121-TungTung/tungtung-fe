@@ -11,10 +11,11 @@ type SelectOption = {
 
 interface SelectFieldProps
     extends React.SelectHTMLAttributes<HTMLSelectElement> {
-    label: string
+    label?: string
     registration?: Partial<UseFormRegisterReturn>
     error?: string
     options: SelectOption[]
+    customSize?: 'sm' | 'md'
 }
 
 export const SelectField: React.FC<SelectFieldProps> = ({
@@ -23,18 +24,21 @@ export const SelectField: React.FC<SelectFieldProps> = ({
     error,
     options,
     id,
+    customSize = 'md',
     ...props
 }) => {
     const inputId = id || registration?.name
     return (
         <div className={styles.formGroup}>
-            <label htmlFor={inputId} className={styles.label}>
-                {label}
-            </label>
+            {label && (
+                <label htmlFor={inputId} className={styles.label}>
+                    {label}
+                </label>
+            )}
             <div className={styles.inputWrapper}>
                 <select
                     id={inputId}
-                    className={`${styles.input} ${styles.select}`}
+                    className={`${styles.input} ${styles.select} ${customSize === 'sm' ? styles.sm : ''}`}
                     {...registration}
                     {...props}
                     aria-invalid={!!error}

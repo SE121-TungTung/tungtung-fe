@@ -9,6 +9,8 @@ import { useForm } from 'react-hook-form'
 import { changePassword } from '@/lib/users'
 import { useMutation } from '@tanstack/react-query'
 
+import DefaultAvatar from '@/assets/avatar-placeholder.png'
+
 interface ProfileEditorProps {
     user?: User | null
     isSubmitting?: boolean
@@ -159,29 +161,42 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
                 >
                     <div className={s.fullWidth}>
                         <label className={s.label}>Ảnh đại diện</label>
-                        <div className={s.avatarRow}>
+
+                        <div className={s.avatarSection}>
                             <img
                                 src={
                                     previewUrl ||
                                     user?.avatarUrl ||
-                                    '/avatar-placeholder.png'
+                                    DefaultAvatar
                                 }
-                                className={s.avatarPreview}
+                                className={s.avatar}
                                 alt="Avatar preview"
                             />
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={handleAvatarChange}
-                            />
-                            <button
-                                type="button"
-                                className={s.clearBtn}
-                                onClick={handleClearAvatar}
-                                disabled={!avatarFile && !previewUrl}
-                            >
-                                Xóa avatar
-                            </button>
+
+                            <div className={s.avatarControls}>
+                                <label className={s.uploadLabel}>
+                                    Thay ảnh mới
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleAvatarChange}
+                                        style={{ display: 'none' }}
+                                    />
+                                </label>
+
+                                <ButtonPrimary
+                                    type="button"
+                                    variant="subtle"
+                                    onClick={handleClearAvatar}
+                                    disabled={
+                                        !avatarFile &&
+                                        !previewUrl &&
+                                        !user?.avatarUrl
+                                    }
+                                >
+                                    Gỡ ảnh hiện tại
+                                </ButtonPrimary>
+                            </div>
                         </div>
                     </div>
 

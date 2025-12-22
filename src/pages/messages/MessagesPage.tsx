@@ -1,10 +1,8 @@
 import { useState, useMemo } from 'react'
 import s from './MessagesPage.module.css'
 import { useSession } from '@/stores/session.store'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { messageApi } from '@/lib/message'
-import type { Conversation, SendMessagePayload } from '@/types/message.types'
-
 import { ConversationList } from '@/components/feature/messages/ConversationList'
 import { ChatWindow } from '@/components/feature/messages/ChatWindow'
 import { ChatDetailsPanel } from '@/components/feature/messages/ChatDetailsPanel'
@@ -12,11 +10,11 @@ import NavigationMenu from '@/components/common/menu/NavigationMenu'
 import Card from '@/components/common/card/Card'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import { NewChatModal } from '@/components/feature/messages/NewChatModal'
-
 import { useLocation, useNavigate } from 'react-router-dom'
 import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
-
+import { queryClient } from '@/lib/query'
 import DefaultAvatar from '@/assets/avatar-placeholder.png'
+import type { Conversation } from '@/types/message.types'
 
 export default function MessagesPage() {
     const sessionState = useSession()
@@ -24,80 +22,97 @@ export default function MessagesPage() {
     const currentUserId = sessionState?.user?.id || ''
 
     const navigate = useNavigate()
+    const session = useSession((state) => state.user)
     const location = useLocation()
-    const queryClient = useQueryClient()
 
-    // --- State ---
     const [activeConversationId, setActiveConversationId] = useState<
         string | null
     >(null)
     const [isDetailsOpen, setIsDetailsOpen] = useState(false)
-    const [showNewChatModal, setShowNewChatModal] = useState(false) // State cho Modal
+    const [showNewChatModal, setShowNewChatModal] = useState(false)
 
-    // --- Data Fetching (Thay thế mockData) ---
-    const { data: conversations = [], isLoading } = useQuery<Conversation[]>({
+    // ✅ FIX: Không cần map lại data - messageApi.getConversations() đã trả về đúng type
+    const {
+        data: conversations = [],
+        isLoading,
+        error,
+    } = useQuery<Conversation[]>({
         queryKey: ['conversations'],
         queryFn: messageApi.getConversations,
-        refetchInterval: 10000, // Polling tạm 10s
+        staleTime: 30000, // Cache 30s
+        refetchInterval: 60000, // Auto refetch mỗi 1 phút
     })
 
+    // ✅ FIX: Dùng đúng field 'id' thay vì 'room_id'
     const activeConversation = useMemo(
         () => conversations.find((c) => c.id === activeConversationId),
         [conversations, activeConversationId]
     )
 
-    // --- Handlers ---
+    // ✅ FIX: Handle errors properly
     const handleStartChat = async (userIds: string[], groupName?: string) => {
         try {
-            let newConvo: Conversation
-
             if (userIds.length === 1 && !groupName) {
-                // 1. Logic Chat 1-1
-                // Kiểm tra xem đã có conversation với user này chưa
-                // (Giả sử BE chưa có endpoint check, ta gửi message đầu tiên hoặc tạo room rỗng)
-                // Ở đây ta gọi API tạo tin nhắn mở đầu hoặc API getOrCreateRoom
-                const payload: SendMessagePayload = {
-                    recipient_id: userIds[0],
-                    content: '👋',
-                } // Gửi tin nhắn chào
-                const res = await messageApi.sendMessage(payload)
-
-                // Sau khi gửi, reload list hội thoại để lấy ID
-                await queryClient.invalidateQueries({
-                    queryKey: ['conversations'],
-                })
-                // Tạm thời chưa biết ID mới, user cần chọn lại từ list (hoặc BE trả về conversationId trong response sendMessage)
-                // Nếu BE trả về conversationId:
-                // setActiveConversationId(res.conversationId)
+                // Start direct chat
+                const conversation =
+                    await messageApi.getOrCreateDirectConversation(userIds[0])
+                setActiveConversationId(conversation.id) // ✅ FIX: Use 'id' not 'room_id'
             } else {
-                // 2. Logic Tạo Group
-                const res = await messageApi.createGroup({
-                    name: groupName!,
+                // Create group chat
+                const newGroup = await messageApi.createGroup({
+                    title: groupName || 'Nhóm chat mới',
                     member_ids: userIds,
                 })
-                newConvo = res
-                await queryClient.invalidateQueries({
-                    queryKey: ['conversations'],
-                })
-                setActiveConversationId(newConvo.id)
+                setActiveConversationId(newGroup.id) // ✅ FIX: Use 'id'
             }
 
+            // Invalidate and refetch conversations
+            await queryClient.invalidateQueries({ queryKey: ['conversations'] })
             setShowNewChatModal(false)
-        } catch (e) {
-            console.error('Failed to start chat', e)
-            alert('Không thể tạo cuộc trò chuyện')
+        } catch (error) {
+            console.error('Failed to start chat:', error)
+            // ✅ TODO: Show user-friendly error message (toast/notification)
+            alert('Không thể tạo cuộc trò chuyện. Vui lòng thử lại.')
         }
     }
 
-    // Navigation (Giữ nguyên code cũ)
     const navItems = useMemo(
         () => getNavItems(userRole as any, location.pathname, navigate),
         [userRole, location.pathname, navigate]
     )
+
     const userMenuItems = useMemo(
         () => getUserMenuItems(userRole as any, navigate),
         [userRole, navigate]
     )
+
+    // ✅ FIX: Handle loading and error states
+    if (error) {
+        return (
+            <div className={s.pageWrapper}>
+                <header className={s.header}>
+                    <NavigationMenu
+                        items={navItems}
+                        rightSlotDropdownItems={userMenuItems}
+                        rightSlot={
+                            <img
+                                src={session?.avatarUrl || DefaultAvatar}
+                                className={s.avatar}
+                                alt="User Avatar"
+                            />
+                        }
+                    />
+                </header>
+                <main className={s.mainContent}>
+                    <div style={{ textAlign: 'center', padding: '40px' }}>
+                        <p style={{ color: '#ef4444' }}>
+                            Không thể tải tin nhắn. Vui lòng thử lại sau.
+                        </p>
+                    </div>
+                </main>
+            </div>
+        )
+    }
 
     return (
         <div className={s.pageWrapper}>
@@ -107,7 +122,7 @@ export default function MessagesPage() {
                     rightSlotDropdownItems={userMenuItems}
                     rightSlot={
                         <img
-                            src={sessionState?.user?.avatarUrl || DefaultAvatar}
+                            src={session?.avatarUrl || DefaultAvatar}
                             className={s.avatar}
                             alt="User Avatar"
                         />
@@ -124,43 +139,32 @@ export default function MessagesPage() {
                     <div
                         className={`${s.container} ${activeConversation && isDetailsOpen ? s.isDetailsActive : ''}`}
                     >
-                        {/* Sidebar: Danh sách chat */}
+                        {/* 1. CONVERSATION LIST */}
                         <aside className={s.conversationPanel}>
-                            {/* Thêm Header cho Sidebar chứa nút Tạo mới */}
-                            <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 z-10">
-                                <h3 className="font-bold text-lg text-gray-700">
-                                    Trò chuyện
-                                </h3>
+                            <div className={s.sidebarHeader}>
+                                <h3 className={s.sidebarTitle}>Đoạn chat</h3>
                                 <ButtonPrimary
                                     size="sm"
                                     onClick={() => setShowNewChatModal(true)}
-                                    style={{ padding: '6px 12px' }}
                                 >
                                     + Mới
                                 </ButtonPrimary>
                             </div>
 
-                            {isLoading ? (
-                                <div className="p-4 text-center text-gray-500">
-                                    Đang tải...
-                                </div>
-                            ) : (
-                                <ConversationList
-                                    conversations={conversations}
-                                    activeId={activeConversationId}
-                                    onSelectConversation={
-                                        setActiveConversationId
-                                    }
-                                    currentUserId={currentUserId}
-                                />
-                            )}
+                            <ConversationList
+                                conversations={conversations}
+                                activeId={activeConversationId}
+                                onSelectConversation={setActiveConversationId}
+                                currentUserId={currentUserId}
+                                isLoading={isLoading}
+                            />
                         </aside>
 
-                        {/* Main Chat Window */}
+                        {/* 2. CHAT WINDOW */}
                         <section className={s.chatPanel}>
                             {activeConversation ? (
                                 <ChatWindow
-                                    key={activeConversation.id}
+                                    key={activeConversation.id} // ✅ FIX: Use 'id'
                                     conversation={activeConversation}
                                     currentUserId={currentUserId}
                                     onCloseChat={() =>
@@ -172,15 +176,21 @@ export default function MessagesPage() {
                                 />
                             ) : (
                                 <div className={s.noChatSelected}>
-                                    <p>
-                                        Chọn một cuộc trò chuyện hoặc tạo mới để
-                                        bắt đầu
-                                    </p>
+                                    <img
+                                        src="/assets/chat-placeholder.svg"
+                                        alt=""
+                                        style={{
+                                            width: 120,
+                                            opacity: 0.5,
+                                            marginBottom: 16,
+                                        }}
+                                    />
+                                    <p>Chọn một cuộc trò chuyện để bắt đầu</p>
                                 </div>
                             )}
                         </section>
 
-                        {/* Info Panel */}
+                        {/* 3. DETAILS PANEL */}
                         {activeConversation && isDetailsOpen && (
                             <aside className={s.detailsPanel}>
                                 <ChatDetailsPanel
@@ -194,7 +204,7 @@ export default function MessagesPage() {
                 </Card>
             </main>
 
-            {/* Modal */}
+            {/* NEW CHAT MODAL */}
             {showNewChatModal && (
                 <NewChatModal
                     onClose={() => setShowNewChatModal(false)}
