@@ -6,6 +6,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import IconHamburger from '@/assets/Menu Hamburger.svg'
 import IconClose from '@/assets/Close X Thin.svg'
 import ButtonGhost from '../button/ButtonGhost'
+import NotificationBell from '@/components/feature/notification/NotificationBell'
 
 export type NavItem = {
     id?: string
@@ -251,6 +252,7 @@ export default function NavigationMenu({
                 </div>
 
                 <div className={styles.right}>
+                    <NotificationBell />
                     <div className={styles.rightSlotContainer}>
                         {rightSlotDropdownItems.length > 0 ? (
                             <button

@@ -11,6 +11,20 @@ interface MessageBubbleProps {
     showAvatar: boolean
 }
 
+const getMessageTime = (createdAt?: string): string => {
+    if (!createdAt) return ''
+
+    try {
+        return new Date(createdAt).toLocaleTimeString('vi-VN', {
+            hour: '2-digit',
+            minute: '2-digit',
+        })
+    } catch (error) {
+        console.error('Error parsing date:', createdAt, error)
+        return ''
+    }
+}
+
 export const MessageBubble: React.FC<MessageBubbleProps> = ({
     message,
     isSent,
@@ -21,6 +35,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
     const senderName = sender
         ? `${sender.firstName} ${sender.lastName}`
         : 'Unknown'
+
+    const messageTime = getMessageTime(message.createdAt)
 
     return (
         <div className={`${s.bubbleWrapper} ${isSent ? s.sent : s.received}`}>
@@ -43,12 +59,9 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                 <div className={`${s.bubble}`}>
                     <p className={s.text}>{message.content}</p>
 
-                    <span className={s.time}>
-                        {new Date(message.createdAt).toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                        })}
-                    </span>
+                    {messageTime && (
+                        <span className={s.time}>{messageTime}</span>
+                    )}
                 </div>
             </div>
         </div>

@@ -84,17 +84,20 @@ function mapMessage(msg: BackendMessageResponse): Message {
         }
     }
 
-    return {
+    const mappedMessage: Message = {
         id: msg.id,
         conversationId: msg.chat_room_id,
         senderId: msg.sender_id,
         content: msg.content,
         messageType: msg.message_type,
         status: (msg.status as any) || 'read',
-        createdAt: msg.created_at,
+        createdAt: msg.timestamp,
         attachments: msg.attachments || [],
         sender: sender,
     }
+
+    console.log('Mapped message:', mappedMessage)
+    return mappedMessage
 }
 
 /**

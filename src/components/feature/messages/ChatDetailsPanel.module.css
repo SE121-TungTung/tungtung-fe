@@ -4,16 +4,17 @@
     height: 100%;
     background-color: var(--surface-card-light);
     border-left: 1px solid var(--boder-soft-light);
+    width: 360px;
+    flex-shrink: 0;
 }
 
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 12px 0 20px;
+    padding: var(--space-16) var(--space-12) var(--space-16) var(--space-20);
     border-bottom: 1px solid var(--boder-soft-light);
     flex-shrink: 0;
-
     height: var(--chat-header-height);
     box-sizing: border-box;
 }
@@ -29,27 +30,32 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 24px;
-    gap: 8px;
+    padding: var(--space-32) var(--space-24);
+    gap: var(--space-12);
     border-bottom: 1px solid var(--boder-soft-light);
 }
 
 .avatarWrapper {
-    width: 80px;
-    height: 80px;
-}
-.avatar {
-    width: 80px;
-    height: 80px;
+    width: 96px;
+    height: 96px;
     border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid var(--boder-soft-light);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.avatar {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
 }
 
 .displayName {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 700;
     color: var(--text-primary-light);
-    margin: 8px 0 0 0;
+    margin: var(--space-8) 0 0 0;
+    text-align: center;
 }
 
 .displayStatus {
@@ -58,53 +64,138 @@
     margin: 0;
 }
 
+.content {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.content::-webkit-scrollbar-thumb {
+    background: var(--boder-soft-light);
+    border-radius: var(--radius-full);
+}
+
+.section {
+    padding: var(--space-20) var(--space-16);
+    border-bottom: 1px solid var(--boder-soft-light);
+}
+
+.sectionTitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary-light);
+    margin: 0 0 var(--space-12) 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.memberList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+}
+
+.memberItem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-12);
+    padding: var(--space-8);
+    border-radius: var(--radius-md);
+    transition: background-color 0.15s ease;
+}
+
+.memberItem:hover {
+    background-color: var(--surface-raised-light);
+}
+
+.memberAvatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--boder-soft-light);
+    flex-shrink: 0;
+}
+
+.memberInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.memberName {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary-light);
+    margin: 0 0 var(--space-2) 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.memberStatus {
+    font-size: 12px;
+    color: var(--text-muted-light);
+    margin: 0;
+}
+
 .menuList {
     list-style: none;
-    padding: 12px;
+    padding: var(--space-12);
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    overflow-y: auto;
+    gap: var(--space-4);
 }
 
 .menuItem {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 10px 12px;
+    gap: var(--space-12);
+    padding: var(--space-12);
     border-radius: var(--radius-md);
     font-size: 14px;
     font-weight: 500;
     color: var(--text-primary-light);
     cursor: pointer;
-    transition: background-color 0.15s ease;
+    transition: all 0.15s ease;
 }
 
 .menuItem:hover {
-    background-color: var(--surface-hover-light);
+    background-color: var(--surface-raised-light);
 }
 
 .menuItem img,
 .menuItem svg {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     opacity: 0.7;
+    flex-shrink: 0;
 }
 
 .menuItem.danger {
-    color: var(--status-danger-light);
+    color: var(--status-danger-500-light);
 }
+
 .menuItem.danger img,
 .menuItem.danger svg {
     opacity: 1;
     filter: invert(39%) sepia(80%) saturate(2720%) hue-rotate(338deg)
         brightness(90%) contrast(101%);
 }
+
 .menuItem.danger:hover {
     background-color: color-mix(
         in srgb,
-        var(--status-danger-light) 10%,
+        var(--status-danger-500-light) 10%,
         transparent
     );
 }
@@ -112,5 +203,12 @@
 .divider {
     height: 1px;
     background-color: var(--boder-soft-light);
-    margin: 6px 4px;
+    margin: var(--space-8) 0;
+}
+
+@media (max-width: 800px) {
+    .panel {
+        width: 100%;
+        border-left: none;
+    }
 }

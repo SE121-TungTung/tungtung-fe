@@ -28,6 +28,7 @@ export const router = createBrowserRouter([
     { path: '/otp', element: <OtpPage /> },
     { path: '/logout', element: <LogoutPage /> },
     { path: '/test', element: <ExamPracticePage /> },
+    { path: '/notifications', element: <NotificationPage /> },
 
     {
         path: '/coming-soon',

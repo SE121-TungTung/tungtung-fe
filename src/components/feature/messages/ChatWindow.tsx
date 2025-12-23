@@ -50,6 +50,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
+
     useEffect(() => {
         scrollToBottom()
     }, [messages])
@@ -57,37 +58,64 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     const otherParticipant = !conversation.isGroup
         ? conversation.participants.find((p) => p.id !== currentUserId)
         : null
+
     const displayName = conversation.isGroup
         ? conversation.name
         : otherParticipant?.firstName + ' ' + otherParticipant?.lastName
 
+    const displayStatus = conversation.isGroup
+        ? `${conversation.participants.length} thành viên`
+        : otherParticipant?.isOnline
+          ? 'Đang hoạt động'
+          : 'Không hoạt động'
+
     return (
-        <div className={s.wrapper}>
+        <div className={s.window}>
             <header className={s.header}>
                 <div className={s.headerLeft}>
-                    <ButtonGhost onClick={onCloseChat} className={s.backButton}>
+                    <ButtonGhost
+                        onClick={onCloseChat}
+                        className={s.backButton}
+                        size="sm"
+                        mode="light"
+                    >
                         <img src={BackIcon} alt="Back" />
                     </ButtonGhost>
 
-                    {conversation.isGroup ? (
-                        <GroupAvatar participants={conversation.participants} />
-                    ) : (
-                        <img
-                            src={
-                                otherParticipant?.avatarUrl ||
-                                '/default-avatar.png'
-                            }
-                            className={s.headerAvatar}
-                            alt=""
-                        />
-                    )}
+                    <div className={s.avatarWrapper}>
+                        {conversation.isGroup ? (
+                            <GroupAvatar
+                                participants={conversation.participants}
+                            />
+                        ) : (
+                            <>
+                                <img
+                                    src={
+                                        otherParticipant?.avatarUrl ||
+                                        '/default-avatar.png'
+                                    }
+                                    className={s.headerAvatar}
+                                    alt=""
+                                />
+                                {otherParticipant?.isOnline && (
+                                    <div className={s.onlineBadge} />
+                                )}
+                            </>
+                        )}
+                    </div>
 
                     <div className={s.headerInfo}>
                         <h3 className={s.chatName}>{displayName}</h3>
+                        <p className={s.chatStatus}>{displayStatus}</p>
                     </div>
                 </div>
+
                 <div className={s.headerActions}>
-                    <ButtonGhost onClick={onToggleDetails}>
+                    <ButtonGhost
+                        onClick={onToggleDetails}
+                        size="sm"
+                        mode="light"
+                    >
                         <img src={InfoIcon} alt="Info" />
                     </ButtonGhost>
                 </div>
@@ -95,39 +123,66 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
             {/* Messages List */}
             <div className={s.messageList}>
-                {isLoading && (
-                    <div className="text-center p-4 text-gray-400">
-                        Đang tải tin nhắn...
+                {isLoading ? (
+                    <div className={s.loadingContainer}>
+                        <div className={s.skeletonMessage}>
+                            <div className={s.skeletonAvatar} />
+                            <div className={s.skeletonBubble} />
+                        </div>
+                        <div className={`${s.skeletonMessage} ${s.right}`}>
+                            <div className={s.skeletonBubble} />
+                        </div>
+                        <div className={s.skeletonMessage}>
+                            <div className={s.skeletonAvatar} />
+                            <div className={s.skeletonBubble} />
+                        </div>
                     </div>
-                )}
-
-                {messages.map((msg, index) => {
-                    const isSent = msg.senderId === currentUserId
-                    let showSenderInfo = false
-                    const sender = conversation.participants.find(
-                        (p) => p.id === msg.senderId
-                    )
-                    if (!sender && !isSent) return null
-                    if (!isSent) {
-                        const nextMsg = messages[index + 1]
-                        if (!nextMsg || nextMsg.senderId !== msg.senderId) {
-                            showSenderInfo = true
-                        }
-                    }
-
-                    return (
-                        <MessageBubble
-                            key={msg.id}
-                            message={msg}
-                            isSent={isSent}
-                            sender={sender!}
-                            showSenderName={
-                                conversation.isGroup && showSenderInfo
+                ) : messages.length === 0 ? (
+                    <div className={s.emptyState}>
+                        <svg
+                            className={s.emptyIcon}
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                            />
+                        </svg>
+                        <p>Chưa có tin nhắn nào</p>
+                    </div>
+                ) : (
+                    messages.map((msg, index) => {
+                        const isSent = msg.senderId === currentUserId
+                        let showSenderInfo = false
+                        const sender = conversation.participants.find(
+                            (p) => p.id === msg.senderId
+                        )
+                        if (!sender && !isSent) return null
+                        if (!isSent) {
+                            const nextMsg = messages[index + 1]
+                            if (!nextMsg || nextMsg.senderId !== msg.senderId) {
+                                showSenderInfo = true
                             }
-                            showAvatar={!isSent && showSenderInfo}
-                        />
-                    )
-                })}
+                        }
+
+                        return (
+                            <MessageBubble
+                                key={msg.id}
+                                message={msg}
+                                isSent={isSent}
+                                sender={sender!}
+                                showSenderName={
+                                    conversation.isGroup && showSenderInfo
+                                }
+                                showAvatar={!isSent && showSenderInfo}
+                            />
+                        )
+                    })
+                )}
                 <div ref={messagesEndRef} />
             </div>
 

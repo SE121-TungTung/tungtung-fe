@@ -1,10 +1,6 @@
-// ============================================
-// BACKEND RESPONSE TYPES (Snake Case)
-// ============================================
-
 export interface BackendUserInfo {
     id: string
-    user_id?: string // Some endpoints use user_id instead of id
+    user_id?: string
     email: string
     full_name: string
     first_name?: string
@@ -29,7 +25,7 @@ export interface BackendLastMessage {
     message_id: string
     content: string
     timestamp: string
-    sender_id?: string // BE might include this
+    sender_id?: string
 }
 
 export interface BackendConversationResponse {
@@ -58,10 +54,10 @@ export interface BackendGroupDetailResponse {
 export interface BackendMessageResponse {
     id: string
     chat_room_id: string
-    sender_id: string | null // null for system messages
+    sender_id: string | null
     content: string
     message_type: string
-    created_at: string
+    timestamp: string
     status: string
     attachments?: any[]
     sender?: {
@@ -100,7 +96,7 @@ export interface Participant {
 export interface Message {
     id: string
     conversationId: string
-    senderId: string | null // null for system messages
+    senderId: string | null
     content: string
     attachments: Attachment[]
     createdAt: string

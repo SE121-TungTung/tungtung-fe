@@ -32,21 +32,13 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
 
     const displayName = conversation.isGroup
         ? conversation.name
-        : 'Thông tin hội thoại'
-    const displayAvatar = isGroup ? (
-        <GroupAvatar participants={participants} size="lg" />
-    ) : (
-        <img
-            src={otherParticipant?.avatarUrl || AvatarImg}
-            alt={displayName}
-            className={s.avatar}
-        />
-    )
+        : otherParticipant?.firstName + ' ' + otherParticipant?.lastName
+
     const displayStatus = isGroup
         ? `${participants.length} thành viên`
         : otherParticipant?.isOnline
-          ? 'Online'
-          : 'Offline'
+          ? 'Đang hoạt động'
+          : 'Không hoạt động'
 
     return (
         <div className={s.panel}>
@@ -58,90 +50,112 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
             </header>
 
             <div className={s.profileSection}>
-                <div className={s.avatarWrapper}>{displayAvatar}</div>
+                <div className={s.avatarWrapper}>
+                    {isGroup ? (
+                        <GroupAvatar participants={participants} size="lg" />
+                    ) : (
+                        <img
+                            src={otherParticipant?.avatarUrl || AvatarImg}
+                            alt={displayName}
+                            className={s.avatar}
+                        />
+                    )}
+                </div>
                 <h3 className={s.displayName}>{displayName}</h3>
                 <p className={s.displayStatus}>{displayStatus}</p>
             </div>
 
-            <ul className={s.menuList}>
-                <div className={s.memberList}>
-                    <h3>Thành viên ({conversation.participants.length})</h3>
-                    {conversation.participants.map((p) => (
-                        <div key={p.id} className={s.memberItem}>
-                            <img
-                                src={p.avatarUrl || '/default-avatar.png'}
-                                className={s.avatar}
-                            />
-                            <div>
-                                <div className={s.memberName}>
-                                    {p.firstName} {p.lastName}
+            <div className={s.content}>
+                {isGroup && (
+                    <div className={s.section}>
+                        <h5 className={s.sectionTitle}>
+                            Thành viên ({participants.length})
+                        </h5>
+                        <div className={s.memberList}>
+                            {participants.map((p) => (
+                                <div key={p.id} className={s.memberItem}>
+                                    <img
+                                        src={p.avatarUrl || AvatarImg}
+                                        className={s.memberAvatar}
+                                        alt=""
+                                    />
+                                    <div className={s.memberInfo}>
+                                        <div className={s.memberName}>
+                                            {p.firstName} {p.lastName}
+                                        </div>
+                                        <div className={s.memberStatus}>
+                                            {p.isOnline
+                                                ? 'Đang hoạt động'
+                                                : 'Không hoạt động'}
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className={s.memberStatus}>
-                                    {p.isOnline ? 'Trực tuyến' : 'Ngoại tuyến'}
-                                </div>
-                            </div>
+                            ))}
                         </div>
-                    ))}
-                </div>
-                {isGroup ? (
-                    <>
-                        <li
-                            className={s.menuItem}
-                            onClick={() => alert('Thêm...')}
-                        >
-                            <img src={AddUserIcon} alt="Add" />
-                            Thêm thành viên
-                        </li>
-                        <li
-                            className={s.menuItem}
-                            onClick={() => alert('Đổi tên...')}
-                        >
-                            <img src={EditIcon} alt="Edit" />
-                            Đổi tên nhóm
-                        </li>
-                        <li
-                            className={s.menuItem}
-                            onClick={() => alert('Tìm kiếm...')}
-                        >
-                            <img src={SearchIcon} alt="Search" />
-                            Tìm kiếm tin nhắn
-                        </li>
-                        <li className={s.divider} />
-                        <li
-                            className={`${s.menuItem} ${s.danger}`}
-                            onClick={() => alert('Rời nhóm...')}
-                        >
-                            <img src={LeaveIcon} alt="Leave" />
-                            Rời khỏi nhóm
-                        </li>
-                    </>
-                ) : (
-                    <>
-                        <li
-                            className={s.menuItem}
-                            onClick={() => alert('Xem hồ sơ...')}
-                        >
-                            <img src={UserIcon} alt="Profile" />
-                            Xem hồ sơ
-                        </li>
-                        <li
-                            className={s.menuItem}
-                            onClick={() => alert('Tìm kiếm...')}
-                        >
-                            <img src={SearchIcon} alt="Search" />
-                            Tìm kiếm tin nhắn
-                        </li>
-                        <li className={s.divider} />
-                        <li
-                            className={`${s.menuItem} ${s.danger}`}
-                            onClick={() => alert('Chặn...')}
-                        >
-                            <img src={BlockIcon} alt="Block" />
-                            Chặn người này
-                        </li>
-                    </>
+                    </div>
                 )}
-            </ul>
+
+                <ul className={s.menuList}>
+                    {isGroup ? (
+                        <>
+                            <li
+                                className={s.menuItem}
+                                onClick={() => alert('Thêm...')}
+                            >
+                                <img src={AddUserIcon} alt="Add" />
+                                Thêm thành viên
+                            </li>
+                            <li
+                                className={s.menuItem}
+                                onClick={() => alert('Đổi tên...')}
+                            >
+                                <img src={EditIcon} alt="Edit" />
+                                Đổi tên nhóm
+                            </li>
+                            <li
+                                className={s.menuItem}
+                                onClick={() => alert('Tìm kiếm...')}
+                            >
+                                <img src={SearchIcon} alt="Search" />
+                                Tìm kiếm tin nhắn
+                            </li>
+                            <li className={s.divider} />
+                            <li
+                                className={`${s.menuItem} ${s.danger}`}
+                                onClick={() => alert('Rời nhóm...')}
+                            >
+                                <img src={LeaveIcon} alt="Leave" />
+                                Rời khỏi nhóm
+                            </li>
+                        </>
+                    ) : (
+                        <>
+                            <li
+                                className={s.menuItem}
+                                onClick={() => alert('Xem hồ sơ...')}
+                            >
+                                <img src={UserIcon} alt="Profile" />
+                                Xem hồ sơ
+                            </li>
+                            <li
+                                className={s.menuItem}
+                                onClick={() => alert('Tìm kiếm...')}
+                            >
+                                <img src={SearchIcon} alt="Search" />
+                                Tìm kiếm tin nhắn
+                            </li>
+                            <li className={s.divider} />
+                            <li
+                                className={`${s.menuItem} ${s.danger}`}
+                                onClick={() => alert('Chặn...')}
+                            >
+                                <img src={BlockIcon} alt="Block" />
+                                Chặn người này
+                            </li>
+                        </>
+                    )}
+                </ul>
+            </div>
         </div>
     )
 }
