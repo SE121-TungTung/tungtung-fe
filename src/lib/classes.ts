@@ -99,7 +99,7 @@ export const listClasses = async (
 ): Promise<PaginatedResponse<Class>> => {
     const {
         page = 1,
-        limit = 100, // Tăng limit mặc định để load nhiều lớp hơn trong dropdown
+        limit = 100,
         search,
         status,
         courseId,

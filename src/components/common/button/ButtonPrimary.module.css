@@ -1,14 +1,4 @@
-/* ButtonPrimary.module.css
-   - Variants: solid | subtle | outline | ghost | gradient | glass
-   - Tones:    brand | neutral | success | danger
-   - Sizes:    sm | md | lg | xl
-   - Shapes:   rounded | pill
-   - States:   hover | active | focus-visible | disabled | [aria-busy="true"]
-   - Extras:   iconOnly | block
-*/
-
 :root {
-    /* defaults = light theme */
     --btn-bg: var(--button-primary-bg-light);
     --btn-bg-hover: var(--button-primary-bg-hover-light);
     --btn-bg-pressed: var(--button-primary-bg-pressed-light);
@@ -16,12 +6,10 @@
     --btn-border: var(--boder-soft-light, rgba(0, 0, 0, 0.08));
     --btn-focus: var(--focus-ring-light, rgb(75, 163, 195));
 
-    /* neutrals */
     --btn-neutral-bg: var(--palette-columbia-blue-700);
     --btn-neutral-fg: var(--text-primary-light, #0b1520);
     --btn-neutral-border: var(--boder-strong-light, rgba(0, 0, 0, 0.12));
 
-    /* success / danger */
     --btn-success-bg: var(--color-green-500);
     --btn-success-bg-hover: var(--color-green-600);
     --btn-success-fg: #fff;
@@ -30,7 +18,6 @@
     --btn-danger-bg-hover: var(--status-danger-600-light);
     --btn-danger-fg: #fff;
 
-    /* glass & subtle */
     --btn-glass-bg: rgba(255, 255, 255, 0.12);
     --btn-glass-border: var(
         --container-border-light,
@@ -40,7 +27,6 @@
     --btn-subtle-bg: var(--palette-lapis-lazuli-900);
     --btn-subtle-fg: var(--brand-primary-600-light, #1e6ea3);
 
-    /* outline/ghost */
     --btn-outline-border: var(--brand-primary-600-light, #2484b5);
     --btn-ghost-hover: var(--palette-lapis-lazuli-900);
 }
@@ -96,7 +82,8 @@
         color 0.15s ease,
         border-color 0.15s ease,
         box-shadow 0.15s ease,
-        transform 0.05s ease;
+        transform 0.05s ease,
+        opacity 0.2s ease;
     box-shadow:
         0 1px 0 rgba(0, 0, 0, 0.05),
         0 4px 4px rgba(0, 0, 0, 0.05),
@@ -121,14 +108,23 @@
     filter: grayscale(0.1);
 }
 
-/* Loading spinner (uses aria-busy) */
+/* ========== Loading State (aria-busy) ========== */
 .btn[aria-busy='true'] {
     pointer-events: none;
+    opacity: 0.85;
 }
+
+/* Ẩn text khi loading, chỉ hiển thị spinner */
+.btn[aria-busy='true'] .label {
+    visibility: hidden;
+    width: 0;
+    margin: 0;
+}
+
+/* Spinner - Loading indicator */
 .btn[aria-busy='true']::after {
     content: '';
     position: absolute;
-    right: calc(var(--pad-x) - 2px);
     width: 1em;
     height: 1em;
     border-radius: 50%;
@@ -136,6 +132,7 @@
     border-right-color: transparent;
     animation: btn-spin 0.8s linear infinite;
 }
+
 @keyframes btn-spin {
     to {
         transform: rotate(360deg);
@@ -188,7 +185,7 @@
     width: 100%;
 }
 
-/* Icon-only button (square) */
+/* Icon-only button */
 .iconOnly {
     padding: var(--pad-y);
     width: var(--button-size-medium, 32px);
@@ -206,7 +203,7 @@
 
 /* ========== Variants ========== */
 
-/* 1) Solid primary (default) */
+/* Solid primary */
 .solid {
     background: var(--btn-bg);
     color: var(--btn-fg);
@@ -218,7 +215,7 @@
     background: var(--btn-bg-pressed);
 }
 
-/* 2) Subtle (soft fill) */
+/* Subtle */
 .subtle {
     background: var(--btn-subtle-bg);
     color: var(--btn-subtle-fg);
@@ -233,7 +230,7 @@
     filter: brightness(0.98);
 }
 
-/* 3) Outline */
+/* Outline */
 .outline {
     background: transparent;
     color: var(--text-primary-light);
@@ -247,7 +244,7 @@
     background: color-mix(in oklab, var(--btn-outline-border) 18%, transparent);
 }
 
-/* 4) Ghost */
+/* Ghost */
 .ghost {
     background: transparent;
     color: var(--btn-fg);
@@ -261,7 +258,7 @@
     background: color-mix(in oklab, var(--btn-ghost-hover) 85%, black 0%);
 }
 
-/* 5) Gradient (brand accent → cyan) */
+/* Gradient */
 .gradient {
     color: #fff;
     border-color: transparent;
@@ -303,7 +300,7 @@
     transform: translateY(1px);
 }
 
-/* 6) Glass (frosted, see-through) */
+/* Glass */
 .glass {
     color: var(--btn-fg);
     background:
@@ -327,7 +324,7 @@
     filter: brightness(0.98);
 }
 
-/* ========== Tones (override colors) ========== */
+/* ========== Tones ========== */
 .toneBrand {
 }
 
@@ -363,7 +360,6 @@
     --btn-outline-border: var(--btn-danger-bg);
 }
 
-/* Optional “elevated/flat” presets */
 .elevated {
     box-shadow:
         0 8px 20px rgba(0, 0, 0, 0.2),

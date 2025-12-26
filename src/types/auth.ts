@@ -43,4 +43,5 @@ export interface LoginResponse {
         role: Role
         avatarUrl?: string
     }
+    is_first_login?: boolean
 }

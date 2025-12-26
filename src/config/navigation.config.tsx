@@ -3,6 +3,7 @@ import type { SideMenuItem } from '@/components/common/menu/SideMenuSet'
 import type { Role } from '@/types/auth.ts'
 import type { NavigateFunction } from 'react-router-dom'
 import IconLogout from '@/assets/Action Dislike.svg'
+import { UnreadBadge } from '@/components/feature/messages/UnreadBadge'
 
 type ExtendedSideMenuItem = SideMenuItem & {
     allowedRoles?: Role[]
@@ -51,7 +52,7 @@ const studentNavItems: AppNavItem[] = [
     {
         id: 'messages',
         label: 'Tin nhắn',
-        href: '/student/messages',
+        href: '/student/messages', // ✅ Thêm UnreadBadge
     },
 ]
 
@@ -110,13 +111,6 @@ const adminNavItems: AppNavItem[] = [
                 label: 'Quản lý lịch học',
                 href: '/admin/schedule',
             },
-        ],
-    },
-    {
-        id: 'hr',
-        label: 'Nhân sự',
-        allowedRoles: ['center_admin', 'system_admin'],
-        dropdownItems: [
             {
                 id: 'kpi',
                 label: 'Quản lý KPI',
@@ -128,6 +122,30 @@ const adminNavItems: AppNavItem[] = [
                 href: '/admin/salary',
             },
         ],
+    },
+    {
+        id: 'reports',
+        label: 'Báo cáo',
+        allowedRoles: ['office_admin', 'center_admin', 'system_admin'],
+        dropdownItems: [
+            {
+                id: 'reports',
+                label: 'Báo cáo',
+                href: '/admin/reports',
+            },
+            {
+                id: 'audit-logs',
+                label: 'Nhật ký hệ thống',
+                href: '/admin/audit-logs',
+            },
+        ],
+    },
+    {
+        id: 'messages',
+        label: 'Tin nhắn',
+        href: '/messages',
+        allowedRoles: ['office_admin', 'center_admin', 'system_admin'],
+        rightIcon: <UnreadBadge />,
     },
 ]
 
@@ -181,7 +199,7 @@ export const getNavItems = (
     }
 
     return navs.map((item): NavItem => {
-        const { /* allowedRoles, */ dropdownItems, ...restOfItem } = item
+        const { dropdownItems, rightIcon, ...restOfItem } = item
 
         const finalDropdownItems = (
             dropdownItems as ExtendedSideMenuItem[] | undefined
@@ -190,7 +208,7 @@ export const getNavItems = (
                 (sub) => !sub.allowedRoles || sub.allowedRoles.includes(role)
             )
             .map((sub) => {
-                const { /* allowedRoles, */ href, ...restOfSub } = sub
+                const { href, ...restOfSub } = sub
                 return {
                     ...restOfSub,
                     onClick: () => href && navigate(href),
@@ -199,6 +217,7 @@ export const getNavItems = (
 
         return {
             ...restOfItem,
+            rightIcon,
             active:
                 item.href === activeHref ||
                 (finalDropdownItems &&

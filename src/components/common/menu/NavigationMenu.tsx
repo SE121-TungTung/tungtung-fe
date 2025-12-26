@@ -15,6 +15,7 @@ export type NavItem = {
     onClick?: (e: React.MouseEvent) => void
     active?: boolean
     leftIcon?: React.ReactNode
+    rightIcon?: React.ReactNode
     dropdownItems?: SideMenuItem[]
 }
 
@@ -230,6 +231,13 @@ export default function NavigationMenu({
                                                 </span>
                                             )}
                                             <span>{it.label}</span>
+                                            {it.rightIcon && (
+                                                <span
+                                                    className={styles.rightIcon}
+                                                >
+                                                    {it.rightIcon}
+                                                </span>
+                                            )}
                                         </Link>
                                     ) : (
                                         <button
@@ -243,6 +251,13 @@ export default function NavigationMenu({
                                                 </span>
                                             )}
                                             <span>{it.label}</span>
+                                            {it.rightIcon && (
+                                                <span
+                                                    className={styles.rightIcon}
+                                                >
+                                                    {it.rightIcon}
+                                                </span>
+                                            )}
                                         </button>
                                     )}
                                 </li>

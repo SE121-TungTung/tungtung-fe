@@ -28,10 +28,12 @@ export default function MessagesPage() {
     const [activeConversationId, setActiveConversationId] = useState<
         string | null
     >(null)
+    const [highlightedMessageId, setHighlightedMessageId] = useState<
+        string | null
+    >(null)
     const [isDetailsOpen, setIsDetailsOpen] = useState(false)
     const [showNewChatModal, setShowNewChatModal] = useState(false)
 
-    // ✅ FIX: Không cần map lại data - messageApi.getConversations() đã trả về đúng type
     const {
         data: conversations = [],
         isLoading,
@@ -39,41 +41,48 @@ export default function MessagesPage() {
     } = useQuery<Conversation[]>({
         queryKey: ['conversations'],
         queryFn: messageApi.getConversations,
-        staleTime: 30000, // Cache 30s
-        refetchInterval: 60000, // Auto refetch mỗi 1 phút
+        staleTime: 30000,
+        refetchInterval: 60000,
     })
 
-    // ✅ FIX: Dùng đúng field 'id' thay vì 'room_id'
     const activeConversation = useMemo(
         () => conversations.find((c) => c.id === activeConversationId),
         [conversations, activeConversationId]
     )
 
-    // ✅ FIX: Handle errors properly
     const handleStartChat = async (userIds: string[], groupName?: string) => {
         try {
             if (userIds.length === 1 && !groupName) {
-                // Start direct chat
+                // Direct chat
                 const conversation =
                     await messageApi.getOrCreateDirectConversation(userIds[0])
-                setActiveConversationId(conversation.id) // ✅ FIX: Use 'id' not 'room_id'
+                setActiveConversationId(conversation.id)
             } else {
-                // Create group chat
+                // Group chat
                 const newGroup = await messageApi.createGroup({
                     title: groupName || 'Nhóm chat mới',
                     member_ids: userIds,
                 })
-                setActiveConversationId(newGroup.id) // ✅ FIX: Use 'id'
+                setActiveConversationId(newGroup.id)
             }
 
-            // Invalidate and refetch conversations
             await queryClient.invalidateQueries({ queryKey: ['conversations'] })
             setShowNewChatModal(false)
         } catch (error) {
             console.error('Failed to start chat:', error)
-            // ✅ TODO: Show user-friendly error message (toast/notification)
             alert('Không thể tạo cuộc trò chuyện. Vui lòng thử lại.')
         }
+    }
+
+    const handleNavigateToMessage = (messageId: string) => {
+        setHighlightedMessageId(messageId)
+        setTimeout(() => setHighlightedMessageId(null), 3000)
+    }
+
+    const handleSelectConversation = (id: string) => {
+        setActiveConversationId(id)
+        setHighlightedMessageId(null)
+        setIsDetailsOpen(false)
     }
 
     const navItems = useMemo(
@@ -86,7 +95,6 @@ export default function MessagesPage() {
         [userRole, navigate]
     )
 
-    // ✅ FIX: Handle loading and error states
     if (error) {
         return (
             <div className={s.pageWrapper}>
@@ -154,7 +162,7 @@ export default function MessagesPage() {
                             <ConversationList
                                 conversations={conversations}
                                 activeId={activeConversationId}
-                                onSelectConversation={setActiveConversationId}
+                                onSelectConversation={handleSelectConversation}
                                 currentUserId={currentUserId}
                                 isLoading={isLoading}
                             />
@@ -164,7 +172,7 @@ export default function MessagesPage() {
                         <section className={s.chatPanel}>
                             {activeConversation ? (
                                 <ChatWindow
-                                    key={activeConversation.id} // ✅ FIX: Use 'id'
+                                    key={activeConversation.id}
                                     conversation={activeConversation}
                                     currentUserId={currentUserId}
                                     onCloseChat={() =>
@@ -173,6 +181,7 @@ export default function MessagesPage() {
                                     onToggleDetails={() =>
                                         setIsDetailsOpen(!isDetailsOpen)
                                     }
+                                    highlightedMessageId={highlightedMessageId}
                                 />
                             ) : (
                                 <div className={s.noChatSelected}>
@@ -197,6 +206,9 @@ export default function MessagesPage() {
                                     conversation={activeConversation}
                                     currentUserId={currentUserId}
                                     onClose={() => setIsDetailsOpen(false)}
+                                    onNavigateToMessage={
+                                        handleNavigateToMessage
+                                    }
                                 />
                             </aside>
                         )}

@@ -57,7 +57,18 @@ async function parseError(res: Response): Promise<never> {
 
 interface ExtendedRequestInit extends RequestInit {
     _retry?: boolean
+    _skipRefresh?: boolean // ← NEW: Flag to skip auto-refresh
 }
+
+// Auth endpoints that should NOT trigger auto-refresh
+const AUTH_ENDPOINTS = [
+    '/api/v1/auth/login',
+    '/api/v1/auth/login-json',
+    '/api/v1/auth/refresh',
+    '/api/v1/auth/password-reset/request',
+    '/api/v1/auth/password-reset/confirm',
+    '/api/v1/auth/password-reset/validate-token',
+]
 
 export async function api<T>(
     path: string,
@@ -84,7 +95,18 @@ export async function api<T>(
 
     const res = await fetch(url, { ...init, headers })
 
+    // Check if this is an auth endpoint that should not trigger refresh
+    const isAuthEndpoint = AUTH_ENDPOINTS.some((endpoint) =>
+        path.includes(endpoint)
+    )
+    const shouldSkipRefresh = init._skipRefresh || isAuthEndpoint
+
     if (res.status === 401) {
+        // Don't try to refresh for auth endpoints or if explicitly skipped
+        if (shouldSkipRefresh) {
+            return parseError(res)
+        }
+
         if (!init._retry) {
             if (isRefreshing) {
                 return new Promise<T>((resolve) => {
@@ -126,7 +148,11 @@ export async function api<T>(
                 localStorage.removeItem('token')
                 localStorage.removeItem('access_token')
                 localStorage.removeItem('refresh_token')
-                window.location.href = '/login'
+
+                // Only redirect if not already on login page
+                if (!window.location.pathname.includes('/login')) {
+                    window.location.href = '/login'
+                }
                 throw error
             } finally {
                 isRefreshing = false

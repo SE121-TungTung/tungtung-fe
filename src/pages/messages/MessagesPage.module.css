@@ -3,6 +3,7 @@
     min-height: 100vh;
     padding: 24px clamp(24px, 5vw, 80px);
 }
+
 .header {
     margin-bottom: 40px;
     position: relative;
@@ -28,12 +29,12 @@
 .mainContent {
     flex: 1;
     display: flex;
-    gap: 32px;
     flex-direction: column;
     width: 100%;
     max-width: 1400px;
     margin: 0 auto;
-    height: calc(100vh - 120px);
+    height: calc(100vh - 120px - 32px);
+    gap: 32px;
 }
 
 .pageTitle {
@@ -45,6 +46,7 @@
     text-align: center;
     width: 100%;
     margin-bottom: var(--space-8);
+    flex-shrink: 0;
 }
 
 .gradientText {
@@ -58,48 +60,49 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     background: white;
-    height: 100%; /* Quan trọng để fill chiều cao */
+    min-height: 0;
+    overflow-y: scroll;
 }
 
 .container {
     display: grid;
-    grid-template-columns: 320px 1fr; /* Sidebar cố định 320px */
-    height: 100%;
+    grid-template-columns: 320px 1fr;
+    flex: 1;
+    min-height: 0;
     overflow: hidden;
-    transition: grid-template-columns 0.3s ease;
-}
-
-.container.isDetailsActive {
-    grid-template-columns: 320px 1fr 300px;
+    position: relative;
+    transition: all 0.3s ease;
 }
 
 /* --- SIDEBAR STYLES --- */
 .conversationPanel {
-    border-right: 1px solid #eee;
+    border-right: 1px solid var(--boder-soft-light);
+    background-color: var(--surface-card-light);
     display: flex;
     flex-direction: column;
-    background-color: #fff;
-    height: 100%;
+    min-height: 0;
     overflow: hidden;
 }
 
 .sidebarHeader {
-    padding: 16px 20px;
-    border-bottom: 1px solid #f0f0f0;
+    padding: var(--space-16) var(--space-20);
+    border-bottom: 1px solid var(--boder-soft-light);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: #fff;
+    background: var(--surface-card-light);
+    min-height: 68px;
+    box-sizing: border-box;
+    flex-shrink: 0;
 }
 
 .sidebarTitle {
     font-size: 18px;
     font-weight: 700;
-    color: #333;
+    color: var(--text-primary-light);
     margin: 0;
 }
 
@@ -118,16 +121,20 @@
     width: 32px;
     height: 32px;
     border: 3px solid #f3f3f3;
-    border-top: 3px solid var(--brand-500, #3b82f6);
+    border-top: 3px solid var(--brand-primary-500-light, #3b82f6);
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
 
 /* --- CHAT PANEL --- */
 .chatPanel {
-    background-color: #fafafa;
+    background-color: var(--surface-page-light);
     position: relative;
-    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
 }
 
 .noChatSelected {
@@ -136,8 +143,33 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: #999;
-    background: #fafafa;
+    color: var(--text-muted-light);
+    background: var(--surface-page-light);
+}
+
+/* --- DETAIL PANEL --- */
+.detailsPanel {
+    background: var(--surface-card-light);
+    border-left: 1px solid var(--boder-soft-light);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    height: 100%;
+}
+
+.container.isDetailsActive {
+    grid-template-columns: 320px 1fr 350px;
+}
+
+.container.isDetailsActive .detailsPanel {
+    transform: translateX(0);
+}
+
+@media (max-width: 1200px) {
+    .container.isDetailsActive {
+        grid-template-columns: 280px 1fr 320px;
+    }
 }
 
 @keyframes spin {
@@ -150,7 +182,42 @@
 }
 
 @media (max-width: 1024px) {
+    .detailsPanel {
+        width: 100%;
+        max-width: 400px;
+    }
+
     .container.isDetailsActive {
-        grid-template-columns: 280px 1fr 0px;
+        grid-template-columns: 0px 1fr 350px;
+    }
+
+    .container.isDetailsActive .conversationPanel {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        grid-template-columns: 1fr;
+    }
+    .container.isDetailsActive {
+        grid-template-columns: 1fr;
+    }
+
+    .detailsPanel {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 20;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+    }
+    .container.isDetailsActive .detailsPanel {
+        transform: translateX(0);
+    }
+    .conversationPanel {
+        display: none;
     }
 }

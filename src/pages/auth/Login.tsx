@@ -23,13 +23,14 @@ const passMsgId = 'pass-msg'
 
 export function LoginPage() {
     const loginStore = useSession((st) => st.login)
+    const setUser = useSession((st) => st.setUser)
     const navigate = useNavigate()
     const [apiError, setApiError] = useState<string | undefined>()
 
     const {
         register,
         handleSubmit,
-        formState: { errors, isSubmitting },
+        formState: { errors },
     } = useForm<LoginValues>({
         resolver: zodResolver(loginSchema),
         defaultValues: { remember: true },
@@ -38,23 +39,74 @@ export function LoginPage() {
     const mutation = useMutation({
         mutationFn: login,
         onSuccess: async (data) => {
+            // Clear any previous errors
+            setApiError(undefined)
+
+            // Save tokens
             loginStore(data.access_token, data.refresh_token)
 
             try {
+                // Fetch full user info
                 const me = await getMe()
-                useSession.getState().setUser(me)
 
+                // Update user in store
+                setUser(me)
+
+                // Navigate to dashboard
+                // FirstLoginGuard will handle first login modal
                 const redirectPath = homePathByRole(me.role)
-                navigate(redirectPath)
-            } catch (e) {
+                navigate(redirectPath, { replace: true })
+            } catch (e: any) {
                 console.error('Failed to fetch user info', e)
+                setApiError(
+                    'Không thể tải thông tin người dùng. Vui lòng thử lại.'
+                )
             }
         },
         onError: (error: any) => {
-            setApiError(error.message || 'Đăng nhập thất bại')
+            console.error('Login error:', error)
+
+            // Parse error message
+            let errorMessage = 'Đăng nhập thất bại'
+
+            if (error?.status === 401) {
+                // Unauthorized - wrong credentials
+                errorMessage = 'Email hoặc mật khẩu không chính xác'
+            } else if (error?.status === 403) {
+                // Forbidden - account not active
+                errorMessage = 'Tài khoản chưa được kích hoạt hoặc đã bị khóa'
+            } else if (error?.message) {
+                // Use backend error message if available
+                const msg = error.message.toLowerCase()
+
+                if (
+                    msg.includes('email') ||
+                    msg.includes('password') ||
+                    msg.includes('incorrect')
+                ) {
+                    errorMessage = 'Email hoặc mật khẩu không chính xác'
+                } else if (msg.includes('account') || msg.includes('active')) {
+                    errorMessage = 'Tài khoản chưa được kích hoạt'
+                } else if (msg.includes('network') || msg.includes('fetch')) {
+                    errorMessage =
+                        'Lỗi kết nối. Vui lòng kiểm tra internet và thử lại.'
+                } else {
+                    errorMessage = error.message
+                }
+            } else if (!navigator.onLine) {
+                errorMessage =
+                    'Không có kết nối internet. Vui lòng kiểm tra và thử lại.'
+            }
+
+            setApiError(errorMessage)
         },
     })
-    const onSubmit = (v: LoginValues) => mutation.mutate(v)
+
+    const onSubmit = (v: LoginValues) => {
+        // Clear previous errors before submitting
+        setApiError(undefined)
+        mutation.mutate(v)
+    }
 
     return (
         <div>
@@ -117,8 +169,8 @@ export function LoginPage() {
                             type="submit"
                             variant="glass"
                             shape="rounded"
-                            loading={isSubmitting}
-                            disabled={isSubmitting}
+                            loading={mutation.isPending}
+                            disabled={mutation.isPending}
                         >
                             Đăng nhập
                         </ButtonPrimary>
@@ -191,8 +243,22 @@ export function LoginPage() {
                         </Link>
                     </div>
 
+                    {/* API Error Display */}
                     {apiError && (
-                        <div className={s.error} role="alert">
+                        <div
+                            className={s.error}
+                            role="alert"
+                            style={{
+                                marginTop: '16px',
+                                padding: '12px 14px',
+                                background: 'rgba(255, 77, 79, 0.15)',
+                                border: '1px solid rgba(255, 77, 79, 0.3)',
+                                borderRadius: '8px',
+                                color: '#ff9aa2',
+                                fontSize: '14px',
+                                lineHeight: '1.5',
+                            }}
+                        >
                             {apiError}
                         </div>
                     )}

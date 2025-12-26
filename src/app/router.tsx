@@ -20,6 +20,7 @@ import ExamPracticePage from '@/pages/student/exam/ExamPracticePage'
 import ScheduleManagementPage from '@/pages/admin/schedule/ScheduleManagementPage'
 import ScheduleGeneratorPage from '@/pages/admin/schedule/ScheduleGeneratorPage'
 import ComingSoon from '@/components/core/ComingSoon'
+import { ResetPasswordPage } from '@/pages/auth/ResetPassword'
 
 export const router = createBrowserRouter([
     { path: '/', element: <Navigate to="/login" replace /> },
@@ -27,6 +28,10 @@ export const router = createBrowserRouter([
     { path: '/forgot-password', element: <ForgotPasswordPage /> },
     { path: '/otp', element: <OtpPage /> },
     { path: '/logout', element: <LogoutPage /> },
+    {
+        path: '/reset-password',
+        element: <ResetPasswordPage />,
+    },
     { path: '/test', element: <ExamPracticePage /> },
     { path: '/notifications', element: <NotificationPage /> },
 

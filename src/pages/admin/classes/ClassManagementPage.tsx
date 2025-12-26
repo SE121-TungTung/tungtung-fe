@@ -91,7 +91,7 @@ export default function ClassManagementPage() {
     // Query (Sử dụng client-side sorting)
     const queryKey = useMemo(
         () => [
-            'classes', // Đổi queryKey
+            'classes',
             {
                 search: searchValue,
                 status: status || undefined,
@@ -192,70 +192,68 @@ export default function ClassManagementPage() {
 
                 {/* Filter Card */}
                 <Card className={s.filterCard} variant="outline">
-                    <div>
-                        <div className={s.searchWrapper}>
-                            <InputField
-                                id="search"
-                                label=""
-                                placeholder="Tìm theo tên lớp..."
-                                value={searchValue}
-                                onChange={(e: any) =>
-                                    setSearchValue(e.target.value)
-                                }
-                                leftIcon={<img src={IconSearch} alt="" />}
-                            />
-                        </div>
-                        <div className={s.filterControls}>
-                            <SelectField
-                                id="statusFilter"
-                                label="Trạng thái"
-                                registration={{ name: 'statusFilter' as any }}
-                                value={status}
-                                options={CLASS_STATUS_OPTIONS}
-                                onChange={(e: any) => setStatus(e.target.value)}
-                            />
-                            <SelectField
-                                id="sortBy"
-                                label="Sắp xếp"
-                                registration={{ name: 'sortBy' as any }}
-                                value={sortBy}
-                                onChange={(e) =>
-                                    setSortBy(
-                                        (e.target as HTMLSelectElement)
-                                            .value as SortBy
-                                    )
-                                }
-                                options={SORT_BY_OPTIONS}
-                            />
-                            <SelectField
-                                id="sortOrder"
-                                label="Thứ tự"
-                                registration={{ name: 'sortOrder' as any }}
-                                value={sortOrder}
-                                onChange={(e) =>
-                                    setSortOrder(
-                                        (e.target as HTMLSelectElement)
-                                            .value as SortOrder
-                                    )
-                                }
-                                options={SORT_ORDER_OPTIONS}
-                            />
-                        </div>
-
-                        {canCreateClass && (
-                            <Button
-                                variant="primary"
-                                onClick={handleOpenCreateModal}
-                            >
-                                <img
-                                    src={IconPlus}
-                                    alt=""
-                                    className={s.buttonIcon}
-                                />
-                                Tạo lớp học
-                            </Button>
-                        )}
+                    <div className={s.searchWrapper}>
+                        <InputField
+                            id="search"
+                            label=""
+                            placeholder="Tìm theo tên lớp..."
+                            value={searchValue}
+                            onChange={(e: any) =>
+                                setSearchValue(e.target.value)
+                            }
+                            leftIcon={<img src={IconSearch} alt="" />}
+                        />
                     </div>
+                    <div className={s.filterControls}>
+                        <SelectField
+                            id="statusFilter"
+                            label="Trạng thái"
+                            registration={{ name: 'statusFilter' as any }}
+                            value={status}
+                            options={CLASS_STATUS_OPTIONS}
+                            onChange={(e: any) => setStatus(e.target.value)}
+                        />
+                        <SelectField
+                            id="sortBy"
+                            label="Sắp xếp"
+                            registration={{ name: 'sortBy' as any }}
+                            value={sortBy}
+                            onChange={(e) =>
+                                setSortBy(
+                                    (e.target as HTMLSelectElement)
+                                        .value as SortBy
+                                )
+                            }
+                            options={SORT_BY_OPTIONS}
+                        />
+                        <SelectField
+                            id="sortOrder"
+                            label="Thứ tự"
+                            registration={{ name: 'sortOrder' as any }}
+                            value={sortOrder}
+                            onChange={(e) =>
+                                setSortOrder(
+                                    (e.target as HTMLSelectElement)
+                                        .value as SortOrder
+                                )
+                            }
+                            options={SORT_ORDER_OPTIONS}
+                        />
+                    </div>
+
+                    {canCreateClass && (
+                        <Button
+                            variant="primary"
+                            onClick={handleOpenCreateModal}
+                        >
+                            <img
+                                src={IconPlus}
+                                alt=""
+                                className={s.buttonIcon}
+                            />
+                            Tạo lớp học
+                        </Button>
+                    )}
                 </Card>
 
                 {/* Table Card */}

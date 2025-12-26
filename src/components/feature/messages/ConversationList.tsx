@@ -22,20 +22,17 @@ export const ConversationList: React.FC<ConversationListProps> = ({
 }) => {
     const [searchTerm, setSearchTerm] = useState('')
 
-    // ✅ FIX: Use correct field 'name' instead of 'title'
     const filteredConversations = useMemo(() => {
         if (!searchTerm.trim()) return conversations
 
         const lowerTerm = searchTerm.toLowerCase().trim()
 
         return conversations.filter((conversation) => {
-            // Search in conversation name
             const displayName = conversation.name || 'Chưa đặt tên'
             if (displayName.toLowerCase().includes(lowerTerm)) {
                 return true
             }
 
-            // ✅ ENHANCEMENT: Search in participants' names for direct chats
             if (!conversation.isGroup && conversation.participants.length > 0) {
                 return conversation.participants.some((participant) => {
                     const fullName = participant.fullName?.toLowerCase() || ''
@@ -52,7 +49,6 @@ export const ConversationList: React.FC<ConversationListProps> = ({
                 })
             }
 
-            // ✅ ENHANCEMENT: Search in last message content
             if (conversation.lastMessage?.content) {
                 return conversation.lastMessage.content
                     .toLowerCase()
@@ -63,10 +59,8 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         })
     }, [conversations, searchTerm])
 
-    // ✅ FIX: Sort conversations by most recent
     const sortedConversations = useMemo(() => {
         return [...filteredConversations].sort((a, b) => {
-            // Sort by updatedAt (most recent first)
             const dateA = new Date(a.updatedAt).getTime()
             const dateB = new Date(b.updatedAt).getTime()
             return dateB - dateA
@@ -92,13 +86,11 @@ export const ConversationList: React.FC<ConversationListProps> = ({
 
             <div className={s.list}>
                 {isLoading && conversations.length === 0 ? (
-                    // ✅ FIX: Show loading only on initial load
                     <div className={s.loadingState}>
                         <div className={s.spinner}></div>
                         <span>Đang tải cuộc trò chuyện...</span>
                     </div>
                 ) : sortedConversations.length > 0 ? (
-                    // ✅ FIX: Render sorted conversations
                     sortedConversations.map((convo) => (
                         <ConversationItem
                             key={convo.id}
@@ -109,7 +101,6 @@ export const ConversationList: React.FC<ConversationListProps> = ({
                         />
                     ))
                 ) : (
-                    // ✅ FIX: Better empty states
                     <div className={s.emptyState}>
                         {searchTerm ? (
                             <>
@@ -127,7 +118,6 @@ export const ConversationList: React.FC<ConversationListProps> = ({
                     </div>
                 )}
 
-                {/* ✅ ENHANCEMENT: Show conversation count */}
                 {!isLoading && conversations.length > 0 && (
                     <div className={s.conversationCount}>
                         {searchTerm && (

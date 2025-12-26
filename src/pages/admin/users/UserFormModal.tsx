@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { type UserFormValues, userFormSchema } from '@/forms/user.schema'
@@ -9,8 +9,9 @@ import { SelectField } from '@/components/common/input/SelectField'
 import styles from './UserFormModal.module.css'
 import { usePermissions } from '@/hooks/usePermissions'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
-import { createUser, listClasses, updateUser } from '@/lib/users'
+import { createUser, updateUser } from '@/lib/users'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { listClasses } from '@/lib/classes'
 
 interface UserFormModalProps {
     isOpen: boolean
@@ -106,9 +107,24 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
         return false
     })
 
+    const queryKey = useMemo(
+        () => [
+            'classes',
+            {
+                status: 'active',
+                limit: 100,
+            },
+        ],
+        []
+    )
+
     const { data: classPage, isLoading: isLoadingClasses } = useQuery({
-        queryKey: ['classes', { limit: 100 }],
-        queryFn: () => listClasses({ limit: 100 }),
+        queryKey: queryKey,
+        queryFn: () =>
+            listClasses({
+                status: 'active',
+                limit: 100,
+            }),
         staleTime: 60_000,
     })
     const classOptions = (classPage?.items ?? []).map((c) => ({

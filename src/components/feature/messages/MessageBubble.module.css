@@ -151,3 +151,53 @@
         font-size: 14px;
     }
 }
+
+.editMode {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+}
+
+.editInput {
+    width: 100%;
+    min-height: 60px;
+    padding: var(--space-8);
+    border: 1px solid var(--boder-soft-light);
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-size: 14px;
+    resize: vertical;
+    background: var(--surface-page-light);
+}
+
+.editActions {
+    display: flex;
+    gap: var(--space-8);
+    justify-content: flex-end;
+}
+
+.editBtn {
+    padding: var(--space-6) var(--space-12);
+    border: 1px solid var(--boder-soft-light);
+    border-radius: var(--radius-sm);
+    background: var(--surface-card-light);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.editBtn:hover {
+    background: var(--surface-raised-light);
+}
+
+.editBtn.primary {
+    background: var(--brand-primary-500-light);
+    color: white;
+    border-color: var(--brand-primary-500-light);
+}
+
+.editBtn.primary:hover {
+    background: var(--brand-primary-600-light);
+}

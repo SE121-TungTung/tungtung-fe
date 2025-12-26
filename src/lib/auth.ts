@@ -9,6 +9,7 @@ export type LoginResponse = {
     access_token: string
     refresh_token: string
     token_type: string
+    is_first_login?: boolean
 }
 
 export const login = (body: LoginPayload) =>
@@ -62,3 +63,14 @@ export const refreshAccessToken = async (refreshToken: string) => {
 
     return (await response.json()) as LoginResponse
 }
+
+export type PasswordResetConfirmPayload = {
+    token: string
+    new_password: string
+}
+
+export const confirmPasswordReset = (body: PasswordResetConfirmPayload) =>
+    api<PasswordResetRequestResponse>('/api/v1/auth/password-reset/confirm', {
+        method: 'POST',
+        body: JSON.stringify(body),
+    })

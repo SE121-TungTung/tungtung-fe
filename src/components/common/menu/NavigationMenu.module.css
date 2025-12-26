@@ -116,8 +116,7 @@
     z-index: -1;
     background: #fff;
     border-radius: inherit;
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    box-shadow: 0 5px 5px rgba(0, 0, 0, 0.2);
+    border: 3px solid var(--boder-soft-light);
 }
 
 .icon {
@@ -126,6 +125,13 @@
     display: grid;
     place-items: center;
     flex-shrink: 0;
+}
+
+.rightIcon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 4px;
 }
 
 .right {

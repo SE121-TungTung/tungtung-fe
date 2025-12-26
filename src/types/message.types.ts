@@ -1,3 +1,7 @@
+// ============================================
+// BACKEND RESPONSE TYPES (Snake Case)
+// ============================================
+
 export interface BackendUserInfo {
     id: string
     user_id?: string
@@ -68,6 +72,18 @@ export interface BackendMessageResponse {
     }
 }
 
+export interface BackendChatHistoryMessage {
+    message_id: string
+    sender_id: string | null
+    sender_name: string
+    content: string
+    message_type: string
+    timestamp: string
+    attachments: any[]
+    is_read: boolean
+    is_starred: boolean
+}
+
 // ============================================
 // FRONTEND TYPES (Camel Case)
 // ============================================
@@ -85,9 +101,9 @@ export interface Attachment {
 export interface Participant {
     id: string
     email: string
-    fullName: string // Store full name as-is from BE
-    firstName?: string // Optional parsed first name
-    lastName?: string // Optional parsed last name
+    fullName: string
+    firstName?: string
+    lastName?: string
     avatarUrl: string | null
     isOnline?: boolean
     role?: string
@@ -103,6 +119,8 @@ export interface Message {
     messageType?: string
     status?: MessageStatus
     sender?: Participant
+    isRead?: boolean
+    isStarred?: boolean
 }
 
 export interface Conversation {
@@ -122,6 +140,7 @@ export interface Conversation {
     }
     updatedAt: string
     memberCount?: number
+    isMuted?: boolean // For local state
 }
 
 // ============================================
@@ -129,12 +148,10 @@ export interface Conversation {
 // ============================================
 
 export interface SendMessagePayload {
-    // Either conversation_id (existing chat) OR recipient_id (new direct chat)
-    conversation_id?: string
-    recipient_id?: string
+    // ✅ FIXED: Use correct BE field names
+    room_id?: string // For existing group/class chat
+    receiver_id?: string // For direct chat (will auto-create room)
     content: string
-    message_type?: 'text' | 'image' | 'file' | 'system'
-    attachment_ids?: string[]
     // Note: sender_id is NOT needed - BE gets it from auth token
 }
 
@@ -155,6 +172,116 @@ export interface AddMembersRequest {
     user_ids: string[]
 }
 
+export interface MarkAsReadRequest {
+    message_ids?: string[] // If null, mark all unread in room
+}
+
+export interface SearchMessagesParams {
+    q: string
+    room_id?: string
+    skip?: number
+    limit?: number
+}
+
+// ============================================
+// WEBSOCKET MESSAGE TYPES
+// ============================================
+
+export type WebSocketMessageType =
+    | 'connected'
+    | 'new_message'
+    | 'system_message'
+    | 'group_created'
+    | 'typing'
+    | 'error'
+    | 'pong'
+    | 'member_added'
+    | 'member_removed'
+    | 'group_updated'
+
+export interface WSConnectedMessage {
+    type: 'connected'
+    message: string
+    user_id: string
+    connection_id: string
+}
+
+export interface WSNewMessage {
+    type: 'new_message'
+    message_id: string
+    sender_id: string
+    room_id: string
+    room_type: 'direct' | 'group' | 'class'
+    content: string
+    timestamp: string
+    attachments: any[]
+}
+
+export interface WSSystemMessage {
+    type: 'system_message'
+    message_id: string
+    room_id: string
+    content: string
+    timestamp: string
+}
+
+export interface WSGroupCreated {
+    type: 'group_created'
+    room_id: string
+    title: string
+    created_by: string
+    member_count: number
+}
+
+export interface WSTypingIndicator {
+    type: 'typing'
+    room_id: string
+    user_id: string
+    is_typing: boolean
+}
+
+export interface WSError {
+    type: 'error'
+    message: string
+    code?: string
+}
+
+export interface WSPong {
+    type: 'pong'
+}
+
+export type WSIncomingMessage =
+    | WSConnectedMessage
+    | WSNewMessage
+    | WSSystemMessage
+    | WSGroupCreated
+    | WSTypingIndicator
+    | WSError
+    | WSPong
+
+// Outgoing WebSocket messages (Client → Server)
+export interface WSOutgoingPing {
+    type: 'ping'
+}
+
+export interface WSOutgoingTyping {
+    type: 'typing'
+    room_id: string
+    is_typing: boolean
+}
+
+export interface WSOutgoingSendMessage {
+    type: 'message'
+    room_id?: string
+    receiver_id?: string
+    content: string
+}
+
+export type WSOutgoingMessage =
+    | WSOutgoingPing
+    | WSOutgoingTyping
+    | WSOutgoingSendMessage
+
 // ============================================
 // USER SEARCH TYPES
 // ============================================
@@ -166,4 +293,32 @@ export interface UserSearchResult {
     email: string
     avatar_url?: string
     role: string
+}
+
+// ============================================
+// API RESPONSE TYPES
+// ============================================
+
+export interface UnreadCountResponse {
+    unread_count: number
+}
+
+export interface OnlineUsersResponse {
+    online_users: string[]
+    total: number
+}
+
+export interface AddMembersResponse {
+    added_count: number
+    added_user_ids: string[]
+}
+
+export interface RemoveMemberResponse {
+    message: string
+}
+
+export interface WebSocketStatsResponse {
+    total_connections: number
+    active_users: number
+    rooms: Record<string, number>
 }

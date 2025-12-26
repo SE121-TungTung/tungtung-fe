@@ -16,7 +16,7 @@
     background-color: var(--surface-card-light);
     flex-shrink: 0;
     gap: var(--space-12);
-    height: var(--chat-header-height);
+    min-height: 68px;
     box-sizing: border-box;
 }
 
@@ -97,6 +97,7 @@
     }
     .header {
         padding: var(--space-12) var(--space-16);
+        min-height: 60px;
     }
     .headerAvatar {
         width: 40px;
@@ -111,6 +112,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-8);
+    min-height: 0;
 }
 
 .messageList::-webkit-scrollbar {
@@ -217,8 +219,26 @@
     border-top: 1px solid var(--boder-soft-light);
     background-color: var(--surface-card-light);
     flex-shrink: 0;
-    height: var(--chat-footer-height);
+    min-height: 76px;
     box-sizing: border-box;
+}
+
+.dateSeparator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 24px 0;
+    position: relative;
+}
+
+.dateSeparator span {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--text-secondary-light);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 12px;
+    z-index: 1;
 }
 
 @media (max-width: 800px) {
@@ -227,5 +247,21 @@
     }
     .footer {
         padding: var(--space-12) var(--space-16);
+    }
+}
+
+.highlighted {
+    animation: highlightPulse 0.5s ease-out;
+    background: rgba(255, 200, 0, 0.2);
+    border-radius: var(--radius-md);
+}
+
+@keyframes highlightPulse {
+    0%,
+    100% {
+        background: transparent;
+    }
+    50% {
+        background: rgba(255, 200, 0, 0.3);
     }
 }
