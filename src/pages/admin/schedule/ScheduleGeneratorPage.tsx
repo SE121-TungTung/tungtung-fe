@@ -14,7 +14,9 @@ import { useSession } from '@/stores/session.store'
 import { type Role as UserRole } from '@/types/auth'
 import type {
     ScheduleGenerateRequest,
-    SessionBase,
+    ScheduleGenerateResponse,
+    SessionProposal,
+    ConflictInfo,
 } from '@/types/schedule.types'
 import { listUsers } from '@/lib/users'
 import ConflictMatrix from '@/components/feature/schedule/ConflictMatrix'
@@ -28,6 +30,7 @@ export default function ScheduleGeneratorPage() {
 
     const [showClassConflict, setShowClassConflict] = useState(false)
     const [showTeacherConflict, setShowTeacherConflict] = useState(false)
+    const [showConflictsModal, setShowConflictsModal] = useState(false)
 
     const session = useSession((state) => state.user)
     const location = useLocation()
@@ -47,14 +50,16 @@ export default function ScheduleGeneratorPage() {
         start_date: '',
         end_date: '',
         class_ids: [],
-        max_slots_per_session: 1,
+        max_slots_per_session: 2, // ✅ Changed default to 2
         prefer_morning: true,
         class_conflict: {},
         teacher_conflict: {},
     })
 
-    const [draftSessions, setDraftSessions] = useState<SessionBase[]>([])
-    const [stats, setStats] = useState<any>(null)
+    // ✅ Store complete generate response
+    const [generateResponse, setGenerateResponse] =
+        useState<ScheduleGenerateResponse | null>(null)
+    const [draftSessions, setDraftSessions] = useState<SessionProposal[]>([])
 
     const { data: teachersData } = useQuery({
         queryKey: ['teachers', 'all'],
@@ -71,15 +76,39 @@ export default function ScheduleGeneratorPage() {
         queryFn: () => listRooms({ page: 1, limit: 100 }),
     })
 
+    const [errorModal, setErrorModal] = useState<{
+        show: boolean
+        title: string
+        message: string
+    }>({ show: false, title: '', message: '' })
+
     const generateMutation = useMutation({
         mutationFn: scheduleApi.generateDraft,
-        onSuccess: (data) => {
+        onSuccess: (data: ScheduleGenerateResponse) => {
+            // ✅ Store complete response
+            setGenerateResponse(data)
             setDraftSessions(data.sessions || [])
-            setStats(data.statistics)
             setStep(2)
+
+            // ✅ Show conflicts modal if any
+            if (data.conflicts && data.conflicts.length > 0) {
+                setShowConflictsModal(true)
+            }
         },
         onError: (err: any) => {
-            alert('Lỗi tạo lịch: ' + (err.message || 'Unknown error'))
+            // ✅ Handle specific error types
+            if (err.status === 409) {
+                // Hard exception - không thể xếp đủ lịch
+                setErrorModal({
+                    show: true,
+                    title: '⚠️ Không thể xếp đủ lịch',
+                    message:
+                        err.message ||
+                        'Không đủ tài nguyên (phòng, giáo viên) để xếp đủ số buổi học yêu cầu trong khoảng thời gian này. Vui lòng:\n\n• Tăng khoảng thời gian (end_date)\n• Giảm số buổi học/tuần của lớp\n• Bỏ chặn một số khung giờ trong class_conflict/teacher_conflict',
+                })
+            } else {
+                alert('Lỗi tạo lịch: ' + (err.message || 'Unknown error'))
+            }
         },
     })
 
@@ -96,14 +125,17 @@ export default function ScheduleGeneratorPage() {
 
     const handleClassSelection = (classId: string) => {
         setFormData((prev) => {
-            const exists = prev.class_ids.includes(classId)
+            const exists = prev.class_ids?.includes(classId)
             if (exists) {
                 return {
                     ...prev,
-                    class_ids: prev.class_ids.filter((id) => id !== classId),
+                    class_ids: prev.class_ids?.filter((id) => id !== classId),
                 }
             } else {
-                return { ...prev, class_ids: [...prev.class_ids, classId] }
+                return {
+                    ...prev,
+                    class_ids: [...(prev.class_ids ?? []), classId],
+                }
             }
         })
     }
@@ -111,39 +143,56 @@ export default function ScheduleGeneratorPage() {
     const handleGenerate = () => {
         if (!formData.start_date || !formData.end_date)
             return alert('Vui lòng chọn ngày bắt đầu và kết thúc')
-        if (formData.class_ids.length === 0)
+        if (formData.class_ids?.length === 0)
             return alert('Vui lòng chọn ít nhất một lớp học')
+
+        if (formData.start_date > formData.end_date) {
+            return alert('Ngày bắt đầu phải trước ngày kết thúc')
+        }
 
         generateMutation.mutate(formData)
     }
 
     const handleApply = () => {
-        const payload = {
-            start_date: formData.start_date,
-            end_date: formData.end_date,
-            class_ids: formData.class_ids,
-            max_slots_per_session: formData.max_slots_per_session,
-            prefer_morning: formData.prefer_morning,
-            class_conflict: formData.class_conflict,
-            teacher_conflict: formData.teacher_conflict,
-            sessions: draftSessions,
-            total_classes: formData.class_ids.length,
-            successful_sessions: draftSessions.length,
-            conflict_count: 0,
-            conflicts: [],
-            statistics: stats || { success_rate: 100 },
+        if (!generateResponse) {
+            return alert('Không có dữ liệu để lưu')
         }
 
-        console.log('Payload gửi lên:', payload) // DEBUG
+        // ✅ Correct payload structure matching ScheduleApplyRequest
+        const payload = {
+            total_classes: generateResponse.total_classes,
+            successful_sessions: draftSessions.length, // Use current edited count
+            conflict_count: generateResponse.conflict_count,
+            sessions: draftSessions, // Use edited sessions
+            conflicts: generateResponse.conflicts,
+            statistics: generateResponse.statistics,
+        }
+
+        console.log('✅ Apply payload:', payload)
         applyMutation.mutate(payload)
     }
 
-    const countConflicts = (conflicts: any) => {
+    const countConflicts = (
+        conflicts?: Record<string, Record<string, number[]>>
+    ) => {
         if (!conflicts) return 0
         return Object.values(conflicts).reduce(
             (acc: number, dates: any) => acc + Object.keys(dates).length,
             0
         )
+    }
+
+    // ✅ Get conflict type label
+    const getConflictTypeLabel = (type: string) => {
+        const labels: Record<string, string> = {
+            teacher_busy: 'Giáo viên bận',
+            room_unavailable: 'Phòng không khả dụng',
+            no_slots: 'Không có khung giờ',
+            max_slot_violation: 'Vượt giới hạn số kíp',
+            request_class_conflict: 'Lớp bị cấm lịch',
+            request_teacher_conflict: 'Giáo viên bị cấm lịch',
+        }
+        return labels[type] || type
     }
 
     return (
@@ -254,13 +303,13 @@ export default function ScheduleGeneratorPage() {
                                 >
                                     <label style={{ fontWeight: 600 }}>
                                         Danh sách lớp (
-                                        {formData.class_ids.length})
+                                        {formData.class_ids?.length})
                                     </label>
                                     <ButtonPrimary
                                         size="sm"
                                         variant="outline"
                                         disabled={
-                                            formData.class_ids.length === 0
+                                            formData.class_ids?.length === 0
                                         }
                                         onClick={() =>
                                             setShowClassConflict(true)
@@ -301,7 +350,7 @@ export default function ScheduleGeneratorPage() {
                                             >
                                                 <input
                                                     type="checkbox"
-                                                    checked={formData.class_ids.includes(
+                                                    checked={formData.class_ids?.includes(
                                                         cls.id
                                                     )}
                                                     onChange={() =>
@@ -378,7 +427,7 @@ export default function ScheduleGeneratorPage() {
                     </div>
                 )}
 
-                {step === 2 && (
+                {step === 2 && generateResponse && (
                     <div
                         style={{
                             width: '100%',
@@ -387,6 +436,48 @@ export default function ScheduleGeneratorPage() {
                             gap: 24,
                         }}
                     >
+                        {/* ✅ Show conflict warning if any */}
+                        {generateResponse.conflicts.length > 0 && (
+                            <Card mode="light">
+                                <div
+                                    style={{
+                                        padding: 16,
+                                        background: '#fef3c7',
+                                        borderRadius: 8,
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                    }}
+                                >
+                                    <div>
+                                        <strong>
+                                            ⚠️ Có{' '}
+                                            {generateResponse.conflicts.length}{' '}
+                                            xung đột
+                                        </strong>
+                                        <div
+                                            style={{
+                                                fontSize: 14,
+                                                marginTop: 4,
+                                            }}
+                                        >
+                                            Một số buổi học không thể xếp được.
+                                            Xem chi tiết để điều chỉnh.
+                                        </div>
+                                    </div>
+                                    <ButtonPrimary
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() =>
+                                            setShowConflictsModal(true)
+                                        }
+                                    >
+                                        Xem chi tiết
+                                    </ButtonPrimary>
+                                </div>
+                            </Card>
+                        )}
+
                         <DraggableScheduleEditor
                             startDate={new Date(formData.start_date)}
                             sessions={draftSessions}
@@ -407,75 +498,75 @@ export default function ScheduleGeneratorPage() {
                             }
                         />
 
-                        {stats && (
-                            <Card title="Thống kê">
-                                <div
-                                    style={{
-                                        display: 'grid',
-                                        gridTemplateColumns: '1fr 1fr 1fr',
-                                        gap: 16,
-                                    }}
-                                >
-                                    <div>
-                                        <div
-                                            style={{
-                                                fontSize: 24,
-                                                fontWeight: 600,
-                                            }}
-                                        >
-                                            {stats.successful_sessions ||
-                                                draftSessions.length}
-                                        </div>
-                                        <div
-                                            style={{
-                                                fontSize: 12,
-                                                color: '#666',
-                                            }}
-                                        >
-                                            Buổi học thành công
-                                        </div>
+                        {/* ✅ Updated Statistics */}
+                        <Card title="Thống kê">
+                            <div
+                                style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: '1fr 1fr 1fr',
+                                    gap: 16,
+                                }}
+                            >
+                                <div>
+                                    <div
+                                        style={{
+                                            fontSize: 24,
+                                            fontWeight: 600,
+                                        }}
+                                    >
+                                        {draftSessions.length}
                                     </div>
-                                    <div>
-                                        <div
-                                            style={{
-                                                fontSize: 24,
-                                                fontWeight: 600,
-                                                color: '#ef4444',
-                                            }}
-                                        >
-                                            {stats.conflict_count || 0}
-                                        </div>
-                                        <div
-                                            style={{
-                                                fontSize: 12,
-                                                color: '#666',
-                                            }}
-                                        >
-                                            Xung đột
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div
-                                            style={{
-                                                fontSize: 24,
-                                                fontWeight: 600,
-                                                color: '#10b981',
-                                            }}
-                                        >
-                                            {stats.success_rate || 100}%
-                                        </div>
-                                        <div
-                                            style={{
-                                                fontSize: 12,
-                                                color: '#666',
-                                            }}
-                                        >
-                                            Tỷ lệ thành công
-                                        </div>
+                                    <div
+                                        style={{
+                                            fontSize: 12,
+                                            color: '#666',
+                                        }}
+                                    >
+                                        Buổi học thành công
                                     </div>
                                 </div>
-                            </Card>
-                        )}
+                                <div>
+                                    <div
+                                        style={{
+                                            fontSize: 24,
+                                            fontWeight: 600,
+                                            color: '#ef4444',
+                                        }}
+                                    >
+                                        {generateResponse.conflict_count || 0}
+                                    </div>
+                                    <div
+                                        style={{
+                                            fontSize: 12,
+                                            color: '#666',
+                                        }}
+                                    >
+                                        Xung đột
+                                    </div>
+                                </div>
+                                <div>
+                                    <div
+                                        style={{
+                                            fontSize: 24,
+                                            fontWeight: 600,
+                                            color: '#10b981',
+                                        }}
+                                    >
+                                        {generateResponse.statistics
+                                            .success_rate || 0}
+                                        %
+                                    </div>
+                                    <div
+                                        style={{
+                                            fontSize: 12,
+                                            color: '#666',
+                                        }}
+                                    >
+                                        Tỷ lệ thành công
+                                    </div>
+                                </div>
+                            </div>
+                        </Card>
 
                         <Card>
                             <div className={s.actions}>
@@ -488,6 +579,7 @@ export default function ScheduleGeneratorPage() {
                                 <ButtonPrimary
                                     onClick={handleApply}
                                     loading={applyMutation.isPending}
+                                    disabled={draftSessions.length === 0}
                                 >
                                     Lưu kết quả
                                 </ButtonPrimary>
@@ -497,6 +589,7 @@ export default function ScheduleGeneratorPage() {
                 )}
             </main>
 
+            {/* Class Conflict Modal */}
             <Modal
                 isOpen={showClassConflict}
                 onClose={() => setShowClassConflict(false)}
@@ -516,7 +609,7 @@ export default function ScheduleGeneratorPage() {
                         endDate={formData.end_date}
                         items={
                             classesData?.items.filter((c: any) =>
-                                formData.class_ids.includes(c.id)
+                                formData.class_ids?.includes(c.id)
                             ) || []
                         }
                         value={formData.class_conflict || {}}
@@ -542,6 +635,7 @@ export default function ScheduleGeneratorPage() {
                 </div>
             </Modal>
 
+            {/* Teacher Conflict Modal */}
             <Modal
                 isOpen={showTeacherConflict}
                 onClose={() => setShowTeacherConflict(false)}
@@ -588,6 +682,182 @@ export default function ScheduleGeneratorPage() {
                         onClick={() => setShowTeacherConflict(false)}
                     >
                         Xong
+                    </ButtonPrimary>
+                </div>
+            </Modal>
+
+            {/* ✅ Conflicts Details Modal */}
+            <Modal
+                isOpen={showConflictsModal}
+                onClose={() => setShowConflictsModal(false)}
+                title={`Chi tiết xung đột (${generateResponse?.conflicts.length || 0})`}
+            >
+                <div
+                    style={{
+                        width: '700px',
+                        maxHeight: '500px',
+                        overflowY: 'auto',
+                    }}
+                >
+                    {generateResponse?.conflicts.map((conflict, idx) => (
+                        <div
+                            key={idx}
+                            style={{
+                                padding: 16,
+                                marginBottom: 12,
+                                background: '#fef3c7',
+                                borderRadius: 8,
+                                borderLeft: '4px solid #f59e0b',
+                            }}
+                        >
+                            <div style={{ fontWeight: 600, marginBottom: 8 }}>
+                                {conflict.class_name} - {conflict.session_date}
+                            </div>
+                            <div
+                                style={{
+                                    fontSize: 14,
+                                    color: '#666',
+                                    marginBottom: 4,
+                                }}
+                            >
+                                <strong>Loại:</strong>{' '}
+                                {getConflictTypeLabel(conflict.conflict_type)}
+                            </div>
+                            <div
+                                style={{
+                                    fontSize: 14,
+                                    color: '#666',
+                                    marginBottom: 4,
+                                }}
+                            >
+                                <strong>Kíp:</strong>{' '}
+                                {conflict.time_slots.join(', ')}
+                            </div>
+                            <div
+                                style={{
+                                    fontSize: 14,
+                                    color: '#666',
+                                    marginBottom: 8,
+                                }}
+                            >
+                                <strong>Lý do:</strong> {conflict.reason}
+                            </div>
+
+                            {conflict.suggestions.length > 0 && (
+                                <div
+                                    style={{
+                                        marginTop: 8,
+                                        paddingTop: 8,
+                                        borderTop: '1px solid #fcd34d',
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            fontSize: 13,
+                                            fontWeight: 600,
+                                            marginBottom: 4,
+                                        }}
+                                    >
+                                        💡 Đề xuất:
+                                    </div>
+                                    {conflict.suggestions.map((sug, sidx) => (
+                                        <div
+                                            key={sidx}
+                                            style={{
+                                                fontSize: 13,
+                                                marginLeft: 16,
+                                            }}
+                                        >
+                                            •{' '}
+                                            {sug.type === 'time_shift'
+                                                ? 'Đổi giờ'
+                                                : 'Đổi ngày'}
+                                            : {sug.date} - Kíp{' '}
+                                            {sug.time_slots.join(', ')}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+                <div
+                    style={{
+                        marginTop: 16,
+                        textAlign: 'right',
+                        paddingTop: 16,
+                        borderTop: '1px solid #e5e7eb',
+                    }}
+                >
+                    <ButtonPrimary onClick={() => setShowConflictsModal(false)}>
+                        Đóng
+                    </ButtonPrimary>
+                </div>
+            </Modal>
+
+            {/* ✅ NEW: Error Modal (Hard Exception) */}
+            <Modal
+                isOpen={errorModal.show}
+                onClose={() =>
+                    setErrorModal({ show: false, title: '', message: '' })
+                }
+                title={errorModal.title}
+            >
+                <div style={{ width: '600px', padding: '20px 0' }}>
+                    <div
+                        style={{
+                            fontSize: 14,
+                            lineHeight: 1.6,
+                            whiteSpace: 'pre-line',
+                            color: '#374151',
+                        }}
+                    >
+                        {errorModal.message}
+                    </div>
+
+                    <div
+                        style={{
+                            marginTop: 20,
+                            padding: 16,
+                            background: '#f3f4f6',
+                            borderRadius: 8,
+                            fontSize: 13,
+                            color: '#6b7280',
+                        }}
+                    >
+                        <strong>💡 Giải pháp:</strong>
+                        <ul style={{ marginTop: 8, marginLeft: 20 }}>
+                            <li>Tăng khoảng thời gian (end_date)</li>
+                            <li>
+                                Giảm số buổi học/tuần (sessions_per_week) trong
+                                cấu hình lớp
+                            </li>
+                            <li>
+                                Bỏ chặn một số khung giờ trong Cấm lịch Lớp/Giáo
+                                viên
+                            </li>
+                            <li>Thêm phòng học hoặc giáo viên mới</li>
+                        </ul>
+                    </div>
+                </div>
+                <div
+                    style={{
+                        marginTop: 16,
+                        textAlign: 'right',
+                        paddingTop: 16,
+                        borderTop: '1px solid #e5e7eb',
+                    }}
+                >
+                    <ButtonPrimary
+                        onClick={() =>
+                            setErrorModal({
+                                show: false,
+                                title: '',
+                                message: '',
+                            })
+                        }
+                    >
+                        Đã hiểu
                     </ButtonPrimary>
                 </div>
             </Modal>

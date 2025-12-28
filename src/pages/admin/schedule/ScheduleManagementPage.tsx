@@ -11,6 +11,7 @@ import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
 import DefaultAvatar from '@/assets/avatar-placeholder.png'
 import { useSession } from '@/stores/session.store'
 import { type Role as UserRole } from '@/types/auth'
+import type { WeeklySession } from '@/types/schedule.types'
 
 export default function ScheduleManagementPage() {
     const navigate = useNavigate()
@@ -34,20 +35,29 @@ export default function ScheduleManagementPage() {
     const startWeek = startOfWeek(currentDate, { weekStartsOn: 1 })
     const endWeek = new Date(startWeek.getTime() + 6 * 24 * 60 * 60 * 1000)
 
-    // Gọi API
-    const { data: sessions = [], isLoading } = useQuery({
-        // Mặc định sessions = [] để tránh lỗi undefined
+    // ✅ Updated: Properly handle response structure
+    const {
+        data: weeklyData,
+        isLoading,
+        error,
+    } = useQuery({
         queryKey: ['schedule', format(startWeek, 'yyyy-MM-dd')],
-        queryFn: () =>
-            scheduleApi.getWeekly({
+        queryFn: async () => {
+            const response = await scheduleApi.getWeekly({
                 start_date: format(startWeek, 'yyyy-MM-dd'),
                 end_date: format(endWeek, 'yyyy-MM-dd'),
-            }),
+            })
+            return response
+        },
     })
+
+    // ✅ Extract sessions array with proper type
+    const sessions: WeeklySession[] = weeklyData?.schedule || []
 
     // Xử lý chuyển tuần
     const handlePrevWeek = () => setCurrentDate(subWeeks(currentDate, 1))
     const handleNextWeek = () => setCurrentDate(addWeeks(currentDate, 1))
+    const handleToday = () => setCurrentDate(new Date())
 
     return (
         <div className={s.pageWrapper}>
@@ -72,10 +82,11 @@ export default function ScheduleManagementPage() {
                 <div className={s.controls}>
                     <ButtonPrimary
                         size="sm"
-                        variant="ghost"
+                        variant="outline"
                         onClick={handlePrevWeek}
+                        disabled={isLoading}
                     >
-                        ← Tuần trước
+                        ←
                     </ButtonPrimary>
                     <div className={s.dateDisplay}>
                         {format(startWeek, 'dd/MM')} -{' '}
@@ -83,12 +94,33 @@ export default function ScheduleManagementPage() {
                     </div>
                     <ButtonPrimary
                         size="sm"
-                        variant="ghost"
+                        variant="outline"
                         onClick={handleNextWeek}
+                        disabled={isLoading}
                     >
-                        Tuần sau →
+                        →
+                    </ButtonPrimary>
+                    <ButtonPrimary
+                        size="sm"
+                        variant="subtle"
+                        onClick={handleToday}
+                        disabled={isLoading}
+                    >
+                        Hôm nay
                     </ButtonPrimary>
                     <div style={{ flex: 1 }}></div> {/* Spacer */}
+                    {/* ✅ Show session count */}
+                    {sessions.length > 0 && (
+                        <div
+                            style={{
+                                fontSize: 14,
+                                color: '#666',
+                                marginRight: 16,
+                            }}
+                        >
+                            {sessions.length} buổi học
+                        </div>
+                    )}
                     <ButtonPrimary
                         onClick={() => navigate('/admin/schedule/generate')}
                     >
@@ -96,14 +128,83 @@ export default function ScheduleManagementPage() {
                     </ButtonPrimary>
                 </div>
 
-                {isLoading ? (
-                    <div>Đang tải dữ liệu...</div>
-                ) : (
-                    // Truyền mảng sessions đã được đảm bảo là Array
-                    <WeeklyCalendar
-                        startDate={startWeek}
-                        sessions={Array.isArray(sessions) ? sessions : []}
-                    />
+                {/* ✅ Better loading and error states */}
+                {isLoading && (
+                    <div
+                        style={{
+                            padding: 40,
+                            textAlign: 'center',
+                            color: '#666',
+                        }}
+                    >
+                        Đang tải dữ liệu...
+                    </div>
+                )}
+
+                {error && (
+                    <div
+                        style={{
+                            padding: 40,
+                            textAlign: 'center',
+                            color: '#ef4444',
+                            background: '#fee',
+                            borderRadius: 8,
+                        }}
+                    >
+                        ❌ Lỗi tải dữ liệu: {(error as Error).message}
+                    </div>
+                )}
+
+                {!isLoading && !error && (
+                    <>
+                        {sessions.length === 0 ? (
+                            <div
+                                style={{
+                                    padding: 60,
+                                    textAlign: 'center',
+                                    background: '#f9fafb',
+                                    borderRadius: 12,
+                                    border: '2px dashed #e5e7eb',
+                                }}
+                            >
+                                <div style={{ fontSize: 48, marginBottom: 16 }}>
+                                    📅
+                                </div>
+                                <div
+                                    style={{
+                                        fontSize: 18,
+                                        fontWeight: 500,
+                                        marginBottom: 8,
+                                        color: 'var(--text-primary-light)',
+                                    }}
+                                >
+                                    Chưa có lịch học nào
+                                </div>
+                                <div
+                                    style={{
+                                        fontSize: 14,
+                                        color: '#666',
+                                        marginBottom: 24,
+                                    }}
+                                >
+                                    Bắt đầu bằng cách tạo lịch tự động hoặc thêm
+                                    thủ công
+                                </div>
+                                <ButtonPrimary
+                                    onClick={() =>
+                                        navigate('/admin/schedule/generate')
+                                    }
+                                >
+                                    + Tạo lịch ngay
+                                </ButtonPrimary>
+                            </div>
+                        ) : (
+                            <WeeklyCalendar
+                                startDate={startWeek}
+                                sessions={sessions}
+                            />
+                        )}
+                    </>
                 )}
             </main>
         </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { messageApi } from '@/lib/message'
 import { listUsers } from '@/lib/users'
@@ -12,6 +12,7 @@ import { Modal } from '@/components/core/Modal'
 import { GroupAvatar } from './GroupAvatar'
 import { MessageSearch } from './MessageSearch'
 
+import DeleteIcon from '@/assets/Trash Bin Delete.svg'
 import SearchIcon from '@/assets/Action Eye Tracking.svg'
 import AddUserIcon from '@/assets/User Add.svg'
 import EditIcon from '@/assets/Edit Pen.svg'
@@ -30,6 +31,7 @@ interface UserResult {
 interface ChatDetailsPanelProps {
     conversation: Conversation
     currentUserId: string
+    currentUserRole?: string
     onClose: () => void
     onNavigateToMessage?: (messageId: string) => void
 }
@@ -37,29 +39,46 @@ interface ChatDetailsPanelProps {
 export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
     conversation,
     currentUserId,
+    currentUserRole,
     onClose,
     onNavigateToMessage,
 }) => {
     const [showSearch, setShowSearch] = useState(false)
     const queryClient = useQueryClient()
-    const { isGroup, participants } = conversation
+    const { isGroup } = conversation
+
+    // FETCH GROUP DETAILS
+    const { data: groupDetails, isLoading: isLoadingDetails } = useQuery({
+        queryKey: ['groupDetails', conversation.id],
+        queryFn: () =>
+            messageApi.getGroupDetails(conversation.id, currentUserId),
+        enabled: isGroup,
+        staleTime: 60 * 1000,
+    })
+
+    const currentConversationData =
+        isGroup && groupDetails ? groupDetails : conversation
+    const participants = currentConversationData.participants || []
 
     const [isRenameModalOpen, setIsRenameModalOpen] = useState(false)
     const [newGroupName, setNewGroupName] = useState('')
-
     const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false)
-
     const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false)
     const [memberSearchTerm, setMemberSearchTerm] = useState('')
     const [selectedUsersToAdd, setSelectedUsersToAdd] = useState<UserResult[]>(
         []
     )
 
+    // Fix: Removed unused avatarPreview state
+    const [avatarFile, setAvatarFile] = useState<File | null>(null)
+    const fileInputRef = useRef<HTMLInputElement>(null)
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+
     useEffect(() => {
-        if (isRenameModalOpen && conversation.name) {
-            setNewGroupName(conversation.name)
+        if (isRenameModalOpen && currentConversationData.name) {
+            setNewGroupName(currentConversationData.name)
         }
-    }, [isRenameModalOpen, conversation.name])
+    }, [isRenameModalOpen, currentConversationData.name])
 
     useEffect(() => {
         if (isAddMemberModalOpen) {
@@ -72,8 +91,8 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
         ? participants.find((p) => p.id !== currentUserId)
         : null
 
-    const displayName = conversation.isGroup
-        ? conversation.name
+    const displayName = isGroup
+        ? currentConversationData.name
         : otherParticipant
           ? `${otherParticipant.firstName} ${otherParticipant.lastName}`.trim() ||
             otherParticipant.fullName
@@ -85,9 +104,7 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
           ? 'Đang hoạt động'
           : 'Không hoạt động'
 
-    // ==========================================
-    // QUERY: Tìm kiếm User để thêm vào nhóm
-    // ==========================================
+    // QUERY SEARCH USERS
     const { data: searchResults = [], isLoading: isSearching } = useQuery({
         queryKey: ['users', 'search', memberSearchTerm],
         queryFn: async () => {
@@ -108,29 +125,24 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
         staleTime: 5000,
     })
 
-    // Lọc bỏ những user đã có trong nhóm
     const filteredSearchResults = searchResults.filter(
         (user) => !participants.some((p) => p.id === user.id)
     )
 
-    // ==========================================
     // MUTATIONS
-    // ==========================================
-
     const renameGroupMutation = useMutation({
         mutationFn: (newTitle: string) =>
             messageApi.updateGroup(conversation.id, { title: newTitle }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['conversations'] })
+            queryClient.invalidateQueries({
+                queryKey: ['groupDetails', conversation.id],
+            })
             setIsRenameModalOpen(false)
         },
         onError: (error: any) => {
-            console.error('Failed to rename group:', error)
-            const msg =
-                error?.response?.data?.detail ||
-                error?.message ||
-                'Không thể đổi tên nhóm.'
-            alert(msg)
+            console.error(error) // Fix: Use 'error'
+            alert(error?.message || 'Lỗi đổi tên')
         },
     })
 
@@ -143,11 +155,8 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
             onClose()
         },
         onError: (error: any) => {
-            console.error('Failed to leave group:', error)
-            const backendMsg = error?.response?.data?.detail
-            const msg = backendMsg || error?.message || 'Lỗi khi rời nhóm.'
-            alert(`⚠️ ${msg}`)
-            setIsLeaveModalOpen(false)
+            console.error(error) // Fix: Use 'error'
+            alert('Lỗi khi rời nhóm')
         },
     })
 
@@ -157,51 +166,85 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['conversations'] })
             queryClient.invalidateQueries({
-                queryKey: ['groups', conversation.id],
+                queryKey: ['groupDetails', conversation.id],
             })
             setIsAddMemberModalOpen(false)
-            alert('Đã thêm thành viên thành công!')
+            alert('Đã thêm thành viên!')
         },
         onError: (error: any) => {
-            console.error('Failed to add member:', error)
-            const msg =
-                error?.response?.data?.detail || 'Không thể thêm thành viên.'
-            alert(msg)
+            console.error(error) // Fix: Use 'error'
+            alert('Lỗi thêm thành viên')
         },
     })
 
-    // ==========================================
-    // HANDLERS
-    // ==========================================
+    const updateGroupAvatarMutation = useMutation({
+        mutationFn: (file: File) =>
+            messageApi.updateGroup(conversation.id, { avatar: file }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['conversations'] })
+            queryClient.invalidateQueries({
+                queryKey: ['groupDetails', conversation.id],
+            })
+            alert('Đã cập nhật ảnh đại diện!')
+            setAvatarFile(null)
+        },
+    })
 
+    const deleteConversationMutation = useMutation({
+        mutationFn: () => messageApi.deleteConversation(conversation.id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['conversations'] })
+            setIsDeleteModalOpen(false)
+            onClose()
+        },
+        onError: (error: any) => {
+            // Fix: Use 'error'
+            console.error(error)
+            alert('Không thể xóa cuộc trò chuyện')
+        },
+    })
+
+    // HANDLERS
     const handleRenameSubmit = () => {
-        if (newGroupName && newGroupName.trim() !== conversation.name) {
+        if (
+            newGroupName &&
+            newGroupName.trim() !== currentConversationData.name
+        ) {
             renameGroupMutation.mutate(newGroupName.trim())
         } else {
             setIsRenameModalOpen(false)
         }
     }
 
-    const handleLeaveSubmit = () => {
-        leaveGroupMutation.mutate()
-    }
+    const handleLeaveSubmit = () => leaveGroupMutation.mutate()
 
     const handleAddMemberSubmit = () => {
         if (selectedUsersToAdd.length > 0) {
-            const userIds = selectedUsersToAdd.map((u) => u.id)
-            addMemberMutation.mutate(userIds)
+            addMemberMutation.mutate(selectedUsersToAdd.map((u) => u.id))
         }
     }
 
+    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (
+            file &&
+            file.type.startsWith('image/') &&
+            file.size <= 5 * 1024 * 1024
+        ) {
+            setAvatarFile(file)
+            // Fix: Removed unused reader logic
+        }
+    }
+
+    const handleDeleteConversation = () => setIsDeleteModalOpen(true)
+
     const toggleSelectUser = (user: UserResult) => {
         const isSelected = selectedUsersToAdd.some((u) => u.id === user.id)
-        if (isSelected) {
+        if (isSelected)
             setSelectedUsersToAdd((prev) =>
                 prev.filter((u) => u.id !== user.id)
             )
-        } else {
-            setSelectedUsersToAdd((prev) => [...prev, user])
-        }
+        else setSelectedUsersToAdd((prev) => [...prev, user])
     }
 
     return (
@@ -237,9 +280,10 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                     {showSearch ? (
                         <MessageSearch
                             roomId={conversation.id}
-                            onNavigateToMessage={(messageId) => {
-                                onNavigateToMessage?.(messageId)
-                            }}
+                            // FIX: Wrapper function để xử lý undefined
+                            onNavigateToMessage={(id) =>
+                                onNavigateToMessage?.(id)
+                            }
                             onClose={() => setShowSearch(false)}
                         />
                     ) : (
@@ -249,51 +293,103 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                                     <h5 className={s.sectionTitle}>
                                         Thành viên ({participants.length})
                                     </h5>
-                                    <div className={s.memberList}>
-                                        {participants.map((p) => (
-                                            <div
-                                                key={p.id}
-                                                className={s.memberItem}
-                                            >
-                                                <img
-                                                    src={
-                                                        p.avatarUrl || AvatarImg
-                                                    }
-                                                    className={s.memberAvatar}
-                                                    alt=""
-                                                />
-                                                <div className={s.memberInfo}>
-                                                    <div
-                                                        className={s.memberName}
-                                                    >
-                                                        {p.firstName}{' '}
-                                                        {p.lastName}
-                                                    </div>
-                                                    <div
-                                                        className={
-                                                            s.memberStatus
+                                    {isLoadingDetails ? (
+                                        <div
+                                            style={{
+                                                padding: '10px',
+                                                textAlign: 'center',
+                                                color: '#888',
+                                                fontSize: '13px',
+                                            }}
+                                        >
+                                            Đang tải danh sách...
+                                        </div>
+                                    ) : (
+                                        <div className={s.memberList}>
+                                            {participants.map((p) => (
+                                                <div
+                                                    key={p.id}
+                                                    className={s.memberItem}
+                                                >
+                                                    <img
+                                                        src={
+                                                            p.avatarUrl ||
+                                                            AvatarImg
                                                         }
+                                                        className={
+                                                            s.memberAvatar
+                                                        }
+                                                        alt=""
+                                                    />
+                                                    <div
+                                                        className={s.memberInfo}
                                                     >
-                                                        {p.role === 'admin' ? (
-                                                            <span
-                                                                style={{
-                                                                    color: 'var(--brand-primary-500-light)',
-                                                                    fontWeight: 600,
-                                                                    fontSize: 11,
-                                                                }}
-                                                            >
-                                                                Quản trị viên
-                                                            </span>
-                                                        ) : p.isOnline ? (
-                                                            'Đang hoạt động'
-                                                        ) : (
-                                                            'Không hoạt động'
-                                                        )}
+                                                        <div
+                                                            className={
+                                                                s.memberName
+                                                            }
+                                                        >
+                                                            {p.firstName}{' '}
+                                                            {p.lastName}
+                                                            {p.id ===
+                                                                currentUserId && (
+                                                                <span
+                                                                    style={{
+                                                                        color: '#888',
+                                                                        fontWeight:
+                                                                            'normal',
+                                                                        marginLeft: 4,
+                                                                    }}
+                                                                >
+                                                                    (Bạn)
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <div
+                                                            className={
+                                                                s.memberStatus
+                                                            }
+                                                        >
+                                                            {p.role ===
+                                                            'admin' ? (
+                                                                <span
+                                                                    style={{
+                                                                        color: 'var(--brand-primary-500-light)',
+                                                                        fontWeight: 700,
+                                                                        fontSize: 11,
+                                                                        backgroundColor:
+                                                                            'var(--brand-primary-50-light)',
+                                                                        padding:
+                                                                            '2px 6px',
+                                                                        borderRadius:
+                                                                            '4px',
+                                                                        display:
+                                                                            'inline-block',
+                                                                        marginTop:
+                                                                            '2px',
+                                                                    }}
+                                                                >
+                                                                    Quản trị
+                                                                    viên
+                                                                </span>
+                                                            ) : p.isOnline ? (
+                                                                <span
+                                                                    style={{
+                                                                        color: '#10b981',
+                                                                    }}
+                                                                >
+                                                                    Đang hoạt
+                                                                    động
+                                                                </span>
+                                                            ) : (
+                                                                'Không hoạt động'
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        ))}
-                                    </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
@@ -306,7 +402,7 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                                                 setIsAddMemberModalOpen(true)
                                             }
                                         >
-                                            <img src={AddUserIcon} alt="Add" />
+                                            <img src={AddUserIcon} alt="Add" />{' '}
                                             Thêm thành viên
                                         </li>
                                         <li
@@ -315,9 +411,61 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                                                 setIsRenameModalOpen(true)
                                             }
                                         >
-                                            <img src={EditIcon} alt="Edit" />
+                                            <img src={EditIcon} alt="Edit" />{' '}
                                             Đổi tên nhóm
                                         </li>
+                                        {isGroup &&
+                                            currentUserRole === 'admin' && (
+                                                <>
+                                                    <input
+                                                        ref={fileInputRef}
+                                                        type="file"
+                                                        accept="image/*"
+                                                        onChange={
+                                                            handleAvatarChange
+                                                        }
+                                                        style={{
+                                                            display: 'none',
+                                                        }}
+                                                    />
+                                                    <li
+                                                        className={s.menuItem}
+                                                        onClick={() =>
+                                                            fileInputRef.current?.click()
+                                                        }
+                                                    >
+                                                        <img
+                                                            src={EditIcon}
+                                                            alt="Avatar"
+                                                        />{' '}
+                                                        Đổi ảnh đại diện
+                                                    </li>
+                                                    {avatarFile && (
+                                                        <div
+                                                            style={{
+                                                                padding:
+                                                                    '0 16px 12px',
+                                                            }}
+                                                        >
+                                                            <ButtonPrimary
+                                                                size="sm"
+                                                                onClick={() =>
+                                                                    updateGroupAvatarMutation.mutate(
+                                                                        avatarFile
+                                                                    )
+                                                                }
+                                                                disabled={
+                                                                    updateGroupAvatarMutation.isPending
+                                                                }
+                                                            >
+                                                                {updateGroupAvatarMutation.isPending
+                                                                    ? 'Đang tải...'
+                                                                    : 'Lưu ảnh mới'}
+                                                            </ButtonPrimary>
+                                                        </div>
+                                                    )}
+                                                </>
+                                            )}
                                         <li
                                             className={s.menuItem}
                                             onClick={() => setShowSearch(true)}
@@ -325,7 +473,7 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                                             <img
                                                 src={SearchIcon}
                                                 alt="Search"
-                                            />
+                                            />{' '}
                                             Tìm kiếm tin nhắn
                                         </li>
                                         <li className={s.divider} />
@@ -335,9 +483,26 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                                                 setIsLeaveModalOpen(true)
                                             }
                                         >
-                                            <img src={LeaveIcon} alt="Leave" />
+                                            <img src={LeaveIcon} alt="Leave" />{' '}
                                             Rời khỏi nhóm
                                         </li>
+                                        {currentUserRole === 'admin' && (
+                                            <>
+                                                <li className={s.divider} />
+                                                <li
+                                                    className={`${s.menuItem} ${s.danger}`}
+                                                    onClick={
+                                                        handleDeleteConversation
+                                                    }
+                                                >
+                                                    <img
+                                                        src={DeleteIcon}
+                                                        alt="Delete"
+                                                    />{' '}
+                                                    Xóa nhóm vĩnh viễn
+                                                </li>
+                                            </>
+                                        )}
                                     </>
                                 ) : (
                                     <>
@@ -348,7 +513,7 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                                             <img
                                                 src={SearchIcon}
                                                 alt="Search"
-                                            />
+                                            />{' '}
                                             Tìm kiếm tin nhắn
                                         </li>
                                         <li className={s.divider} />
@@ -360,8 +525,18 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                                                 )
                                             }
                                         >
-                                            <img src={BlockIcon} alt="Block" />
+                                            <img src={BlockIcon} alt="Block" />{' '}
                                             Chặn người này
+                                        </li>
+                                        <li
+                                            className={`${s.menuItem} ${s.danger}`}
+                                            onClick={handleDeleteConversation}
+                                        >
+                                            <img
+                                                src={DeleteIcon}
+                                                alt="Delete"
+                                            />{' '}
+                                            Xóa cuộc trò chuyện
                                         </li>
                                     </>
                                 )}
@@ -371,7 +546,7 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                 </div>
             </div>
 
-            {/* ✅ 1. MODAL ĐỔI TÊN NHÓM */}
+            {/* MODALS */}
             <Modal
                 isOpen={isRenameModalOpen}
                 onClose={() => setIsRenameModalOpen(false)}
@@ -415,7 +590,6 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                 </div>
             </Modal>
 
-            {/* ✅ 2. MODAL RỜI NHÓM */}
             <Modal
                 isOpen={isLeaveModalOpen}
                 onClose={() => setIsLeaveModalOpen(false)}
@@ -454,12 +628,10 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                     }}
                 >
                     Bạn có chắc chắn muốn rời khỏi nhóm{' '}
-                    <strong>{conversation.name}</strong> không? Bạn sẽ không thể
-                    nhận tin nhắn từ nhóm này nữa.
+                    <strong>{currentConversationData.name}</strong> không?
                 </p>
             </Modal>
 
-            {/* ✅ 3. MODAL THÊM THÀNH VIÊN */}
             <Modal
                 isOpen={isAddMemberModalOpen}
                 onClose={() => setIsAddMemberModalOpen(false)}
@@ -513,8 +685,6 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                             />
                         }
                     />
-
-                    {/* Danh sách người đã chọn */}
                     {selectedUsersToAdd.length > 0 && (
                         <div
                             style={{
@@ -552,8 +722,6 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                             ))}
                         </div>
                     )}
-
-                    {/* Danh sách kết quả tìm kiếm */}
                     <div
                         style={{
                             flex: 1,
@@ -583,7 +751,7 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                                     <div
                                         key={user.id}
                                         onClick={() => toggleSelectUser(user)}
-                                        className={s.memberItem} // Tái sử dụng class memberItem
+                                        className={s.memberItem}
                                         style={{
                                             cursor: 'pointer',
                                             backgroundColor: isSelected
@@ -629,12 +797,56 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                                     marginTop: '20px',
                                 }}
                             >
-                                Không tìm thấy người dùng phù hợp hoặc đã có
-                                trong nhóm.
+                                Không tìm thấy.
                             </p>
                         ) : null}
                     </div>
                 </div>
+            </Modal>
+
+            <Modal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                title={isGroup ? 'Xóa nhóm?' : 'Xóa cuộc trò chuyện?'}
+                footer={
+                    <div
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'flex-end',
+                            gap: '10px',
+                        }}
+                    >
+                        <ButtonGhost
+                            onClick={() => setIsDeleteModalOpen(false)}
+                        >
+                            Hủy
+                        </ButtonGhost>
+                        <ButtonPrimary
+                            onClick={() => deleteConversationMutation.mutate()}
+                            disabled={deleteConversationMutation.isPending}
+                            style={{
+                                backgroundColor:
+                                    'var(--status-danger-500-light)',
+                                borderColor: 'var(--status-danger-500-light)',
+                            }}
+                        >
+                            {deleteConversationMutation.isPending
+                                ? 'Đang xóa...'
+                                : 'Xóa'}
+                        </ButtonPrimary>
+                    </div>
+                }
+            >
+                <p
+                    style={{
+                        color: 'var(--text-secondary-light)',
+                        lineHeight: 1.5,
+                    }}
+                >
+                    {isGroup
+                        ? `Bạn có chắc muốn xóa nhóm "${currentConversationData.name}"?`
+                        : `Bạn có chắc muốn xóa cuộc trò chuyện với ${displayName}?`}
+                </p>
             </Modal>
         </>
     )

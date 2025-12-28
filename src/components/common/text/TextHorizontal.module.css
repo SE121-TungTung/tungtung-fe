@@ -4,11 +4,17 @@
 
     display: flex;
     align-items: center;
-    gap: 24px;
+    gap: 16px;
     align-self: stretch;
     flex-direction: column;
     text-align: center;
+
+    border-radius: 12px;
+    padding: 12px;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
 }
+
 .light {
     --text-primary: var(--text-primary-light);
     --text-secondary: var(--text-secondary-light);
@@ -18,10 +24,24 @@
     --text-secondary: var(--text-secondary-dark);
 }
 
+.clickable {
+    cursor: pointer;
+}
+
+.clickable:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+    transform: translateY(-2px);
+}
+
+.dark.clickable:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
 @media (min-width: 768px) {
     .textHorizontal {
         flex-direction: row;
         text-align: left;
+        padding: 12px 16px;
     }
 }
 
@@ -45,37 +65,46 @@
     line-height: 1.4;
     margin: 0;
 }
+
 .ctaButton {
     display: inline-flex;
     flex-shrink: 0;
     align-items: center;
-    gap: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    box-shadow: var(--shadow-blur-sm);
-    padding: 8px 16px;
-    color: #fff;
-    background: linear-gradient(180deg, #ffffff33 0%, #ffffff1a 100%);
-    cursor: pointer;
-    transition:
-        background 0.15s,
-        border-color 0.15s;
+    gap: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    padding: 6px 12px;
+    background: transparent;
+    transition: all 0.2s;
 }
 
-.ctaButton:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.2);
+.clickable:hover .ctaButton {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.2);
 }
 
 .ctaText {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
-    line-height: 1;
+    color: var(--text-primary);
 }
 
 .arrowRight {
-    flex-shrink: 0;
-    width: 16px;
-    height: 16px;
-    overflow: hidden;
+    width: 14px;
+    height: 14px;
+    filter: brightness(0.5);
+}
+
+.arrowRightBase {
+    width: 20px;
+    height: 20px;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: all 0.2s ease;
+    filter: grayscale(1);
+}
+
+.clickable:hover .arrowRightBase {
+    opacity: 0.5;
+    transform: translateX(0);
 }

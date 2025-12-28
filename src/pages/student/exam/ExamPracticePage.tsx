@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import s from './ExamPracticePage.module.css'
 
 import NavigationMenu from '@/components/common/menu/NavigationMenu'
@@ -22,99 +22,52 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
 import { useSession } from '@/stores/session.store'
 
-const mockExams: ExamInfo[] = [
-    {
-        id: 'l1',
-        title: 'IELTS Listening Practice Test 1',
-        skill: 'listening',
-        durationMinutes: 30,
-        questionCount: 40,
-    },
-    {
-        id: 'l2',
-        title: 'TOEIC Listening Part 3 Simulation',
-        skill: 'listening',
-        durationMinutes: 25,
-        questionCount: 39,
-    },
-    {
-        id: 'r1',
-        title: 'IELTS Reading Academic Test 1',
-        skill: 'reading',
-        durationMinutes: 60,
-        questionCount: 40,
-    },
-    {
-        id: 'r2',
-        title: 'TOEFL Reading Passage Practice',
-        skill: 'reading',
-        durationMinutes: 20,
-        questionCount: 10,
-    },
-    {
-        id: 'w1',
-        title: 'IELTS Writing Task 1 (Academic)',
-        skill: 'writing',
-        durationMinutes: 20,
-        questionCount: 1,
-    },
-    {
-        id: 'w2',
-        title: 'IELTS Writing Task 2: Opinion Essay',
-        skill: 'writing',
-        durationMinutes: 40,
-        questionCount: 1,
-    },
-    {
-        id: 's1',
-        title: 'IELTS Speaking Part 1 Practice',
-        skill: 'speaking',
-        durationMinutes: 5,
-        questionCount: 10,
-    },
-    {
-        id: 'f1',
-        title: 'Full IELTS Academic Mock Test 1',
-        skill: 'full',
-        durationMinutes: 165,
-        questionCount: 91,
-    },
-    {
-        id: 'f2',
-        title: 'Full Mock Test by British Council',
-        skill: 'full',
-        durationMinutes: 120,
-        questionCount: 200,
-    },
-]
+// API imports
+import {
+    testApi,
+    // , getSkillAreaLabel
+} from '@/lib/test'
+import type { TestListItem } from '@/types/test.types'
+import { SkillArea } from '@/types/test.types'
 
 const viewModeItems: SegItem[] = [
     { label: 'Theo Kỹ năng', value: 'skill' },
-    { label: 'Theo Bài thi', value: 'exam' },
+    { label: 'Tất cả bài thi', value: 'exam' },
 ]
 
 const skills = [
     {
         name: 'Nghe',
-        value: 'listening',
+        value: SkillArea.LISTENING,
         icon: <img src={ListeningIcon} alt="Listening" />,
     },
     {
         name: 'Đọc',
-        value: 'reading',
+        value: SkillArea.READING,
         icon: <img src={ReadingIcon} alt="Reading" />,
     },
     {
         name: 'Viết',
-        value: 'writing',
+        value: SkillArea.WRITING,
         icon: <img src={WritingIcon} alt="Writing" />,
     },
     {
         name: 'Nói',
-        value: 'speaking',
+        value: SkillArea.SPEAKING,
         icon: <img src={SpeakingIcon} alt="Speaking" />,
     },
 ]
+
+// Map TestListItem to ExamInfo
+function mapTestToExamInfo(test: TestListItem): ExamInfo {
+    return {
+        id: test.id,
+        title: test.title,
+        skill: test.skill.toLowerCase() as any,
+        durationMinutes: test.durationMinutes,
+        questionCount: test.totalQuestions,
+    }
+}
 
 export default function ExamPracticePage() {
     const sessionState = useSession()
@@ -124,9 +77,14 @@ export default function ExamPracticePage() {
     const currentPath = location.pathname
 
     const [viewMode, setViewMode] = useState<'skill' | 'exam'>('skill')
-    const [selectedSkill, setSelectedSkill] = useState<string | null>(null)
+    const [selectedSkill, setSelectedSkill] = useState<SkillArea | null>(null)
     const [searchTerm, setSearchTerm] = useState('')
     const [showGradientName, setShowGradientName] = useState(false)
+
+    // API state
+    const [tests, setTests] = useState<TestListItem[]>([])
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
 
     const navItems = useMemo(
         () => getNavItems(userRole as any, currentPath, navigate),
@@ -137,54 +95,123 @@ export default function ExamPracticePage() {
         [userRole, navigate]
     )
 
+    // Load tests on mount or when filters change
+    useEffect(() => {
+        loadTests()
+    }, [])
+
+    const loadTests = async () => {
+        setLoading(true)
+        setError(null)
+        try {
+            const data = await testApi.listTests({
+                limit: 100,
+                // status: 'active' // Uncomment nếu chỉ muốn lấy active tests
+            })
+            setTests(data)
+        } catch (err: any) {
+            console.error('Failed to load tests:', err)
+            setError(err.message || 'Không thể tải danh sách bài thi')
+        } finally {
+            setLoading(false)
+        }
+    }
+
     const handleGreetingComplete = useCallback(() => {
         setShowGradientName(true)
     }, [])
 
-    const handleSelectSkill = (skillValue: string) => {
+    const handleSelectSkill = (skillValue: SkillArea) => {
         setSelectedSkill(skillValue)
-        setSearchTerm('') // Reset search khi chọn kỹ năng mới
+        setSearchTerm('')
     }
 
     const handleBackFromList = () => {
         setSelectedSkill(null)
-        setSearchTerm('') // Reset search khi quay lại
+        setSearchTerm('')
     }
 
-    const handleStartExam = (examId: string) => {
-        console.log(`Starting exam: ${examId}`)
-        // Điều hướng đến trang làm bài thi
-        // Ví dụ: navigate(`/student/exams/${examId}/do`);
-        alert(`Bắt đầu bài thi ID: ${examId}`)
+    const handleStartExam = async (examId: string) => {
+        try {
+            // Start attempt
+            const attempt = await testApi.startAttempt(examId)
+
+            // Save attempt info to localStorage
+            localStorage.setItem(
+                `attempt_${attempt.attemptId}`,
+                JSON.stringify(attempt)
+            )
+
+            // Navigate to test taking page
+            navigate(`/student/exams/${examId}/take/${attempt.attemptId}`)
+        } catch (error: any) {
+            console.error('Failed to start exam:', error)
+            alert(error.message || 'Không thể bắt đầu bài thi')
+        }
     }
 
     const filteredExams = useMemo(() => {
-        let examsToShow = mockExams
+        let examsToShow = tests
 
+        // Filter by view mode and skill
         if (viewMode === 'skill' && selectedSkill) {
-            examsToShow = mockExams.filter(
-                (exam) => exam.skill === selectedSkill
-            )
-        } else if (viewMode === 'exam') {
-            // Lấy các bài full test (skill === 'full')
-            // Hoặc tất cả nếu bạn muốn tìm kiếm trên tất cả? Tạm lấy full test.
-            examsToShow = mockExams.filter((exam) => exam.skill === 'full')
-        } else {
-            // Khi ở view chọn kỹ năng, danh sách lọc sẽ áp dụng cho lần xem chi tiết
-            // Hoặc nếu search bar ở ngoài, nó sẽ lọc gì? Tạm thời chỉ lọc khi ở list view.
-            examsToShow = [] // Không hiển thị list khi đang chọn skill
+            examsToShow = tests.filter((test) => test.skill === selectedSkill)
         }
 
-        if (searchTerm) {
-            return examsToShow.filter((exam) =>
-                exam.title.toLowerCase().includes(searchTerm.toLowerCase())
+        // Filter by search term
+        if (searchTerm.trim()) {
+            examsToShow = examsToShow.filter((test) =>
+                test.title.toLowerCase().includes(searchTerm.toLowerCase())
             )
         }
 
-        return examsToShow
-    }, [searchTerm, selectedSkill, viewMode])
+        return examsToShow.map(mapTestToExamInfo)
+    }, [tests, searchTerm, selectedSkill, viewMode])
 
     const renderContent = () => {
+        if (loading) {
+            return (
+                <div className={s.examListContainer}>
+                    <ExamListCard
+                        title="Đang tải..."
+                        exams={[]}
+                        onStartExam={handleStartExam}
+                        isLoading={true}
+                    />
+                </div>
+            )
+        }
+
+        if (error) {
+            return (
+                <div className={s.examListContainer}>
+                    <div
+                        style={{
+                            textAlign: 'center',
+                            padding: '40px',
+                            color: 'var(--status-danger-500-light)',
+                        }}
+                    >
+                        <p>❌ {error}</p>
+                        <button
+                            onClick={loadTests}
+                            style={{
+                                marginTop: '16px',
+                                padding: '8px 16px',
+                                background: 'var(--brand-primary-light)',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: 'var(--radius-md)',
+                                cursor: 'pointer',
+                            }}
+                        >
+                            Thử lại
+                        </button>
+                    </div>
+                </div>
+            )
+        }
+
         if (viewMode === 'skill') {
             if (selectedSkill) {
                 const skillInfo = skills.find((s) => s.value === selectedSkill)
@@ -195,6 +222,7 @@ export default function ExamPracticePage() {
                             exams={filteredExams}
                             onBackClick={handleBackFromList}
                             onStartExam={handleStartExam}
+                            isLoading={false}
                         />
                     </div>
                 )
@@ -216,9 +244,10 @@ export default function ExamPracticePage() {
             return (
                 <div className={s.examListContainer}>
                     <ExamListCard
-                        title="Danh sách bài thi đầy đủ"
+                        title="Tất cả bài thi"
                         exams={filteredExams}
                         onStartExam={handleStartExam}
+                        isLoading={false}
                     />
                 </div>
             )

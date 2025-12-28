@@ -41,6 +41,16 @@ const passwordSchema = z
 
 type PasswordFormValues = z.infer<typeof passwordSchema>
 
+// Helper: Format date for input type="date" (YYYY-MM-DD)
+const formatDateForInput = (isoString?: string | null) => {
+    if (!isoString) return ''
+    try {
+        return isoString.split('T')[0]
+    } catch {
+        return ''
+    }
+}
+
 export const ProfileEditor: React.FC<ProfileEditorProps> = ({
     user,
     isSubmitting,
@@ -53,26 +63,29 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
         text: string
     } | null>(null)
 
+    // Form Profile
     const {
         register,
         handleSubmit,
         reset,
-        formState: { errors },
+        formState: { errors, isDirty },
     } = useForm<UserFormValues>({
         defaultValues: {
             firstName: user?.firstName ?? '',
             lastName: user?.lastName ?? '',
             phone: user?.phone ?? '',
             address: user?.address ?? '',
+            dateOfBirth: formatDateForInput(user?.dateOfBirth), // Set default value formatting
         },
     })
 
+    // Form Password
     const {
         register: registerPassword,
         handleSubmit: handlePasswordSubmit,
         reset: resetPassword,
         watch: watchPassword,
-        formState: { errors: passwordErrors },
+        formState: { errors: passwordErrors, isDirty: isPasswordDirty },
     } = useForm<PasswordFormValues>({
         resolver: zodResolver(passwordSchema),
         defaultValues: {
@@ -109,12 +122,14 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
             },
         })
 
+    // Reset form when user data loads
     useEffect(() => {
         reset({
             firstName: user?.firstName ?? '',
             lastName: user?.lastName ?? '',
             phone: user?.phone ?? '',
             address: user?.address ?? '',
+            dateOfBirth: formatDateForInput(user?.dateOfBirth),
         })
     }, [user, reset])
 
@@ -161,7 +176,6 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
         }
     }
 
-    // Password strength indicator
     const getPasswordStrength = (pwd: string) => {
         if (!pwd) return { label: '', percent: 0, color: '' }
 
@@ -181,6 +195,19 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
     }
 
     const strength = getPasswordStrength(newPassword)
+
+    // Helper for Requirement Item
+    const RequirementItem = ({
+        isValid,
+        text,
+    }: {
+        isValid: boolean
+        text: string
+    }) => (
+        <li className={`${s.reqItem} ${isValid ? s.valid : ''}`}>
+            {isValid ? '✓' : '○'} {text}
+        </li>
+    )
 
     return (
         <div className={s.wrapper}>
@@ -267,6 +294,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
                         className={s.fullWidth}
                         value={user?.email ?? ''}
                         readOnly
+                        disabled
                     />
 
                     <InputField
@@ -285,12 +313,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
                         variant="soft"
                         mode="light"
                         className={s.fullWidth}
-                        value={
-                            user?.dateOfBirth
-                                ? user.dateOfBirth.split('T')[0]
-                                : ''
-                        }
-                        readOnly
+                        {...register('dateOfBirth')}
                     />
 
                     <InputField
@@ -303,7 +326,10 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
                     />
 
                     <div className={`${s.formActions} ${s.fullWidth}`}>
-                        <ButtonPrimary type="submit" disabled={isSubmitting}>
+                        <ButtonPrimary
+                            type="submit"
+                            disabled={(!isDirty && !avatarFile) || isSubmitting}
+                        >
                             {isSubmitting ? 'Đang lưu...' : 'Lưu thay đổi'}
                         </ButtonPrimary>
                     </div>
@@ -313,26 +339,11 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
             <Card title="Đổi mật khẩu" variant="flat" mode="light">
                 {passwordMessage && (
                     <div
-                        style={{
-                            marginBottom: '1.25rem',
-                            padding: '12px 16px',
-                            borderRadius: '8px',
-                            backgroundColor:
-                                passwordMessage.type === 'success'
-                                    ? '#f6ffed'
-                                    : '#fff2f0',
-                            border: `1px solid ${
-                                passwordMessage.type === 'success'
-                                    ? '#b7eb8f'
-                                    : '#ffccc7'
-                            }`,
-                            color:
-                                passwordMessage.type === 'success'
-                                    ? '#389e0d'
-                                    : '#cf1322',
-                            fontSize: '14px',
-                            fontWeight: 500,
-                        }}
+                        className={`${s.alertMessage} ${
+                            passwordMessage.type === 'success'
+                                ? s.alertSuccess
+                                : s.alertError
+                        }`}
                         role="alert"
                     >
                         {passwordMessage.text}
@@ -372,49 +383,28 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
                         {...registerPassword('newPassword')}
                     />
 
-                    {/* Password Strength Indicator */}
+                    {/* Updated Password Strength UI */}
                     {newPassword && (
-                        <div className={s.fullWidth}>
-                            <div
-                                style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    marginBottom: 6,
-                                }}
-                            >
-                                <span
-                                    style={{
-                                        fontSize: 12,
-                                        color: '#8c8c8c',
-                                    }}
-                                >
+                        <div
+                            className={`${s.passwordStrengthContainer} ${s.fullWidth}`}
+                        >
+                            <div className={s.strengthHeader}>
+                                <span className={s.strengthLabel}>
                                     Độ mạnh mật khẩu:
                                 </span>
                                 <span
-                                    style={{
-                                        fontSize: 12,
-                                        color: strength.color,
-                                        fontWeight: 600,
-                                    }}
+                                    className={s.strengthValue}
+                                    style={{ color: strength.color }}
                                 >
                                     {strength.label}
                                 </span>
                             </div>
-                            <div
-                                style={{
-                                    width: '100%',
-                                    height: 6,
-                                    background: '#f0f0f0',
-                                    borderRadius: 3,
-                                    overflow: 'hidden',
-                                }}
-                            >
+                            <div className={s.strengthBarBg}>
                                 <div
+                                    className={s.strengthBarFill}
                                     style={{
                                         width: `${strength.percent}%`,
-                                        height: '100%',
                                         background: strength.color,
-                                        transition: 'all 0.3s ease',
                                     }}
                                 />
                             </div>
@@ -447,111 +437,41 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
                         </div>
                     )}
 
-                    {/* Password Requirements */}
-                    <div
-                        className={s.fullWidth}
-                        style={{
-                            marginTop: '8px',
-                            padding: '12px 14px',
-                            background: '#fafafa',
-                            borderRadius: '8px',
-                            border: '1px solid #e8e8e8',
-                        }}
-                    >
-                        <div
-                            style={{
-                                fontSize: 13,
-                                color: '#262626',
-                                marginBottom: 8,
-                                fontWeight: 500,
-                            }}
-                        >
-                            Yêu cầu mật khẩu:
-                        </div>
-                        <ul
-                            style={{
-                                margin: 0,
-                                paddingLeft: 20,
-                                fontSize: 12,
-                                color: '#595959',
-                                lineHeight: 1.8,
-                            }}
-                        >
-                            <li
-                                style={{
-                                    color:
-                                        newPassword && newPassword.length >= 8
-                                            ? '#52c41a'
-                                            : 'inherit',
-                                    fontWeight:
-                                        newPassword && newPassword.length >= 8
-                                            ? 500
-                                            : 400,
-                                }}
-                            >
-                                {newPassword && newPassword.length >= 8
-                                    ? '✓'
-                                    : '○'}{' '}
-                                Tối thiểu 8 ký tự
-                            </li>
-                            <li
-                                style={{
-                                    color:
-                                        newPassword && /[A-Z]/.test(newPassword)
-                                            ? '#52c41a'
-                                            : 'inherit',
-                                    fontWeight:
-                                        newPassword && /[A-Z]/.test(newPassword)
-                                            ? 500
-                                            : 400,
-                                }}
-                            >
-                                {newPassword && /[A-Z]/.test(newPassword)
-                                    ? '✓'
-                                    : '○'}{' '}
-                                Ít nhất 1 chữ hoa (A-Z)
-                            </li>
-                            <li
-                                style={{
-                                    color:
-                                        newPassword && /[a-z]/.test(newPassword)
-                                            ? '#52c41a'
-                                            : 'inherit',
-                                    fontWeight:
-                                        newPassword && /[a-z]/.test(newPassword)
-                                            ? 500
-                                            : 400,
-                                }}
-                            >
-                                {newPassword && /[a-z]/.test(newPassword)
-                                    ? '✓'
-                                    : '○'}{' '}
-                                Ít nhất 1 chữ thường (a-z)
-                            </li>
-                            <li
-                                style={{
-                                    color:
-                                        newPassword && /[0-9]/.test(newPassword)
-                                            ? '#52c41a'
-                                            : 'inherit',
-                                    fontWeight:
-                                        newPassword && /[0-9]/.test(newPassword)
-                                            ? 500
-                                            : 400,
-                                }}
-                            >
-                                {newPassword && /[0-9]/.test(newPassword)
-                                    ? '✓'
-                                    : '○'}{' '}
-                                Ít nhất 1 chữ số (0-9)
-                            </li>
+                    {/* Updated Password Requirements UI */}
+                    <div className={`${s.passwordRequirements} ${s.fullWidth}`}>
+                        <div className={s.reqTitle}>Yêu cầu mật khẩu:</div>
+                        <ul className={s.reqList}>
+                            <RequirementItem
+                                isValid={Boolean(
+                                    newPassword && newPassword.length >= 8
+                                )}
+                                text="Tối thiểu 8 ký tự"
+                            />
+                            <RequirementItem
+                                isValid={Boolean(
+                                    newPassword && /[A-Z]/.test(newPassword)
+                                )}
+                                text="Ít nhất 1 chữ hoa (A-Z)"
+                            />
+                            <RequirementItem
+                                isValid={Boolean(
+                                    newPassword && /[a-z]/.test(newPassword)
+                                )}
+                                text="Ít nhất 1 chữ thường (a-z)"
+                            />
+                            <RequirementItem
+                                isValid={Boolean(
+                                    newPassword && /[0-9]/.test(newPassword)
+                                )}
+                                text="Ít nhất 1 chữ số (0-9)"
+                            />
                         </ul>
                     </div>
 
                     <div className={`${s.formActions} ${s.fullWidth}`}>
                         <ButtonPrimary
                             type="submit"
-                            disabled={isChangingPassword}
+                            disabled={!isPasswordDirty || isChangingPassword}
                         >
                             {isChangingPassword
                                 ? 'Đang đổi...'

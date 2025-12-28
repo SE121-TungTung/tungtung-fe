@@ -1,193 +1,175 @@
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import s from './ReadingTestPage.module.css'
 
+// --- Hooks & Assets ---
 import { useTextHighlighter } from '@/hooks/useTextHighlighter'
-
 import ClockIcon from '@/assets/History.svg'
 import ReviewIcon from '@/assets/Action Favourite.svg'
-import HelpIcon from '@/assets/Help.svg'
 
+// --- Components ---
 import SentenceCompletionQuestion from '@/components/feature/exams/SentenceCompletionQuestion'
 import TrueFalseNotGivenQuestion from '@/components/feature/exams/TrueFalseNotGivenQuestion'
 import HighlightToolbar from '@/components/feature/exams/HighlightToolbar'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import ButtonGhost from '@/components/common/button/ButtonGhost'
-
-import type {
-    ReadingTest,
-    Passage,
-    QuestionGroup,
-    Question,
-} from '@/types/exam.types'
-import React from 'react'
-import MatchingQuestionGroup from '@/components/feature/exams/MatchingQuestionGroup'
-import SummaryCompletionGroup from '@/components/feature/exams/SummaryCompletionGroup'
 import MultipleChoiceQuestion from '@/components/feature/exams/MultipleChoiceQuestion'
-import { useParams } from 'react-router-dom'
+import { SpeakingQuestion } from '@/components/feature/exams/SpeakingQuestion'
+import { EssayQuestion } from '@/components/feature/exams/EssayQuestion'
+
+// --- Libs & Types ---
+import { testApi, calculateRemainingTime, formatTime } from '@/lib/test'
+import {
+    type Test,
+    type TestAttempt,
+    type QuestionSubmitItem,
+    type Question,
+    QuestionType,
+} from '@/types/test.types'
 
 const STORAGE_KEY_PREFIX = 'readingHighlights_'
+const ANSWERS_STORAGE_PREFIX = 'testAnswers_'
 
-const mockTestData: ReadingTest = {
-    id: 'ielts-reading-test-1',
-    title: 'IELTS Academic Reading Practice 1',
-    totalTimeSeconds: 60 * 60,
-    passages: [
-        {
-            id: 'p1',
-            title: 'The History of Glass',
-            content: `Glass, in one form or another, has long been in subordinate relation to the human race. Records of its use date back as far as 4000 B.C.\n\nIt was not until 1500 B.C., however, that the first glass vessel was produced. The glass industry suddenly declined after 1200 B.C.\n\n(Nội dung bài đọc 1 dài...)\n\nModern glass manufacturing techniques are highly sophisticated.`,
-            questionGroups: [
-                {
-                    id: 'g1',
-                    instruction:
-                        'Questions 1-3: Do the following statements agree with the information given? Write TRUE, FALSE, or NOT GIVEN.',
-                    questionType: 'TFNF',
-                    questions: [
-                        {
-                            id: 'q1',
-                            number: 1,
-                            type: 'TFNF',
-                            text: 'The earliest known use of glass dates back to 4000 B.C.',
-                        },
-                        {
-                            id: 'q2',
-                            number: 2,
-                            type: 'TFNF',
-                            text: 'The glass industry declined after 1500 B.C.',
-                        },
-                        {
-                            id: 'q3',
-                            number: 3,
-                            type: 'TFNF',
-                            text: 'Glass was only used for decoration in ancient times.',
-                        },
-                    ] as Question[],
-                },
-                {
-                    id: 'g2',
-                    instruction:
-                        'Questions 4-5: Complete the sentences below. Choose NO MORE THAN TWO WORDS.',
-                    questionType: 'SentenceCompletion',
-                    questions: [
-                        {
-                            id: 'q4',
-                            number: 4,
-                            type: 'SentenceCompletion',
-                            parts: [
-                                'The first glass vessel was produced in ',
-                                null,
-                                '.',
-                            ],
-                        },
-                        {
-                            id: 'q5',
-                            number: 5,
-                            type: 'SentenceCompletion',
-                            parts: ['Modern techniques are very ', null, '.'],
-                        },
-                    ] as Question[],
-                },
-            ],
-        },
-        {
-            id: 'p2',
-            title: 'Advantages of Public Transport',
-            content: `A. A developed public transport system is a sign of a civilized society.\n\nB. However, the reliance on private cars is still dominant in many regions...\n\n(Nội dung bài đọc 2 dài...)`,
-            questionGroups: [
-                {
-                    id: 'g3',
-                    instruction:
-                        'Questions 6-8: The reading passage has paragraphs A and B. Which paragraph contains the following information? (NB You may use any letter more than once)',
-                    questionType: 'MatchingFeatures',
-                    optionsBank: [
-                        { value: 'A', text: 'Paragraph A' },
-                        { value: 'B', text: 'Paragraph B' },
-                    ],
-                    questions: [
-                        {
-                            id: 'q6',
-                            number: 6,
-                            type: 'MatchingFeatures',
-                            itemText:
-                                'A reference to the dominance of private cars.',
-                        },
-                        {
-                            id: 'q7',
-                            number: 7,
-                            type: 'MatchingFeatures',
-                            itemText: 'A definition of a civilized society.',
-                        },
-                        {
-                            id: 'q8',
-                            number: 8,
-                            type: 'MatchingFeatures',
-                            itemText: 'A solution to traffic congestion.',
-                        },
-                    ] as Question[],
-                },
-            ],
-        },
-        {
-            id: 'p3',
-            title: 'Understanding Circadian Rhythms',
-            content: `(Nội dung bài đọc 3 dài...)`,
-            questionGroups: [
-                {
-                    id: 'g4',
-                    instruction:
-                        'Questions 9-10: Choose the correct letter, A, B, C or D.',
-                    questionType: 'MCQ',
-                    questions: [
-                        {
-                            id: 'q9',
-                            number: 9,
-                            type: 'MCQ',
-                            allowMultiple: false,
-                            text: 'What is the main topic of this passage?',
-                            options: [
-                                { value: 'A', text: '...' },
-                                { value: 'B', text: '...' },
-                            ],
-                        },
-                        {
-                            id: 'q10',
-                            number: 10,
-                            type: 'MCQ',
-                            allowMultiple: false,
-                            text: 'The "master clock" is located in the...?',
-                            options: [
-                                { value: 'A', text: '...' },
-                                { value: 'B', text: '...' },
-                            ],
-                        },
-                    ] as Question[],
-                },
-            ],
-        },
-    ],
+// ============================================
+// INTERNAL TYPES FOR UI RENDER
+// ============================================
+
+interface InternalQuestion {
+    id: string
+    number: number // Số thứ tự hiển thị (1, 2, 3...)
+    type: QuestionType
+    text?: string // Instruction hoặc tiêu đề phụ
+    questionText?: string // Nội dung câu hỏi chính
+    parts?: (string | null)[] // Dùng cho câu hỏi điền từ (đoạn text bị cắt)
+    options?: Array<{ value: string; text: string }>
+    allowMultiple?: boolean
+    maxPoints?: number
 }
 
-const ReadingHeader = ({ timeLeft }: { timeLeft: number }) => {
-    const minutes = Math.floor(timeLeft / 60)
-    const seconds = timeLeft % 60
-    const formattedTime = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`
+interface InternalPassage {
+    id: string
+    title: string
+    content: string
+    questions: InternalQuestion[]
+}
+
+// ============================================
+// MAPPING UTILITIES
+// ============================================
+
+/**
+ * Chuyển đổi cấu trúc Test phức tạp (Section -> Part -> Group -> Question)
+ * sang cấu trúc phẳng hơn để dễ render UI theo từng Passage (Section).
+ */
+function mapTestToInternalFormat(test: Test): InternalPassage[] {
+    let globalQuestionNumber = 1
+
+    // Trong IELTS Reading: 1 Section thường tương ứng 1 Passage
+    return test.sections.map((section) => {
+        const sectionQuestions: InternalQuestion[] = []
+
+        // Gộp nội dung bài đọc từ các Part (thường Part chứa text bài đọc)
+        // Nếu không có, fallback về instruction của section
+        const passageContent =
+            section.parts
+                .map((p) => p.instructions)
+                .filter(Boolean)
+                .join('\n\n') ||
+            section.instructions ||
+            'No content available'
+
+        // Duyệt qua từng Part
+        section.parts.forEach((part) => {
+            // Duyệt qua từng Question Group
+            part.questionGroups.forEach((group) => {
+                // Duyệt qua từng Question
+                group.questions.forEach((q) => {
+                    const baseQuestion: InternalQuestion = {
+                        id: q.id,
+                        number: globalQuestionNumber++, // Tăng số thứ tự toàn cục
+                        type: q.questionType,
+                        maxPoints: q.points,
+                        questionText: q.questionText || '',
+                        text: group.instructions || '', // Lấy hướng dẫn từ Group (VD: "Choose TRUE/FALSE...")
+                    }
+
+                    // Map specific fields based on type
+                    switch (q.questionType) {
+                        case QuestionType.MULTIPLE_CHOICE:
+                            sectionQuestions.push({
+                                ...baseQuestion,
+                                allowMultiple: false, // TODO: Check logic multi-select nếu cần
+                                options: q.options?.map((opt) => ({
+                                    value: opt.key,
+                                    text: opt.text,
+                                })),
+                            })
+                            break
+
+                        case QuestionType.TRUE_FALSE:
+                        case QuestionType.ESSAY:
+                        case QuestionType.SPEAKING:
+                            sectionQuestions.push(baseQuestion)
+                            break
+
+                        case QuestionType.SHORT_ANSWER:
+                        case QuestionType.FILL_IN_BLANK:
+                            // Với dạng điền từ, ta giả định questionText chứa placeholder
+                            // Hoặc xử lý tách chuỗi nếu BE trả về format đặc biệt
+                            sectionQuestions.push({
+                                ...baseQuestion,
+                                parts: [q.questionText || '', null], // Simplification for UI component
+                            })
+                            break
+
+                        default:
+                            // Fallback cho các dạng chưa support visual
+                            sectionQuestions.push(baseQuestion)
+                            break
+                    }
+                })
+            })
+        })
+
+        return {
+            id: section.id,
+            title: section.name,
+            content: passageContent,
+            questions: sectionQuestions,
+        }
+    })
+}
+
+// ============================================
+// SUB-COMPONENTS
+// ============================================
+
+const ReadingHeader = React.memo(({ timeLeft }: { timeLeft: number }) => {
+    const formattedTime = formatTime(timeLeft)
+
+    // Đổi màu timer khi sắp hết giờ (< 5 phút)
+    const timerStyle =
+        timeLeft < 300
+            ? { color: '#ef4444', animation: 'pulse 1s infinite' }
+            : {}
 
     return (
         <header className={s.header}>
             <span className={s.headerInfo}>IELTS Academic Reading</span>
-            <div className={s.timer} title="Time remaining">
+            <div className={s.timer} title="Time remaining" style={timerStyle}>
                 <img src={ClockIcon} alt="time left" />
                 {formattedTime}
             </div>
         </header>
     )
-}
+})
 
 interface ReadingPassageProps {
-    passage: Passage
+    passage: InternalPassage
     testId: string
     clearHighlightsRef: React.RefObject<(() => void) | null>
 }
+
 const ReadingPassage = React.memo(
     ({ passage, testId, clearHighlightsRef }: ReadingPassageProps) => {
         const contentRef = useRef<HTMLDivElement>(null!)
@@ -204,6 +186,7 @@ const ReadingPassage = React.memo(
         }, [clearAllHighlights, clearHighlightsRef])
 
         const passageParagraphs = useMemo(() => {
+            if (!passage.content) return <p>No content available.</p>
             return passage.content
                 .split('\n\n')
                 .map((text, index) => <p key={index}>{text}</p>)
@@ -212,11 +195,9 @@ const ReadingPassage = React.memo(
         return (
             <div className={s.passageContainer} id={passage.id}>
                 <h3 className={s.passageTitle}>{passage.title}</h3>
-
                 <div className={s.passageContent} ref={contentRef}>
                     {passageParagraphs}
                 </div>
-
                 {toolbarState && (
                     <HighlightToolbar
                         state={toolbarState}
@@ -230,104 +211,118 @@ const ReadingPassage = React.memo(
 )
 
 interface QuestionAreaProps {
-    passage: Passage
+    passage: InternalPassage
     answers: { [key: string]: any }
     onAnswerChange: (questionId: string, value: any) => void
     registerRef: (id: string, element: HTMLElement | null) => void
+    attemptId: string
 }
-const QuestionArea = ({
-    passage,
-    answers,
-    onAnswerChange,
-    registerRef,
-}: QuestionAreaProps) => {
-    const renderGroup = (group: QuestionGroup) => {
-        switch (group.questionType) {
-            case 'TFNF':
-                return group.questions.map((q) => (
-                    <TrueFalseNotGivenQuestion
-                        key={q.id}
-                        question={q as any}
-                        selectedValue={answers[q.id] || null}
-                        onChange={(value) => onAnswerChange(q.id, value)}
-                        registerRef={registerRef}
-                    />
-                ))
-            case 'MCQ':
-                return group.questions.map((q) => (
-                    <MultipleChoiceQuestion
-                        key={q.id}
-                        question={q as any}
-                        selectedValues={answers[q.id] || []}
-                        onChange={(value) => onAnswerChange(q.id, value)}
-                        registerRef={registerRef}
-                    />
-                ))
-            case 'SentenceCompletion':
-            case 'ShortAnswer':
-                return group.questions.map((q) => (
-                    <SentenceCompletionQuestion
-                        key={q.id}
-                        question={q as any}
-                        value={answers[q.id] || ''}
-                        onChange={(value) => onAnswerChange(q.id, value)}
-                        registerRef={registerRef}
-                    />
-                ))
-            case 'MatchingFeatures':
-            case 'MatchingHeadings':
-                return (
-                    <MatchingQuestionGroup
-                        group={group}
-                        answers={answers}
-                        onAnswerChange={onAnswerChange}
-                        registerRef={registerRef}
-                    />
-                )
-            case 'SummaryCompletion':
-                if (!group.optionsBank) {
+
+const QuestionArea = React.memo(
+    ({
+        passage,
+        answers,
+        onAnswerChange,
+        registerRef,
+        attemptId,
+    }: QuestionAreaProps) => {
+        const renderQuestion = (q: InternalQuestion) => {
+            const commonProps = {
+                key: q.id,
+                question: q as any, // Cast vì component con dùng type hơi khác 1 chút
+                registerRef: registerRef,
+            }
+
+            switch (q.type) {
+                case QuestionType.TRUE_FALSE:
                     return (
-                        <SummaryCompletionGroup
-                            group={group}
-                            answers={answers}
-                            onAnswerChange={onAnswerChange}
+                        <TrueFalseNotGivenQuestion
+                            {...commonProps}
+                            selectedValue={answers[q.id] || null}
+                            onChange={(value) => onAnswerChange(q.id, value)}
+                        />
+                    )
+
+                case QuestionType.MULTIPLE_CHOICE:
+                    return (
+                        <MultipleChoiceQuestion
+                            {...commonProps}
+                            selectedValues={
+                                answers[q.id] ? [answers[q.id]] : []
+                            } // Adapter: array -> single if needed
+                            onChange={(value) => onAnswerChange(q.id, value)}
+                        />
+                    )
+
+                case QuestionType.SHORT_ANSWER:
+                case QuestionType.FILL_IN_BLANK:
+                    return (
+                        <SentenceCompletionQuestion
+                            {...commonProps}
+                            value={answers[q.id] || ''}
+                            onChange={(value) => onAnswerChange(q.id, value)}
+                        />
+                    )
+
+                case QuestionType.ESSAY:
+                    return (
+                        <EssayQuestion
+                            key={q.id}
+                            questionId={q.id}
+                            questionNumber={q.number}
+                            questionText={q.questionText || ''}
+                            value={answers[q.id] || ''}
+                            onChange={(value: any) =>
+                                onAnswerChange(q.id, value)
+                            }
                             registerRef={registerRef}
                         />
                     )
-                }
-                return (
-                    <MatchingQuestionGroup
-                        group={group}
-                        answers={answers}
-                        onAnswerChange={onAnswerChange}
-                        registerRef={registerRef}
-                    />
-                )
-            default:
-                return (
-                    <p>Dạng câu hỏi "{group.questionType}" chưa được hỗ trợ.</p>
-                )
-        }
-    }
 
-    return (
-        <div className={s.questionContainer}>
-            <div className={s.questionScrollArea}>
-                {passage.questionGroups.map((group) => (
-                    <div key={group.id} className={s.questionGroupBlock}>
-                        <h4 className={s.questionInstruction}>
-                            {group.instruction}
-                        </h4>
-                        {renderGroup(group)}
-                    </div>
-                ))}
+                case QuestionType.SPEAKING:
+                    return (
+                        <SpeakingQuestion
+                            key={q.id}
+                            questionId={q.id}
+                            questionNumber={q.number}
+                            questionText={q.questionText || ''}
+                            attemptId={attemptId}
+                            registerRef={registerRef}
+                        />
+                    )
+
+                default:
+                    return (
+                        <div
+                            key={q.id}
+                            className="p-4 border border-gray-200 rounded my-2"
+                        >
+                            <p className="font-bold text-red-500">
+                                Unsupported Question Type: {q.type} (ID: {q.id})
+                            </p>
+                        </div>
+                    )
+            }
+        }
+
+        return (
+            <div className={s.questionContainer}>
+                <div className={s.questionScrollArea}>
+                    {passage.questions.length > 0 ? (
+                        passage.questions.map((q) => renderQuestion(q))
+                    ) : (
+                        <div className="text-center text-gray-500 mt-10">
+                            No questions in this section.
+                        </div>
+                    )}
+                </div>
             </div>
-        </div>
-    )
-}
+        )
+    }
+)
 
 interface ReadingFooterProps {
-    testData: ReadingTest
+    passages: InternalPassage[]
     currentPassageIndex: number
     onPassageChange: (index: number) => void
     currentQuestionNumber: number
@@ -339,193 +334,287 @@ interface ReadingFooterProps {
     isSubmitting: boolean
     testFinished: boolean
 }
-const ReadingFooter = ({
-    testData,
-    currentPassageIndex,
-    onPassageChange,
-    currentQuestionNumber,
-    reviewedQuestions,
-    answers,
-    onNavClick,
-    onToggleReview,
-    onSubmit,
-    isSubmitting,
-    testFinished,
-}: ReadingFooterProps) => {
-    const subQuestionContainerRef = useRef<HTMLDivElement>(null)
 
-    // Lấy danh sách questions của passage hiện tại
-    const currentPassageQuestions = useMemo(() => {
-        return testData.passages[currentPassageIndex].questionGroups.flatMap(
-            (g) => g.questions
-        )
-    }, [testData, currentPassageIndex])
+const ReadingFooter = React.memo(
+    ({
+        passages,
+        currentPassageIndex,
+        onPassageChange,
+        currentQuestionNumber,
+        reviewedQuestions,
+        answers,
+        onNavClick,
+        onToggleReview,
+        onSubmit,
+        isSubmitting,
+        testFinished,
+    }: ReadingFooterProps) => {
+        const subQuestionContainerRef = useRef<HTMLDivElement>(null)
 
-    // Tự động cuộn thanh questions của part hiện tại
-    useEffect(() => {
-        const currentButton = subQuestionContainerRef.current?.querySelector(
-            `button[data-q-number="${currentQuestionNumber}"]`
-        )
-        if (currentButton) {
-            currentButton.scrollIntoView({
-                behavior: 'smooth',
-                block: 'nearest',
-                inline: 'center',
-            })
+        // Lấy danh sách câu hỏi của Passage hiện tại để hiển thị thanh điều hướng dưới cùng
+        const currentPassageQuestions = useMemo(() => {
+            return passages[currentPassageIndex]?.questions || []
+        }, [passages, currentPassageIndex])
+
+        // Auto-scroll thanh nav câu hỏi khi current question thay đổi
+        useEffect(() => {
+            const currentButton =
+                subQuestionContainerRef.current?.querySelector(
+                    `button[data-q-number="${currentQuestionNumber}"]`
+                )
+            if (currentButton) {
+                currentButton.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest',
+                    inline: 'center',
+                })
+            }
+        }, [currentQuestionNumber])
+
+        const getQuestionButtonClass = (qNumber: number, qId: string) => {
+            let classes = s.navButton
+            if (qNumber === currentQuestionNumber) classes += ` ${s.current}`
+            if (reviewedQuestions.has(qNumber)) classes += ` ${s.reviewed}`
+
+            // Kiểm tra xem đã trả lời chưa
+            const hasAnswer =
+                answers[qId] !== undefined &&
+                answers[qId] !== null &&
+                String(answers[qId]).trim() !== ''
+            if (hasAnswer) {
+                classes += ` ${s.answered}`
+            }
+            return classes
         }
-    }, [currentQuestionNumber])
 
-    // Lấy class cho nút 1-40 (theo style IDP)
-    const getQuestionButtonClass = (qNumber: number, qId: string) => {
-        let classes = s.navButton
-        if (qNumber === currentQuestionNumber) classes += ` ${s.current}`
-        if (reviewedQuestions.has(qNumber)) classes += ` ${s.reviewed}`
-        if (
-            answers[qId] !== undefined &&
-            answers[qId] !== null &&
-            String(answers[qId]).trim() !== ''
-        ) {
-            classes += ` ${s.answered}`
-        }
-        return classes
-    }
+        return (
+            <footer className={s.footer}>
+                <div className={s.footerRow}>
+                    <div className={s.passageNav}>
+                        {passages.map((p, index) => (
+                            <button
+                                key={p.id}
+                                className={`${s.passageButton} ${
+                                    index === currentPassageIndex
+                                        ? s.active
+                                        : ''
+                                }`}
+                                onClick={() => onPassageChange(index)}
+                                disabled={testFinished || isSubmitting}
+                            >
+                                Passage {index + 1}
+                            </button>
+                        ))}
+                    </div>
 
-    return (
-        <footer className={s.footer}>
-            <div className={s.footerRow}>
-                <div className={s.passageNav}>
-                    {testData.passages.map((p, index) => (
-                        <button
-                            key={p.id}
-                            className={`${s.passageButton} ${
-                                index === currentPassageIndex ? s.active : ''
-                            }`}
-                            onClick={() => onPassageChange(index)}
+                    <div className={s.footerActions}>
+                        <ButtonGhost
+                            size="sm"
+                            mode="light"
+                            leftIcon={<img src={ReviewIcon} alt="review" />}
+                            onClick={() =>
+                                onToggleReview(currentQuestionNumber)
+                            }
+                            disabled={testFinished || isSubmitting}
+                            style={{
+                                color: reviewedQuestions.has(
+                                    currentQuestionNumber
+                                )
+                                    ? '#D97706'
+                                    : undefined,
+                                fontWeight: reviewedQuestions.has(
+                                    currentQuestionNumber
+                                )
+                                    ? '600'
+                                    : '500',
+                            }}
+                        >
+                            Review
+                        </ButtonGhost>
+
+                        <ButtonPrimary
+                            size="md"
+                            onClick={onSubmit}
+                            loading={isSubmitting}
                             disabled={testFinished || isSubmitting}
                         >
-                            Passage {index + 1}
-                        </button>
-                    ))}
+                            Submit Test
+                        </ButtonPrimary>
+                    </div>
                 </div>
 
-                <div className={s.footerActions}>
-                    <ButtonGhost
-                        size="sm"
-                        mode="light"
-                        leftIcon={<img src={ReviewIcon} alt="review" />}
-                        onClick={() => onToggleReview(currentQuestionNumber)}
-                        disabled={testFinished || isSubmitting}
-                        style={{
-                            color: reviewedQuestions.has(currentQuestionNumber)
-                                ? '#D97706'
-                                : undefined,
-                            fontWeight: reviewedQuestions.has(
-                                currentQuestionNumber
-                            )
-                                ? '600'
-                                : '500',
-                        }}
+                <div className={s.footerRow}>
+                    <div
+                        className={s.questionNav}
+                        ref={subQuestionContainerRef}
                     >
-                        Review
-                    </ButtonGhost>
-                    <ButtonGhost
-                        size="sm"
-                        mode="light"
-                        leftIcon={<img src={HelpIcon} alt="help" />}
-                        disabled={testFinished || isSubmitting}
-                    >
-                        Help
-                    </ButtonGhost>
-                    <ButtonPrimary
-                        size="md"
-                        onClick={onSubmit}
-                        loading={isSubmitting}
-                        disabled={testFinished || isSubmitting}
-                    >
-                        Submit
-                    </ButtonPrimary>
+                        {currentPassageQuestions.map((q) => (
+                            <button
+                                key={q.id}
+                                data-q-number={q.number}
+                                className={getQuestionButtonClass(
+                                    q.number,
+                                    q.id
+                                )}
+                                onClick={() => onNavClick(q.number)}
+                                disabled={testFinished}
+                                title={`Question ${q.number}`}
+                            >
+                                {q.number}
+                            </button>
+                        ))}
+                    </div>
                 </div>
-            </div>
+            </footer>
+        )
+    }
+)
 
-            <div className={s.footerRow}>
-                <div className={s.questionNav} ref={subQuestionContainerRef}>
-                    {currentPassageQuestions.map((q) => (
-                        <button
-                            key={q.id}
-                            data-q-number={q.number}
-                            className={getQuestionButtonClass(q.number, q.id)}
-                            onClick={() => onNavClick(q.number)}
-                            disabled={testFinished}
-                            title={`Question ${q.number}`}
-                        >
-                            {q.number}
-                        </button>
-                    ))}
-                </div>
-            </div>
-        </footer>
-    )
-}
+// ============================================
+// MAIN PAGE COMPONENT
+// ============================================
 
 export default function ReadingTestPage() {
-    const { testId } = useParams<{ testId: string }>()
+    const { testId, attemptId } = useParams<{
+        testId: string
+        attemptId: string
+    }>()
+    const navigate = useNavigate()
 
-    const [testData, setTestData] = useState<ReadingTest | null>(null)
+    // State Management
+    const [test, setTest] = useState<Test | null>(null)
+    const [passages, setPassages] = useState<InternalPassage[]>([])
     const [timeLeft, setTimeLeft] = useState(0)
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+
+    // UI State
     const [currentPassageIndex, setCurrentPassageIndex] = useState(0)
     const [currentQuestionNumber, setCurrentQuestionNumber] = useState(1)
+
+    // Data State
     const [answers, setAnswers] = useState<{ [key: string]: any }>({})
     const [reviewedQuestions, setReviewedQuestions] = useState<Set<number>>(
         new Set()
     )
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [, setShowSubmitConfirm] = useState(false)
     const [testFinished, setTestFinished] = useState(false)
 
+    // Refs
     const questionElementRefs = useRef<Map<string, HTMLElement | null>>(
         new Map()
     )
     const clearHighlightsRef = useRef<(() => void) | null>(null)
 
+    // 1. Initial Data Loading
     useEffect(() => {
-        const fetchTest = async () => {
+        const fetchTestAndAttempt = async () => {
+            if (!testId || !attemptId) {
+                setError('Missing URL parameters (Test ID or Attempt ID)')
+                setIsLoading(false)
+                return
+            }
+
             setIsLoading(true)
             setError(null)
             try {
-                await new Promise((resolve) => setTimeout(resolve, 500))
-                const data = mockTestData
+                // Fetch Test Detail
+                const testData = await testApi.getTest(testId)
+                setTest(testData)
 
-                setTestData(data)
-                setTimeLeft(data.totalTimeSeconds)
-                setIsLoading(false)
-            } catch (err) {
-                console.error(err)
-                setError('Failed to load test data.')
+                // Transform to Internal Format
+                const passagesData = mapTestToInternalFormat(testData)
+                setPassages(passagesData)
+
+                // Verify Attempt Info (get start time)
+                // Trong thực tế, nên gọi API getAttemptDetail để check xem user có đang resume không
+                // Ở đây ta dùng localStorage như yêu cầu tạm thời, nhưng tốt nhất là gọi API.
+                const attemptDataStr = localStorage.getItem(
+                    `attempt_${attemptId}`
+                )
+                let startTime = new Date().toISOString()
+
+                if (attemptDataStr) {
+                    const attemptData = JSON.parse(
+                        attemptDataStr
+                    ) as TestAttempt
+                    startTime = attemptData.startedAt
+                } else {
+                    // Fallback: Nếu không thấy trong local (đổi máy), lẽ ra nên fetch API
+                    // Giả lập call API startAttempt nếu cần, hoặc lấy từ getAttemptDetail
+                    console.warn(
+                        'Attempt info not found in localStorage, using default time logic'
+                    )
+                }
+
+                // Calculate Time
+                if (testData.timeLimitMinutes) {
+                    const remaining = calculateRemainingTime(
+                        startTime,
+                        testData.timeLimitMinutes
+                    )
+                    setTimeLeft(remaining)
+
+                    if (remaining === 0) {
+                        setTestFinished(true)
+                        alert('Bài thi này đã hết giờ.')
+                    }
+                }
+
+                // Load Saved Answers (Resume work)
+                const savedAnswers = localStorage.getItem(
+                    `${ANSWERS_STORAGE_PREFIX}${attemptId}`
+                )
+                if (savedAnswers) {
+                    setAnswers(JSON.parse(savedAnswers))
+                }
+            } catch (err: any) {
+                console.error('Failed to load test:', err)
+                setError(
+                    err.message || 'Failed to load test data. Please try again.'
+                )
+            } finally {
                 setIsLoading(false)
             }
         }
-        fetchTest()
-    }, [testId])
+        fetchTestAndAttempt()
+    }, [testId, attemptId])
 
+    // 2. Timer Countdown
     useEffect(() => {
-        if (isLoading || testFinished || isSubmitting) {
-            return
-        }
-
-        if (timeLeft <= 0) {
-            handleFinalSubmit()
-            return
-        }
+        if (isLoading || testFinished || isSubmitting || timeLeft <= 0) return
 
         const timerId = setInterval(() => {
-            setTimeLeft((prevTime) => prevTime - 1)
+            setTimeLeft((prevTime) => {
+                if (prevTime <= 1) {
+                    clearInterval(timerId)
+                    handleFinalSubmit(true) // Force submit due to timeout
+                    return 0
+                }
+                return prevTime - 1
+            })
         }, 1000)
 
         return () => clearInterval(timerId)
     }, [timeLeft, isLoading, testFinished, isSubmitting])
 
+    // 3. Auto-save Answers
+    useEffect(() => {
+        if (!attemptId || testFinished) return
+
+        const interval = setInterval(() => {
+            if (Object.keys(answers).length > 0) {
+                localStorage.setItem(
+                    `${ANSWERS_STORAGE_PREFIX}${attemptId}`,
+                    JSON.stringify(answers)
+                )
+            }
+        }, 15000) // Save every 15s
+
+        return () => clearInterval(interval)
+    }, [answers, attemptId, testFinished])
+
+    // Handlers
     const handleAnswerChange = useCallback(
         (questionId: string, value: any) => {
             if (testFinished) return
@@ -561,55 +650,35 @@ export default function ReadingTestPage() {
         []
     )
 
-    const handlePassageChange = (index: number) => {
-        setCurrentPassageIndex(index)
-
-        const firstQuestion =
-            testData?.passages[index]?.questionGroups[0]?.questions[0]
-        if (firstQuestion) {
-            setCurrentQuestionNumber(firstQuestion.number)
-        }
-    }
-
     const handleNavigateQuestion = useCallback(
-        (questionNumber: number, targetPassageIndex?: number) => {
-            if (testFinished || !testData) return
+        (questionNumber: number) => {
+            if (testFinished || !passages.length) return
 
             setCurrentQuestionNumber(questionNumber)
 
-            let passageIdx = targetPassageIndex ?? currentPassageIndex
-            let questionId: string | undefined
+            // Find passage containing this question
+            let targetPassageIdx = currentPassageIndex
+            let targetQuestionId: string | undefined
 
-            if (targetPassageIndex === undefined) {
-                for (let i = 0; i < testData.passages.length; i++) {
-                    const q = testData.passages[i].questionGroups
-                        .flatMap((g) => g.questions)
-                        .find((q) => q.number === questionNumber)
-                    if (q) {
-                        passageIdx = i
-                        questionId = q.id
-                        break
-                    }
+            for (let i = 0; i < passages.length; i++) {
+                const q = passages[i].questions.find(
+                    (q) => q.number === questionNumber
+                )
+                if (q) {
+                    targetPassageIdx = i
+                    targetQuestionId = q.id
+                    break
                 }
-            } else {
-                questionId = testData.passages[passageIdx].questionGroups
-                    .flatMap((g) => g.questions)
-                    .find((q) => q.number === questionNumber)?.id
             }
 
-            if (passageIdx !== -1 && passageIdx !== currentPassageIndex) {
-                setCurrentPassageIndex(passageIdx)
+            if (targetPassageIdx !== currentPassageIndex) {
+                setCurrentPassageIndex(targetPassageIdx)
             }
 
+            // Scroll to question
             setTimeout(() => {
-                if (!questionId) {
-                    questionId = testData.passages[passageIdx].questionGroups
-                        .flatMap((g) => g.questions)
-                        .find((q) => q.number === questionNumber)?.id
-                }
-
-                const element = questionId
-                    ? questionElementRefs.current.get(questionId)
+                const element = targetQuestionId
+                    ? questionElementRefs.current.get(targetQuestionId)
                     : undefined
 
                 if (element) {
@@ -618,86 +687,140 @@ export default function ReadingTestPage() {
                         block: 'center',
                     })
                 }
-            }, 150)
+            }, 100)
         },
-        [testData, currentPassageIndex, testFinished]
+        [passages, currentPassageIndex, testFinished]
     )
 
     const promptSubmit = () => {
         if (testFinished || isSubmitting) return
-        setShowSubmitConfirm(true)
-    }
-
-    const handleFinalSubmit = useCallback(async () => {
-        setShowSubmitConfirm(false)
-        if (testFinished || isSubmitting) return
-
-        setIsSubmitting(true)
-        setTestFinished(true)
-        console.log('Submitting answers:', answers)
-
-        try {
-            await new Promise((resolve) => setTimeout(resolve, 1500))
-
-            clearHighlightsRef.current?.()
-
-            Object.keys(localStorage).forEach((key) => {
-                if (key.startsWith(`${STORAGE_KEY_PREFIX}${testId}_`)) {
-                    localStorage.removeItem(key)
-                }
-            })
-
-            console.log('Test submitted and highlights cleared.')
-            alert('Nộp bài thành công!')
-        } catch (err) {
-            console.error('Submission error:', err)
-            setError('Nộp bài thất bại. Vui lòng thử lại.')
-            setTestFinished(false)
-        } finally {
-            setIsSubmitting(false)
+        if (
+            window.confirm(
+                'Bạn có chắc chắn muốn nộp bài? Hành động này không thể hoàn tác.'
+            )
+        ) {
+            handleFinalSubmit(false)
         }
-    }, [testFinished, isSubmitting, answers, testId, clearHighlightsRef])
+    }
 
+    const handleFinalSubmit = useCallback(
+        async (isTimeout = false) => {
+            if ((testFinished && !isTimeout) || isSubmitting || !attemptId)
+                return
+
+            setIsSubmitting(true)
+
+            try {
+                // Transform answers to API Payload
+                const responses: QuestionSubmitItem[] = Object.entries(
+                    answers
+                ).map(([questionId, value]) => {
+                    // Logic xác định response_text vs response_data
+                    // Với câu hỏi trắc nghiệm, value thường là string key
+                    // Với câu hỏi mảng (nhiều lựa chọn), value là array
+
+                    const isComplexData =
+                        typeof value === 'object' && value !== null
+
+                    return {
+                        question_id: questionId,
+                        response_text: !isComplexData
+                            ? String(value)
+                            : undefined,
+                        response_data: isComplexData ? value : undefined,
+                    }
+                })
+
+                // Submit API Call
+                await testApi.submitAttempt(attemptId, { responses })
+
+                // Cleanup Local Storage
+                clearHighlightsRef.current?.()
+                localStorage.removeItem(`${ANSWERS_STORAGE_PREFIX}${attemptId}`)
+                localStorage.removeItem(`attempt_${attemptId}`)
+
+                // Clear highlights cache
+                Object.keys(localStorage).forEach((key) => {
+                    if (key.startsWith(`${STORAGE_KEY_PREFIX}${testId}_`)) {
+                        localStorage.removeItem(key)
+                    }
+                })
+
+                setTestFinished(true)
+
+                if (isTimeout) {
+                    alert(
+                        'Hết giờ làm bài! Hệ thống đã tự động nộp bài của bạn.'
+                    )
+                }
+
+                // Redirect to Results
+                navigate(`/student/exams/results/${attemptId}`)
+            } catch (err: any) {
+                console.error('Submission error:', err)
+                alert(
+                    err.message ||
+                        'Nộp bài thất bại. Vui lòng kiểm tra kết nối mạng và thử lại.'
+                )
+                setIsSubmitting(false)
+            }
+        },
+        [testFinished, isSubmitting, answers, attemptId, testId, navigate]
+    )
+
+    // Render Logic
     if (isLoading) {
-        return <div className={s.loadingContainer}>Đang tải bài thi...</div>
+        return <div className={s.loadingContainer}>Loading test data...</div>
     }
+
     if (error) {
-        return <div className={s.errorContainer}>Lỗi: {error}</div>
-    }
-    if (!testData) {
         return (
             <div className={s.errorContainer}>
-                Không tìm thấy dữ liệu bài thi.
+                <p>Error: {error}</p>
+                <ButtonGhost onClick={() => window.location.reload()}>
+                    Try Again
+                </ButtonGhost>
             </div>
         )
     }
 
-    const currentPassage = testData.passages[currentPassageIndex]
+    if (!test || !passages.length) {
+        return <div className={s.errorContainer}>No test content found.</div>
+    }
+
+    const currentPassage = passages[currentPassageIndex]
 
     return (
         <div className={`${s.pageWrapper} lightMode`}>
             <ReadingHeader timeLeft={timeLeft} />
 
             <main className={s.mainContent}>
+                {/* Cột trái: Bài đọc */}
                 <ReadingPassage
-                    key={currentPassage.id}
+                    key={`passage-${currentPassage.id}`}
                     passage={currentPassage}
-                    testId={testData.id}
+                    testId={test.id}
                     clearHighlightsRef={clearHighlightsRef}
                 />
+
+                {/* Cột phải: Câu hỏi */}
                 <QuestionArea
-                    key={`${currentPassage.id}-questions`}
+                    key={`questions-${currentPassage.id}`}
                     passage={currentPassage}
                     answers={answers}
                     onAnswerChange={handleAnswerChange}
                     registerRef={registerQuestionRef}
+                    attemptId={attemptId!}
                 />
             </main>
 
             <ReadingFooter
-                testData={testData}
+                passages={passages}
                 currentPassageIndex={currentPassageIndex}
-                onPassageChange={handlePassageChange}
+                onPassageChange={(idx) => {
+                    setCurrentPassageIndex(idx)
+                    // Optional: Reset question scroll to top or first question of passage
+                }}
                 currentQuestionNumber={currentQuestionNumber}
                 reviewedQuestions={reviewedQuestions}
                 answers={answers}
@@ -709,7 +832,12 @@ export default function ReadingTestPage() {
             />
 
             {isSubmitting && (
-                <div className={s.submitOverlay}>Đang nộp bài...</div>
+                <div className={s.submitOverlay}>
+                    <div className="flex flex-col items-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-4"></div>
+                        <p>Submitting your answers...</p>
+                    </div>
+                </div>
             )}
         </div>
     )

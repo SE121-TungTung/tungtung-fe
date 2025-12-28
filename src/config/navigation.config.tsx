@@ -19,17 +19,17 @@ const studyMenuItems: ExtendedSideMenuItem[] = [
     {
         id: 'classes',
         label: 'Lớp học',
-        href: '/student/class',
+        href: '/coming-soon',
     },
     {
         id: 'exams',
         label: 'Luyện thi',
-        href: '/student/exams',
+        href: '/coming-soon',
     },
     {
         id: 'roadmap',
         label: 'Lộ trình',
-        href: '/student/roadmap',
+        href: '/coming-soon',
     },
 ]
 
@@ -37,7 +37,7 @@ const studentNavItems: AppNavItem[] = [
     {
         id: 'dashboard',
         label: 'Dashboard',
-        href: '/student/dashboard',
+        href: '/dashboard',
     },
     {
         id: 'study',
@@ -47,12 +47,12 @@ const studentNavItems: AppNavItem[] = [
     {
         id: 'notifications',
         label: 'Thông báo',
-        href: '/student/notifications',
+        href: '/notifications',
     },
     {
         id: 'messages',
         label: 'Tin nhắn',
-        href: '/student/messages', // ✅ Thêm UnreadBadge
+        href: '/messages',
     },
 ]
 
@@ -60,7 +60,7 @@ const teacherNavItems: AppNavItem[] = [
     {
         id: 'dashboard',
         label: 'Dashboard',
-        href: '/teacher/dashboard',
+        href: '/dashboard',
     },
     {
         id: 'classes',
@@ -70,7 +70,13 @@ const teacherNavItems: AppNavItem[] = [
     {
         id: 'exams',
         label: 'Quản lý đề thi',
-        href: '/teacher/exams',
+        dropdownItems: [
+            {
+                id: 'create-test',
+                label: 'Tạo đề thi mới',
+                href: '/teacher/tests/create',
+            },
+        ],
     },
 ]
 
@@ -78,7 +84,7 @@ const adminNavItems: AppNavItem[] = [
     {
         id: 'dashboard',
         label: 'Tổng quan',
-        href: '/coming-soon',
+        href: '/dashboard',
         allowedRoles: ['office_admin', 'center_admin', 'system_admin'],
     },
     {
@@ -114,12 +120,12 @@ const adminNavItems: AppNavItem[] = [
             {
                 id: 'kpi',
                 label: 'Quản lý KPI',
-                href: '/admin/kpi',
+                href: '/coming-soon',
             },
             {
                 id: 'salary',
                 label: 'Quản lý Lương',
-                href: '/admin/salary',
+                href: '/coming-soon',
             },
         ],
     },
@@ -131,12 +137,12 @@ const adminNavItems: AppNavItem[] = [
             {
                 id: 'reports',
                 label: 'Báo cáo',
-                href: '/admin/reports',
+                href: '/coming-soon',
             },
             {
                 id: 'audit-logs',
                 label: 'Nhật ký hệ thống',
-                href: '/admin/audit-logs',
+                href: '/coming-soon',
             },
         ],
     },
@@ -158,12 +164,12 @@ const commonUserMenu: ExtendedSideMenuItem[] = [
     {
         id: 'settings',
         label: 'Cài đặt',
-        href: '/settings',
+        href: '/coming-soon',
     },
     {
         id: 'help',
         label: 'Trợ giúp',
-        href: '/help',
+        href: '/coming-soon',
     },
     {
         id: 'logout',

@@ -16,6 +16,8 @@ import type {
     AddMembersResponse,
     RemoveMemberResponse,
     SearchMessagesParams,
+    DeleteConversationResponse,
+    DeleteMessageResponse,
 } from '@/types/message.types'
 
 const BASE_URL = '/api/v1/messaging'
@@ -24,10 +26,6 @@ const BASE_URL = '/api/v1/messaging'
 // MAPPING UTILITIES
 // ============================================
 
-/**
- * Parse full name into first/last name
- * Note: This is a best-effort approach and may not work for all name formats
- */
 function parseFullName(fullName: string): {
     firstName: string
     lastName: string
@@ -42,17 +40,12 @@ function parseFullName(fullName: string): {
         return { firstName: parts[0], lastName: '' }
     }
 
-    // For Vietnamese names: "Nguyen Van An" -> firstName="Nguyen Van", lastName="An"
-    // For Western names: "John Doe" -> firstName="John", lastName="Doe"
     const lastName = parts[parts.length - 1]
     const firstName = parts.slice(0, -1).join(' ')
 
     return { firstName, lastName }
 }
 
-/**
- * Map backend member response to frontend Participant
- */
 function mapParticipant(member: BackendMemberResponse): Participant {
     const fullName = member.full_name || 'Unknown User'
     const { firstName, lastName } = parseFullName(fullName)
@@ -69,9 +62,6 @@ function mapParticipant(member: BackendMemberResponse): Participant {
     }
 }
 
-/**
- * Map backend message response to frontend Message
- */
 function mapMessage(msg: BackendMessageResponse): Message {
     let sender: Participant | undefined
 
@@ -103,15 +93,12 @@ function mapMessage(msg: BackendMessageResponse): Message {
     }
 }
 
-/**
- * Map backend chat history message (from /history endpoint)
- */
 function mapHistoryMessage(msg: BackendChatHistoryMessage): Message {
     const { firstName, lastName } = parseFullName(msg.sender_name)
 
     return {
         id: msg.message_id,
-        conversationId: '', // Will be set by caller
+        conversationId: '',
         senderId: msg.sender_id,
         content: msg.content,
         messageType: msg.message_type,
@@ -132,9 +119,6 @@ function mapHistoryMessage(msg: BackendChatHistoryMessage): Message {
     }
 }
 
-/**
- * Map backend conversation to frontend Conversation
- */
 function mapConversation(dto: BackendConversationResponse): Conversation {
     return {
         id: dto.room_id,
@@ -145,7 +129,7 @@ function mapConversation(dto: BackendConversationResponse): Conversation {
         description: dto.description || null,
         unreadCount: dto.unread_count,
         updatedAt: dto.last_message_at || new Date().toISOString(),
-        participants: [], // Will be populated separately if needed
+        participants: [],
         memberCount: dto.member_count,
         lastMessage: dto.last_message
             ? {
@@ -159,7 +143,7 @@ function mapConversation(dto: BackendConversationResponse): Conversation {
 }
 
 // ============================================
-// API METHODS
+// API METHODS - UPDATED
 // ============================================
 
 export const messageApi = {
@@ -167,17 +151,12 @@ export const messageApi = {
     // CONVERSATIONS
     // ========================================
 
-    /**
-     * Get all conversations (Direct + Group + Class)
-     * Endpoint: GET /conversations/all
-     */
     getConversations: async (): Promise<Conversation[]> => {
         try {
             const response = await api<BackendConversationResponse[]>(
                 `${BASE_URL}/conversations/all`,
                 { method: 'GET' }
             )
-
             return response.map(mapConversation)
         } catch (error) {
             console.error('Error fetching conversations:', error)
@@ -185,10 +164,6 @@ export const messageApi = {
         }
     },
 
-    /**
-     * Get or create direct conversation with another user
-     * Endpoint: GET /conversations/direct/{other_user_id}
-     */
     getOrCreateDirectConversation: async (
         otherUserId: string
     ): Promise<Conversation> => {
@@ -196,7 +171,6 @@ export const messageApi = {
             `${BASE_URL}/conversations/direct/${otherUserId}`,
             { method: 'GET' }
         )
-
         return mapConversation(response)
     },
 
@@ -204,10 +178,6 @@ export const messageApi = {
     // MESSAGES
     // ========================================
 
-    /**
-     * Get message history for a room with pagination
-     * Endpoint: GET /rooms/{room_id}/history
-     */
     getMessages: async (
         roomId: string,
         skip = 0,
@@ -217,29 +187,20 @@ export const messageApi = {
             `${BASE_URL}/rooms/${roomId}/history?skip=${skip}&limit=${limit}`,
             { method: 'GET' }
         )
-
-        // Map and set conversationId
         return response.map((msg) => ({
             ...mapHistoryMessage(msg),
             conversationId: roomId,
         }))
     },
 
-    /**
-     * Send a message (REST API)
-     * Endpoint: POST /send
-     *
-     * ✅ FIXED: Use correct field names (room_id, receiver_id)
-     */
     sendMessage: async (payload: SendMessagePayload): Promise<Message> => {
-        // Validate: either room_id or receiver_id must be provided
         if (!payload.room_id && !payload.receiver_id) {
             throw new Error('Either room_id or receiver_id must be provided')
         }
 
         const body = {
-            room_id: payload.room_id, // ✅ CORRECT
-            receiver_id: payload.receiver_id, // ✅ CORRECT
+            room_id: payload.room_id,
+            receiver_id: payload.receiver_id,
             content: payload.content,
         }
 
@@ -251,10 +212,6 @@ export const messageApi = {
         return mapMessage(response)
     },
 
-    /**
-     * ✅ IMPLEMENTED: Mark all messages in conversation as read
-     * Endpoint: POST /conversations/{room_id}/read
-     */
     markAsRead: async (
         roomId: string
     ): Promise<{ success: boolean; marked_count: number }> => {
@@ -264,10 +221,6 @@ export const messageApi = {
         )
     },
 
-    /**
-     * ✅ IMPLEMENTED: Search messages
-     * Endpoint: GET /search_messages
-     */
     searchMessages: async (
         params: SearchMessagesParams
     ): Promise<{
@@ -297,38 +250,17 @@ export const messageApi = {
                 createdAt: msg.created_at,
                 attachments: msg.attachments || [],
                 status: msg.status || 'sent',
-
-                // Search result thường không kèm thông tin sender chi tiết (name/avatar)
-                // Nếu cần hiển thị tên, backend cần join bảng User hoặc FE tự lookup
                 sender: undefined,
             })),
         }
     },
 
-    /**
-     * ⚠️ PARTIAL: Delete message (soft delete - recipient side only)
-     * Endpoint: Not explicitly defined in router, needs implementation
-     *
-     * Note: Current backend only marks as deleted for recipient, not actual delete
-     */
     deleteMessage: async (messageId: string): Promise<{ success: boolean }> => {
-        // TODO: Backend needs explicit endpoint
-        console.warn(
-            'deleteMessage: Backend service exists but no router endpoint'
-        )
-        throw new Error('API endpoint not exposed in router')
-
-        // When backend adds endpoint:
-        // return api<{ success: boolean }>(
-        //     `${BASE_URL}/messages/${messageId}`,
-        //     { method: 'DELETE' }
-        // )
+        return api<DeleteMessageResponse>(`/api/v1/messages/${messageId}`, {
+            method: 'DELETE',
+        })
     },
 
-    /**
-     * ✅ IMPLEMENTED: Edit message
-     * Endpoint: POST /edit_message/{message_id}
-     */
     editMessage: async (
         messageId: string,
         newContent: string
@@ -340,10 +272,6 @@ export const messageApi = {
         return mapMessage(response)
     },
 
-    /**
-     * ✅ IMPLEMENTED: Get total unread count
-     * Endpoint: GET /unread-count
-     */
     getTotalUnreadCount: async (): Promise<number> => {
         const response = await api<UnreadCountResponse>(
             `${BASE_URL}/unread-count`,
@@ -353,17 +281,20 @@ export const messageApi = {
     },
 
     // ========================================
-    // GROUP MANAGEMENT
+    // GROUP MANAGEMENT - UPDATED
     // ========================================
 
-    /**
-     * Get group details with members
-     * Endpoint: GET /groups/{room_id}
-     */
-    getGroupDetails: async (roomId: string): Promise<Conversation> => {
+    getGroupDetails: async (
+        roomId: string,
+        currentUserId: string
+    ): Promise<Conversation> => {
         const response = await api<BackendGroupDetailResponse>(
             `${BASE_URL}/groups/${roomId}`,
             { method: 'GET' }
+        )
+
+        const currentMember = response.members.find(
+            (m) => m.user_id === currentUserId
         )
 
         return {
@@ -373,28 +304,41 @@ export const messageApi = {
             isGroup: true,
             avatarUrl: response.avatar_url || null,
             description: response.description || null,
-            unreadCount: 0, // Not provided in detail endpoint
+            unreadCount: 0,
             updatedAt: response.created_at,
             participants: (response.members || []).map(mapParticipant),
             memberCount: response.member_count,
+            isAdmin: currentMember?.role === 'admin',
         }
     },
 
     /**
-     * Create new group chat
-     * Endpoint: POST /groups
+     * Backend expects FormData with:
+     * - title: string (Form)
+     * - description: string (Form, optional)
+     * - member_ids: comma-separated string (Form)
+     * - avatar: File (File, optional)
      */
     createGroup: async (payload: CreateGroupPayload): Promise<Conversation> => {
+        const formData = new FormData()
+
+        formData.append('title', payload.title)
+
+        if (payload.description) {
+            formData.append('description', payload.description)
+        }
+
+        formData.append('member_ids', payload.member_ids.join(','))
+
+        if (payload.avatar) {
+            formData.append('avatar', payload.avatar)
+        }
+
         const response = await api<BackendGroupDetailResponse>(
             `${BASE_URL}/groups`,
             {
                 method: 'POST',
-                body: JSON.stringify({
-                    title: payload.title,
-                    description: payload.description,
-                    member_ids: payload.member_ids,
-                    avatar_url: payload.avatar_url,
-                }),
+                body: formData,
             }
         )
 
@@ -413,23 +357,49 @@ export const messageApi = {
     },
 
     /**
-     * Update group information
-     * Endpoint: PUT /groups/{room_id}
+     * Backend expects FormData with:
+     * - title: string (Form, optional)
+     * - description: string (Form, optional)
+     * - avatar: File (File, optional)
      */
     updateGroup: async (
         roomId: string,
         payload: UpdateGroupPayload
     ): Promise<BackendGroupDetailResponse> => {
+        const formData = new FormData()
+
+        if (payload.title !== undefined) {
+            formData.append('title', payload.title)
+        }
+
+        if (payload.description !== undefined) {
+            formData.append('description', payload.description || '')
+        }
+
+        if (payload.avatar) {
+            formData.append('avatar', payload.avatar)
+        }
+
         return api<BackendGroupDetailResponse>(`${BASE_URL}/groups/${roomId}`, {
             method: 'PUT',
-            body: JSON.stringify(payload),
+            body: formData,
         })
     },
 
     /**
-     * Add members to group
-     * Endpoint: POST /groups/{room_id}/members
+     * ✅ NEW: Delete/Clear conversation
+     * - Direct chat: Clear for current user only
+     * - Group chat: Delete entire room (admin only)
+     * Endpoint: DELETE /rooms/{room_id}
      */
+    deleteConversation: async (
+        roomId: string
+    ): Promise<DeleteConversationResponse> => {
+        return api<DeleteConversationResponse>(`${BASE_URL}/rooms/${roomId}`, {
+            method: 'DELETE',
+        })
+    },
+
     addMembersToGroup: async (
         roomId: string,
         userIds: string[]
@@ -440,10 +410,6 @@ export const messageApi = {
         })
     },
 
-    /**
-     * Remove member from group (or self-leave)
-     * Endpoint: DELETE /groups/{room_id}/members/{user_id}
-     */
     removeMemberFromGroup: async (
         roomId: string,
         userId: string
@@ -454,10 +420,6 @@ export const messageApi = {
         )
     },
 
-    /**
-     * ✅ IMPLEMENTED: Mute conversation
-     * Endpoint: POST /rooms/{room_id}/mute
-     */
     muteConversation: async (
         roomId: string
     ): Promise<{ success: boolean; is_muted: boolean }> => {
@@ -467,10 +429,6 @@ export const messageApi = {
         )
     },
 
-    /**
-     * ✅ IMPLEMENTED: Unmute conversation
-     * Endpoint: POST /rooms/{room_id}/unmute
-     */
     unmuteConversation: async (
         roomId: string
     ): Promise<{ success: boolean; is_muted: boolean }> => {
@@ -484,10 +442,6 @@ export const messageApi = {
     // WEBSOCKET UTILITIES
     // ========================================
 
-    /**
-     * Get online users
-     * Endpoint: GET /ws/online-users
-     */
     getOnlineUsers: async (): Promise<string[]> => {
         const response = await api<OnlineUsersResponse>(
             `${BASE_URL}/ws/online-users`,
@@ -496,10 +450,6 @@ export const messageApi = {
         return response.online_users
     },
 
-    /**
-     * Get WebSocket connection stats (admin)
-     * Endpoint: GET /ws/stats
-     */
     getWebSocketStats: async () => {
         return api(`${BASE_URL}/ws/stats`, { method: 'GET' })
     },

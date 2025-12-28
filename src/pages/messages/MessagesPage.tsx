@@ -50,7 +50,12 @@ export default function MessagesPage() {
         [conversations, activeConversationId]
     )
 
-    const handleStartChat = async (userIds: string[], groupName?: string) => {
+    const handleStartChat = async (
+        userIds: string[],
+        groupName?: string,
+        groupAvatar?: File,
+        groupDesc?: string
+    ) => {
         try {
             if (userIds.length === 1 && !groupName) {
                 // Direct chat
@@ -62,6 +67,8 @@ export default function MessagesPage() {
                 const newGroup = await messageApi.createGroup({
                     title: groupName || 'Nhóm chat mới',
                     member_ids: userIds,
+                    avatar: groupAvatar,
+                    description: groupDesc,
                 })
                 setActiveConversationId(newGroup.id)
             }
@@ -153,6 +160,7 @@ export default function MessagesPage() {
                                 <h3 className={s.sidebarTitle}>Đoạn chat</h3>
                                 <ButtonPrimary
                                     size="sm"
+                                    variant="outline"
                                     onClick={() => setShowNewChatModal(true)}
                                 >
                                     + Mới

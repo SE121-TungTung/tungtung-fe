@@ -1,25 +1,23 @@
 import { useState } from 'react'
 import s from './DraggableScheduleEditor.module.css'
-import type { SessionBase } from '@/types/schedule.types'
+import type { SessionProposal } from '@/types/schedule.types'
+import { SYSTEM_TIME_SLOTS } from '@/types/schedule.types'
 import { format, addDays, startOfWeek } from 'date-fns'
 import { vi } from 'date-fns/locale'
 
 interface DraggableScheduleEditorProps {
     startDate: Date
-    sessions: SessionBase[]
-    onSessionsChange: (sessions: SessionBase[]) => void
+    sessions: SessionProposal[]
+    onSessionsChange: (sessions: SessionProposal[]) => void
     availableTeachers?: Array<{ id: string; name: string }>
     availableRooms?: Array<{ id: string; name: string }>
 }
 
-const TIME_SLOTS = [
-    { id: 1, label: 'Kíp 1', time: '08:00-09:30' },
-    { id: 2, label: 'Kíp 2', time: '09:45-11:15' },
-    { id: 3, label: 'Kíp 3', time: '11:30-13:00' },
-    { id: 4, label: 'Kíp 4', time: '13:30-15:00' },
-    { id: 5, label: 'Kíp 5', time: '15:15-16:45' },
-    { id: 6, label: 'Kíp 6', time: '17:00-18:30' },
-]
+const TIME_SLOTS = SYSTEM_TIME_SLOTS.map((slot) => ({
+    id: slot.slot_number,
+    label: `Kíp ${slot.slot_number}`,
+    time: `${slot.start_time.slice(0, 5)}-${slot.end_time.slice(0, 5)}`,
+}))
 
 const DAYS_OF_WEEK = 7
 
@@ -30,9 +28,8 @@ export default function DraggableScheduleEditor({
     availableTeachers = [],
     availableRooms = [],
 }: DraggableScheduleEditorProps) {
-    const [draggedSession, setDraggedSession] = useState<SessionBase | null>(
-        null
-    )
+    const [draggedSession, setDraggedSession] =
+        useState<SessionProposal | null>(null)
     const [editingSession, setEditingSession] = useState<string | null>(null)
     const [hoveredSlot, setHoveredSlot] = useState<string | null>(null)
 
@@ -42,7 +39,7 @@ export default function DraggableScheduleEditor({
     )
 
     // Generate unique key cho session
-    const getSessionKey = (session: SessionBase) => {
+    const getSessionKey = (session: SessionProposal) => {
         return `${session.class_id}_${session.session_date}_${(session.time_slots || []).join('-')}`
     }
 
@@ -97,7 +94,7 @@ export default function DraggableScheduleEditor({
     }
 
     // Handle drag start
-    const handleDragStart = (session: SessionBase) => {
+    const handleDragStart = (session: SessionProposal) => {
         setDraggedSession(session)
     }
 
@@ -122,11 +119,27 @@ export default function DraggableScheduleEditor({
         const originalSlots = draggedSession.time_slots || [1]
         const slotCount = originalSlots.length
 
+        const maxSlot =
+            SYSTEM_TIME_SLOTS[SYSTEM_TIME_SLOTS.length - 1].slot_number
+        if (targetSlot + slotCount - 1 > maxSlot) {
+            alert(
+                `Không thể xếp ${slotCount} kíp từ kíp ${targetSlot} (vượt quá kíp ${maxSlot})`
+            )
+            return
+        }
+
         // Tạo time_slots mới bắt đầu từ targetSlot
         const newTimeSlots = Array.from(
             { length: slotCount },
             (_, i) => targetSlot + i
-        ).filter((slot) => slot <= 6) // Không vượt quá kíp 6
+        ).filter((slot) => slot <= maxSlot)
+
+        const startSlot = SYSTEM_TIME_SLOTS.find(
+            (s) => s.slot_number === newTimeSlots[0]
+        )
+        const endSlot = SYSTEM_TIME_SLOTS.find(
+            (s) => s.slot_number === newTimeSlots[newTimeSlots.length - 1]
+        )
 
         const updatedSessions = sessions.map((s) => {
             if (getSessionKey(s) === getSessionKey(draggedSession)) {
@@ -134,6 +147,8 @@ export default function DraggableScheduleEditor({
                     ...s,
                     session_date: targetDateStr,
                     time_slots: newTimeSlots,
+                    start_time: startSlot?.start_time || s.start_time,
+                    end_time: endSlot?.end_time || s.end_time,
                 }
             }
             return s
@@ -145,13 +160,13 @@ export default function DraggableScheduleEditor({
 
     // Handle session update
     const handleSessionUpdate = (
-        sessionToUpdate: SessionBase,
-        field: keyof SessionBase,
+        sessionToUpdate: SessionProposal,
+        field: keyof SessionProposal,
         value: any
     ) => {
         const updatedSessions = sessions.map((s) => {
             if (getSessionKey(s) === getSessionKey(sessionToUpdate)) {
-                const updates: Partial<SessionBase> = { [field]: value }
+                const updates: Partial<SessionProposal> = { [field]: value }
 
                 if (field === 'teacher_id') {
                     const teacher = availableTeachers.find(
@@ -172,7 +187,7 @@ export default function DraggableScheduleEditor({
     }
 
     // Handle session delete
-    const handleDeleteSession = (session: SessionBase) => {
+    const handleDeleteSession = (session: SessionProposal) => {
         if (!confirm('Bạn có chắc muốn xóa buổi học này?')) return
         const updatedSessions = sessions.filter(
             (s) => getSessionKey(s) !== getSessionKey(session)
@@ -400,7 +415,8 @@ export default function DraggableScheduleEditor({
                                                             }
                                                             type="text"
                                                             value={
-                                                                session.lesson_topic
+                                                                session.lesson_topic ||
+                                                                ''
                                                             }
                                                             onChange={(e) =>
                                                                 handleSessionUpdate(
@@ -450,16 +466,18 @@ export default function DraggableScheduleEditor({
                                                             🏫{' '}
                                                             {session.room_name}
                                                         </div>
-                                                        <div
-                                                            className={
-                                                                s.infoRow
-                                                            }
-                                                        >
-                                                            📚{' '}
-                                                            {
-                                                                session.lesson_topic
-                                                            }
-                                                        </div>
+                                                        {session.lesson_topic && (
+                                                            <div
+                                                                className={
+                                                                    s.infoRow
+                                                                }
+                                                            >
+                                                                📚{' '}
+                                                                {
+                                                                    session.lesson_topic
+                                                                }
+                                                            </div>
+                                                        )}
                                                         {spanRows > 1 && (
                                                             <div
                                                                 className={

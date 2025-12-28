@@ -192,8 +192,23 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
                     onMuteToggle={() => muteMutation.mutate()}
                     onMarkAsRead={() => markAsReadMutation.mutate()}
                     onDelete={() => {
-                        // TODO: Implement delete conversation
-                        console.log('Delete conversation:', conversation.id)
+                        if (
+                            confirm(
+                                'Bạn có chắc chắn muốn xóa cuộc trò chuyện này?'
+                            )
+                        ) {
+                            messageApi
+                                .deleteConversation(conversation.id)
+                                .then(() => {
+                                    queryClient.invalidateQueries({
+                                        queryKey: ['conversations'],
+                                    })
+                                })
+                                .catch((error) => {
+                                    console.error('Delete failed:', error)
+                                    alert('Không thể xóa cuộc trò chuyện')
+                                })
+                        }
                     }}
                     onClose={() => setContextMenu(null)}
                 />

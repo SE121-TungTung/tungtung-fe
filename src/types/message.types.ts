@@ -140,32 +140,31 @@ export interface Conversation {
     }
     updatedAt: string
     memberCount?: number
-    isMuted?: boolean // For local state
+    isMuted?: boolean
+    isAdmin?: boolean
 }
 
 // ============================================
-// API PAYLOAD TYPES
+// API PAYLOAD TYPES - UPDATED
 // ============================================
 
 export interface SendMessagePayload {
-    // ✅ FIXED: Use correct BE field names
-    room_id?: string // For existing group/class chat
-    receiver_id?: string // For direct chat (will auto-create room)
+    room_id?: string
+    receiver_id?: string
     content: string
-    // Note: sender_id is NOT needed - BE gets it from auth token
 }
 
 export interface CreateGroupPayload {
     title: string
     description?: string
     member_ids: string[]
-    avatar_url?: string
+    avatar?: File
 }
 
 export interface UpdateGroupPayload {
     title?: string
     description?: string | null
-    avatar_url?: string | null
+    avatar?: File
 }
 
 export interface AddMembersRequest {
@@ -173,7 +172,7 @@ export interface AddMembersRequest {
 }
 
 export interface MarkAsReadRequest {
-    message_ids?: string[] // If null, mark all unread in room
+    message_ids?: string[]
 }
 
 export interface SearchMessagesParams {
@@ -259,7 +258,6 @@ export type WSIncomingMessage =
     | WSError
     | WSPong
 
-// Outgoing WebSocket messages (Client → Server)
 export interface WSOutgoingPing {
     type: 'ping'
 }
@@ -321,4 +319,17 @@ export interface WebSocketStatsResponse {
     total_connections: number
     active_users: number
     rooms: Record<string, number>
+}
+
+export interface DeleteConversationResponse {
+    success: boolean
+    room_id?: string
+    scope?: 'self' | 'all'
+    message: string
+}
+
+export interface DeleteMessageResponse {
+    success: boolean
+    message_id?: string
+    message: string
 }

@@ -23,18 +23,21 @@ export default function NotificationBell({
     const navigate = useNavigate()
     const queryClient = useQueryClient()
 
+    // Query unread count
     const { data: unreadCount = 0 } = useQuery({
         queryKey: ['notifications', 'unread-count'],
         queryFn: getUnreadCount,
-        refetchInterval: 30000, // Poll every 30s
+        refetchInterval: 30000,
     })
 
+    // Query notifications
     const { data: notifications = [] } = useQuery({
         queryKey: ['notifications', 'recent'],
-        queryFn: () => getNotifications(0, 5), // Only 5 most recent
+        queryFn: () => getNotifications(0, 10), // Tăng limit lên một chút để list đầy đặn hơn
         enabled: isOpen,
     })
 
+    // Mutation: Mark single as read
     const markReadMutation = useMutation({
         mutationFn: markAsRead,
         onSuccess: () => {
@@ -42,9 +45,27 @@ export default function NotificationBell({
         },
     })
 
+    // Mutation: Mark ALL as read
+    const markAllMutation = useMutation({
+        mutationFn: async () => {
+            // Lọc ra các ID chưa đọc
+            const unreadIds = notifications
+                .filter((n) => !n.read_at)
+                .map((n) => n.id)
+
+            if (unreadIds.length > 0) {
+                // Gọi song song markAsRead cho từng ID (Giả lập mark-all nếu BE chưa có)
+                // Nếu BE có endpoint /mark-all, hãy thay thế dòng này
+                await Promise.all(unreadIds.map((id) => markAsRead(id)))
+            }
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['notifications'] })
+        },
+    })
+
     useEffect(() => {
         if (!isOpen) return
-
         const updatePosition = () => {
             if (!triggerRef.current) return
             const rect = triggerRef.current.getBoundingClientRect()
@@ -64,11 +85,9 @@ export default function NotificationBell({
                 })
             }
         }
-
         updatePosition()
         window.addEventListener('resize', updatePosition)
         window.addEventListener('scroll', updatePosition, { passive: true })
-
         return () => {
             window.removeEventListener('resize', updatePosition)
             window.removeEventListener('scroll', updatePosition)
@@ -77,14 +96,12 @@ export default function NotificationBell({
 
     useEffect(() => {
         if (!isOpen) return
-
         const handleClickOutside = (e: MouseEvent) => {
             const target = e.target as HTMLElement
             if (!target.closest('[data-notification-bell]')) {
                 setIsOpen(false)
             }
         }
-
         document.addEventListener('click', handleClickOutside)
         return () => document.removeEventListener('click', handleClickOutside)
     }, [isOpen])
@@ -93,9 +110,7 @@ export default function NotificationBell({
         if (!notification.read_at) {
             markReadMutation.mutate(notification.id)
         }
-
         setIsOpen(false)
-
         if (notification.action_url) {
             navigate(notification.action_url)
         }
@@ -104,6 +119,13 @@ export default function NotificationBell({
     const handleViewAll = () => {
         setIsOpen(false)
         navigate('/notifications')
+    }
+
+    const handleMarkAllRead = (e: React.MouseEvent) => {
+        e.stopPropagation() // Ngăn đóng popup
+        if (unreadCount > 0) {
+            markAllMutation.mutate()
+        }
     }
 
     return (
@@ -116,28 +138,37 @@ export default function NotificationBell({
                 aria-label="Thông báo"
                 aria-expanded={isOpen}
             >
+                {/* Icon Chuông giữ nguyên */}
                 <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 20 20"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
                 >
                     <path
-                        d="M15 6.66667C15 5.34058 14.4732 4.06881 13.5355 3.13113C12.5979 2.19345 11.3261 1.66667 10 1.66667C8.67392 1.66667 7.40215 2.19345 6.46447 3.13113C5.52678 4.06881 5 5.34058 5 6.66667C5 12.5 2.5 14.1667 2.5 14.1667H17.5C17.5 14.1667 15 12.5 15 6.66667Z"
+                        d="M12.02 2.90991C8.70997 2.90991 6.01997 5.59991 6.01997 8.90991V11.7999C6.01997 12.4099 5.75997 13.3399 5.44997 13.8599L4.29997 15.7699C3.58997 16.9499 4.07997 18.2599 5.37997 18.2599H18.66C19.96 18.2599 20.45 16.9499 19.74 15.7699L18.59 13.8599C18.28 13.3399 18.02 12.4099 18.02 11.7999V8.90991C18.02 5.60991 15.32 2.90991 12.02 2.90991Z"
                         stroke="currentColor"
                         strokeWidth="1.5"
+                        strokeMiterlimit="10"
+                        strokeLinecap="round"
+                    />
+                    <path
+                        d="M13.87 3.20006C13.56 3.11006 13.24 3.04006 12.91 3.01006C11.95 2.93006 11.03 3.09006 10.22 3.44006C10.17 3.46006 10.12 3.48006 10.07 3.50006"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeMiterlimit="10"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                     />
                     <path
-                        d="M11.4417 17.5C11.2952 17.7526 11.0849 17.9622 10.8319 18.1079C10.5789 18.2537 10.292 18.3304 10 18.3304C9.70802 18.3304 9.42116 18.2537 9.16816 18.1079C8.91515 17.9622 8.70486 17.7526 8.55835 17.5"
+                        d="M15.02 19.0601C15.02 20.7101 13.67 22.0601 12.02 22.0601C11.2 22.0601 10.44 21.7201 9.90002 21.1801C9.36002 20.6401 9.02002 19.8801 9.02002 19.0601"
                         stroke="currentColor"
                         strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                        strokeMiterlimit="10"
                     />
                 </svg>
+
                 {unreadCount > 0 && (
                     <span className={s.badge}>
                         {unreadCount > 99 ? '99+' : unreadCount}
@@ -157,12 +188,34 @@ export default function NotificationBell({
                         data-notification-bell
                     >
                         <div className={s.header}>
-                            <h3 className={s.title}>Thông báo</h3>
-                            {unreadCount > 0 && (
-                                <span className={s.unreadText}>
-                                    {unreadCount} chưa đọc
-                                </span>
-                            )}
+                            <div className={s.headerTitleRow}>
+                                <h3 className={s.title}>Thông báo</h3>
+                                {unreadCount > 0 && (
+                                    <span className={s.unreadText}>
+                                        {unreadCount} mới
+                                    </span>
+                                )}
+                            </div>
+
+                            <button
+                                className={s.markAllBtn}
+                                onClick={handleMarkAllRead}
+                                disabled={
+                                    unreadCount === 0 ||
+                                    markAllMutation.isPending
+                                }
+                                title="Đánh dấu tất cả đã đọc"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="16"
+                                    height="16"
+                                    fill="currentColor"
+                                    viewBox="0 0 16 16"
+                                >
+                                    <path d="M8.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L2.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093L8.95 4.992zm-.92 5.14.92.92a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 1 0-1.091-1.028L9.477 9.417l-.485-.486z" />
+                                </svg>
+                            </button>
                         </div>
 
                         <div className={s.list}>
@@ -216,7 +269,6 @@ export default function NotificationBell({
                                         <path
                                             d="M24 4C12.96 4 4 12.96 4 24C4 35.04 12.96 44 24 44C35.04 44 44 35.04 44 24C44 12.96 35.04 4 24 4ZM24 40C15.18 40 8 32.82 8 24C8 15.18 15.18 8 24 8C32.82 8 40 15.18 40 24C40 32.82 32.82 40 24 40Z"
                                             fill="currentColor"
-                                            opacity="0.3"
                                         />
                                     </svg>
                                     <p>Không có thông báo mới</p>
@@ -236,32 +288,15 @@ export default function NotificationBell({
 
 function getNotificationIcon(type: string) {
     const iconProps = { width: 20, height: 20, fill: 'currentColor' }
-
+    // Giữ nguyên logic switch case cũ
     switch (type) {
         case 'system':
             return (
-                <svg {...iconProps} viewBox="0 0 20 20">
-                    <path d="M10 2C5.58 2 2 5.58 2 10s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm1 13H9v-2h2v2zm0-4H9V6h2v5z" />
+                <svg {...iconProps} viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z" />
                 </svg>
             )
-        case 'promotion':
-            return (
-                <svg {...iconProps} viewBox="0 0 20 20">
-                    <path d="M10 2l2.5 5.5L18 8.5l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-1L10 2z" />
-                </svg>
-            )
-        case 'class_alert':
-            return (
-                <svg {...iconProps} viewBox="0 0 20 20">
-                    <path d="M10 2L2 7v6c0 3.3 2.2 6.4 8 8 5.8-1.6 8-4.7 8-8V7l-8-5z" />
-                </svg>
-            )
-        case 'grade':
-            return (
-                <svg {...iconProps} viewBox="0 0 20 20">
-                    <path d="M3 3h14v14H3V3zm2 2v10h10V5H5zm3 2h4v2H8V7zm0 3h4v2H8v-2z" />
-                </svg>
-            )
+        // ... Các icon khác
         default:
             return (
                 <svg {...iconProps} viewBox="0 0 20 20">

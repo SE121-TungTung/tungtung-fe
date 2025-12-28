@@ -56,7 +56,8 @@ export default function FirstLoginPasswordModal({
         }) => changePassword(payload),
         onSuccess: async () => {
             try {
-                // Refresh user data to update is_first_login flag
+                localStorage.removeItem('is_first_login')
+
                 const updatedUser = await getMe()
                 setUser(updatedUser)
                 onSuccess?.()

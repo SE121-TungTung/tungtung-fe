@@ -88,7 +88,7 @@ export function ForgotPasswordPage() {
                             iconStyle="glass"
                             description="Website quản lý trung tâm Anh ngữ số 1 Việt Nam, cung cấp hệ sinh thái đa dạng cho người dạy lẫn người học."
                             ctaText="Tìm hiểu thêm"
-                            onCtaClick={() =>
+                            onClick={() =>
                                 window.open(
                                     'https://tungtung-fe.vercel.app',
                                     '_blank'

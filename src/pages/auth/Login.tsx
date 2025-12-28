@@ -45,6 +45,12 @@ export function LoginPage() {
             // Save tokens
             loginStore(data.access_token, data.refresh_token)
 
+            if (data.is_first_login) {
+                localStorage.setItem('is_first_login', 'true')
+            } else {
+                localStorage.removeItem('is_first_login')
+            }
+
             try {
                 // Fetch full user info
                 const me = await getMe()
@@ -151,7 +157,7 @@ export function LoginPage() {
                             iconStyle="glass"
                             description="Website quản lý trung tâm Anh ngữ số 1 Việt Nam, cung cấp hệ sinh thái đa dạng cho người dạy lẫn người học."
                             ctaText="Tìm hiểu thêm"
-                            onCtaClick={() =>
+                            onClick={() =>
                                 window.open(
                                     'https://tungtung-fe.vercel.app',
                                     '_blank'
