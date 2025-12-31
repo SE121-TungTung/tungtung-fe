@@ -50,7 +50,56 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         queryKey: ['messages', conversation.id],
         queryFn: () => messageApi.getMessages(conversation.id),
         staleTime: 30000,
+        refetchInterval: 10000,
+        refetchIntervalInBackground: true,
     })
+
+    // 🔍 DEBUG: Log messages để kiểm tra
+    useEffect(() => {
+        console.log('📩 Messages updated:', {
+            conversationId: conversation.id,
+            messageCount: messages.length,
+            messages: messages,
+        })
+    }, [messages, conversation.id])
+
+    useEffect(() => {
+        // Setup event listener for new messages
+        const handleNewMessage = (event: MessageEvent) => {
+            try {
+                const data = JSON.parse(event.data)
+
+                console.log('🔔 WebSocket event received:', data)
+
+                if (
+                    data.type === 'new_message' &&
+                    data.room_id === conversation.id
+                ) {
+                    console.log('✅ Invalidating queries for:', conversation.id)
+
+                    // Invalidate queries to refetch messages
+                    queryClient.invalidateQueries({
+                        queryKey: ['messages', conversation.id],
+                    })
+                    queryClient.invalidateQueries({
+                        queryKey: ['conversations'],
+                    })
+                }
+            } catch (error) {
+                console.error('❌ Error handling WebSocket message:', error)
+            }
+        }
+
+        // Listen to custom event (dispatched by WebSocket manager)
+        window.addEventListener('ws-new-message', handleNewMessage as any)
+
+        return () => {
+            window.removeEventListener(
+                'ws-new-message',
+                handleNewMessage as any
+            )
+        }
+    }, [conversation.id, queryClient])
 
     const sendMessageMutation = useMutation({
         mutationFn: (content: string) =>
@@ -59,6 +108,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                 content,
             }),
         onSuccess: () => {
+            console.log('✅ Message sent successfully')
             queryClient.invalidateQueries({
                 queryKey: ['messages', conversation.id],
             })
@@ -66,7 +116,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             queryClient.invalidateQueries({ queryKey: ['totalUnreadCount'] })
         },
         onError: (error) => {
-            console.error('Failed to send message:', error)
+            console.error('❌ Failed to send message:', error)
             alert('Không thể gửi tin nhắn. Vui lòng thử lại.')
         },
     })
@@ -143,7 +193,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           : 'Unknown User'
 
     const displayStatus = conversation.isGroup
-        ? `${conversation.participants.length} thành viên`
+        ? conversation.participants?.length
+            ? `${conversation.participants.length} thành viên`
+            : 'Đang tải...'
         : otherParticipant?.isOnline
           ? 'Đang hoạt động'
           : 'Không hoạt động'
@@ -183,9 +235,17 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
                     <div className={s.avatarWrapper}>
                         {conversation.isGroup ? (
-                            <GroupAvatar
-                                participants={conversation.participants}
-                            />
+                            conversation.participants?.length > 0 ? (
+                                <GroupAvatar
+                                    participants={conversation.participants}
+                                />
+                            ) : (
+                                <img
+                                    src="/default-avatar.png"
+                                    className={s.headerAvatar}
+                                    alt="Group"
+                                />
+                            )
                         ) : (
                             <>
                                 <img
@@ -276,16 +336,67 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                                 new Date(prevMsg.createdAt)
                             )
 
-                        const sender = conversation.participants.find(
-                            (p) => p.id === msg.senderId
-                        )
+                        const sender =
+                            conversation.participants?.find(
+                                (p) => p.id === msg.senderId
+                            ) || msg.sender // Fallback to sender from message API
 
+                        // Don't hide messages if sender not found - use fallback
                         if (!sender && !isSent) {
                             console.warn(
-                                'Sender not found for message:',
-                                msg.id
+                                '⚠️ Sender not found for message:',
+                                msg.id,
+                                'senderId:',
+                                msg.senderId,
+                                'participants:',
+                                conversation.participants
                             )
-                            return null
+                            // Use a fallback sender instead of hiding message
+                            const fallbackSender = {
+                                id: msg.senderId || 'unknown',
+                                fullName: 'Unknown User',
+                                email: '',
+                                avatarUrl: null,
+                                firstName: 'Unknown',
+                                lastName: 'User',
+                            }
+
+                            return (
+                                <div
+                                    key={msg.id}
+                                    ref={(el) => {
+                                        messageRefs.current[msg.id] = el
+                                    }}
+                                >
+                                    {showDateSeparator && (
+                                        <DateSeparator
+                                            dateString={msg.createdAt}
+                                        />
+                                    )}
+
+                                    <MessageBubble
+                                        message={msg}
+                                        isSent={false}
+                                        sender={fallbackSender}
+                                        showSenderName={
+                                            conversation.isGroup &&
+                                            showSenderInfo
+                                        }
+                                        showAvatar={showSenderInfo}
+                                        onEdit={(messageId, content) =>
+                                            editMessageMutation.mutate({
+                                                messageId,
+                                                content,
+                                            })
+                                        }
+                                        onDelete={(messageId) =>
+                                            deleteMessageMutation.mutate(
+                                                messageId
+                                            )
+                                        }
+                                    />
+                                </div>
+                            )
                         }
 
                         if (!isSent && conversation.isGroup) {

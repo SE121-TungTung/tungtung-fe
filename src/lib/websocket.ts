@@ -263,6 +263,12 @@ export class WebSocketManager {
                 console.error('Error in message handler:', error)
             }
         })
+
+        if (message.type === 'new_message') {
+            window.dispatchEvent(
+                new CustomEvent('ws-new-message', { detail: message })
+            )
+        }
     }
 
     private handleError(error: Error): void {

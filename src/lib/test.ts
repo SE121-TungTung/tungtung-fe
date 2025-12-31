@@ -58,6 +58,8 @@ import {
     TestType,
     AttemptStatus,
     ContentStatus,
+    type BackendPassageResponse,
+    type Passage,
 } from '@/types/test.types'
 
 const BASE_URL = '/tests'
@@ -80,7 +82,7 @@ function mapQuestionOption(option: BackendQuestionOption): QuestionOption {
 /**
  * Map frontend question option to backend
  */
-function mapQuestionOptionToBackend(
+export function mapQuestionOptionToBackend(
     option: QuestionOption
 ): BackendQuestionOption {
     return {
@@ -187,13 +189,24 @@ function mapPart(dto: BackendPartResponse): TestSectionPart {
         id: dto.id,
         name: dto.name,
         orderNumber: dto.order_number,
-        content: dto.content, // ✅ Critical field for reading passages/listening scripts
+        passage: dto.passage ? mapPassage(dto.passage) : null,
         minQuestions: dto.min_questions,
         maxQuestions: dto.max_questions,
         imageUrl: dto.image_url,
         audioUrl: dto.audio_url,
         instructions: dto.instructions,
         questionGroups: dto.question_groups.map(mapQuestionGroup),
+    }
+}
+
+function mapPassage(dto: BackendPassageResponse): Passage {
+    return {
+        id: dto.id,
+        title: dto.title,
+        textContent: dto.text_content,
+        audioUrl: dto.audio_url,
+        imageUrl: dto.image_url,
+        durationSeconds: dto.duration_seconds,
     }
 }
 
@@ -207,7 +220,7 @@ function mapPartTeacher(
         id: dto.id,
         name: dto.name,
         orderNumber: dto.order_number,
-        content: dto.content,
+        passage: dto.passage ? mapPassage(dto.passage) : null,
         minQuestions: dto.min_questions,
         maxQuestions: dto.max_questions,
         imageUrl: dto.image_url,
@@ -380,12 +393,22 @@ function mapQuestionResult(dto: BackendQuestionResult): QuestionResult {
         questionId: dto.question_id,
         answered: dto.answered,
         isCorrect: dto.is_correct,
+        autoGraded: dto.auto_graded,
+
         pointsEarned: dto.points_earned,
         maxPoints: dto.max_points,
-        autoGraded: dto.auto_graded,
-        // ✅ New AI scoring fields
-        aiScore: dto.ai_score,
+        bandScore: dto.band_score,
+        rubricScores: dto.rubric_scores,
+
+        aiPointsEarned: dto.ai_points_earned,
+        aiBandScore: dto.ai_band_score,
+        aiRubricScores: dto.ai_rubric_scores,
         aiFeedback: dto.ai_feedback,
+
+        teacherPointsEarned: dto.teacher_points_earned,
+        teacherBandScore: dto.teacher_band_score,
+        teacherRubricScores: dto.teacher_rubric_scores,
+        teacherFeedback: dto.teacher_feedback,
     }
 }
 
@@ -396,7 +419,6 @@ function mapSubmitResult(dto: BackendSubmitAttemptResponse): SubmitResult {
     return {
         attemptId: dto.attempt_id,
         status: parseEnum(AttemptStatus, dto.status) || AttemptStatus.SUBMITTED,
-        // ✅ New fields
         submittedAt: dto.submitted_at,
         timeTakenSeconds: dto.time_taken_seconds,
         totalScore: dto.total_score,
@@ -405,6 +427,8 @@ function mapSubmitResult(dto: BackendSubmitAttemptResponse): SubmitResult {
         passed: dto.passed,
         gradedAt: dto.graded_at,
         gradedBy: dto.graded_by,
+        aiFeedback: dto.ai_feedback,
+        teacherFeedback: dto.teacher_feedback,
         questionResults: dto.question_results.map(mapQuestionResult),
     }
 }
@@ -435,15 +459,32 @@ function mapQuestionResultDetail(
     return {
         questionId: dto.question_id,
         questionText: dto.question_text,
+        questionType:
+            parseEnum(QuestionType, dto.question_type) ||
+            QuestionType.MULTIPLE_CHOICE,
+
         userAnswer: dto.user_answer,
-        // ✅ New fields
+        responseData: dto.response_data,
         audioResponseUrl: dto.audio_response_url,
-        aiScore: dto.ai_score,
-        aiFeedback: dto.ai_feedback,
+
+        isCorrect: dto.is_correct,
+        autoGraded: dto.auto_graded,
+
         pointsEarned: dto.points_earned,
         maxPoints: dto.max_points,
-        teacherScore: dto.teacher_score,
+        bandScore: dto.band_score,
+        rubricScores: dto.rubric_scores,
+
+        aiPointsEarned: dto.ai_points_earned,
+        aiBandScore: dto.ai_band_score,
+        aiRubricScores: dto.ai_rubric_scores,
+        aiFeedback: dto.ai_feedback,
+
+        teacherPointsEarned: dto.teacher_points_earned,
+        teacherBandScore: dto.teacher_band_score,
+        teacherRubricScores: dto.teacher_rubric_scores,
         teacherFeedback: dto.teacher_feedback,
+
         timeSpentSeconds: dto.time_spent_seconds,
         flaggedForReview: dto.flagged_for_review,
     }
@@ -458,11 +499,25 @@ function mapAttemptDetail(dto: BackendAttemptDetailResponse): AttemptDetail {
         testId: dto.test_id,
         testTitle: dto.test_title,
         studentId: dto.student_id,
-        startTime: dto.start_time,
-        endTime: dto.end_time,
+
+        attemptNumber: dto.attempt_number,
+        startedAt: dto.started_at,
+        submittedAt: dto.submitted_at,
+        timeTakenSeconds: dto.time_taken_seconds,
+
         totalScore: dto.total_score,
+        percentageScore: dto.percentage_score,
+        bandScore: dto.band_score,
+        passed: dto.passed,
         status:
             parseEnum(AttemptStatus, dto.status) || AttemptStatus.IN_PROGRESS,
+
+        gradedBy: dto.graded_by,
+        gradedAt: dto.graded_at,
+
+        aiFeedback: dto.ai_feedback,
+        teacherFeedback: dto.teacher_feedback,
+
         details: dto.details.map(mapQuestionResultDetail),
     }
 }
@@ -654,15 +709,35 @@ export const testApi = {
      * ⚠️ Requires: TEACHER, OFFICE_ADMIN, CENTER_ADMIN, or SYSTEM_ADMIN role
      *
      * @param payload - Test creation payload
+     * @param files - Optional files (audio, images)
      * @returns Created test basic info
      */
     createTest: async (
-        payload: TestCreatePayload
+        payload: TestCreatePayload,
+        files?: { [key: string]: File }
     ): Promise<{ id: string; title: string }> => {
-        return api<{ id: string; title: string }>(`${BASE_URL}/create`, {
+        const formData = new FormData()
+
+        formData.append('test_data_str', JSON.stringify(payload))
+
+        if (files) {
+            Object.entries(files).forEach(([key, file]) => {
+                formData.append('files', file, `${key}_${file.name}`)
+            })
+        }
+
+        const response = await fetch('/api/tests/create', {
             method: 'POST',
-            body: JSON.stringify(payload),
+            body: formData,
+            credentials: 'include',
         })
+
+        if (!response.ok) {
+            const error = await response.json()
+            throw new Error(error.detail || 'Failed to create test')
+        }
+
+        return response.json()
     },
 
     // ========================================
@@ -791,7 +866,12 @@ export function formatTime(seconds: number): string {
  * Check if answer is required
  */
 export function isAnswerRequired(questionType: QuestionType): boolean {
-    return questionType !== QuestionType.SPEAKING
+    const speakingTypes = [
+        QuestionType.SPEAKING_PART_1,
+        QuestionType.SPEAKING_PART_2,
+        QuestionType.SPEAKING_PART_3,
+    ]
+    return !speakingTypes.includes(questionType)
 }
 
 /**
@@ -799,17 +879,27 @@ export function isAnswerRequired(questionType: QuestionType): boolean {
  */
 export function getQuestionTypeLabel(type: QuestionType): string {
     const labels: Record<QuestionType, string> = {
+        // Reading & Listening
         [QuestionType.MULTIPLE_CHOICE]: 'Multiple Choice',
-        [QuestionType.TRUE_FALSE]: 'True/False',
+        [QuestionType.TRUE_FALSE_NOT_GIVEN]: 'True / False / Not Given',
+        [QuestionType.YES_NO_NOT_GIVEN]: 'Yes / No / Not Given',
+        [QuestionType.MATCHING_HEADINGS]: 'Matching Headings',
+        [QuestionType.MATCHING_INFORMATION]: 'Matching Information',
+        [QuestionType.MATCHING_FEATURES]: 'Matching Features',
+        [QuestionType.SENTENCE_COMPLETION]: 'Sentence Completion',
+        [QuestionType.SUMMARY_COMPLETION]: 'Summary Completion',
+        [QuestionType.NOTE_COMPLETION]: 'Note/Table/Flow-chart Completion',
         [QuestionType.SHORT_ANSWER]: 'Short Answer',
-        [QuestionType.ESSAY]: 'Essay',
-        [QuestionType.LISTENING]: 'Listening',
-        [QuestionType.SPEAKING]: 'Speaking',
-        [QuestionType.READING]: 'Reading Comprehension',
-        [QuestionType.FILL_IN_BLANK]: 'Fill in the Blank',
-        [QuestionType.MATCHING]: 'Matching',
-        [QuestionType.ORDERING]: 'Ordering',
-        [QuestionType.DRAG_AND_DROP]: 'Drag and Drop',
+        [QuestionType.DIAGRAM_LABELING]: 'Diagram Labeling',
+
+        // Writing
+        [QuestionType.WRITING_TASK_1]: 'Writing Task 1',
+        [QuestionType.WRITING_TASK_2]: 'Writing Task 2',
+
+        // Speaking
+        [QuestionType.SPEAKING_PART_1]: 'Speaking Part 1',
+        [QuestionType.SPEAKING_PART_2]: 'Speaking Part 2',
+        [QuestionType.SPEAKING_PART_3]: 'Speaking Part 3',
     }
     return labels[type] || type
 }

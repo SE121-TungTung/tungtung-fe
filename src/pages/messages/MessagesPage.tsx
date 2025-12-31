@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import s from './MessagesPage.module.css'
 import { useSession } from '@/stores/session.store'
 import { useQuery } from '@tanstack/react-query'
@@ -45,10 +45,85 @@ export default function MessagesPage() {
         refetchInterval: 60000,
     })
 
-    const activeConversation = useMemo(
-        () => conversations.find((c) => c.id === activeConversationId),
-        [conversations, activeConversationId]
-    )
+    const { data: detailedConversation } = useQuery({
+        queryKey: ['conversationDetails', activeConversationId],
+        queryFn: async () => {
+            if (!activeConversationId) return null
+
+            const baseConversation = conversations.find(
+                (c) => c.id === activeConversationId
+            )
+
+            if (!baseConversation) return null
+
+            // For group/class conversations, fetch full details with participants
+            if (baseConversation.isGroup) {
+                return messageApi.getGroupDetails(
+                    activeConversationId,
+                    currentUserId
+                )
+            }
+
+            // For direct conversations, participants might be empty from getConversations
+            // We still need to fetch group details to get the other user's info
+            return messageApi.getGroupDetails(
+                activeConversationId,
+                currentUserId
+            )
+        },
+        enabled: !!activeConversationId,
+        staleTime: 30000,
+    })
+
+    // Use detailed conversation if available, otherwise fallback to basic one
+    const activeConversation = useMemo(() => {
+        if (!activeConversationId) return null
+
+        // If we have detailed data with participants, use it
+        if (detailedConversation) {
+            const baseData = conversations.find(
+                (c) => c.id === activeConversationId
+            )
+            return {
+                ...baseData,
+                ...detailedConversation,
+                // Preserve unread count from base conversation
+                unreadCount: baseData?.unreadCount ?? 0,
+            } as Conversation
+        }
+
+        // Fallback to basic conversation (without participants)
+        return conversations.find((c) => c.id === activeConversationId) || null
+    }, [conversations, activeConversationId, detailedConversation])
+
+    // ✅ Refetch conversation details when new message arrives
+    useEffect(() => {
+        const handleNewMessage = (event: MessageEvent) => {
+            try {
+                const data = JSON.parse(event.data)
+
+                if (
+                    data.type === 'new_message' &&
+                    data.room_id === activeConversationId
+                ) {
+                    // Refetch conversation details to update participants
+                    queryClient.invalidateQueries({
+                        queryKey: ['conversationDetails', activeConversationId],
+                    })
+                }
+            } catch (error) {
+                console.error('Error handling WebSocket message:', error)
+            }
+        }
+
+        window.addEventListener('ws-new-message', handleNewMessage as any)
+        return () => {
+            window.removeEventListener(
+                'ws-new-message',
+                handleNewMessage as any
+            )
+        }
+    }, [activeConversationId])
 
     const handleStartChat = async (
         userIds: string[],

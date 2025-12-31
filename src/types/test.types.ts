@@ -1,19 +1,28 @@
 // ============================================
 // ENUMS
 // ============================================
-
 export enum QuestionType {
+    // Reading & Listening
     MULTIPLE_CHOICE = 'multiple_choice',
-    TRUE_FALSE = 'true_false',
+    TRUE_FALSE_NOT_GIVEN = 'true_false_not_given',
+    YES_NO_NOT_GIVEN = 'yes_no_not_given',
+    MATCHING_HEADINGS = 'matching_headings',
+    MATCHING_INFORMATION = 'matching_information',
+    MATCHING_FEATURES = 'matching_features',
+    SENTENCE_COMPLETION = 'sentence_completion',
+    SUMMARY_COMPLETION = 'summary_completion',
+    NOTE_COMPLETION = 'note_completion',
     SHORT_ANSWER = 'short_answer',
-    ESSAY = 'essay',
-    LISTENING = 'listening',
-    SPEAKING = 'speaking',
-    READING = 'reading_comprehension',
-    FILL_IN_BLANK = 'fill_in_blank',
-    MATCHING = 'matching',
-    ORDERING = 'ordering',
-    DRAG_AND_DROP = 'drag_and_drop',
+    DIAGRAM_LABELING = 'diagram_labeling',
+
+    // Writing
+    WRITING_TASK_1 = 'writing_task_1',
+    WRITING_TASK_2 = 'writing_task_2',
+
+    // Speaking
+    SPEAKING_PART_1 = 'speaking_part_1',
+    SPEAKING_PART_2 = 'speaking_part_2',
+    SPEAKING_PART_3 = 'speaking_part_3',
 }
 
 export enum SkillArea {
@@ -142,7 +151,7 @@ export interface BackendPartResponse {
     id: string
     name: string
     order_number: number
-    content: string | null
+    passage: BackendPassageResponse | null
     min_questions: number | null
     max_questions: number | null
     image_url: string | null
@@ -277,11 +286,22 @@ export interface BackendQuestionResult {
     question_id: string
     answered: boolean
     is_correct: boolean | null
+    auto_graded: boolean
+
     points_earned: number
     max_points: number
-    auto_graded: boolean
-    ai_score: number | null
+    band_score: number | null
+    rubric_scores: Record<string, any> | null
+
+    ai_points_earned: number | null
+    ai_band_score: number | null
+    ai_rubric_scores: Record<string, any> | null
     ai_feedback: string | null
+
+    teacher_points_earned: number | null
+    teacher_band_score: number | null
+    teacher_rubric_scores: Record<string, any> | null
+    teacher_feedback: string | null
 }
 
 /**
@@ -299,6 +319,8 @@ export interface BackendSubmitAttemptResponse {
     graded_at: string | null
     graded_by: string | null
     question_results: BackendQuestionResult[]
+    ai_feedback: Record<string, any> | null
+    teacher_feedback: string | null
 }
 
 /**
@@ -320,14 +342,30 @@ export interface BackendSpeakingSubmissionResponse {
 export interface BackendQuestionResultDetail {
     question_id: string
     question_text: string
+    question_type: string
+
     user_answer: string | null
+    response_data: any | null
     audio_response_url: string | null
-    ai_score: number | null
-    ai_feedback: string | null
+
+    is_correct: boolean | null
+    auto_graded: boolean
+
     points_earned: number
     max_points: number
-    teacher_score: number | null
+    band_score: number | null
+    rubric_scores: Record<string, any> | null
+
+    ai_points_earned: number | null
+    ai_band_score: number | null
+    ai_rubric_scores: Record<string, any> | null
+    ai_feedback: string | null
+
+    teacher_points_earned: number | null
+    teacher_band_score: number | null
+    teacher_rubric_scores: Record<string, any> | null
     teacher_feedback: string | null
+
     time_spent_seconds: number | null
     flagged_for_review: boolean
 }
@@ -340,13 +378,29 @@ export interface BackendAttemptDetailResponse {
     test_id: string
     test_title: string
     student_id: string
-    start_time: string
-    end_time: string | null
+
+    attempt_number: number
+    started_at: string
+    submitted_at: string | null
+    time_taken_seconds: number | null
+
     total_score: number | null
-    status: string // AttemptStatus
+    percentage_score: number | null
+    band_score: number | null
+    passed: boolean | null
+    status: string
+
+    graded_by: string | null
+    graded_at: string | null
+
+    ai_feedback: Record<string, any> | null
+    teacher_feedback: string | null
+
+    ip_address?: string | null
+    user_agent?: string | null
+
     details: BackendQuestionResultDetail[]
 }
-
 /**
  * Backend test summary (from service)
  */
@@ -366,6 +420,18 @@ export interface BackendTestSummary {
     created_at: string
     start_time: string | null
     end_time: string | null
+}
+
+/**
+ * Backend passage response (from service)
+ */
+export interface BackendPassageResponse {
+    id: string
+    title: string
+    text_content: string | null
+    audio_url: string | null
+    image_url: string | null
+    duration_seconds: number | null
 }
 
 // ============================================
@@ -441,7 +507,7 @@ export interface TestSectionPart {
     id: string
     name: string
     orderNumber: number
-    content: string | null
+    passage: Passage | null
     minQuestions: number | null
     maxQuestions: number | null
     imageUrl: string | null
@@ -574,11 +640,22 @@ export interface QuestionResult {
     questionId: string
     answered: boolean
     isCorrect: boolean | null
+    autoGraded: boolean
+
     pointsEarned: number
     maxPoints: number
-    autoGraded: boolean
-    aiScore: number | null
+    bandScore: number | null
+    rubricScores: Record<string, any> | null
+
+    aiPointsEarned: number | null
+    aiBandScore: number | null
+    aiRubricScores: Record<string, any> | null
     aiFeedback: string | null
+
+    teacherPointsEarned: number | null
+    teacherBandScore: number | null
+    teacherRubricScores: Record<string, any> | null
+    teacherFeedback: string | null
 }
 
 /**
@@ -595,6 +672,8 @@ export interface SubmitResult {
     passed: boolean | null
     gradedAt: string | null
     gradedBy: string | null
+    aiFeedback: Record<string, any> | null
+    teacherFeedback: string | null
     questionResults: QuestionResult[]
 }
 
@@ -617,14 +696,30 @@ export interface SpeakingSubmissionResult {
 export interface QuestionResultDetail {
     questionId: string
     questionText: string
+    questionType: QuestionType
+
     userAnswer: string | null
+    responseData: any | null
     audioResponseUrl: string | null
-    aiScore: number | null
-    aiFeedback: string | null
+
+    isCorrect: boolean | null
+    autoGraded: boolean
+
     pointsEarned: number
     maxPoints: number
-    teacherScore: number | null
+    bandScore: number | null
+    rubricScores: Record<string, any> | null
+
+    aiPointsEarned: number | null
+    aiBandScore: number | null
+    aiRubricScores: Record<string, any> | null
+    aiFeedback: string | null
+
+    teacherPointsEarned: number | null
+    teacherBandScore: number | null
+    teacherRubricScores: Record<string, any> | null
     teacherFeedback: string | null
+
     timeSpentSeconds: number | null
     flaggedForReview: boolean
 }
@@ -637,10 +732,24 @@ export interface AttemptDetail {
     testId: string
     testTitle: string
     studentId: string
-    startTime: string
-    endTime: string | null
+
+    attemptNumber: number
+    startedAt: string
+    submittedAt: string | null
+    timeTakenSeconds: number | null
+
     totalScore: number | null
+    percentageScore: number | null
+    bandScore: number | null
+    passed: boolean | null
     status: AttemptStatus
+
+    gradedBy: string | null
+    gradedAt: string | null
+
+    aiFeedback: Record<string, any> | null
+    teacherFeedback: string | null
+
     details: QuestionResultDetail[]
 }
 
@@ -663,6 +772,18 @@ export interface TestSummary {
     createdAt: string
     startTime: string | null
     endTime: string | null
+}
+
+/**
+ * Frontend passage
+ */
+export interface Passage {
+    id: string
+    title: string
+    textContent: string | null
+    audioUrl: string | null
+    imageUrl: string | null
+    durationSeconds: number | null
 }
 
 // ============================================
@@ -720,22 +841,6 @@ export interface QuestionGroupCreatePayload {
     min_questions?: number | null
     max_questions?: number | null
     questions: QuestionCreatePayload[]
-}
-
-/**
- * Test section part create payload
- */
-export interface TestSectionPartCreatePayload {
-    structure_part_id?: string | null
-    name: string
-    order_number: number
-    content?: string | null
-    min_questions?: number | null
-    max_questions?: number | null
-    audio_url?: string | null
-    image_url?: string | null
-    instructions?: string | null
-    question_groups: QuestionGroupCreatePayload[]
 }
 
 /**
@@ -797,4 +902,32 @@ export interface ListStudentTestsParams {
     limit?: number
     class_id?: string
     skill?: SkillArea
+}
+
+export interface PassageCreatePayload {
+    title: string
+    content_type: string // "reading_passage" | "listening_audio" | "speaking_cue_card"
+    text_content?: string | null
+    audio_url?: string | null
+    image_url?: string | null
+    topic?: string | null
+    difficulty_level?: string | null
+    word_count?: number | null
+    duration_seconds?: number | null
+}
+
+export interface TestSectionPartCreatePayload {
+    structure_part_id?: string | null
+    name: string
+    order_number: number
+
+    passage_id?: string | null
+    passage?: PassageCreatePayload | null
+
+    min_questions?: number | null
+    max_questions?: number | null
+    audio_url?: string | null
+    image_url?: string | null
+    instructions?: string | null
+    question_groups: QuestionGroupCreatePayload[]
 }

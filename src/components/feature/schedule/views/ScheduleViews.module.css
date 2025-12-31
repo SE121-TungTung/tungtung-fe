@@ -1,0 +1,543 @@
+/* =============================================================================
+   SHARED STYLES FOR ALL SCHEDULE VIEWS
+   ============================================================================= */
+
+/* -----------------------------------------------------------------------------
+   View Mode Selector
+   ----------------------------------------------------------------------------- */
+.viewSelector {
+    display: flex;
+    gap: var(--space-8);
+    padding: var(--space-4);
+    background: var(--surface-card-light);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--boder-soft-light);
+    backdrop-filter: blur(20px);
+}
+
+.viewButton {
+    padding: var(--space-8) var(--space-16);
+    border: 1px solid var(--boder-soft-light);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-secondary-light);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.viewButton:hover {
+    background: rgba(255, 255, 255, 0.5);
+    border-color: var(--brand-primary-500-light);
+    color: var(--text-primary-light);
+}
+
+.viewButton.active {
+    background: var(--brand-primary-500-light);
+    border-color: var(--brand-primary-500-light);
+    color: var(--text-on-primary-light);
+    font-weight: 600;
+}
+
+/* -----------------------------------------------------------------------------
+   Filters
+   ----------------------------------------------------------------------------- */
+.filters {
+    display: flex;
+    gap: var(--space-12);
+    align-items: center;
+    padding: var(--space-12) var(--space-16);
+    background: var(--surface-card-light);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--boder-soft-light);
+    backdrop-filter: blur(20px);
+    flex-wrap: wrap;
+}
+
+.filterGroup {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+}
+
+.filterLabel {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary-light);
+    white-space: nowrap;
+}
+
+.filterSelect {
+    padding: var(--space-8) var(--space-12);
+    border: 1px solid var(--boder-soft-light);
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.7);
+    color: var(--text-primary-light);
+    font-size: 13px;
+    cursor: pointer;
+    min-width: 140px;
+    transition: all 0.2s;
+}
+
+.filterSelect:hover {
+    border-color: var(--brand-primary-500-light);
+}
+
+.filterSelect:focus {
+    outline: none;
+    border-color: var(--brand-primary-500-light);
+    box-shadow: 0 0 0 3px var(--focus-ring-light);
+}
+
+.clearFilters {
+    padding: var(--space-8) var(--space-12);
+    background: transparent;
+    border: 1px solid var(--status-danger-500-light);
+    border-radius: var(--radius-sm);
+    color: var(--status-danger-500-light);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.clearFilters:hover {
+    background: var(--status-danger-500-light);
+    color: white;
+}
+
+/* -----------------------------------------------------------------------------
+   Session Cards
+   ----------------------------------------------------------------------------- */
+
+/* Compact card for grid views */
+.sessionCardCompact {
+    position: relative;
+    width: 100%;
+    padding: var(--space-8);
+    border-radius: var(--radius-sm);
+    background: rgba(48, 131, 255, 0.12);
+    border-left: 3px solid var(--brand-primary-500-light);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sessionCardCompact:hover {
+    background: rgba(48, 131, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+}
+
+.sessionTitle {
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--text-primary-light);
+    margin-bottom: var(--space-4);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sessionMeta {
+    display: flex;
+    gap: var(--space-4);
+    align-items: center;
+    font-size: 10px;
+    color: var(--text-secondary-light);
+}
+
+/* Full card for list view */
+.sessionCardFull {
+    padding: var(--space-16);
+    background: var(--surface-card-light);
+    border: 1px solid var(--boder-soft-light);
+    border-left: 4px solid var(--brand-primary-500-light);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s;
+    backdrop-filter: blur(20px);
+}
+
+.sessionCardFull:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    border-left-color: var(--brand-primary-600-light);
+}
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--space-12);
+}
+
+.cardHeader .sessionTitle {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary-light);
+}
+
+.sessionTime {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--brand-primary-500-light);
+    white-space: nowrap;
+}
+
+.cardBody {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+}
+
+.cardInfo {
+    display: flex;
+    gap: var(--space-12);
+    align-items: center;
+    font-size: 13px;
+    color: var(--text-secondary-light);
+}
+
+.cardTopic {
+    font-size: 13px;
+    color: var(--text-muted-light);
+    font-style: italic;
+}
+
+/* Tooltip */
+.tooltip {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: var(--space-8);
+    padding: var(--space-12);
+    background: var(--surface-raised-light);
+    border: 1px solid var(--boder-soft-light);
+    border-radius: var(--radius-md);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    min-width: 200px;
+    backdrop-filter: blur(20px);
+}
+
+.tooltipHeader {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text-primary-light);
+    margin-bottom: var(--space-8);
+    padding-bottom: var(--space-8);
+    border-bottom: 1px solid var(--boder-soft-light);
+}
+
+.tooltipRow {
+    display: flex;
+    gap: var(--space-8);
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-secondary-light);
+    margin-bottom: var(--space-4);
+}
+
+/* -----------------------------------------------------------------------------
+   Time Grid View
+   ----------------------------------------------------------------------------- */
+.timeGridContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    background: var(--surface-card-light);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--boder-soft-light);
+    backdrop-filter: blur(20px);
+    overflow: hidden;
+}
+
+.timeGridHeader {
+    display: grid;
+    grid-template-columns: 60px repeat(7, 1fr);
+    border-bottom: 1px solid var(--boder-soft-light);
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.timeHeaderCell {
+    padding: var(--space-12);
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text-secondary-light);
+    text-align: center;
+    border-right: 1px solid var(--boder-soft-light);
+}
+
+.dayHeaderCell {
+    padding: var(--space-12);
+    text-align: center;
+    border-right: 1px solid var(--boder-soft-light);
+}
+
+.dayName {
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--text-primary-light);
+    display: block;
+    text-transform: capitalize;
+}
+
+.dayDate {
+    font-size: 11px;
+    color: var(--text-secondary-light);
+    margin-top: var(--space-4);
+}
+
+.timeGridBody {
+    display: grid;
+    grid-template-columns: 60px repeat(7, 1fr);
+    height: 600px;
+    overflow-y: auto;
+    position: relative;
+}
+
+.timeColumn {
+    border-right: 1px solid var(--boder-soft-light);
+    position: sticky;
+    left: 0;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 2;
+}
+
+.timeSlot {
+    height: 60px;
+    border-bottom: 1px dashed var(--boder-soft-light);
+    font-size: 11px;
+    color: var(--text-secondary-light);
+    text-align: center;
+    padding-top: var(--space-4);
+}
+
+.dayColumn {
+    border-right: 1px solid var(--boder-soft-light);
+    position: relative;
+    background: transparent;
+}
+
+.gridLine {
+    height: 60px;
+    border-bottom: 1px dashed var(--boder-soft-light);
+}
+
+.gridSession {
+    position: absolute;
+    transition: all 0.2s;
+}
+
+.gridSession.overlapping {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.emptyDay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    color: var(--text-muted-light);
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+/* -----------------------------------------------------------------------------
+   Room Grid View
+   ----------------------------------------------------------------------------- */
+.roomGridContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    background: var(--surface-card-light);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--boder-soft-light);
+    backdrop-filter: blur(20px);
+    overflow: hidden;
+}
+
+.roomGridHeader {
+    display: grid;
+    grid-template-columns: 140px repeat(7, 1fr);
+    border-bottom: 1px solid var(--boder-soft-light);
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.roomHeaderCell {
+    padding: var(--space-12);
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text-secondary-light);
+    border-right: 1px solid var(--boder-soft-light);
+    text-align: center;
+}
+
+.roomGridBody {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.roomRow {
+    display: grid;
+    grid-template-columns: 140px repeat(7, 1fr);
+    border-bottom: 1px solid var(--boder-soft-light);
+    min-height: 80px;
+}
+
+.roomRow:last-child {
+    border-bottom: none;
+}
+
+.roomNameCell {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+    padding: var(--space-12);
+    border-right: 1px solid var(--boder-soft-light);
+    background: rgba(255, 255, 255, 0.3);
+    position: sticky;
+    left: 0;
+    z-index: 1;
+}
+
+.roomIcon {
+    font-size: 16px;
+}
+
+.roomName {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text-primary-light);
+}
+
+.roomDayCell {
+    padding: var(--space-8);
+    border-right: 1px solid var(--boder-soft-light);
+    background: transparent;
+}
+
+.emptyCell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-muted-light);
+    opacity: 0.3;
+    font-size: 14px;
+}
+
+.sessionStack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+}
+
+/* -----------------------------------------------------------------------------
+   List View
+   ----------------------------------------------------------------------------- */
+.listContainer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-24);
+    max-height: 600px;
+    overflow-y: auto;
+    padding: var(--space-8);
+}
+
+.dateGroup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-12);
+}
+
+.dateHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-12) var(--space-16);
+    background: var(--surface-raised-light);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--boder-soft-light);
+}
+
+.dateTitle {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--text-primary-light);
+    text-transform: capitalize;
+}
+
+.sessionCount {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--brand-primary-500-light);
+    padding: var(--space-4) var(--space-12);
+    background: rgba(48, 131, 255, 0.1);
+    border-radius: var(--radius-full);
+}
+
+.sessionList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-12);
+}
+
+/* -----------------------------------------------------------------------------
+   Empty States
+   ----------------------------------------------------------------------------- */
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-60);
+    background: var(--surface-card-light);
+    border-radius: var(--radius-md);
+    border: 2px dashed var(--boder-soft-light);
+}
+
+.emptyIcon {
+    font-size: 48px;
+    margin-bottom: var(--space-16);
+    opacity: 0.5;
+}
+
+.emptyText {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-secondary-light);
+}
+
+/* -----------------------------------------------------------------------------
+   Scrollbar Styling
+   ----------------------------------------------------------------------------- */
+.timeGridBody::-webkit-scrollbar,
+.roomGridBody::-webkit-scrollbar,
+.listContainer::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.timeGridBody::-webkit-scrollbar-track,
+.roomGridBody::-webkit-scrollbar-track,
+.listContainer::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.timeGridBody::-webkit-scrollbar-thumb,
+.roomGridBody::-webkit-scrollbar-thumb,
+.listContainer::-webkit-scrollbar-thumb {
+    background: var(--boder-soft-light);
+    border-radius: var(--radius-full);
+}
+
+.timeGridBody::-webkit-scrollbar-thumb:hover,
+.roomGridBody::-webkit-scrollbar-thumb:hover,
+.listContainer::-webkit-scrollbar-thumb:hover {
+    background: var(--boder-strong-light);
+}

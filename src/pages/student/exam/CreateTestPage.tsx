@@ -7,6 +7,7 @@ import type {
     TestSectionPartCreatePayload,
     QuestionGroupCreatePayload,
     QuestionCreatePayload,
+    PassageCreatePayload,
 } from '@/types/test.types'
 import {
     QuestionType,
@@ -20,6 +21,7 @@ import ButtonGhost from '@/components/common/button/ButtonGhost'
 import Card from '@/components/common/card/Card'
 
 import s from './CreateTestPage.module.css'
+import InputField from '@/components/common/input/InputField'
 
 export default function CreateTestPage() {
     const navigate = useNavigate()
@@ -33,17 +35,29 @@ export default function CreateTestPage() {
     const [instructions, setInstructions] = useState('')
     const [testType, setTestType] = useState<TestType | null>(null)
 
-    // ✅ Config fields (from BE schema)
     const [timeLimitMinutes, setTimeLimitMinutes] = useState<number>(60)
     const [passingScore, setPassingScore] = useState<number>(60)
     const [maxAttempts, setMaxAttempts] = useState<number>(1)
     const [randomizeQuestions, setRandomizeQuestions] = useState(false)
     const [showResultsImmediately, setShowResultsImmediately] = useState(true)
     const [aiGradingEnabled, setAiGradingEnabled] = useState(false)
+    const [uploadedFiles, setUploadedFiles] = useState<{
+        [key: string]: File // key format: "section_0_part_1_audio"
+    }>({})
 
-    // Optional fields
     const [startTime, setStartTime] = useState<string>('')
     const [endTime, setEndTime] = useState<string>('')
+
+    // ========================================
+    // Helpers
+    // ========================================
+    const getFileKey = (
+        sectionIndex: number,
+        partIndex: number,
+        fileType: 'audio' | 'image'
+    ) => {
+        return `section_${sectionIndex}_part_${partIndex}_${fileType}`
+    }
 
     // ========================================
     // Sections State
@@ -57,7 +71,13 @@ export default function CreateTestPage() {
                 {
                     name: 'Part 1',
                     order_number: 1,
-                    content: '', // ✅ Critical field for reading/listening content
+                    passage: {
+                        title: '',
+                        content_type: 'reading_passage', // hoặc 'listening_audio'
+                        text_content: '',
+                        topic: '',
+                        difficulty_level: 'medium',
+                    },
                     question_groups: [],
                 },
             ],
@@ -78,7 +98,13 @@ export default function CreateTestPage() {
                     {
                         name: 'Part 1',
                         order_number: 1,
-                        content: '',
+                        passage: {
+                            title: '',
+                            content_type: 'reading_passage',
+                            text_content: '',
+                            topic: '',
+                            difficulty_level: 'medium',
+                        },
                         question_groups: [],
                     },
                 ],
@@ -105,10 +131,25 @@ export default function CreateTestPage() {
     const handleAddPart = (sectionIndex: number) => {
         const newSections = [...sections]
         const section = newSections[sectionIndex]
+
+        // Tự động xác định content_type dựa trên skill_area
+        const contentType =
+            section.skill_area === SkillArea.LISTENING
+                ? 'listening_audio'
+                : section.skill_area === SkillArea.SPEAKING
+                  ? 'speaking_cue_card'
+                  : 'reading_passage'
+
         section.parts.push({
             name: `Part ${section.parts.length + 1}`,
             order_number: section.parts.length + 1,
-            content: '',
+            passage: {
+                title: `Part ${section.parts.length + 1} Passage`,
+                content_type: contentType,
+                text_content: '',
+                topic: '',
+                difficulty_level: 'medium',
+            },
             question_groups: [],
         })
         setSections(newSections)
@@ -134,14 +175,81 @@ export default function CreateTestPage() {
     const updatePart = (
         sectionIndex: number,
         partIndex: number,
-        updates: Partial<TestSectionPartCreatePayload>
+        updates: Partial<Omit<TestSectionPartCreatePayload, 'question_groups'>>
     ) => {
         const newSections = [...sections]
+        const part = newSections[sectionIndex].parts[partIndex]
+
         newSections[sectionIndex].parts[partIndex] = {
-            ...newSections[sectionIndex].parts[partIndex],
+            ...part,
             ...updates,
         }
+
         setSections(newSections)
+    }
+
+    const updatePartPassage = (
+        sectionIndex: number,
+        partIndex: number,
+        passageUpdates: Partial<PassageCreatePayload>
+    ) => {
+        const newSections = [...sections]
+        const part = newSections[sectionIndex].parts[partIndex]
+
+        if (part.passage) {
+            part.passage = {
+                ...part.passage,
+                ...passageUpdates,
+            }
+        } else {
+            const section = newSections[sectionIndex]
+            const contentType =
+                section.skill_area === SkillArea.LISTENING
+                    ? 'listening_audio'
+                    : section.skill_area === SkillArea.SPEAKING
+                      ? 'speaking_cue_card'
+                      : 'reading_passage'
+
+            part.passage = {
+                title: part.name,
+                content_type: contentType,
+                text_content: '',
+                ...passageUpdates,
+            }
+        }
+
+        setSections(newSections)
+    }
+
+    const handleFileUpload = (
+        sectionIndex: number,
+        partIndex: number,
+        fileType: 'audio' | 'image',
+        file: File | null
+    ) => {
+        const key = getFileKey(sectionIndex, partIndex, fileType)
+
+        setUploadedFiles((prev) => {
+            if (!file) {
+                const newFiles = { ...prev }
+                delete newFiles[key]
+                return newFiles
+            }
+
+            return {
+                ...prev,
+                [key]: file,
+            }
+        })
+
+        const newSections = [...sections]
+        const part = newSections[sectionIndex].parts[partIndex]
+
+        if (fileType === 'audio') {
+            updatePartPassage(sectionIndex, partIndex, {
+                audio_url: file ? file.name : undefined,
+            })
+        }
     }
 
     // ========================================
@@ -272,6 +380,21 @@ export default function CreateTestPage() {
             }
 
             for (const part of section.parts) {
+                // ✅ Validate passage
+                if (!part.passage?.text_content?.trim()) {
+                    alert(`Part "${part.name}" chưa có nội dung passage`)
+                    return false
+                }
+
+                // ✅ Validate audio_url for Listening
+                if (
+                    section.skill_area === SkillArea.LISTENING &&
+                    !part.passage?.audio_url?.trim()
+                ) {
+                    alert(`Part "${part.name}" (Listening) chưa có audio URL`)
+                    return false
+                }
+
                 if (part.question_groups.length === 0) {
                     alert(`Part "${part.name}" chưa có question group nào`)
                     return false
@@ -285,7 +408,6 @@ export default function CreateTestPage() {
                         return false
                     }
 
-                    // Validate each question
                     for (const question of group.questions) {
                         if (!question.question_text.trim()) {
                             alert(
@@ -306,6 +428,8 @@ export default function CreateTestPage() {
 
         setLoading(true)
         try {
+            const formData = new FormData()
+
             const payload: TestCreatePayload = {
                 title,
                 description: description || undefined,
@@ -322,7 +446,14 @@ export default function CreateTestPage() {
                 sections,
             }
 
-            const result = await testApi.createTest(payload)
+            formData.append('test_data_str', JSON.stringify(payload))
+
+            Object.entries(uploadedFiles).forEach(([key, file]) => {
+                // key format: "section_0_part_1_audio"
+                formData.append('files', file, `${key}_${file.name}`)
+            })
+
+            const result = await testApi.createTest(payload, uploadedFiles)
             console.log('Test created:', result)
             alert('Tạo bài thi thành công!')
             navigate(`/teacher/tests/${result.id}`)
@@ -545,8 +676,8 @@ export default function CreateTestPage() {
                     >
                         <div className={s.formGrid}>
                             <div className={s.formField}>
-                                <label className={s.label}>Tên section</label>
-                                <input
+                                <InputField
+                                    label="Tên section"
                                     type="text"
                                     value={section.name}
                                     onChange={(e) => {
@@ -663,37 +794,310 @@ export default function CreateTestPage() {
                                         className={`${s.formField} ${s.fullWidth}`}
                                     >
                                         <label className={s.label}>
-                                            Nội dung (Đoạn văn Reading / Audio
-                                            script Listening)
+                                            Tiêu đề Passage
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={part.passage?.title || ''}
+                                            onChange={(e) =>
+                                                updatePartPassage(
+                                                    sIndex,
+                                                    pIndex,
+                                                    {
+                                                        title: e.target.value,
+                                                    }
+                                                )
+                                            }
+                                            className={s.input}
+                                            placeholder="VD: The History of Coffee"
+                                        />
+                                    </div>
+
+                                    <div
+                                        className={`${s.formField} ${s.fullWidth}`}
+                                    >
+                                        <label className={s.label}>
+                                            {section.skill_area ===
+                                            SkillArea.LISTENING
+                                                ? 'Audio Script (Listening)'
+                                                : section.skill_area ===
+                                                    SkillArea.SPEAKING
+                                                  ? 'Cue Card Content'
+                                                  : 'Đoạn văn Reading'}{' '}
+                                            <span style={{ color: 'red' }}>
+                                                *
+                                            </span>
                                         </label>
                                         <textarea
-                                            value={part.content || ''}
+                                            value={
+                                                part.passage?.text_content || ''
+                                            }
                                             onChange={(e) =>
-                                                updatePart(sIndex, pIndex, {
-                                                    content: e.target.value,
-                                                })
+                                                updatePartPassage(
+                                                    sIndex,
+                                                    pIndex,
+                                                    {
+                                                        text_content:
+                                                            e.target.value,
+                                                    }
+                                                )
                                             }
                                             className={s.textarea}
-                                            style={{ minHeight: '120px' }}
-                                            placeholder="Nhập đoạn văn reading hoặc audio script listening..."
+                                            style={{ minHeight: '150px' }}
+                                            placeholder={
+                                                section.skill_area ===
+                                                SkillArea.LISTENING
+                                                    ? 'Nhập nội dung audio script...'
+                                                    : section.skill_area ===
+                                                        SkillArea.SPEAKING
+                                                      ? 'Nhập nội dung cue card...'
+                                                      : 'Nhập đoạn văn reading...'
+                                            }
+                                        />
+                                    </div>
+
+                                    {/* ============================================ */}
+                                    {/* PARTS - AUDIO UPLOAD */}
+                                    {/* ============================================ */}
+                                    {section.skill_area ===
+                                        SkillArea.LISTENING && (
+                                        <div
+                                            className={`${s.formField} ${s.fullWidth}`}
+                                        >
+                                            <label className={s.label}>
+                                                Audio File (Listening){' '}
+                                                <span style={{ color: 'red' }}>
+                                                    *
+                                                </span>
+                                            </label>
+
+                                            <div
+                                                style={{
+                                                    display: 'flex',
+                                                    gap: '12px',
+                                                    alignItems: 'center',
+                                                }}
+                                            >
+                                                {/* ✅ File input */}
+                                                <input
+                                                    type="file"
+                                                    accept="audio/*"
+                                                    onChange={(e) => {
+                                                        const file =
+                                                            e.target
+                                                                .files?.[0] ||
+                                                            null
+                                                        handleFileUpload(
+                                                            sIndex,
+                                                            pIndex,
+                                                            'audio',
+                                                            file
+                                                        )
+                                                    }}
+                                                    style={{
+                                                        padding: '8px',
+                                                        border: '1px solid #d9d9d9',
+                                                        borderRadius: '6px',
+                                                        flex: 1,
+                                                    }}
+                                                />
+
+                                                {/* ✅ Show selected file */}
+                                                {uploadedFiles[
+                                                    getFileKey(
+                                                        sIndex,
+                                                        pIndex,
+                                                        'audio'
+                                                    )
+                                                ] && (
+                                                    <span
+                                                        style={{
+                                                            color: '#388e3c',
+                                                            fontSize: '14px',
+                                                        }}
+                                                    >
+                                                        ✓{' '}
+                                                        {
+                                                            uploadedFiles[
+                                                                getFileKey(
+                                                                    sIndex,
+                                                                    pIndex,
+                                                                    'audio'
+                                                                )
+                                                            ].name
+                                                        }
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            {/* ✅ Hoặc cho phép nhập URL */}
+                                            <div style={{ marginTop: '8px' }}>
+                                                <label
+                                                    style={{
+                                                        fontSize: '12px',
+                                                        color: '#666',
+                                                    }}
+                                                >
+                                                    Hoặc nhập URL:
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={
+                                                        part.passage
+                                                            ?.audio_url || ''
+                                                    }
+                                                    onChange={(e) => {
+                                                        // Clear file nếu user nhập URL
+                                                        if (e.target.value) {
+                                                            const key =
+                                                                getFileKey(
+                                                                    sIndex,
+                                                                    pIndex,
+                                                                    'audio'
+                                                                )
+                                                            setUploadedFiles(
+                                                                (prev) => {
+                                                                    const newFiles =
+                                                                        {
+                                                                            ...prev,
+                                                                        }
+                                                                    delete newFiles[
+                                                                        key
+                                                                    ]
+                                                                    return newFiles
+                                                                }
+                                                            )
+                                                        }
+
+                                                        updatePartPassage(
+                                                            sIndex,
+                                                            pIndex,
+                                                            {
+                                                                audio_url:
+                                                                    e.target
+                                                                        .value,
+                                                            }
+                                                        )
+                                                    }}
+                                                    className={s.input}
+                                                    placeholder="https://example.com/audio.mp3"
+                                                    disabled={
+                                                        !!uploadedFiles[
+                                                            getFileKey(
+                                                                sIndex,
+                                                                pIndex,
+                                                                'audio'
+                                                            )
+                                                        ]
+                                                    }
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className={s.formField}>
+                                        <label className={s.label}>
+                                            Hình ảnh (Diagram/Chart - tùy chọn)
+                                        </label>
+
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e) => {
+                                                const file =
+                                                    e.target.files?.[0] || null
+                                                handleFileUpload(
+                                                    sIndex,
+                                                    pIndex,
+                                                    'image',
+                                                    file
+                                                )
+                                            }}
+                                            style={{
+                                                padding: '8px',
+                                                border: '1px solid #d9d9d9',
+                                                borderRadius: '6px',
+                                            }}
+                                        />
+
+                                        {uploadedFiles[
+                                            getFileKey(sIndex, pIndex, 'image')
+                                        ] && (
+                                            <span
+                                                style={{
+                                                    color: '#388e3c',
+                                                    fontSize: '14px',
+                                                    marginTop: '4px',
+                                                }}
+                                            >
+                                                ✓{' '}
+                                                {
+                                                    uploadedFiles[
+                                                        getFileKey(
+                                                            sIndex,
+                                                            pIndex,
+                                                            'image'
+                                                        )
+                                                    ].name
+                                                }
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    <div className={s.formField}>
+                                        <label className={s.label}>
+                                            Topic (tùy chọn)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={part.passage?.topic || ''}
+                                            onChange={(e) =>
+                                                updatePartPassage(
+                                                    sIndex,
+                                                    pIndex,
+                                                    {
+                                                        topic: e.target.value,
+                                                    }
+                                                )
+                                            }
+                                            className={s.input}
+                                            placeholder="VD: Environment, Technology"
                                         />
                                     </div>
 
                                     <div className={s.formField}>
                                         <label className={s.label}>
-                                            Audio URL (tùy chọn)
+                                            Độ khó (Passage)
                                         </label>
-                                        <input
-                                            type="text"
-                                            value={part.audio_url || ''}
+                                        <select
+                                            value={
+                                                part.passage
+                                                    ?.difficulty_level ||
+                                                'medium'
+                                            }
                                             onChange={(e) =>
-                                                updatePart(sIndex, pIndex, {
-                                                    audio_url: e.target.value,
-                                                })
+                                                updatePartPassage(
+                                                    sIndex,
+                                                    pIndex,
+                                                    {
+                                                        difficulty_level:
+                                                            e.target.value,
+                                                    }
+                                                )
                                             }
                                             className={s.input}
-                                            placeholder="https://..."
-                                        />
+                                        >
+                                            {Object.values(DifficultyLevel).map(
+                                                (level) => (
+                                                    <option
+                                                        key={level}
+                                                        value={level}
+                                                    >
+                                                        {level}
+                                                    </option>
+                                                )
+                                            )}
+                                        </select>
                                     </div>
 
                                     <div
