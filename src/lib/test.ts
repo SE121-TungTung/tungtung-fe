@@ -702,16 +702,6 @@ export const testApi = {
         return mapTestSummary(response)
     },
 
-    /**
-     * Create new test
-     * Endpoint: POST /tests/create
-     *
-     * ⚠️ Requires: TEACHER, OFFICE_ADMIN, CENTER_ADMIN, or SYSTEM_ADMIN role
-     *
-     * @param payload - Test creation payload
-     * @param files - Optional files (audio, images)
-     * @returns Created test basic info
-     */
     createTest: async (
         payload: TestCreatePayload,
         files?: { [key: string]: File }
@@ -722,22 +712,16 @@ export const testApi = {
 
         if (files) {
             Object.entries(files).forEach(([key, file]) => {
-                formData.append('files', file, `${key}_${file.name}`)
+                const blob = file.slice(0, file.size, file.type)
+                const newFile = new File([blob], key, { type: file.type })
+                formData.append('files', newFile)
             })
         }
 
-        const response = await fetch('/api/tests/create', {
+        return api<{ id: string; title: string }>(`${BASE_URL}/create`, {
             method: 'POST',
             body: formData,
-            credentials: 'include',
         })
-
-        if (!response.ok) {
-            const error = await response.json()
-            throw new Error(error.detail || 'Failed to create test')
-        }
-
-        return response.json()
     },
 
     // ========================================
