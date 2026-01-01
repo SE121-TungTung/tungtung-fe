@@ -25,6 +25,9 @@ import TestResultPage from '@/pages/student/exam/TestResultPage'
 import CreateTestPage from '@/pages/student/exam/CreateTestPage'
 import FirstLoginGuard from '@/components/feature/auth/FirstLoginGuard'
 import GeneralDashboard from '@/pages/Dashboard'
+import TestDetailPage from '@/pages/student/exam/TestDetailPage'
+import ChatbotUploadPage from '@/pages/admin/system/ChatbotUploadPage'
+import { MainLayout } from './layouts/MainLayout'
 
 export const router = createBrowserRouter([
     {
@@ -46,210 +49,231 @@ export const router = createBrowserRouter([
             },
 
             // General routes
-            {
-                path: '/dashboard',
-                element: (
-                    <ProtectedRoute>
-                        <GeneralDashboard />
-                    </ProtectedRoute>
-                ),
-            },
-            {
-                path: '/',
-                element: (
-                    <ProtectedRoute>
-                        <Navigate to="/dashboard" replace />
-                    </ProtectedRoute>
-                ),
-            },
-
             { path: '/test', element: <ExamPracticePage /> },
-            { path: '/notifications', element: <NotificationPage /> },
-
             {
                 path: '/coming-soon',
                 element: <ComingSoon />,
             },
 
-            // Profile (accessible to all authenticated users)
-            {
-                path: '/profile',
-                element: (
-                    <ProtectedRoute>
-                        <ProfilePage />
-                    </ProtectedRoute>
-                ),
-            },
-            {
-                path: '/messages',
-                element: (
-                    <ProtectedRoute>
-                        <MessagesPage />
-                    </ProtectedRoute>
-                ),
-            },
-
-            // Student routes
-            {
-                path: '/student',
-                element: <Navigate to="/dashboard" replace />,
-            },
-            {
-                path: '/student/class',
-                element: (
-                    <ProtectedRoute allowedRoles={['student']}>
-                        <ClassPage />
-                    </ProtectedRoute>
-                ),
-            },
-            {
-                path: '/student/exams',
-                element: <ExamPracticePage />,
-            },
+            // No Nav
             {
                 path: '/student/exams/:testId/take/:attemptId',
                 element: <ReadingTestPage />,
             },
-            {
-                path: '/student/exams/results/:attemptId',
-                element: <TestResultPage />,
-            },
-            {
-                path: '/student/notifications',
-                element: (
-                    <ProtectedRoute allowedRoles={['student']}>
-                        <NotificationPage />
-                    </ProtectedRoute>
-                ),
-            },
-            {
-                path: '/student/messages',
-                element: (
-                    <ProtectedRoute allowedRoles={['student']}>
-                        <MessagesPage />
-                    </ProtectedRoute>
-                ),
-            },
-            {
-                path: '/student/roadmap',
-                element: (
-                    <ProtectedRoute allowedRoles={['student']}>
-                        <RoadmapPage />
-                    </ProtectedRoute>
-                ),
-            },
 
-            // Teacher routes
+            // Profile (accessible to all authenticated users)
             {
-                path: '/teacher',
-                element: <Navigate to="/dashboard" replace />,
-            },
-            {
-                path: '/teacher/tests/create',
                 element: (
-                    <ProtectedRoute allowedRoles={['teacher']}>
-                        <CreateTestPage />,
+                    <ProtectedRoute>
+                        <MainLayout />
                     </ProtectedRoute>
                 ),
-            },
-            // Admin routes
-            {
-                path: '/admin',
-                element: (
-                    <ProtectedRoute
-                        allowedRoles={[
-                            'office_admin',
-                            'center_admin',
-                            'system_admin',
-                        ]}
-                    >
-                        <Navigate to="/dashboard" replace />{' '}
-                    </ProtectedRoute>
-                ),
-            },
-            {
-                path: '/admin/users',
-                element: (
-                    <ProtectedRoute
-                        allowedRoles={[
-                            'office_admin',
-                            'center_admin',
-                            'system_admin',
-                        ]}
-                    >
-                        <UserManagementPage />
-                    </ProtectedRoute>
-                ),
-            },
-            {
-                path: '/admin/rooms',
-                element: (
-                    <ProtectedRoute
-                        allowedRoles={[
-                            'office_admin',
-                            'center_admin',
-                            'system_admin',
-                        ]}
-                    >
-                        <RoomManagementPage />
-                    </ProtectedRoute>
-                ),
-            },
-            {
-                path: '/admin/courses',
-                element: (
-                    <ProtectedRoute
-                        allowedRoles={[
-                            'office_admin',
-                            'center_admin',
-                            'system_admin',
-                        ]}
-                    >
-                        <CourseManagementPage />
-                    </ProtectedRoute>
-                ),
-            },
-            {
-                path: '/admin/classes',
-                element: (
-                    <ProtectedRoute
-                        allowedRoles={[
-                            'office_admin',
-                            'center_admin',
-                            'system_admin',
-                        ]}
-                    >
-                        <ClassManagementPage />
-                    </ProtectedRoute>
-                ),
-            },
-            {
-                path: '/admin/schedule',
-                element: (
-                    <ProtectedRoute
-                        allowedRoles={[
-                            'office_admin',
-                            'center_admin',
-                            'system_admin',
-                        ]}
-                    >
-                        <ScheduleManagementPage />
-                    </ProtectedRoute>
-                ),
-            },
-            {
-                path: '/admin/schedule/generate',
-                element: (
-                    <ProtectedRoute
-                        allowedRoles={[
-                            'office_admin',
-                            'center_admin',
-                            'system_admin',
-                        ]}
-                    >
-                        <ScheduleGeneratorPage />
-                    </ProtectedRoute>
-                ),
+                children: [
+                    {
+                        path: '/profile',
+                        element: <ProfilePage />,
+                    },
+                    {
+                        path: '/messages',
+                        element: <MessagesPage />,
+                    },
+                    {
+                        path: '/notifications',
+                        element: <NotificationPage />,
+                    },
+                    {
+                        path: '/dashboard',
+                        element: <GeneralDashboard />,
+                    },
+                    {
+                        path: '/',
+                        element: <Navigate to="/dashboard" replace />,
+                    },
+                    // Student routes
+                    {
+                        path: '/student',
+                        element: <Navigate to="/dashboard" replace />,
+                    },
+                    {
+                        path: '/student/class',
+                        element: (
+                            <ProtectedRoute allowedRoles={['student']}>
+                                <ClassPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/student/exams',
+                        element: <ExamPracticePage />,
+                    },
+                    {
+                        path: '/student/exams/results/:attemptId',
+                        element: <TestResultPage />,
+                    },
+                    {
+                        path: '/student/notifications',
+                        element: (
+                            <ProtectedRoute allowedRoles={['student']}>
+                                <NotificationPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/student/messages',
+                        element: (
+                            <ProtectedRoute allowedRoles={['student']}>
+                                <MessagesPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/student/roadmap',
+                        element: (
+                            <ProtectedRoute allowedRoles={['student']}>
+                                <RoadmapPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+
+                    // Teacher routes
+                    {
+                        path: '/teacher',
+                        element: <Navigate to="/dashboard" replace />,
+                    },
+                    {
+                        path: '/teacher/tests',
+                        element: (
+                            <ProtectedRoute allowedRoles={['teacher']}>
+                                <ExamPracticePage />,
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/teacher/tests/create',
+                        element: (
+                            <ProtectedRoute allowedRoles={['teacher']}>
+                                <CreateTestPage />,
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/teacher/tests/:testId/view',
+                        element: (
+                            <ProtectedRoute allowedRoles={['teacher']}>
+                                <TestDetailPage />,
+                            </ProtectedRoute>
+                        ),
+                    },
+                    // Admin routes
+                    {
+                        path: '/admin',
+                        element: (
+                            <ProtectedRoute
+                                allowedRoles={[
+                                    'office_admin',
+                                    'center_admin',
+                                    'system_admin',
+                                ]}
+                            >
+                                <Navigate to="/dashboard" replace />{' '}
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/admin/users',
+                        element: (
+                            <ProtectedRoute
+                                allowedRoles={[
+                                    'office_admin',
+                                    'center_admin',
+                                    'system_admin',
+                                ]}
+                            >
+                                <UserManagementPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/admin/rooms',
+                        element: (
+                            <ProtectedRoute
+                                allowedRoles={[
+                                    'office_admin',
+                                    'center_admin',
+                                    'system_admin',
+                                ]}
+                            >
+                                <RoomManagementPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/admin/courses',
+                        element: (
+                            <ProtectedRoute
+                                allowedRoles={[
+                                    'office_admin',
+                                    'center_admin',
+                                    'system_admin',
+                                ]}
+                            >
+                                <CourseManagementPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/admin/classes',
+                        element: (
+                            <ProtectedRoute
+                                allowedRoles={[
+                                    'office_admin',
+                                    'center_admin',
+                                    'system_admin',
+                                ]}
+                            >
+                                <ClassManagementPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/admin/schedule',
+                        element: (
+                            <ProtectedRoute
+                                allowedRoles={[
+                                    'office_admin',
+                                    'center_admin',
+                                    'system_admin',
+                                ]}
+                            >
+                                <ScheduleManagementPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/admin/schedule/generate',
+                        element: (
+                            <ProtectedRoute
+                                allowedRoles={[
+                                    'office_admin',
+                                    'center_admin',
+                                    'system_admin',
+                                ]}
+                            >
+                                <ScheduleGeneratorPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/admin/system/chatbot-documents',
+                        element: (
+                            <ProtectedRoute
+                                allowedRoles={['system_admin', 'center_admin']}
+                            >
+                                <ChatbotUploadPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                ],
             },
         ],
     },

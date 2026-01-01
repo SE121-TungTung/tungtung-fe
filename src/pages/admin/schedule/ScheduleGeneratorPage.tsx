@@ -1,22 +1,16 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import s from './Schedule.module.css'
 import Card from '@/components/common/card/Card'
 import InputField from '@/components/common/input/InputField'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
-import NavigationMenu from '@/components/common/menu/NavigationMenu'
 import { scheduleApi } from '@/lib/schedule'
 import { listClasses } from '@/lib/classes'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
-import DefaultAvatar from '@/assets/avatar-placeholder.png'
-import { useSession } from '@/stores/session.store'
-import { type Role as UserRole } from '@/types/auth'
+import { useNavigate } from 'react-router-dom'
 import type {
     ScheduleGenerateRequest,
     ScheduleGenerateResponse,
     SessionProposal,
-    ConflictInfo,
 } from '@/types/schedule.types'
 import { listUsers } from '@/lib/users'
 import ConflictMatrix from '@/components/feature/schedule/ConflictMatrix'
@@ -31,20 +25,6 @@ export default function ScheduleGeneratorPage() {
     const [showClassConflict, setShowClassConflict] = useState(false)
     const [showTeacherConflict, setShowTeacherConflict] = useState(false)
     const [showConflictsModal, setShowConflictsModal] = useState(false)
-
-    const session = useSession((state) => state.user)
-    const location = useLocation()
-    const userRole = (session?.role as UserRole) || 'student'
-    const currentPath = location.pathname
-
-    const navItems = useMemo(
-        () => getNavItems(userRole, currentPath, navigate),
-        [userRole, currentPath, navigate]
-    )
-    const userMenuItems = useMemo(
-        () => getUserMenuItems(userRole, navigate),
-        [userRole, navigate]
-    )
 
     const [formData, setFormData] = useState<ScheduleGenerateRequest>({
         start_date: '',
@@ -196,20 +176,7 @@ export default function ScheduleGeneratorPage() {
     }
 
     return (
-        <div className={s.pageWrapper}>
-            <header className={s.header}>
-                <NavigationMenu
-                    items={navItems}
-                    rightSlotDropdownItems={userMenuItems}
-                    rightSlot={
-                        <img
-                            src={session?.avatarUrl || DefaultAvatar}
-                            className={s.avatar}
-                            alt="User Avatar"
-                        />
-                    }
-                />
-            </header>
+        <div className={s.pageWrapperWithoutHeader}>
             <main className={s.mainContent}>
                 <h1 className={s.pageTitle}>
                     {step === 1 ? 'Cấu hình Xếp lịch' : 'Xem trước & Chỉnh sửa'}

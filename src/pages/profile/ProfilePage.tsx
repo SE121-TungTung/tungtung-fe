@@ -82,22 +82,7 @@ export default function ProfilePage() {
     const userData = sessionState?.user
 
     return (
-        <div className={s.pageWrapper}>
-            {/* --- Header --- */}
-            <header className={s.header}>
-                <NavigationMenu
-                    items={navItems}
-                    rightSlotDropdownItems={userMenuItems}
-                    rightSlot={
-                        <img
-                            src={sessionState?.user?.avatarUrl || DefaultAvatar}
-                            className={s.avatar}
-                            alt="User Avatar"
-                        />
-                    }
-                />
-            </header>
-
+        <div className={s.pageWrapperWithoutHeader}>
             {/* --- Main Content --- */}
             <main className={s.mainContent}>
                 {/* Tiêu đề trang */}

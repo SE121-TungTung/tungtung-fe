@@ -1,15 +1,10 @@
 import { useMemo, useState } from 'react'
 import s from './Schedule.module.css'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
-import NavigationMenu from '@/components/common/menu/NavigationMenu'
 import { scheduleApi } from '@/lib/schedule'
 import { useQuery } from '@tanstack/react-query'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { startOfWeek, format, addWeeks, subWeeks } from 'date-fns'
-import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
-import DefaultAvatar from '@/assets/avatar-placeholder.png'
-import { useSession } from '@/stores/session.store'
-import { type Role as UserRole } from '@/types/auth'
 import type { WeeklySession } from '@/types/schedule.types'
 
 // New components
@@ -30,20 +25,6 @@ export default function ScheduleManagementPage() {
     const [selectedRoom, setSelectedRoom] = useState<string | undefined>()
     const [selectedClass, setSelectedClass] = useState<string | undefined>()
     const [selectedTeacher, setSelectedTeacher] = useState<string | undefined>()
-
-    const session = useSession((state) => state.user)
-    const location = useLocation()
-    const userRole = (session?.role as UserRole) || 'student'
-    const currentPath = location.pathname
-
-    const navItems = useMemo(
-        () => getNavItems(userRole, currentPath, navigate),
-        [userRole, currentPath, navigate]
-    )
-    const userMenuItems = useMemo(
-        () => getUserMenuItems(userRole, navigate),
-        [userRole, navigate]
-    )
 
     // Date logic
     const startWeek = startOfWeek(currentDate, { weekStartsOn: 1 })
@@ -73,7 +54,9 @@ export default function ScheduleManagementPage() {
         },
     })
 
-    const sessions: WeeklySession[] = weeklyData?.schedule || []
+    const sessions = useMemo(() => {
+        return weeklyData?.schedule || []
+    }, [weeklyData])
 
     // Client-side filtering (until backend supports it)
     const filteredSessions = useMemo(() => {
@@ -233,21 +216,7 @@ export default function ScheduleManagementPage() {
     }
 
     return (
-        <div className={s.pageWrapper}>
-            <header className={s.header}>
-                <NavigationMenu
-                    items={navItems}
-                    rightSlotDropdownItems={userMenuItems}
-                    rightSlot={
-                        <img
-                            src={session?.avatarUrl || DefaultAvatar}
-                            className={s.avatar}
-                            alt="User Avatar"
-                        />
-                    }
-                />
-            </header>
-
+        <div className={s.pageWrapperWithoutHeader}>
             <main className={s.mainContent}>
                 <h1 className={s.pageTitle}>Quản lý Thời khóa biểu</h1>
 

@@ -62,7 +62,7 @@ import {
     type Passage,
 } from '@/types/test.types'
 
-const BASE_URL = '/tests'
+const BASE_URL = '/api/v1/tests'
 
 // ============================================
 // MAPPING UTILITIES
@@ -370,6 +370,10 @@ function mapStudentTestListItem(
         ),
         latestAttemptScore: dto.latest_attempt_score,
         status: parseEnum(TestStatus, dto.status) || TestStatus.DRAFT,
+        skill: SkillArea.LISTENING,
+        difficulty: DifficultyLevel.VERY_EASY,
+        durationMinutes: 0,
+        createdAt: '',
     }
 }
 

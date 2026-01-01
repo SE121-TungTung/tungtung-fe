@@ -187,3 +187,80 @@
 .isFile .input::before {
     color: var(--input-placeholder);
 }
+
+.labelRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 8px;
+}
+
+.mdTabs {
+    display: flex;
+    gap: 4px;
+    background: color-mix(in srgb, var(--input-bg), #000 5%);
+    padding: 2px;
+    border-radius: 6px;
+}
+
+.mdTabs button {
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 4px;
+    color: var(--input-icon);
+    transition: var(--transition);
+}
+
+.mdTabs button.activeTab {
+    background: #fff;
+    color: var(--brand-primary-500-light);
+    box-shadow: var(--input-shadow);
+    font-weight: bolder;
+}
+
+.dark .mdTabs button.activeTab {
+    background: var(--surface-raised-dark);
+    color: var(--brand-primary-500-dark);
+}
+
+/* --- Preview Area Content --- */
+.previewArea {
+    background-color: var(--input-bg);
+    overflow-y: auto;
+    line-height: 1.6;
+}
+
+.previewArea table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 14px;
+}
+
+.previewArea th,
+.previewArea td {
+    border: 1px solid var(--input-bd);
+    padding: 8px 12px;
+}
+
+.previewArea th {
+    background: color-mix(in srgb, var(--input-bg), #000 5%);
+}
+
+.previewArea ul,
+.previewArea ol {
+    padding-left: 20px;
+    margin: 8px 0;
+}
+
+.previewArea blockquote {
+    border-left: 4px solid var(--brand-primary-light-500);
+    padding-left: 12px;
+    margin: 8px 0;
+    color: var(--input-icon);
+    font-style: italic;
+}

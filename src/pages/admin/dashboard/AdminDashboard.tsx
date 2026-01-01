@@ -1,16 +1,14 @@
 import React, { useMemo } from 'react'
 import s from './AdminDashboard.module.css'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 
-import NavigationMenu from '@/components/common/menu/NavigationMenu'
 import Card from '@/components/common/card/Card'
 import StatCard from '@/components/common/card/StatCard'
 import TemplateCard from '@/components/common/card/TemplateCard'
 import { TextHorizontal } from '@/components/common/text/TextHorizontal'
 import TextType from '@/components/common/text/TextType'
 
-import AvatarImg from '@/assets/avatar-placeholder.png'
 import ChartBarIcon from '@/assets/Chart Bar.svg'
 import SettingsIcon from '@/assets/User Settings.svg'
 import UserIcon from '@/assets/User.svg'
@@ -19,7 +17,6 @@ import DangerIcon from '@/assets/Information.svg'
 import ArrowRightIcon from '@/assets/Arrow Right.svg'
 
 import { getMe } from '@/lib/users'
-import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
 import type { Role } from '@/types/auth'
 
 interface StatItem {
@@ -104,7 +101,6 @@ const systemStats: StatItem[] = [
 
 export default function AdminDashboard() {
     const navigate = useNavigate()
-    const location = useLocation()
 
     const { data: userData, isLoading: userLoading } = useQuery({
         queryKey: ['me'],
@@ -112,17 +108,6 @@ export default function AdminDashboard() {
     })
 
     const userRole = (userData?.role || 'office_admin') as Role
-    const currentPath = location.pathname
-
-    const navItems = useMemo(
-        () => getNavItems(userRole, currentPath, navigate),
-        [userRole, currentPath, navigate]
-    )
-
-    const userMenuItems = useMemo(
-        () => getUserMenuItems(userRole, navigate),
-        [userRole, navigate]
-    )
 
     const greetingTexts = useMemo(() => {
         if (!userData) return ['Xin chào Quản trị viên!']
@@ -313,53 +298,42 @@ export default function AdminDashboard() {
 
     return (
         <div className={s.dashboard}>
-            <header className={s.header}>
-                <NavigationMenu
-                    items={navItems}
-                    rightSlotDropdownItems={userMenuItems}
-                    rightSlot={
-                        <img
-                            src={userData?.avatarUrl || AvatarImg}
-                            className={s.avatar}
-                            alt="User Avatar"
+            <main className={s.mainContent}>
+                <h1 className={s.welcomeMessage}>
+                    {!userLoading && userData && (
+                        <TextType
+                            text={greetingTexts}
+                            typingSpeed={60}
+                            pauseDuration={4000}
+                            deletingSpeed={40}
+                            renderText={(text) => {
+                                const namePattern = new RegExp(fullName, 'g')
+                                const parts = text.split(namePattern)
+                                const names = text.match(namePattern) || []
+                                return (
+                                    <>
+                                        {parts.map((part, i) => (
+                                            <React.Fragment key={i}>
+                                                {part}
+                                                {names[i] && (
+                                                    <span
+                                                        className={
+                                                            s.gradientText
+                                                        }
+                                                    >
+                                                        {names[i]}
+                                                    </span>
+                                                )}
+                                            </React.Fragment>
+                                        ))}
+                                    </>
+                                )
+                            }}
                         />
-                    }
-                />
-            </header>
-
-            <h1 className={s.welcomeMessage}>
-                {!userLoading && userData && (
-                    <TextType
-                        text={greetingTexts}
-                        typingSpeed={60}
-                        pauseDuration={4000}
-                        deletingSpeed={40}
-                        renderText={(text) => {
-                            const namePattern = new RegExp(fullName, 'g')
-                            const parts = text.split(namePattern)
-                            const names = text.match(namePattern) || []
-                            return (
-                                <>
-                                    {parts.map((part, i) => (
-                                        <React.Fragment key={i}>
-                                            {part}
-                                            {names[i] && (
-                                                <span
-                                                    className={s.gradientText}
-                                                >
-                                                    {names[i]}
-                                                </span>
-                                            )}
-                                        </React.Fragment>
-                                    ))}
-                                </>
-                            )
-                        }}
-                    />
-                )}
-            </h1>
-
-            <main className={s.mainContent}>{renderContent()}</main>
+                    )}
+                </h1>
+                {renderContent()}
+            </main>
         </div>
     )
 }

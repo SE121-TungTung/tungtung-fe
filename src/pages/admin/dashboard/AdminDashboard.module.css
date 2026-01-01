@@ -1,7 +1,6 @@
 .dashboard {
     background: linear-gradient(115deg, #e4ecf7, #fff);
     padding: 24px clamp(24px, 5vw, 80px);
-    min-height: 100vh;
     position: relative;
     display: flex;
     flex-direction: column;

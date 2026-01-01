@@ -75,10 +75,6 @@
     align-items: flex-start;
 }
 
-.received.noAvatar .bubbleGroup {
-    margin-left: 44px;
-}
-
 .bubble {
     padding: var(--space-12) var(--space-16);
     font-size: 15px;
@@ -160,6 +156,7 @@
 }
 
 .editInput {
+    color: var(--text-primary-light);
     width: 100%;
     min-height: 60px;
     padding: var(--space-8);
@@ -175,29 +172,56 @@
     display: flex;
     gap: var(--space-8);
     justify-content: flex-end;
+    color: var(--text-primary-light);
 }
 
-.editBtn {
-    padding: var(--space-6) var(--space-12);
-    border: 1px solid var(--boder-soft-light);
-    border-radius: var(--radius-sm);
-    background: var(--surface-card-light);
-    font-size: 13px;
-    font-weight: 500;
+.bubbleContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.actionBtn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    background-color: var(--surface-card-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    transition: all 0.15s ease;
+    opacity: 0;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    z-index: 10;
 }
 
-.editBtn:hover {
-    background: var(--surface-raised-light);
+.actionBtn:hover {
+    background-color: var(--surface-raised-light);
 }
 
-.editBtn.primary {
-    background: var(--brand-primary-500-light);
-    color: white;
-    border-color: var(--brand-primary-500-light);
+.bubbleWrapper:hover .actionBtn,
+.bubbleWrapper.active .actionBtn {
+    opacity: 1;
 }
 
-.editBtn.primary:hover {
-    background: var(--brand-primary-600-light);
+.sent .actionBtn {
+    left: -36px;
+}
+
+.received .actionBtn {
+    right: -36px;
+}
+
+@media (max-width: 800px) {
+    .sent .actionBtn {
+        left: -32px;
+    }
+    .received .actionBtn {
+        right: -32px;
+    }
 }

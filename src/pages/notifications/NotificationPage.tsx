@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react'
 import s from './NotificationPage.module.css'
 import { useSession } from '@/stores/session.store'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 import {
@@ -9,8 +9,6 @@ import {
     markAsRead,
     markAllAsRead,
 } from '@/lib/notifications'
-import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
-import NavigationMenu from '@/components/common/menu/NavigationMenu'
 import TextType from '@/components/common/text/TextType'
 import Card from '@/components/common/card/Card'
 import TabMenu, { type TabItem } from '@/components/common/menu/TabMenu'
@@ -18,7 +16,6 @@ import ButtonGhost from '@/components/common/button/ButtonGhost'
 import { NotificationItem } from '@/components/common/list/NotificationItem'
 import Pagination from '@/components/common/menu/Pagination'
 
-import AvatarImg from '@/assets/avatar-placeholder.png'
 import MarkReadIcon from '@/assets/Check.svg'
 import type { NotificationResponse } from '@/types/notification.types'
 
@@ -32,22 +29,8 @@ const tabItems: TabItem[] = [
 const ITEMS_PER_PAGE = 10
 
 export default function NotificationPage() {
-    const sessionState = useSession()
-    const userRole = sessionState?.user?.role || 'student'
     const navigate = useNavigate()
-    const location = useLocation()
     const queryClient = useQueryClient()
-
-    const currentPath = location.pathname
-
-    const navItems = useMemo(
-        () => getNavItems(userRole as any, currentPath, navigate),
-        [userRole, currentPath, navigate]
-    )
-    const userMenuItems = useMemo(
-        () => getUserMenuItems(userRole as any, navigate),
-        [userRole, navigate]
-    )
 
     const [showGradientName, setShowGradientName] = useState(false)
     const [activeTab, setActiveTab] = useState('all')
@@ -127,21 +110,7 @@ export default function NotificationPage() {
     const totalPages = hasNextPage ? currentPage + 2 : currentPage + 1
 
     return (
-        <div className={s.pageWrapper}>
-            <header className={s.header}>
-                <NavigationMenu
-                    items={navItems}
-                    rightSlotDropdownItems={userMenuItems}
-                    rightSlot={
-                        <img
-                            src={sessionState?.user?.avatarUrl || AvatarImg}
-                            className={s.avatar}
-                            alt="User Avatar"
-                        />
-                    }
-                />
-            </header>
-
+        <div className={s.pageWrapperWithoutHeader}>
             <main className={s.mainContent}>
                 <h1 className={s.pageTitle}>
                     <TextType

@@ -33,6 +33,7 @@ export default function MessagesPage() {
     >(null)
     const [isDetailsOpen, setIsDetailsOpen] = useState(false)
     const [showNewChatModal, setShowNewChatModal] = useState(false)
+    const [isAdmin, setIsAdmin] = useState(false)
 
     const {
         data: conversations = [],
@@ -62,14 +63,28 @@ export default function MessagesPage() {
                     activeConversationId,
                     currentUserId
                 )
-            }
+            } else {
+                // const roomDetails = await messageApi.getGroupDetails(
+                //     activeConversationId,
+                //     currentUserId
+                // )
 
-            // For direct conversations, participants might be empty from getConversations
-            // We still need to fetch group details to get the other user's info
-            return messageApi.getGroupDetails(
-                activeConversationId,
-                currentUserId
-            )
+                // const otherMember = roomDetails.participants.find(
+                //     (p) => p.id !== currentUserId
+                // )
+
+                // if (otherMember) {
+                //     return messageApi.getOrCreateDirectConversation(
+                //         otherMember.id
+                //     )
+                // }
+
+                // return roomDetails
+                return messageApi.getGroupDetails(
+                    activeConversationId,
+                    currentUserId
+                )
+            }
         },
         enabled: !!activeConversationId,
         staleTime: 30000,
@@ -95,6 +110,19 @@ export default function MessagesPage() {
         // Fallback to basic conversation (without participants)
         return conversations.find((c) => c.id === activeConversationId) || null
     }, [conversations, activeConversationId, detailedConversation])
+
+    useEffect(() => {
+        if (!detailedConversation?.participants) {
+            setIsAdmin(false)
+            return
+        }
+
+        const isUserAdmin = detailedConversation.participants.some(
+            (p) => p.id === currentUserId && p.role === 'admin'
+        )
+
+        setIsAdmin(isUserAdmin)
+    }, [detailedConversation, currentUserId])
 
     // ✅ Refetch conversation details when new message arrives
     useEffect(() => {
@@ -205,98 +233,77 @@ export default function MessagesPage() {
     }
 
     return (
-        <div className={s.pageWrapper}>
-            <header className={s.header}>
-                <NavigationMenu
-                    items={navItems}
-                    rightSlotDropdownItems={userMenuItems}
-                    rightSlot={
-                        <img
-                            src={session?.avatarUrl || DefaultAvatar}
-                            className={s.avatar}
-                            alt="User Avatar"
-                        />
-                    }
-                />
-            </header>
-
+        <div className={s.pageWrapperWithoutHeader}>
             <main className={s.mainContent}>
-                <h1 className={s.pageTitle}>
-                    Tin nhắn <span className={s.gradientText}>trực tuyến</span>
-                </h1>
+                <div
+                    className={`${s.container} ${activeConversation && isDetailsOpen ? s.isDetailsActive : ''}`}
+                >
+                    {/* 1. CONVERSATION LIST */}
+                    <aside className={s.conversationPanel}>
+                        <div className={s.sidebarHeader}>
+                            <h3 className={s.sidebarTitle}>Đoạn chat</h3>
+                            <ButtonPrimary
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setShowNewChatModal(true)}
+                            >
+                                + Mới
+                            </ButtonPrimary>
+                        </div>
 
-                <Card className={s.chatCard}>
-                    <div
-                        className={`${s.container} ${activeConversation && isDetailsOpen ? s.isDetailsActive : ''}`}
-                    >
-                        {/* 1. CONVERSATION LIST */}
-                        <aside className={s.conversationPanel}>
-                            <div className={s.sidebarHeader}>
-                                <h3 className={s.sidebarTitle}>Đoạn chat</h3>
-                                <ButtonPrimary
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => setShowNewChatModal(true)}
-                                >
-                                    + Mới
-                                </ButtonPrimary>
-                            </div>
+                        <ConversationList
+                            conversations={conversations}
+                            activeId={activeConversationId}
+                            onSelectConversation={handleSelectConversation}
+                            currentUserId={currentUserId}
+                            isLoading={isLoading}
+                        />
+                    </aside>
 
-                            <ConversationList
-                                conversations={conversations}
-                                activeId={activeConversationId}
-                                onSelectConversation={handleSelectConversation}
+                    {/* 2. CHAT WINDOW */}
+                    <section className={s.chatPanel}>
+                        {activeConversation ? (
+                            <ChatWindow
+                                key={activeConversation.id}
+                                conversation={activeConversation}
                                 currentUserId={currentUserId}
-                                isLoading={isLoading}
+                                onCloseChat={() =>
+                                    setActiveConversationId(null)
+                                }
+                                onToggleDetails={() =>
+                                    setIsDetailsOpen(!isDetailsOpen)
+                                }
+                                highlightedMessageId={highlightedMessageId}
+                            />
+                        ) : (
+                            <div className={s.noChatSelected}>
+                                <img
+                                    src="/assets/chat-placeholder.svg"
+                                    alt=""
+                                    style={{
+                                        width: 120,
+                                        opacity: 0.5,
+                                        marginBottom: 16,
+                                    }}
+                                />
+                                <p>Chọn một cuộc trò chuyện để bắt đầu</p>
+                            </div>
+                        )}
+                    </section>
+
+                    {/* 3. DETAILS PANEL */}
+                    {activeConversation && isDetailsOpen && (
+                        <aside className={s.detailsPanel}>
+                            <ChatDetailsPanel
+                                conversation={activeConversation}
+                                currentUserId={currentUserId}
+                                isAdmin={isAdmin}
+                                onClose={() => setIsDetailsOpen(false)}
+                                onNavigateToMessage={handleNavigateToMessage}
                             />
                         </aside>
-
-                        {/* 2. CHAT WINDOW */}
-                        <section className={s.chatPanel}>
-                            {activeConversation ? (
-                                <ChatWindow
-                                    key={activeConversation.id}
-                                    conversation={activeConversation}
-                                    currentUserId={currentUserId}
-                                    onCloseChat={() =>
-                                        setActiveConversationId(null)
-                                    }
-                                    onToggleDetails={() =>
-                                        setIsDetailsOpen(!isDetailsOpen)
-                                    }
-                                    highlightedMessageId={highlightedMessageId}
-                                />
-                            ) : (
-                                <div className={s.noChatSelected}>
-                                    <img
-                                        src="/assets/chat-placeholder.svg"
-                                        alt=""
-                                        style={{
-                                            width: 120,
-                                            opacity: 0.5,
-                                            marginBottom: 16,
-                                        }}
-                                    />
-                                    <p>Chọn một cuộc trò chuyện để bắt đầu</p>
-                                </div>
-                            )}
-                        </section>
-
-                        {/* 3. DETAILS PANEL */}
-                        {activeConversation && isDetailsOpen && (
-                            <aside className={s.detailsPanel}>
-                                <ChatDetailsPanel
-                                    conversation={activeConversation}
-                                    currentUserId={currentUserId}
-                                    onClose={() => setIsDetailsOpen(false)}
-                                    onNavigateToMessage={
-                                        handleNavigateToMessage
-                                    }
-                                />
-                            </aside>
-                        )}
-                    </div>
-                </Card>
+                    )}
+                </div>
             </main>
 
             {/* NEW CHAT MODAL */}

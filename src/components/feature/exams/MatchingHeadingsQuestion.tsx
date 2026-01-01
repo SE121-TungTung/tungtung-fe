@@ -1,46 +1,40 @@
+import type { QuestionGroup, Question } from '@/types/test.types'
 import s from './MatchingHeadingsQuestion.module.css'
 
-interface HeadingOption {
-    value: string
-    text: string
-}
+type AnswerMap = { [questionId: string]: string }
 
-interface Paragraph {
-    id: string
-    label: string
-}
-
-interface MatchingHeadingsProps {
-    questionNumbers: string
-    headings: HeadingOption[]
-    paragraphs: Paragraph[]
-    answers: { [paragraphId: string]: string } // { paragraph_a: 'iii', paragraph_b: 'i' }
-    onChange: (paragraphId: string, headingValue: string) => void
-    registerRef: (id: string, element: HTMLElement) => void
+interface MatchingHeadingsQuestionProps {
+    group: QuestionGroup & {
+        questions: (Question & { globalNumber: number })[]
+    }
+    answers: AnswerMap
+    onAnswerChange: (questionId: string, value: string) => void
+    registerRef: (id: string, element: HTMLElement | null) => void
 }
 
 export default function MatchingHeadingsQuestion({
-    questionNumbers,
-    headings,
-    paragraphs,
+    group,
     answers,
-    onChange,
+    onAnswerChange,
     registerRef,
-}: MatchingHeadingsProps) {
+}: MatchingHeadingsQuestionProps) {
+    // Headings list cần lấy từ metadata hoặc instructions
+    const headings = (group as any).metadata?.headings || []
+
+    if (headings.length === 0) {
+        return <div>Missing headings list</div>
+    }
+
     return (
-        <div
-            className={s.container}
-            ref={(el) => {
-                if (el) registerRef(questionNumbers.toString(), el)
-            }}
-        >
+        <div className={s.container}>
+            {/* List of Headings */}
             <div className={s.headingsListCard}>
                 <h4 className={s.headingsListTitle}>List of Headings</h4>
                 <ul className={s.headingsList}>
-                    {headings.map((heading) => (
-                        <li key={heading.value} className={s.headingItem}>
+                    {headings.map((heading: any) => (
+                        <li key={heading.key} className={s.headingItem}>
                             <span className={s.headingLabel}>
-                                {heading.value}
+                                {heading.key}
                             </span>
                             <span className={s.headingText}>
                                 {heading.text}
@@ -50,29 +44,29 @@ export default function MatchingHeadingsQuestion({
                 </ul>
             </div>
 
+            {/* Paragraphs to match */}
             <div className={s.paragraphMatching}>
-                {paragraphs.map((para) => (
-                    <div key={para.id} className={s.matchItem}>
-                        <label
-                            htmlFor={`select-${para.id}`}
-                            className={s.paragraphLabel}
-                        >
-                            <strong>{questionNumbers.split('-')[0]}.</strong>{' '}
-                            {para.label}
+                {group.questions.map((question) => (
+                    <div
+                        key={question.id}
+                        className={s.matchItem}
+                        ref={(el) => registerRef(question.id, el)}
+                    >
+                        <label className={s.paragraphLabel}>
+                            <strong>{question.globalNumber}.</strong>{' '}
+                            {question.questionText}
                         </label>
                         <select
-                            id={`select-${para.id}`}
                             className={s.selectHeading}
-                            value={answers[para.id] || ''}
-                            onChange={(e) => onChange(para.id, e.target.value)}
+                            value={answers[question.id] || ''}
+                            onChange={(e) =>
+                                onAnswerChange(question.id, e.target.value)
+                            }
                         >
                             <option value="">Choose heading...</option>
-                            {headings.map((heading) => (
-                                <option
-                                    key={heading.value}
-                                    value={heading.value}
-                                >
-                                    {heading.value}
+                            {headings.map((heading: any) => (
+                                <option key={heading.key} value={heading.key}>
+                                    {heading.key}
                                 </option>
                             ))}
                         </select>

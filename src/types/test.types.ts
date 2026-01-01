@@ -1,5 +1,8 @@
 // ============================================
 // ENUMS
+
+import type { ReactNode } from 'react'
+
 // ============================================
 export enum QuestionType {
     // Reading & Listening
@@ -491,6 +494,11 @@ export interface QuestionGroup {
     instructions: string | null
     imageUrl: string | null
     questions: Question[]
+    metadata?: {
+        options?: Array<{ key: string; text: string }>
+        headings?: Array<{ key: string; text: string }>
+        [key: string]: any
+    } | null
 }
 
 /**
@@ -621,6 +629,10 @@ export interface StudentTestListItem {
     latestAttemptStatus: AttemptStatus | null
     latestAttemptScore: number | null
     status: TestStatus
+    skill: SkillArea
+    difficulty: DifficultyLevel
+    durationMinutes: number
+    createdAt: string
 }
 
 /**

@@ -1,4 +1,6 @@
 import React, { useId, useState, forwardRef } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import s from './InputField.module.css'
 import FieldMessage from '@/components/common/typography/FieldMessage'
 
@@ -23,6 +25,7 @@ export interface InputFieldProps
     enablePasswordToggle?: boolean
     multiline?: boolean
     rows?: number
+    enableMarkdown?: boolean // Thuộc tính mới
 }
 
 const InputField = forwardRef<
@@ -39,12 +42,14 @@ const InputField = forwardRef<
             variant = 'glass',
             uiSize = 'md',
             mode = 'light',
+            enableMarkdown = false,
             fullWidth,
             enablePasswordToggle,
             multiline = false,
             rows = 4,
             type = 'text',
             className = '',
+            value,
             id,
             ...rest
         },
@@ -54,11 +59,11 @@ const InputField = forwardRef<
         const inputId = id ?? `in-${autoId}`
 
         const [reveal, setReveal] = useState(false)
+        const [isPreview, setIsPreview] = useState(false)
 
+        const isPassword = type === 'password' && !multiline
         const isFile = type === 'file'
 
-        // Logic cho password toggle (chỉ áp dụng nếu không phải multiline)
-        const isPassword = type === 'password' && !multiline
         const inputType =
             isPassword && enablePasswordToggle
                 ? reveal
@@ -66,7 +71,6 @@ const InputField = forwardRef<
                     : 'password'
                 : type
 
-        // Class tổng hợp
         const wrapperClasses = [
             s.wrapper,
             s[`variant-${variant}`],
@@ -79,44 +83,68 @@ const InputField = forwardRef<
             className,
         ].join(' ')
 
-        // Render chung cho Input hoặc Textarea
         const InputComponent = multiline ? 'textarea' : 'input'
-
-        // Các props đặc thù cho từng loại
-        const specificProps = multiline
-            ? {
-                  rows,
-                  ...(rest as React.TextareaHTMLAttributes<HTMLTextAreaElement>),
-              }
-            : {
-                  type: inputType,
-                  ...(rest as React.InputHTMLAttributes<HTMLInputElement>),
-              }
 
         return (
             <div className={wrapperClasses}>
-                {label && (
-                    <label htmlFor={inputId} className={s.label}>
-                        {label}
-                    </label>
-                )}
+                <div className={s.labelRow}>
+                    {label && (
+                        <label htmlFor={inputId} className={s.label}>
+                            {label}
+                        </label>
+                    )}
+
+                    {enableMarkdown && multiline && (
+                        <div className={s.mdTabs}>
+                            <button
+                                type="button"
+                                className={!isPreview ? s.activeTab : ''}
+                                onClick={() => setIsPreview(false)}
+                            >
+                                Soạn thảo
+                            </button>
+                            <button
+                                type="button"
+                                className={isPreview ? s.activeTab : ''}
+                                onClick={() => setIsPreview(true)}
+                            >
+                                Xem trước
+                            </button>
+                        </div>
+                    )}
+                </div>
 
                 <div className={s.inputContainer}>
-                    {leftIcon && (
+                    {leftIcon && !isPreview && (
                         <span className={[s.icon, s.prefix].join(' ')}>
                             {leftIcon}
                         </span>
                     )}
 
-                    <InputComponent
-                        id={inputId}
-                        // @ts-expect-error - Hỗ trợ ref cho cả 2 loại thẻ
-                        ref={ref}
-                        className={s.input}
-                        {...specificProps}
-                    />
+                    {isPreview && enableMarkdown && multiline ? (
+                        <div
+                            className={`${s.input} ${s.previewArea}`}
+                            style={{ minHeight: `${rows * 24}px` }}
+                        >
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                {String(value || '')}
+                            </ReactMarkdown>
+                        </div>
+                    ) : (
+                        <InputComponent
+                            id={inputId}
+                            // @ts-expect-error - TS doesn't recognize dynamic component with ref
+                            ref={ref}
+                            className={s.input}
+                            type={multiline ? undefined : inputType}
+                            rows={multiline ? rows : undefined}
+                            value={value}
+                            {...rest}
+                        />
+                    )}
 
-                    {isPassword && enablePasswordToggle ? (
+                    {/* Toggle Password Icon */}
+                    {isPassword && enablePasswordToggle && !multiline ? (
                         <button
                             type="button"
                             className={[s.icon, s.suffix, s.toggleBtn].join(
@@ -135,7 +163,8 @@ const InputField = forwardRef<
                             />
                         </button>
                     ) : (
-                        rightIcon && (
+                        rightIcon &&
+                        !isPreview && (
                             <span className={[s.icon, s.suffix].join(' ')}>
                                 {rightIcon}
                             </span>

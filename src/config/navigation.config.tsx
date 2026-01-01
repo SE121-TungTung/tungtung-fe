@@ -76,6 +76,11 @@ const teacherNavItems: AppNavItem[] = [
                 label: 'Tạo đề thi mới',
                 href: '/teacher/tests/create',
             },
+            {
+                id: 'manage-tests',
+                label: 'Quản lý đề thi',
+                href: '/teacher/tests',
+            },
         ],
     },
 ]
@@ -130,14 +135,15 @@ const adminNavItems: AppNavItem[] = [
         ],
     },
     {
-        id: 'reports',
-        label: 'Báo cáo',
+        id: 'system',
+        label: 'Hệ thống',
         allowedRoles: ['office_admin', 'center_admin', 'system_admin'],
         dropdownItems: [
             {
-                id: 'reports',
-                label: 'Báo cáo',
-                href: '/coming-soon',
+                id: 'chatbot-documents',
+                label: 'Tài liệu Chatbot',
+                href: '/admin/system/chatbot-documents',
+                allowedRoles: ['system_admin', 'center_admin'],
             },
             {
                 id: 'audit-logs',

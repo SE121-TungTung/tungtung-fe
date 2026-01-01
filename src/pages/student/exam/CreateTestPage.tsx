@@ -230,7 +230,7 @@ export default function CreateTestPage() {
             const result = await testApi.createTest(payload, uploadedFiles)
 
             alert('Tạo bài thi thành công!')
-            navigate(`/teacher/tests/${result.id}`)
+            navigate(`/teacher/tests/${result.id}/view`)
         } catch (error: any) {
             console.error('Failed to create test:', error)
 
@@ -362,6 +362,7 @@ export default function CreateTestPage() {
                             <InputField
                                 label="Hướng dẫn"
                                 multiline={true}
+                                enableMarkdown={true}
                                 value={instructions}
                                 onChange={(e) =>
                                     setInstructions(e.target.value)
@@ -485,6 +486,7 @@ export default function CreateTestPage() {
 
                                 <InputField
                                     label="Hướng dẫn section (tùy chọn)"
+                                    enableMarkdown={true}
                                     className={`${s.fullWidth}`}
                                     multiline={true}
                                     value={section.instructions || ''}
@@ -560,6 +562,7 @@ export default function CreateTestPage() {
                                                           ? 'Cue Card Content'
                                                           : 'Đoạn văn Reading'
                                                 }
+                                                enableMarkdown={true}
                                                 required={true}
                                                 value={
                                                     part.passage
@@ -884,6 +887,7 @@ export default function CreateTestPage() {
 
                                     <InputField
                                         label="Hướng dẫn part"
+                                        enableMarkdown={true}
                                         value={part.instructions || ''}
                                         multiline={true}
                                         onChange={(e) =>
@@ -975,7 +979,8 @@ export default function CreateTestPage() {
                                                     />
 
                                                     <InputField
-                                                        label="Instructions"
+                                                        label="Hướng dẫn group"
+                                                        enableMarkdown={true}
                                                         multiline={true}
                                                         value={
                                                             group.instructions ||
@@ -1074,6 +1079,9 @@ export default function CreateTestPage() {
 
                                                                 <InputField
                                                                     label="Nội dung câu hỏi"
+                                                                    enableMarkdown={
+                                                                        true
+                                                                    }
                                                                     className={`${s.fullWidth}`}
                                                                     required={
                                                                         true

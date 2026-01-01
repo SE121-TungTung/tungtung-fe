@@ -1,7 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from 'react'
 import s from './ExamPracticePage.module.css'
 
-import NavigationMenu from '@/components/common/menu/NavigationMenu'
 import TextType from '@/components/common/text/TextType'
 import SegmentedControl, {
     type SegItem,
@@ -9,17 +8,14 @@ import SegmentedControl, {
 import InputField from '@/components/common/input/InputField'
 import SkillCard from '@/components/common/card/SkillCard'
 import ExamListCard from './ExamListCard'
-import type { ExamInfo } from '@/components/common/list/ExamItem'
 
-import AvatarPlaceholder from '@/assets/avatar-placeholder.png'
 import SearchIcon from '@/assets/Action Eye Tracking.svg'
 import ListeningIcon from '@/assets/Action Ear Normal.svg'
 import ReadingIcon from '@/assets/Book Open.svg'
 import WritingIcon from '@/assets/Edit Pen.svg'
 import SpeakingIcon from '@/assets/Microphone.svg'
+import BackIcon from '@/assets/arrow-left.svg'
 
-import { useLocation, useNavigate } from 'react-router-dom'
-import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
 import { useSession } from '@/stores/session.store'
 
 // API imports
@@ -27,12 +23,21 @@ import {
     testApi,
     // , getSkillAreaLabel
 } from '@/lib/test'
-import type { TestListItem } from '@/types/test.types'
+import type { StudentTestListItem, TestListItem } from '@/types/test.types'
 import { SkillArea } from '@/types/test.types'
+import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
+import ExamGrid from '@/components/feature/exams/ExamGrid'
+import ButtonGhost from '@/components/common/button/ButtonGhost'
+import { useNavigate } from 'react-router-dom'
 
-const viewModeItems: SegItem[] = [
+const contentModeItems: SegItem[] = [
     { label: 'Theo Kỹ năng', value: 'skill' },
-    { label: 'Tất cả bài thi', value: 'exam' },
+    { label: 'Tất cả bài thi', value: 'all' },
+]
+
+const displayModeItems: SegItem[] = [
+    { label: 'Lưới', value: 'grid' },
+    { label: 'Danh sách', value: 'list' },
 ]
 
 const skills = [
@@ -58,57 +63,40 @@ const skills = [
     },
 ]
 
-// Map TestListItem to ExamInfo
-function mapTestToExamInfo(test: TestListItem): ExamInfo {
-    return {
-        id: test.id,
-        title: test.title,
-        skill: test.skill.toLowerCase() as any,
-        durationMinutes: test.durationMinutes,
-        questionCount: test.totalQuestions,
-    }
-}
-
 export default function ExamPracticePage() {
     const sessionState = useSession()
     const userRole = sessionState?.user?.role || 'student'
     const navigate = useNavigate()
-    const location = useLocation()
-    const currentPath = location.pathname
 
-    const [viewMode, setViewMode] = useState<'skill' | 'exam'>('skill')
+    const [contentMode, setContentMode] = useState<'skill' | 'all'>('skill')
+    const [displayMode, setDisplayMode] = useState<'grid' | 'list'>('grid')
     const [selectedSkill, setSelectedSkill] = useState<SkillArea | null>(null)
+
     const [searchTerm, setSearchTerm] = useState('')
     const [showGradientName, setShowGradientName] = useState(false)
 
     // API state
-    const [tests, setTests] = useState<TestListItem[]>([])
+    const [tests, setTests] = useState<TestListItem[] | StudentTestListItem[]>(
+        []
+    )
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
-
-    const navItems = useMemo(
-        () => getNavItems(userRole as any, currentPath, navigate),
-        [userRole, currentPath, navigate]
-    )
-    const userMenuItems = useMemo(
-        () => getUserMenuItems(userRole as any, navigate),
-        [userRole, navigate]
-    )
-
-    // Load tests on mount or when filters change
-    useEffect(() => {
-        loadTests()
-    }, [])
 
     const loadTests = async () => {
         setLoading(true)
         setError(null)
         try {
-            const data = await testApi.listTests({
-                limit: 100,
-                // status: 'active' // Uncomment nếu chỉ muốn lấy active tests
-            })
-            setTests(data)
+            if (userRole === 'student') {
+                const data = await testApi.listStudentTests({
+                    limit: 100,
+                })
+                setTests(data.tests)
+            } else {
+                const data = await testApi.listTests({
+                    limit: 100,
+                })
+                setTests(data.tests)
+            }
         } catch (err: any) {
             console.error('Failed to load tests:', err)
             setError(err.message || 'Không thể tải danh sách bài thi')
@@ -116,6 +104,10 @@ export default function ExamPracticePage() {
             setLoading(false)
         }
     }
+
+    useEffect(() => {
+        loadTests()
+    }, [loadTests])
 
     const handleGreetingComplete = useCallback(() => {
         setShowGradientName(true)
@@ -131,31 +123,37 @@ export default function ExamPracticePage() {
         setSearchTerm('')
     }
 
-    const handleStartExam = async (examId: string) => {
-        try {
-            // Start attempt
-            const attempt = await testApi.startAttempt(examId)
-
-            // Save attempt info to localStorage
-            localStorage.setItem(
-                `attempt_${attempt.attemptId}`,
-                JSON.stringify(attempt)
-            )
-
-            // Navigate to test taking page
-            navigate(`/student/exams/${examId}/take/${attempt.attemptId}`)
-        } catch (error: any) {
-            console.error('Failed to start exam:', error)
-            alert(error.message || 'Không thể bắt đầu bài thi')
+    const handleExamClick = async (examId: string) => {
+        if (userRole === 'student') {
+            // Student: Start attempt và chuyển sang page làm bài
+            try {
+                const attempt = await testApi.startAttempt(examId)
+                localStorage.setItem(
+                    `attempt_${attempt.attemptId}`,
+                    JSON.stringify(attempt)
+                )
+                navigate(`/student/exams/${examId}/take/${attempt.attemptId}`)
+            } catch (error: any) {
+                console.error('Failed to start exam:', error)
+                alert(error.message || 'Không thể bắt đầu bài thi')
+            }
+        } else {
+            // Teacher: Chuyển sang page xem chi tiết
+            navigate(`/teacher/tests/${examId}/view`)
         }
     }
 
     const filteredExams = useMemo(() => {
         let examsToShow = tests
 
-        // Filter by view mode and skill
-        if (viewMode === 'skill' && selectedSkill) {
-            examsToShow = tests.filter((test) => test.skill === selectedSkill)
+        // Filter by content mode and skill
+        if (contentMode === 'skill' && selectedSkill) {
+            examsToShow = tests.filter((test) => {
+                if ('skill' in test) {
+                    return test.skill === selectedSkill
+                }
+                return false
+            })
         }
 
         // Filter by search term
@@ -165,19 +163,14 @@ export default function ExamPracticePage() {
             )
         }
 
-        return examsToShow.map(mapTestToExamInfo)
-    }, [tests, searchTerm, selectedSkill, viewMode])
+        return examsToShow
+    }, [tests, searchTerm, selectedSkill, contentMode])
 
     const renderContent = () => {
         if (loading) {
             return (
                 <div className={s.examListContainer}>
-                    <ExamListCard
-                        title="Đang tải..."
-                        exams={[]}
-                        onStartExam={handleStartExam}
-                        isLoading={true}
-                    />
+                    <div className={s.loadingState}>Đang tải danh sách...</div>
                 </div>
             )
         }
@@ -185,48 +178,20 @@ export default function ExamPracticePage() {
         if (error) {
             return (
                 <div className={s.examListContainer}>
-                    <div
-                        style={{
-                            textAlign: 'center',
-                            padding: '40px',
-                            color: 'var(--status-danger-500-light)',
-                        }}
-                    >
-                        <p>❌ {error}</p>
-                        <button
-                            onClick={loadTests}
-                            style={{
-                                marginTop: '16px',
-                                padding: '8px 16px',
-                                background: 'var(--brand-primary-light)',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: 'var(--radius-md)',
-                                cursor: 'pointer',
-                            }}
-                        >
+                    <div className={s.errorState}>
+                        <p>⚠ {error}</p>
+                        <ButtonPrimary onClick={loadTests}>
                             Thử lại
-                        </button>
+                        </ButtonPrimary>
                     </div>
                 </div>
             )
         }
 
-        if (viewMode === 'skill') {
-            if (selectedSkill) {
-                const skillInfo = skills.find((s) => s.value === selectedSkill)
-                return (
-                    <div className={s.examListContainer}>
-                        <ExamListCard
-                            title={`Bài thi kỹ năng: ${skillInfo?.name || ''}`}
-                            exams={filteredExams}
-                            onBackClick={handleBackFromList}
-                            onStartExam={handleStartExam}
-                            isLoading={false}
-                        />
-                    </div>
-                )
-            } else {
+        // Mode 1: Theo Kỹ năng
+        if (contentMode === 'skill') {
+            // Chưa chọn skill → Hiện skill cards
+            if (selectedSkill === null) {
                 return (
                     <div className={s.skillGrid}>
                         {skills.map((skill) => (
@@ -240,36 +205,75 @@ export default function ExamPracticePage() {
                     </div>
                 )
             }
-        } else {
-            return (
-                <div className={s.examListContainer}>
+
+            // Đã chọn skill → Hiện exams theo displayMode
+            const skillInfo = skills.find((s) => s.value === selectedSkill)
+            const title = `Bài thi kỹ năng: ${skillInfo?.name || ''}`
+
+            if (displayMode === 'grid') {
+                return (
+                    <div className={s.examSection}>
+                        <div className={s.sectionHeader}>
+                            <h2 className={s.sectionTitle}>{title}</h2>
+                            <ButtonGhost
+                                size="sm"
+                                mode="light"
+                                leftIcon={<img src={BackIcon} alt="back" />}
+                                onClick={handleBackFromList}
+                            >
+                                Quay lại
+                            </ButtonGhost>
+                        </div>
+                        <ExamGrid
+                            exams={filteredExams}
+                            onExamClick={handleExamClick}
+                            userRole={userRole as any}
+                        />
+                    </div>
+                )
+            } else {
+                return (
                     <ExamListCard
-                        title="Tất cả bài thi"
+                        title={title}
                         exams={filteredExams}
-                        onStartExam={handleStartExam}
+                        onBackClick={handleBackFromList}
+                        onExamClick={handleExamClick}
                         isLoading={false}
+                        viewMode="list"
+                        userRole={userRole as any}
+                    />
+                )
+            }
+        }
+
+        // Mode 2: Tất cả đề thi
+        if (displayMode === 'grid') {
+            return (
+                <div className={s.examSection}>
+                    <h2 className={s.sectionTitle}>Tất cả bài thi</h2>
+                    <ExamGrid
+                        exams={filteredExams}
+                        onExamClick={handleExamClick}
+                        userRole={userRole as any}
                     />
                 </div>
+            )
+        } else {
+            return (
+                <ExamListCard
+                    title="Tất cả bài thi"
+                    exams={filteredExams}
+                    onExamClick={handleExamClick}
+                    isLoading={false}
+                    viewMode="list"
+                    userRole={userRole as any}
+                />
             )
         }
     }
 
     return (
-        <div className={s.pageWrapper}>
-            <header className={s.header}>
-                <NavigationMenu
-                    items={navItems}
-                    rightSlotDropdownItems={userMenuItems}
-                    rightSlot={
-                        <img
-                            src={AvatarPlaceholder}
-                            className={s.avatar}
-                            alt="User Avatar"
-                        />
-                    }
-                />
-            </header>
-
+        <div className={s.pageWrapperWithoutHeader}>
             <main className={s.mainContent}>
                 <h1 className={s.pageTitle}>
                     <TextType
@@ -291,7 +295,8 @@ export default function ExamPracticePage() {
                 </h1>
 
                 <div className={s.controlsBar}>
-                    {(selectedSkill !== null || viewMode === 'exam') && (
+                    {/* Search - chỉ hiện khi đang xem danh sách đề */}
+                    {(selectedSkill !== null || contentMode === 'all') && (
                         <div className={s.searchWrapper}>
                             <InputField
                                 placeholder="Tìm kiếm bài thi..."
@@ -304,25 +309,31 @@ export default function ExamPracticePage() {
                             />
                         </div>
                     )}
-                    <div
-                        className={s.viewModeControl}
-                        style={{
-                            marginLeft:
-                                selectedSkill === null && viewMode === 'skill'
-                                    ? 'auto'
-                                    : '0',
-                        }}
-                    >
+
+                    <div className={s.viewControls}>
+                        {/* Content Mode: Theo Kỹ năng | Tất cả */}
                         <SegmentedControl
-                            items={viewModeItems}
-                            value={viewMode}
+                            items={contentModeItems}
+                            value={contentMode}
                             onChange={(value) => {
-                                setViewMode(value as 'skill' | 'exam')
+                                setContentMode(value as 'skill' | 'all')
                                 setSelectedSkill(null)
                                 setSearchTerm('')
                             }}
                             size="sm"
                         />
+
+                        {/* Display Mode: Lưới | Danh sách - chỉ hiện khi đang xem list đề */}
+                        {(selectedSkill !== null || contentMode === 'all') && (
+                            <SegmentedControl
+                                items={displayModeItems}
+                                value={displayMode}
+                                onChange={(value) =>
+                                    setDisplayMode(value as 'grid' | 'list')
+                                }
+                                size="sm"
+                            />
+                        )}
                     </div>
                 </div>
 

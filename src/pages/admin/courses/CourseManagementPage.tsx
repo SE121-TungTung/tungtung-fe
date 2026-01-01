@@ -24,13 +24,6 @@ import IconPlus from '@/assets/Plus Thin.svg'
 import IconSearch from '@/assets/Lens.svg'
 import { usePermissions } from '@/hooks/usePermissions'
 
-import { useLocation, useNavigate } from 'react-router-dom'
-import { useSession } from '@/stores/session.store'
-import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
-import NavigationMenu from '@/components/common/menu/NavigationMenu'
-import DefaultAvatar from '@/assets/avatar-placeholder.png'
-import { type Role as UserRole } from '@/types/auth'
-
 type SortBy = 'name' | 'fee_amount' | 'created_at' | 'duration_hours'
 type SortOrder = 'asc' | 'desc'
 
@@ -91,20 +84,6 @@ export default function CourseManagementPage() {
     useEffect(() => {
         setPage(1)
     }, [debouncedSearch, level, status, sortBy, sortOrder])
-
-    const navigate = useNavigate()
-    const session = useSession((state) => state.user)
-    const location = useLocation()
-    const userRole = (session?.role as UserRole) || 'student'
-    const currentPath = location.pathname
-    const navItems = useMemo(
-        () => getNavItems(userRole, currentPath, navigate),
-        [userRole, currentPath, navigate]
-    )
-    const userMenuItems = useMemo(
-        () => getUserMenuItems(userRole, navigate),
-        [userRole, navigate]
-    )
 
     const coursesQuery = useQuery({
         queryKey: [
@@ -218,21 +197,7 @@ export default function CourseManagementPage() {
     const isFetching = coursesQuery.isFetching
 
     return (
-        <div className={s.pageWrapper}>
-            <header className={s.header}>
-                <NavigationMenu
-                    items={navItems}
-                    rightSlotDropdownItems={userMenuItems}
-                    rightSlot={
-                        <img
-                            src={session?.avatarUrl || DefaultAvatar}
-                            className={s.avatar}
-                            alt="User Avatar"
-                        />
-                    }
-                />
-            </header>
-
+        <div className={s.pageWrapperWithoutHeader}>
             <main className={s.mainContent}>
                 <h1 className={s.pageTitle}>Quản lý khóa học</h1>
 

@@ -1,66 +1,48 @@
 import s from './MultipleChoiceQuestion.module.css'
-import type { McqQuestion } from '@/types/exam.types'
+import type { Question, QuestionOption } from '@/types/test.types'
 
-// props: cho phép optional để fallback được
-interface McqProps {
-    question: McqQuestion
-    selectedValues?: string[]
-    onChange: (selected: string[]) => void
+interface MultipleChoiceQuestionProps {
+    question: Question & { globalNumber: number }
+    selectedValue?: string | null
+    onChange: (value: string) => void
     registerRef: (id: string, element: HTMLElement | null) => void
 }
 
 export default function MultipleChoiceQuestion({
     question,
-    selectedValues,
+    selectedValue,
     onChange,
     registerRef,
-}: McqProps) {
-    const { id, number, text, options, allowMultiple } = question
+}: MultipleChoiceQuestionProps) {
+    const { id, globalNumber, questionText, options } = question
 
-    const values = Array.isArray(selectedValues) ? selectedValues : []
-
-    const handleOptionChange = (optionValue: string) => {
-        if (allowMultiple) {
-            const newSelection = values.includes(optionValue)
-                ? values.filter((v) => v !== optionValue)
-                : [...values, optionValue]
-            onChange(newSelection.sort())
-        } else {
-            onChange([optionValue])
-        }
+    if (!options || options.length === 0) {
+        return <div>No options available</div>
     }
 
-    const inputType = allowMultiple ? 'checkbox' : 'radio'
-
     return (
-        <div
-            className={s.questionBlock}
-            ref={(el) => registerRef(id, el)}
-            id={`q-${id}`}
-        >
+        <div className={s.questionBlock} ref={(el) => registerRef(id, el)}>
             <p className={s.questionText}>
-                <strong>{number}.</strong> {text}
+                <strong>{globalNumber}.</strong> {questionText}
             </p>
             <ul className={s.optionsList}>
                 {options.map((option) => (
                     <li
-                        key={option.value}
-                        className={`${s.optionItem} ${values.includes(option.value) ? s.selected : ''}`}
-                        onClick={() => handleOptionChange(option.value)}
-                        role={inputType === 'radio' ? 'radio' : 'checkbox'}
-                        aria-checked={values.includes(option.value)}
-                        tabIndex={0}
+                        key={option.key}
+                        className={`${s.optionItem} ${
+                            selectedValue === option.key ? s.selected : ''
+                        }`}
+                        onClick={() => onChange(option.key)}
                     >
                         <input
-                            className={s.optionInput}
-                            type={inputType}
-                            name={`q-${id}-group`}
-                            value={option.value}
-                            checked={values.includes(option.value)}
-                            onChange={() => handleOptionChange(option.value)}
+                            type="radio"
+                            name={`q-${id}`}
+                            value={option.key}
+                            checked={selectedValue === option.key}
+                            onChange={() => onChange(option.key)}
                             onClick={(e) => e.stopPropagation()}
                         />
-                        <span className={s.optionLabel}>{option.value}.</span>
+                        <span className={s.optionLabel}>{option.key}.</span>
                         <span className={s.optionText}>{option.text}</span>
                     </li>
                 ))}

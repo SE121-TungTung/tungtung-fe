@@ -19,6 +19,7 @@ import EditIcon from '@/assets/Edit Pen.svg'
 import LeaveIcon from '@/assets/Close X Thin.svg'
 import BlockIcon from '@/assets/Block.svg'
 import CloseIcon from '@/assets/Close X Thin.svg'
+import { createPortal } from 'react-dom'
 
 interface UserResult {
     id: string
@@ -31,21 +32,30 @@ interface UserResult {
 interface ChatDetailsPanelProps {
     conversation: Conversation
     currentUserId: string
-    currentUserRole?: string
+    isAdmin?: boolean
     onClose: () => void
     onNavigateToMessage?: (messageId: string) => void
+}
+
+const ModalPortal = ({ children }: { children: React.ReactNode }) => {
+    return createPortal(children, document.body)
 }
 
 export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
     conversation,
     currentUserId,
-    currentUserRole,
+    isAdmin = false,
     onClose,
     onNavigateToMessage,
 }) => {
     const [showSearch, setShowSearch] = useState(false)
     const queryClient = useQueryClient()
-    const { isGroup } = conversation
+    const isGroup = conversation.isGroup
+
+    const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(
+        null
+    )
+    const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false)
 
     // FETCH GROUP DETAILS
     const { data: groupDetails, isLoading: isLoadingDetails } = useQuery({
@@ -232,8 +242,28 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
             file.size <= 5 * 1024 * 1024
         ) {
             setAvatarFile(file)
-            // Fix: Removed unused reader logic
+            const url = URL.createObjectURL(file)
+            setAvatarPreviewUrl(url)
+            setIsAvatarModalOpen(true)
+
+            e.target.value = ''
         }
+    }
+
+    const handleConfirmAvatarUpdate = () => {
+        if (avatarFile) {
+            updateGroupAvatarMutation.mutate(avatarFile)
+            setIsAvatarModalOpen(false)
+            if (avatarPreviewUrl) URL.revokeObjectURL(avatarPreviewUrl)
+            setAvatarPreviewUrl(null)
+        }
+    }
+
+    const handleCancelAvatarUpdate = () => {
+        setAvatarFile(null)
+        setIsAvatarModalOpen(false)
+        if (avatarPreviewUrl) URL.revokeObjectURL(avatarPreviewUrl)
+        setAvatarPreviewUrl(null)
     }
 
     const handleDeleteConversation = () => setIsDeleteModalOpen(true)
@@ -260,10 +290,24 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                 <div className={s.profileSection}>
                     <div className={s.avatarWrapper}>
                         {isGroup ? (
-                            <GroupAvatar
-                                participants={participants}
-                                size="lg"
-                            />
+                            currentConversationData.avatarUrl ? (
+                                <img
+                                    src={currentConversationData.avatarUrl}
+                                    alt={displayName}
+                                    className={s.avatar}
+                                />
+                            ) : participants.length > 0 ? (
+                                <GroupAvatar
+                                    participants={participants}
+                                    size="lg"
+                                />
+                            ) : (
+                                <img
+                                    src={AvatarImg}
+                                    alt={displayName}
+                                    className={s.avatar}
+                                />
+                            )
                         ) : (
                             <img
                                 src={otherParticipant?.avatarUrl || AvatarImg}
@@ -275,7 +319,6 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                     <h3 className={s.displayName}>{displayName}</h3>
                     <p className={s.displayStatus}>{displayStatus}</p>
                 </div>
-
                 <div className={s.content}>
                     {showSearch ? (
                         <MessageSearch
@@ -396,76 +439,59 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                             <ul className={s.menuList}>
                                 {isGroup ? (
                                     <>
-                                        <li
-                                            className={s.menuItem}
-                                            onClick={() =>
-                                                setIsAddMemberModalOpen(true)
-                                            }
-                                        >
-                                            <img src={AddUserIcon} alt="Add" />{' '}
-                                            Thêm thành viên
-                                        </li>
-                                        <li
-                                            className={s.menuItem}
-                                            onClick={() =>
-                                                setIsRenameModalOpen(true)
-                                            }
-                                        >
-                                            <img src={EditIcon} alt="Edit" />{' '}
-                                            Đổi tên nhóm
-                                        </li>
-                                        {isGroup &&
-                                            currentUserRole === 'admin' && (
-                                                <>
-                                                    <input
-                                                        ref={fileInputRef}
-                                                        type="file"
-                                                        accept="image/*"
-                                                        onChange={
-                                                            handleAvatarChange
-                                                        }
-                                                        style={{
-                                                            display: 'none',
-                                                        }}
-                                                    />
-                                                    <li
-                                                        className={s.menuItem}
-                                                        onClick={() =>
-                                                            fileInputRef.current?.click()
-                                                        }
-                                                    >
-                                                        <img
-                                                            src={EditIcon}
-                                                            alt="Avatar"
-                                                        />{' '}
-                                                        Đổi ảnh đại diện
-                                                    </li>
-                                                    {avatarFile && (
-                                                        <div
-                                                            style={{
-                                                                padding:
-                                                                    '0 16px 12px',
-                                                            }}
-                                                        >
-                                                            <ButtonPrimary
-                                                                size="sm"
-                                                                onClick={() =>
-                                                                    updateGroupAvatarMutation.mutate(
-                                                                        avatarFile
-                                                                    )
-                                                                }
-                                                                disabled={
-                                                                    updateGroupAvatarMutation.isPending
-                                                                }
-                                                            >
-                                                                {updateGroupAvatarMutation.isPending
-                                                                    ? 'Đang tải...'
-                                                                    : 'Lưu ảnh mới'}
-                                                            </ButtonPrimary>
-                                                        </div>
-                                                    )}
-                                                </>
-                                            )}
+                                        {isAdmin && (
+                                            <>
+                                                <li
+                                                    className={s.menuItem}
+                                                    onClick={() =>
+                                                        setIsAddMemberModalOpen(
+                                                            true
+                                                        )
+                                                    }
+                                                >
+                                                    <img
+                                                        src={AddUserIcon}
+                                                        alt="Add"
+                                                    />{' '}
+                                                    Thêm thành viên
+                                                </li>
+                                                <li
+                                                    className={s.menuItem}
+                                                    onClick={() =>
+                                                        setIsRenameModalOpen(
+                                                            true
+                                                        )
+                                                    }
+                                                >
+                                                    <img
+                                                        src={EditIcon}
+                                                        alt="Edit"
+                                                    />{' '}
+                                                    Đổi tên nhóm
+                                                </li>
+                                                <input
+                                                    ref={fileInputRef}
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={
+                                                        handleAvatarChange
+                                                    }
+                                                    style={{ display: 'none' }}
+                                                />
+                                                <li
+                                                    className={s.menuItem}
+                                                    onClick={() =>
+                                                        fileInputRef.current?.click()
+                                                    }
+                                                >
+                                                    <img
+                                                        src={EditIcon}
+                                                        alt="Avatar"
+                                                    />{' '}
+                                                    Đổi ảnh đại diện
+                                                </li>
+                                            </>
+                                        )}
                                         <li
                                             className={s.menuItem}
                                             onClick={() => setShowSearch(true)}
@@ -486,7 +512,7 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                                             <img src={LeaveIcon} alt="Leave" />{' '}
                                             Rời khỏi nhóm
                                         </li>
-                                        {currentUserRole === 'admin' && (
+                                        {isAdmin && (
                                             <>
                                                 <li className={s.divider} />
                                                 <li
@@ -547,307 +573,395 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
             </div>
 
             {/* MODALS */}
-            <Modal
-                isOpen={isRenameModalOpen}
-                onClose={() => setIsRenameModalOpen(false)}
-                title="Đổi tên nhóm"
-                footer={
-                    <div
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'flex-end',
-                            gap: '10px',
-                        }}
-                    >
-                        <ButtonGhost
-                            onClick={() => setIsRenameModalOpen(false)}
-                        >
-                            Hủy
-                        </ButtonGhost>
-                        <ButtonPrimary
-                            onClick={handleRenameSubmit}
-                            disabled={
-                                !newGroupName.trim() ||
-                                renameGroupMutation.isPending
-                            }
-                        >
-                            {renameGroupMutation.isPending
-                                ? 'Đang lưu...'
-                                : 'Lưu thay đổi'}
-                        </ButtonPrimary>
-                    </div>
-                }
-            >
-                <div style={{ paddingTop: '10px' }}>
-                    <InputField
-                        label="Tên nhóm mới"
-                        value={newGroupName}
-                        onChange={(e) => setNewGroupName(e.target.value)}
-                        placeholder="Nhập tên nhóm..."
-                        fullWidth
-                        autoFocus
-                    />
-                </div>
-            </Modal>
-
-            <Modal
-                isOpen={isLeaveModalOpen}
-                onClose={() => setIsLeaveModalOpen(false)}
-                title="Rời khỏi nhóm?"
-                footer={
-                    <div
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'flex-end',
-                            gap: '10px',
-                        }}
-                    >
-                        <ButtonGhost onClick={() => setIsLeaveModalOpen(false)}>
-                            Hủy
-                        </ButtonGhost>
-                        <ButtonPrimary
-                            onClick={handleLeaveSubmit}
-                            disabled={leaveGroupMutation.isPending}
-                            style={{
-                                backgroundColor:
-                                    'var(--status-danger-500-light)',
-                                borderColor: 'var(--status-danger-500-light)',
-                            }}
-                        >
-                            {leaveGroupMutation.isPending
-                                ? 'Đang xử lý...'
-                                : 'Rời nhóm'}
-                        </ButtonPrimary>
-                    </div>
-                }
-            >
-                <p
-                    style={{
-                        color: 'var(--text-secondary-light)',
-                        lineHeight: 1.5,
-                    }}
-                >
-                    Bạn có chắc chắn muốn rời khỏi nhóm{' '}
-                    <strong>{currentConversationData.name}</strong> không?
-                </p>
-            </Modal>
-
-            <Modal
-                isOpen={isAddMemberModalOpen}
-                onClose={() => setIsAddMemberModalOpen(false)}
-                title="Thêm thành viên"
-                footer={
-                    <div
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'flex-end',
-                            gap: '10px',
-                        }}
-                    >
-                        <ButtonGhost
-                            onClick={() => setIsAddMemberModalOpen(false)}
-                        >
-                            Hủy
-                        </ButtonGhost>
-                        <ButtonPrimary
-                            onClick={handleAddMemberSubmit}
-                            disabled={
-                                selectedUsersToAdd.length === 0 ||
-                                addMemberMutation.isPending
-                            }
-                        >
-                            {addMemberMutation.isPending
-                                ? 'Đang thêm...'
-                                : `Thêm (${selectedUsersToAdd.length})`}
-                        </ButtonPrimary>
-                    </div>
-                }
-            >
-                <div
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '16px',
-                        minHeight: '300px',
-                    }}
-                >
-                    <InputField
-                        value={memberSearchTerm}
-                        onChange={(e) => setMemberSearchTerm(e.target.value)}
-                        placeholder="Tìm người muốn thêm..."
-                        fullWidth
-                        autoFocus
-                        leftIcon={
-                            <img
-                                src={SearchIcon}
-                                alt=""
-                                style={{ width: 16, opacity: 0.5 }}
-                            />
-                        }
-                    />
-                    {selectedUsersToAdd.length > 0 && (
+            <ModalPortal>
+                {/* Avatar Preview Modal */}
+                <Modal
+                    isOpen={isAvatarModalOpen}
+                    onClose={handleCancelAvatarUpdate}
+                    title="Xem trước ảnh đại diện"
+                    footer={
                         <div
                             style={{
                                 display: 'flex',
-                                flexWrap: 'wrap',
+                                justifyContent: 'flex-end',
+                                gap: '10px',
+                            }}
+                        >
+                            <ButtonGhost onClick={handleCancelAvatarUpdate}>
+                                Hủy
+                            </ButtonGhost>
+                            <ButtonPrimary
+                                onClick={handleConfirmAvatarUpdate}
+                                disabled={updateGroupAvatarMutation.isPending}
+                            >
+                                {updateGroupAvatarMutation.isPending
+                                    ? 'Đang tải lên...'
+                                    : 'Lưu thay đổi'}
+                            </ButtonPrimary>
+                        </div>
+                    }
+                >
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            padding: '20px 0',
+                        }}
+                    >
+                        <div
+                            style={{
+                                width: '200px',
+                                height: '200px',
+                                borderRadius: '50%',
+                                overflow: 'hidden',
+                                border: '4px solid var(--surface-raised-light)',
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                            }}
+                        >
+                            {avatarPreviewUrl && (
+                                <img
+                                    src={avatarPreviewUrl}
+                                    alt="Preview"
+                                    style={{
+                                        width: '100%',
+                                        height: '100%',
+                                        objectFit: 'cover',
+                                    }}
+                                />
+                            )}
+                        </div>
+                        <p
+                            style={{
+                                marginTop: '16px',
+                                color: 'var(--text-secondary-light)',
+                                textAlign: 'center',
+                            }}
+                        >
+                            Ảnh đại diện nhóm sẽ hiển thị như thế này với mọi
+                            thành viên.
+                        </p>
+                    </div>
+                </Modal>
+
+                {/* Rename Group Modal */}
+                <Modal
+                    isOpen={isRenameModalOpen}
+                    onClose={() => setIsRenameModalOpen(false)}
+                    title="Đổi tên nhóm"
+                    footer={
+                        <div
+                            style={{
+                                display: 'flex',
+                                justifyContent: 'flex-end',
+                                gap: '10px',
+                            }}
+                        >
+                            <ButtonGhost
+                                onClick={() => setIsRenameModalOpen(false)}
+                            >
+                                Hủy
+                            </ButtonGhost>
+                            <ButtonPrimary
+                                onClick={handleRenameSubmit}
+                                disabled={
+                                    !newGroupName.trim() ||
+                                    renameGroupMutation.isPending
+                                }
+                            >
+                                {renameGroupMutation.isPending
+                                    ? 'Đang lưu...'
+                                    : 'Lưu thay đổi'}
+                            </ButtonPrimary>
+                        </div>
+                    }
+                >
+                    <div style={{ paddingTop: '10px' }}>
+                        <InputField
+                            label="Tên nhóm mới"
+                            value={newGroupName}
+                            onChange={(e) => setNewGroupName(e.target.value)}
+                            placeholder="Nhập tên nhóm..."
+                            fullWidth
+                            autoFocus
+                        />
+                    </div>
+                </Modal>
+
+                {/* Leave Group Modal */}
+                <Modal
+                    isOpen={isLeaveModalOpen}
+                    onClose={() => setIsLeaveModalOpen(false)}
+                    title="Rời khỏi nhóm?"
+                    footer={
+                        <div
+                            style={{
+                                display: 'flex',
+                                justifyContent: 'flex-end',
+                                gap: '10px',
+                            }}
+                        >
+                            <ButtonGhost
+                                onClick={() => setIsLeaveModalOpen(false)}
+                            >
+                                Hủy
+                            </ButtonGhost>
+                            <ButtonPrimary
+                                onClick={handleLeaveSubmit}
+                                disabled={leaveGroupMutation.isPending}
+                                style={{
+                                    backgroundColor:
+                                        'var(--status-danger-500-light)',
+                                    borderColor:
+                                        'var(--status-danger-500-light)',
+                                }}
+                            >
+                                {leaveGroupMutation.isPending
+                                    ? 'Đang xử lý...'
+                                    : 'Rời nhóm'}
+                            </ButtonPrimary>
+                        </div>
+                    }
+                >
+                    <p
+                        style={{
+                            color: 'var(--text-secondary-light)',
+                            lineHeight: 1.5,
+                        }}
+                    >
+                        Bạn có chắc chắn muốn rời khỏi nhóm{' '}
+                        <strong>{currentConversationData.name}</strong> không?
+                    </p>
+                </Modal>
+
+                {/* Add Member Modal */}
+                <Modal
+                    isOpen={isAddMemberModalOpen}
+                    onClose={() => setIsAddMemberModalOpen(false)}
+                    title="Thêm thành viên"
+                    footer={
+                        <div
+                            style={{
+                                display: 'flex',
+                                justifyContent: 'flex-end',
+                                gap: '10px',
+                            }}
+                        >
+                            <ButtonGhost
+                                onClick={() => setIsAddMemberModalOpen(false)}
+                            >
+                                Hủy
+                            </ButtonGhost>
+                            <ButtonPrimary
+                                onClick={handleAddMemberSubmit}
+                                disabled={
+                                    selectedUsersToAdd.length === 0 ||
+                                    addMemberMutation.isPending
+                                }
+                            >
+                                {addMemberMutation.isPending
+                                    ? 'Đang thêm...'
+                                    : `Thêm (${selectedUsersToAdd.length})`}
+                            </ButtonPrimary>
+                        </div>
+                    }
+                >
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '16px',
+                            minHeight: '300px',
+                        }}
+                    >
+                        <InputField
+                            value={memberSearchTerm}
+                            onChange={(e) =>
+                                setMemberSearchTerm(e.target.value)
+                            }
+                            placeholder="Tìm người muốn thêm..."
+                            fullWidth
+                            autoFocus
+                            leftIcon={
+                                <img
+                                    src={SearchIcon}
+                                    alt=""
+                                    style={{ width: 16, opacity: 0.5 }}
+                                />
+                            }
+                        />
+                        {selectedUsersToAdd.length > 0 && (
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    flexWrap: 'wrap',
+                                    gap: '8px',
+                                }}
+                            >
+                                {selectedUsersToAdd.map((u) => (
+                                    <span
+                                        key={u.id}
+                                        style={{
+                                            background: '#eef2ff',
+                                            color: 'var(--brand-primary-600-light)',
+                                            padding: '4px 10px',
+                                            borderRadius: '16px',
+                                            fontSize: '12px',
+                                            fontWeight: 500,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '6px',
+                                        }}
+                                    >
+                                        {u.firstName} {u.lastName}
+                                        <span
+                                            onClick={() => toggleSelectUser(u)}
+                                            style={{
+                                                cursor: 'pointer',
+                                                fontWeight: 'bold',
+                                            }}
+                                        >
+                                            ×
+                                        </span>
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+                        <div
+                            style={{
+                                flex: 1,
+                                overflowY: 'auto',
+                                display: 'flex',
+                                flexDirection: 'column',
                                 gap: '8px',
                             }}
                         >
-                            {selectedUsersToAdd.map((u) => (
-                                <span
-                                    key={u.id}
+                            {isSearching ? (
+                                <p
                                     style={{
-                                        background: '#eef2ff',
-                                        color: 'var(--brand-primary-600-light)',
-                                        padding: '4px 10px',
-                                        borderRadius: '16px',
-                                        fontSize: '12px',
-                                        fontWeight: 500,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '6px',
+                                        textAlign: 'center',
+                                        color: '#999',
+                                        fontSize: '13px',
+                                        marginTop: '20px',
                                     }}
                                 >
-                                    {u.firstName} {u.lastName}
-                                    <span
-                                        onClick={() => toggleSelectUser(u)}
-                                        style={{
-                                            cursor: 'pointer',
-                                            fontWeight: 'bold',
-                                        }}
-                                    >
-                                        ×
-                                    </span>
-                                </span>
-                            ))}
-                        </div>
-                    )}
-                    <div
-                        style={{
-                            flex: 1,
-                            overflowY: 'auto',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '8px',
-                        }}
-                    >
-                        {isSearching ? (
-                            <p
-                                style={{
-                                    textAlign: 'center',
-                                    color: '#999',
-                                    fontSize: '13px',
-                                    marginTop: '20px',
-                                }}
-                            >
-                                Đang tìm...
-                            </p>
-                        ) : filteredSearchResults.length > 0 ? (
-                            filteredSearchResults.map((user) => {
-                                const isSelected = selectedUsersToAdd.some(
-                                    (u) => u.id === user.id
-                                )
-                                return (
-                                    <div
-                                        key={user.id}
-                                        onClick={() => toggleSelectUser(user)}
-                                        className={s.memberItem}
-                                        style={{
-                                            cursor: 'pointer',
-                                            backgroundColor: isSelected
-                                                ? '#eff6ff'
-                                                : undefined,
-                                            border: isSelected
-                                                ? '1px solid var(--brand-primary-200-light)'
-                                                : '1px solid transparent',
-                                        }}
-                                    >
-                                        <img
-                                            src={user.avatarUrl || AvatarImg}
-                                            className={s.memberAvatar}
-                                            alt=""
-                                        />
-                                        <div className={s.memberInfo}>
-                                            <div className={s.memberName}>
-                                                {user.firstName} {user.lastName}
+                                    Đang tìm...
+                                </p>
+                            ) : filteredSearchResults.length > 0 ? (
+                                filteredSearchResults.map((user) => {
+                                    const isSelected = selectedUsersToAdd.some(
+                                        (u) => u.id === user.id
+                                    )
+                                    return (
+                                        <div
+                                            key={user.id}
+                                            onClick={() =>
+                                                toggleSelectUser(user)
+                                            }
+                                            className={s.memberItem}
+                                            style={{
+                                                cursor: 'pointer',
+                                                backgroundColor: isSelected
+                                                    ? '#eff6ff'
+                                                    : undefined,
+                                                border: isSelected
+                                                    ? '1px solid var(--brand-primary-200-light)'
+                                                    : '1px solid transparent',
+                                            }}
+                                        >
+                                            <img
+                                                src={
+                                                    user.avatarUrl || AvatarImg
+                                                }
+                                                className={s.memberAvatar}
+                                                alt=""
+                                            />
+                                            <div className={s.memberInfo}>
+                                                <div className={s.memberName}>
+                                                    {user.firstName}{' '}
+                                                    {user.lastName}
+                                                </div>
+                                                <div className={s.memberStatus}>
+                                                    {user.email}
+                                                </div>
                                             </div>
-                                            <div className={s.memberStatus}>
-                                                {user.email}
-                                            </div>
+                                            {isSelected && (
+                                                <span
+                                                    style={{
+                                                        color: 'green',
+                                                        fontWeight: 'bold',
+                                                    }}
+                                                >
+                                                    ✓
+                                                </span>
+                                            )}
                                         </div>
-                                        {isSelected && (
-                                            <span
-                                                style={{
-                                                    color: 'green',
-                                                    fontWeight: 'bold',
-                                                }}
-                                            >
-                                                ✓
-                                            </span>
-                                        )}
-                                    </div>
-                                )
-                            })
-                        ) : memberSearchTerm.length > 1 ? (
-                            <p
-                                style={{
-                                    textAlign: 'center',
-                                    color: '#999',
-                                    fontSize: '13px',
-                                    marginTop: '20px',
-                                }}
-                            >
-                                Không tìm thấy.
-                            </p>
-                        ) : null}
+                                    )
+                                })
+                            ) : memberSearchTerm.length > 1 ? (
+                                <p
+                                    style={{
+                                        textAlign: 'center',
+                                        color: '#999',
+                                        fontSize: '13px',
+                                        marginTop: '20px',
+                                    }}
+                                >
+                                    Không tìm thấy.
+                                </p>
+                            ) : null}
+                        </div>
                     </div>
-                </div>
-            </Modal>
+                </Modal>
 
-            <Modal
-                isOpen={isDeleteModalOpen}
-                onClose={() => setIsDeleteModalOpen(false)}
-                title={isGroup ? 'Xóa nhóm?' : 'Xóa cuộc trò chuyện?'}
-                footer={
-                    <div
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'flex-end',
-                            gap: '10px',
-                        }}
-                    >
-                        <ButtonGhost
-                            onClick={() => setIsDeleteModalOpen(false)}
-                        >
-                            Hủy
-                        </ButtonGhost>
-                        <ButtonPrimary
-                            onClick={() => deleteConversationMutation.mutate()}
-                            disabled={deleteConversationMutation.isPending}
+                <Modal
+                    isOpen={isDeleteModalOpen}
+                    onClose={() => setIsDeleteModalOpen(false)}
+                    title={isGroup ? 'Xóa nhóm?' : 'Xóa cuộc trò chuyện?'}
+                    footer={
+                        <div
                             style={{
-                                backgroundColor:
-                                    'var(--status-danger-500-light)',
-                                borderColor: 'var(--status-danger-500-light)',
+                                display: 'flex',
+                                justifyContent: 'flex-end',
+                                gap: '10px',
                             }}
                         >
-                            {deleteConversationMutation.isPending
-                                ? 'Đang xóa...'
-                                : 'Xóa'}
-                        </ButtonPrimary>
-                    </div>
-                }
-            >
-                <p
-                    style={{
-                        color: 'var(--text-secondary-light)',
-                        lineHeight: 1.5,
-                    }}
+                            <ButtonGhost
+                                onClick={() => setIsDeleteModalOpen(false)}
+                            >
+                                Hủy
+                            </ButtonGhost>
+                            <ButtonPrimary
+                                onClick={() =>
+                                    deleteConversationMutation.mutate()
+                                }
+                                disabled={deleteConversationMutation.isPending}
+                                style={{
+                                    backgroundColor:
+                                        'var(--status-danger-500-light)',
+                                    borderColor:
+                                        'var(--status-danger-500-light)',
+                                }}
+                            >
+                                {deleteConversationMutation.isPending
+                                    ? 'Đang xóa...'
+                                    : 'Xóa'}
+                            </ButtonPrimary>
+                        </div>
+                    }
                 >
-                    {isGroup
-                        ? `Bạn có chắc muốn xóa nhóm "${currentConversationData.name}"?`
-                        : `Bạn có chắc muốn xóa cuộc trò chuyện với ${displayName}?`}
-                </p>
-            </Modal>
+                    <p
+                        style={{
+                            color: 'var(--text-secondary-light)',
+                            lineHeight: 1.5,
+                        }}
+                    >
+                        {isGroup
+                            ? `Bạn có chắc muốn xóa nhóm "${currentConversationData.name}"?`
+                            : `Bạn có chắc muốn xóa cuộc trò chuyện với ${displayName}?`}
+                    </p>
+                </Modal>
+            </ModalPortal>
         </>
     )
 }

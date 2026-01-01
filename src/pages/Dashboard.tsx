@@ -30,6 +30,6 @@ export default function GeneralDashboard() {
             return <AdminDashboard />
 
         default:
-            return <div className="p-8">Unauthorized Role: {userData.role}</div>
+            return <div>Unauthorized Role: {userData.role}</div>
     }
 }

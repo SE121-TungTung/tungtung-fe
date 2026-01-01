@@ -12,6 +12,8 @@ import ButtonGhost from '@/components/common/button/ButtonGhost'
 import { GroupAvatar } from './GroupAvatar'
 import { format, isSameDay, isToday, isYesterday } from 'date-fns'
 import { vi } from 'date-fns/locale'
+import AvatarImg from '@/assets/avatar-placeholder.png'
+import { useDialog } from '@/hooks/useDialog'
 
 const DateSeparator = ({ dateString }: { dateString: string }) => {
     const date = new Date(dateString)
@@ -45,6 +47,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const messageRefs = useRef<Record<string, HTMLDivElement | null>>({})
     const queryClient = useQueryClient()
+    const { alert: showAlert } = useDialog()
 
     const { data: messages = [], isLoading } = useQuery({
         queryKey: ['messages', conversation.id],
@@ -117,7 +120,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         },
         onError: (error) => {
             console.error('❌ Failed to send message:', error)
-            alert('Không thể gửi tin nhắn. Vui lòng thử lại.')
+            showAlert(
+                'Không thể gửi tin nhắn. Vui lòng thử lại sau.',
+                'Lỗi gửi tin'
+            )
         },
     })
 
@@ -136,19 +142,29 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         },
         onError: (error) => {
             console.error('Failed to edit message:', error)
-            alert('Không thể chỉnh sửa tin nhắn.')
+            showAlert(
+                'Không thể gửi chỉnh sửa nhắn. Vui lòng thử lại sau.',
+                'Lỗi chỉnh sửa tin'
+            )
         },
     })
 
     const deleteMessageMutation = useMutation({
-        mutationFn: (messageId: string) => {
-            console.log('Delete message:', messageId)
-            return Promise.resolve()
+        mutationFn: async (messageId: string) => {
+            await messageApi.deleteMessage(messageId)
         },
         onSuccess: () => {
             queryClient.invalidateQueries({
                 queryKey: ['messages', conversation.id],
             })
+            queryClient.invalidateQueries({ queryKey: ['conversations'] })
+        },
+        onError: (error) => {
+            console.error('Failed to delete message:', error)
+            showAlert(
+                'Không thể xóa tin nhắn. Vui lòng thử lại sau.',
+                'Lỗi xóa tin'
+            )
         },
     })
 
@@ -235,13 +251,19 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
                     <div className={s.avatarWrapper}>
                         {conversation.isGroup ? (
-                            conversation.participants?.length > 0 ? (
+                            conversation.avatarUrl ? (
+                                <img
+                                    src={conversation.avatarUrl}
+                                    className={s.headerAvatar}
+                                    alt={conversation.name}
+                                />
+                            ) : conversation.participants?.length > 0 ? (
                                 <GroupAvatar
                                     participants={conversation.participants}
                                 />
                             ) : (
                                 <img
-                                    src="/default-avatar.png"
+                                    src={AvatarImg}
                                     className={s.headerAvatar}
                                     alt="Group"
                                 />
@@ -250,11 +272,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                             <>
                                 <img
                                     src={
-                                        otherParticipant?.avatarUrl ||
-                                        '/default-avatar.png'
+                                        otherParticipant?.avatarUrl || AvatarImg
                                     }
                                     className={s.headerAvatar}
-                                    alt=""
+                                    alt={otherParticipant?.fullName || 'User'}
                                 />
                                 {otherParticipant?.isOnline && (
                                     <div className={s.onlineBadge} />
@@ -401,7 +422,18 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
                         if (!isSent && conversation.isGroup) {
                             const nextMsg = messages[index + 1]
+
                             if (!nextMsg || nextMsg.senderId !== msg.senderId) {
+                                showSenderInfo = true
+                            }
+
+                            if (
+                                nextMsg &&
+                                !isSameDay(
+                                    new Date(msg.createdAt),
+                                    new Date(nextMsg.createdAt)
+                                )
+                            ) {
                                 showSenderInfo = true
                             }
                         }

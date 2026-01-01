@@ -3,7 +3,7 @@ import { testApi } from '@/lib/test'
 
 export interface SpeakingQuestionProps {
     questionId: string
-    questionNumber: number
+    globalNumber: number
     questionText: string
     audioUrl?: string | null
     attemptId: string
@@ -13,7 +13,7 @@ export interface SpeakingQuestionProps {
 
 export function SpeakingQuestion({
     questionId,
-    questionNumber,
+    globalNumber,
     questionText,
     audioUrl,
     attemptId,
@@ -129,7 +129,7 @@ export function SpeakingQuestion({
                     color: 'var(--text-primary-light)',
                 }}
             >
-                {questionNumber}. {questionText}
+                {globalNumber}. {questionText}
             </p>
 
             {audioUrl && (

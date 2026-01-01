@@ -9,10 +9,6 @@ import { ALL_ROLES, type Role, type User } from '@/types/auth'
 import { UserFormModal } from './UserFormModal'
 import { UserTable } from './UserTable'
 import { usePermissions } from '@/hooks/usePermissions'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { useSession } from '@/stores/session.store'
-import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
-import NavigationMenu from '@/components/common/menu/NavigationMenu'
 import {
     keepPreviousData,
     useMutation,
@@ -21,8 +17,6 @@ import {
 } from '@tanstack/react-query'
 import { deleteUser, listUsers } from '@/lib/users'
 import { SelectField } from '@/components/common/input/SelectField'
-
-import DefaultAvatar from '@/assets/avatar-placeholder.png'
 
 type SortBy = 'name' | 'email' | 'role' | 'status' | 'createdAt'
 type SortOrder = 'asc' | 'desc'
@@ -116,21 +110,6 @@ export const UserManagementPage: React.FC = () => {
         },
     })
 
-    const navigate = useNavigate()
-    const session = useSession((state) => state.user)
-    const location = useLocation()
-    const userRole = (session?.role as Role) || 'student'
-    const currentPath = location.pathname
-
-    const navItems = useMemo(
-        () => getNavItems(userRole, currentPath, navigate),
-        [userRole, currentPath, navigate]
-    )
-    const userMenuItems = useMemo(
-        () => getUserMenuItems(userRole, navigate),
-        [userRole, navigate]
-    )
-
     const { canAny } = usePermissions()
     const canCreateUser = canAny(['user:create:student', 'user:create:teacher'])
 
@@ -173,21 +152,7 @@ export const UserManagementPage: React.FC = () => {
     }
 
     return (
-        <div className={s.pageWrapper}>
-            <header className={s.header}>
-                <NavigationMenu
-                    items={navItems}
-                    rightSlotDropdownItems={userMenuItems}
-                    rightSlot={
-                        <img
-                            src={session?.avatarUrl || DefaultAvatar}
-                            className={s.avatar}
-                            alt="User Avatar"
-                        />
-                    }
-                />
-            </header>
-
+        <div className={s.pageWrapperWithoutHeader}>
             <main className={s.mainContent}>
                 <h1 className={s.pageTitle}>Quản lý người dùng</h1>
 

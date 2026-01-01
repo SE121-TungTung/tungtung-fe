@@ -297,11 +297,14 @@ export const messageApi = {
             (m) => m.user_id === currentUserId
         )
 
+        const isGroup =
+            response.room_type === 'group' || response.room_type === 'class'
+
         return {
             id: response.id,
             name: response.title,
             type: response.room_type as 'direct' | 'group' | 'class',
-            isGroup: true,
+            isGroup: isGroup,
             avatarUrl: response.avatar_url || null,
             description: response.description || null,
             unreadCount: 0,

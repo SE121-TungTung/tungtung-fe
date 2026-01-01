@@ -1,28 +1,21 @@
-import React, { useMemo, useState } from 'react'
+import React from 'react'
 import s from './TeacherDashboard.module.css'
-import { useNavigate, useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 
-import NavigationMenu from '@/components/common/menu/NavigationMenu'
 import Card from '@/components/common/card/Card'
 import StatCard from '@/components/common/card/StatCard'
 import ScheduleTodayCard from '@/components/common/card/ScheduleToday'
 import TemplateCard from '@/components/common/card/TemplateCard'
 
-import AvatarImg from '@/assets/avatar-placeholder.png'
 import ChartBarIcon from '@/assets/Chart Bar.svg'
 import ChatIcon from '@/assets/Chat Square Double Text.svg'
 import DocumentIcon from '@/assets/Attachment 2.svg'
-import RobotIcon from '@/assets/Robot.svg'
 import ArrowRightIcon from '@/assets/Arrow Right.svg'
 import BannerImg from '@/assets/banner-placeholder.png'
 
-import Chatbot from '@/components/feature/chatbot/Chatbot'
 import { TextHorizontal } from '@/components/common/text/TextHorizontal'
 import TextType from '@/components/common/text/TextType'
 import { getMe } from '@/lib/users'
-import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
-import type { Role } from '@/types/auth'
 import type { Lesson } from '@/components/common/typography/LessonItem'
 
 const stats = [
@@ -77,27 +70,10 @@ const teachingSessions: Lesson[] = [
 ]
 
 export default function TeacherDashboard() {
-    const navigate = useNavigate()
-    const location = useLocation()
-    const [isChatOpen, setIsChatOpen] = useState(false)
-
     const { data: userData, isLoading: userLoading } = useQuery({
         queryKey: ['me'],
         queryFn: () => getMe(),
     })
-
-    const userRole = 'teacher' as Role
-    const currentPath = location.pathname
-
-    const navItems = useMemo(
-        () => getNavItems(userRole, currentPath, navigate),
-        [currentPath, navigate]
-    )
-
-    const userMenuItems = useMemo(
-        () => getUserMenuItems(userRole, navigate),
-        [navigate]
-    )
 
     const greetingTexts = userData
         ? [
@@ -112,20 +88,6 @@ export default function TeacherDashboard() {
 
     return (
         <div className={s.dashboard}>
-            <header className={s.header}>
-                <NavigationMenu
-                    items={navItems}
-                    rightSlotDropdownItems={userMenuItems}
-                    rightSlot={
-                        <img
-                            src={userData?.avatarUrl || AvatarImg}
-                            className={s.avatar}
-                            alt="User Avatar"
-                        />
-                    }
-                />
-            </header>
-
             <h1 className={s.welcomeMessage}>
                 {!userLoading && userData && (
                     <TextType
@@ -230,16 +192,6 @@ export default function TeacherDashboard() {
                     </Card>
                 </div>
             </main>
-
-            <button
-                className={s.fab}
-                aria-label="Open AI Assistant"
-                onClick={() => setIsChatOpen(true)}
-            >
-                <img src={RobotIcon} alt="Chatbot" />
-            </button>
-
-            <Chatbot isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
         </div>
     )
 }

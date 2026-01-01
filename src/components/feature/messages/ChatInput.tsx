@@ -119,6 +119,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                     className={s.sendButton}
                     aria-label="Gửi tin nhắn"
                     disabled={disabled || !text.trim()}
+                    onClick={handleSubmit}
                 >
                     <img
                         src={SendIcon}
