@@ -1,70 +1,142 @@
 import { api } from './api'
-import type { User, Role } from '@/types/auth'
+import type {
+    User,
+    BackendUser,
+    CreateUserPayload,
+    UpdateUserPayload,
+    UpdateMePayload,
+    ChangePasswordPayload,
+    ListUsersParams,
+    ListUsersResponse,
+    StudentOverviewStats,
+    MyClass,
+    AttendanceRecord,
+    StudentCheckInResponse,
+} from '@/types/user.types'
 
-export type CreateUserPayload = {
-    email: string
-    first_name: string
-    last_name: string
-    phone?: string
-    date_of_birth?: string
-    address?: string
-    role:
-        | Role
-        | 'student'
-        | 'teacher'
-        | 'office_admin'
-        | 'center_admin'
-        | 'system_admin'
+export * from '@/types/user.types'
+
+// --- HELPER ---
+const safeParse = (data: any) => {
+    if (typeof data === 'string') {
+        try {
+            return JSON.parse(data)
+        } catch {
+            return null
+        }
+    }
+    return data
 }
 
+export const mapUser = (u: BackendUser): User => ({
+    id: u.id,
+    email: u.email,
+    firstName: u.first_name,
+    lastName: u.last_name,
+    fullName: `${u.first_name} ${u.last_name}`.trim(),
+    phone: u.phone ?? '',
+    dateOfBirth: u.date_of_birth ?? '',
+    address: u.address ?? '',
+    role: u.role,
+    status: u.status as User['status'],
+    avatarUrl: u.avatar_url ?? '',
+    lastLogin: u.last_login ?? '',
+    createdAt: u.created_at,
+    updatedAt: u.updated_at,
+    isFirstLogin: !!u.is_first_login,
+    emergencyContact: safeParse(u.emergency_contact),
+})
+
+// --- API FUNCTIONS ---
+
+// 1. Get Me
+export async function getMe(): Promise<User> {
+    const data = await api<BackendUser>('/api/v1/users/me', { method: 'GET' })
+    return mapUser(data)
+}
+
+// 2. List Users
+export async function listUsers(params: ListUsersParams = {}) {
+    const qs = new URLSearchParams()
+    if (params.role) qs.set('role', params.role)
+    if (params.search) qs.set('search', params.search)
+    if (params.skip != null) qs.set('skip', String(params.skip))
+    if (params.limit != null) qs.set('limit', String(params.limit))
+    if (typeof params.include_deleted === 'boolean') {
+        qs.set('include_deleted', String(params.include_deleted))
+    }
+
+    const path = `/api/v1/users/?${qs.toString()}`
+    const res = await api<ListUsersResponse>(path, { method: 'GET' })
+
+    const raw =
+        params.include_deleted === true
+            ? res.users
+            : res.users.filter((u) => !u.deleted_at)
+
+    return {
+        ...res,
+        users: raw.map(mapUser),
+    }
+}
+
+// 3. Create User
 export async function createUser(
     body: CreateUserPayload,
     opts?: { defaultClassId?: string | null }
-) {
+): Promise<User> {
     const qs = new URLSearchParams()
     if (opts?.defaultClassId) qs.set('default_class_id', opts.defaultClassId)
-    const path = `/api/v1/users/${qs.toString() ? `?${qs}` : ''}`
-    return api<User>(path, {
+
+    const path = `/api/v1/users/?${qs.toString()}`
+    const res = await api<BackendUser>(path, {
         method: 'POST',
         body: JSON.stringify(body),
-    })
-}
-
-export type UpdateUserPayload = {
-    first_name?: string
-    last_name?: string
-    phone?: string
-    address?: string
-    emergency_contact?: Record<string, unknown>
-    preferences?: Record<string, unknown>
-}
-
-export async function updateUser(userId: string, body: UpdateUserPayload) {
-    const wrappedBody = {
-        user_update: body,
-    }
-
-    const res = await api<BackendUser>(`/api/v1/users/${userId}`, {
-        method: 'PUT',
-        body: JSON.stringify(wrappedBody),
     })
     return mapUser(res)
 }
 
+// 4. Update User (Admin updating others)
+export async function updateUser(
+    userId: string,
+    body: UpdateUserPayload,
+    avatarFile?: File | null
+): Promise<User> {
+    const formData = new FormData()
+
+    if (body.first_name) formData.append('first_name', body.first_name)
+    if (body.last_name) formData.append('last_name', body.last_name)
+    if (body.phone) formData.append('phone', body.phone)
+    if (body.address) formData.append('address', body.address)
+
+    if (body.emergency_contact) {
+        formData.append(
+            'emergency_contact',
+            JSON.stringify(body.emergency_contact)
+        )
+    }
+    if (body.preferences) {
+        formData.append('preferences', JSON.stringify(body.preferences))
+    }
+
+    if (avatarFile) {
+        formData.append('avatar_file', avatarFile)
+    }
+
+    const res = await api<BackendUser>(`/api/v1/users/${userId}`, {
+        method: 'PUT',
+        body: formData,
+    })
+
+    return mapUser(res)
+}
+
+// 5. Delete User
 export async function deleteUser(userId: string) {
     return api<string>(`/api/v1/users/${userId}`, { method: 'DELETE' })
 }
 
-export type UpdateMePayload = {
-    first_name?: string
-    last_name?: string
-    phone?: string
-    address?: string
-    emergency_contact?: Record<string, unknown>
-    preferences?: Record<string, unknown>
-    avatar_file?: File | null
-}
-
+// 6. Update Me (User updating themselves)
 export async function updateMe(body: UpdateMePayload) {
     const fd = new FormData()
 
@@ -74,15 +146,19 @@ export async function updateMe(body: UpdateMePayload) {
         fd.append('last_name', body.last_name || '')
     if (body.phone !== undefined) fd.append('phone', body.phone || '')
     if (body.address !== undefined) fd.append('address', body.address || '')
-    if (body.emergency_contact !== undefined)
+
+    if (body.emergency_contact !== undefined) {
         fd.append('emergency_contact', JSON.stringify(body.emergency_contact))
-    if (body.preferences !== undefined)
+    }
+    if (body.preferences !== undefined) {
         fd.append('preferences', JSON.stringify(body.preferences))
+    }
 
     if (body.avatar_file !== undefined) {
         if (body.avatar_file) {
             fd.append('avatar_file', body.avatar_file)
         } else {
+            // Trường hợp muốn xóa avatar hoặc gửi empty
             fd.append('avatar_file', new Blob([]), '')
         }
     }
@@ -94,11 +170,7 @@ export async function updateMe(body: UpdateMePayload) {
     return mapUser(res)
 }
 
-export type ChangePasswordPayload = {
-    current_password: string
-    new_password: string
-}
-
+// 7. Change Password
 export async function changePassword(body: ChangePasswordPayload) {
     return api<string>(`/api/v1/users/me/change-password`, {
         method: 'POST',
@@ -106,176 +178,36 @@ export async function changePassword(body: ChangePasswordPayload) {
     })
 }
 
-export interface MyClassStudent {
-    id: string
-    full_name: string
-    email: string
-    avatar_url?: string | null
+// 8. Get Overview
+export async function getUserOverview(): Promise<StudentOverviewStats> {
+    return api<StudentOverviewStats>('/api/v1/users/overview', {
+        method: 'GET',
+    })
 }
 
-export interface MyClassTeacher {
-    id: string
-    full_name: string
-    email: string
-    avatar_url?: string
-}
-
-export interface MyClass {
-    id: string
-    name: string
-    start_date: string
-    end_date: string
-    status: string
-    max_students: number
-    current_students: number
-    teacher?: MyClassTeacher
-    students?: MyClassStudent[]
-}
-
+// 9. Get My Classes
 export async function getMyClasses(): Promise<MyClass[]> {
     const data = await api<MyClass[] | { classes: MyClass[] }>(
         '/api/v1/users/me/classes',
-        {
-            method: 'GET',
-        }
+        { method: 'GET' }
     )
     return Array.isArray(data) ? data : data.classes || []
 }
 
-export type ListClassesParams = {
-    skip?: number
-    limit?: number
-    sort_by?: string | null
-    sort_order?: 'asc' | 'desc'
-    search?: string | null
-    include_deleted?: boolean
+// 10. Attendance
+export async function getSessionAttendance(sessionId: string) {
+    return api<AttendanceRecord[]>(
+        `/api/v1/sessions/${sessionId}/attendance/`,
+        { method: 'GET' }
+    )
 }
 
-export type ClassItem = {
-    id: string
-    name: string
-    course_id: string
-    teacher_id: string | null
-    substitute_teacher_id: string | null
-    room_id: string | null
-    start_date: string
-    end_date: string
-    schedule?: Record<string, unknown>
-    max_students: number
-    current_students: number
-    fee_amount?: string
-    sessions_per_week?: number
-    status: 'scheduled' | 'ongoing' | 'completed' | string
-    notes?: string
-    created_at: string
-    updated_at: string
-    deleted_at?: string | null
-    created_by?: string
-    updated_by?: string
-}
-
-export type ListClassesResponse = {
-    total: number
-    page: number
-    size: number
-    pages: number
-    has_next: boolean
-    has_prev: boolean
-    items: ClassItem[]
-}
-
-export async function listClasses(params: ListClassesParams = {}) {
-    const qs = new URLSearchParams()
-    if (params.skip != null) qs.set('skip', String(params.skip))
-    if (params.limit != null) qs.set('limit', String(params.limit))
-    if (params.sort_by != null) qs.set('sort_by', params.sort_by ?? '')
-    if (params.sort_order) qs.set('sort_order', params.sort_order)
-    if (params.search != null) qs.set('search', params.search ?? '')
-    if (typeof params.include_deleted === 'boolean') {
-        qs.set('include_deleted', String(params.include_deleted))
-    }
-    const path = `/api/v1/classes/${qs.toString() ? `?${qs}` : ''}`
-    return api<ListClassesResponse>(path, { method: 'GET' })
-}
-
-export type ListUsersParams = {
-    role?: Role | null
-    search?: string | null
-    skip?: number
-    limit?: number
-    include_deleted?: boolean
-}
-
-type BackendUser = {
-    id: string
-    email: string
-    first_name: string
-    last_name: string
-    phone?: string | null
-    date_of_birth?: string | null
-    address?: string | null
-    role: Role
-    status: 'active' | 'inactive' | 'suspended' | string
-    avatar_url?: string | null
-    last_login?: string | null
-    created_at: string
-    updated_at: string
-    is_first_login?: boolean | null
-    deleted_at?: string | null
-}
-
-export type ListUsersResponse = {
-    users: BackendUser[]
-    total: number
-    page: number
-    size: number
-    pages: number
-}
-
-const mapUser = (u: BackendUser): User => ({
-    id: u.id,
-    email: u.email,
-    firstName: u.first_name,
-    lastName: u.last_name,
-    phone: u.phone ?? '',
-    dateOfBirth: u.date_of_birth ?? '',
-    address: u.address ?? '',
-    role: u.role,
-    status: u.status as User['status'],
-    avatarUrl: u.avatar_url ?? '',
-    lastLogin: u.last_login ?? '',
-    createdAt: u.created_at,
-    updatedAt: u.updated_at,
-    isFirstLogin: !!u.is_first_login,
-})
-
-export async function listUsers(params: ListUsersParams = {}) {
-    const qs = new URLSearchParams()
-    if (params.role) qs.set('role', params.role)
-    if (params.search != null) qs.set('search', params.search ?? '')
-    if (params.skip != null) qs.set('skip', String(params.skip))
-    if (params.limit != null) qs.set('limit', String(params.limit))
-    if (typeof params.include_deleted === 'boolean') {
-        qs.set('include_deleted', String(params.include_deleted))
-    } else {
-        qs.set('include_deleted', 'false')
-    }
-
-    const path = `/api/v1/users/${qs.toString() ? `?${qs}` : ''}`
-    const res = await api<ListUsersResponse>(path, { method: 'GET' })
-
-    const raw =
-        params.include_deleted === true
-            ? res.users
-            : res.users.filter((u) => !u.deleted_at)
-    return {
-        ...res,
-        items: raw.map(mapUser),
-        total: params.include_deleted ? res.total : raw.length,
-    }
-}
-
-export async function getMe(): Promise<User> {
-    const data = await api<BackendUser>('/api/v1/users/me', { method: 'GET' })
-    return mapUser(data)
+export async function selfCheckIn(sessionId: string) {
+    return api<StudentCheckInResponse>(
+        `/api/v1/sessions/${sessionId}/attendance/self-check-in`,
+        {
+            method: 'POST',
+            body: JSON.stringify({ session_id: sessionId }),
+        }
+    )
 }

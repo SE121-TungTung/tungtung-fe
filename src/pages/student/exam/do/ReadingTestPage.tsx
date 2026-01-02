@@ -1,35 +1,32 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { useParams } from 'react-router-dom'
 import s from './ReadingTestPage.module.css'
-
-// --- Hooks & Assets ---
-import { useTextHighlighter } from '@/hooks/useTextHighlighter'
-import ClockIcon from '@/assets/History.svg'
 
 // --- Components ---
 import SentenceCompletionQuestion from '@/components/feature/exams/SentenceCompletionQuestion'
 import TrueFalseNotGivenQuestion from '@/components/feature/exams/TrueFalseNotGivenQuestion'
-import HighlightToolbar from '@/components/feature/exams/HighlightToolbar'
-import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
-import ButtonGhost from '@/components/common/button/ButtonGhost'
 import MultipleChoiceQuestion from '@/components/feature/exams/MultipleChoiceQuestion'
 import { SpeakingQuestion } from '@/components/feature/exams/SpeakingQuestion'
 import { EssayQuestion } from '@/components/feature/exams/EssayQuestion'
 
 // --- Libs & Types ---
-import { testApi, calculateRemainingTime, formatTime } from '@/lib/test'
+import { testApi } from '@/lib/test'
 import {
     type Test,
     type TestSection,
     type TestSectionPart,
     type QuestionGroup,
     type Question,
-    type QuestionSubmitItem,
     QuestionType,
 } from '@/types/test.types'
 
-const STORAGE_KEY_PREFIX = 'readingHighlights_'
-const ANSWERS_STORAGE_PREFIX = 'testAnswers_'
+import { useTestTimer } from '@/hooks/useTestTimer'
+import { useAnswerManager } from '@/hooks/useAnswerManager'
+import { useTestSubmit } from '@/hooks/useTestSubmit'
+import { TestHeader } from '@/components/feature/exams/shared/TextHeader'
+import { PassageViewer } from '@/components/feature/exams/MediaViewers/PassageViewer'
+import { TestFooter } from '@/components/feature/exams/shared/TextFooter'
+import { enhanceTestWithQuestionNumbers } from '@/utils/examHelpers'
 
 interface EnhancedQuestion extends Question {
     globalNumber: number
@@ -46,98 +43,6 @@ interface EnhancedPart extends Omit<TestSectionPart, 'questionGroups'> {
 interface EnhancedSection extends Omit<TestSection, 'parts'> {
     parts: EnhancedPart[]
 }
-
-function enhanceTestWithQuestionNumbers(test: Test): EnhancedSection[] {
-    let globalQuestionNumber = 1
-
-    return test.sections.map((section) => ({
-        ...section,
-        parts: section.parts.map((part) => ({
-            ...part,
-            questionGroups: part.questionGroups.map((group) => ({
-                ...group,
-                questions: group.questions.map((question) => ({
-                    ...question,
-                    globalNumber: globalQuestionNumber++,
-                })),
-            })),
-        })),
-    }))
-}
-
-// ============================================
-// SUB-COMPONENTS
-// ============================================
-
-const ReadingHeader = React.memo(({ timeLeft }: { timeLeft: number }) => {
-    const formattedTime = formatTime(timeLeft)
-    const timerStyle =
-        timeLeft < 300
-            ? { color: '#ef4444', animation: 'pulse 1s infinite' }
-            : {}
-
-    return (
-        <header className={s.header}>
-            <span className={s.headerInfo}>IELTS Academic Reading</span>
-            <div className={s.timer} title="Time remaining" style={timerStyle}>
-                <img src={ClockIcon} alt="time left" />
-                {formattedTime}
-            </div>
-        </header>
-    )
-})
-
-const ReadingPassage = React.memo(
-    ({
-        section,
-        testId,
-        clearHighlightsRef,
-    }: {
-        section: EnhancedSection
-        testId: string
-        clearHighlightsRef: React.RefObject<(() => void) | null>
-    }) => {
-        const contentRef = useRef<HTMLDivElement>(null!)
-        // Lấy passage từ part đầu tiên có chứa passage content
-        const passage = section.parts.find((p) => p.passage)?.passage
-
-        const {
-            toolbarState,
-            addHighlight,
-            removeHighlight,
-            clearAllHighlights,
-        } = useTextHighlighter(contentRef, testId, section.id)
-
-        useEffect(() => {
-            clearHighlightsRef.current = clearAllHighlights
-        }, [clearAllHighlights, clearHighlightsRef])
-
-        if (!passage)
-            return (
-                <div className={s.passageContainer}>
-                    No content available for this section.
-                </div>
-            )
-
-        return (
-            <div className={s.passageContainer} id={section.id}>
-                <h3 className={s.passageTitle}>{passage.title}</h3>
-                <div className={s.passageContent} ref={contentRef}>
-                    {passage.textContent?.split('\n\n').map((text, idx) => (
-                        <p key={idx}>{text}</p>
-                    ))}
-                </div>
-                {toolbarState && (
-                    <HighlightToolbar
-                        state={toolbarState}
-                        onAdd={addHighlight}
-                        onRemove={removeHighlight}
-                    />
-                )}
-            </div>
-        )
-    }
-)
 
 const UniversalQuestionRenderer = React.memo(
     ({
@@ -316,53 +221,64 @@ export default function ReadingTestPage() {
         testId: string
         attemptId: string
     }>()
-    const navigate = useNavigate()
 
     const [sections, setSections] = useState<EnhancedSection[]>([])
-    const [timeLeft, setTimeLeft] = useState(0)
+    const [test, setTest] = useState<Test | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [currentSectionIndex, setCurrentSectionIndex] = useState(0)
     const [currentQuestionNumber, setCurrentQuestionNumber] = useState(1)
-    const [answers, setAnswers] = useState<{ [key: string]: any }>({})
     const [reviewedQuestions, setReviewedQuestions] = useState<Set<number>>(
         new Set()
     )
-    const [isSubmitting, setIsSubmitting] = useState(false)
     const [testFinished, setTestFinished] = useState(false)
+    const [startTime, setStartTime] = useState('')
 
     const questionElementRefs = useRef<Map<string, HTMLElement | null>>(
         new Map()
     )
     const clearHighlightsRef = useRef<(() => void) | null>(null)
 
+    const { answers, handleAnswerChange, clearAnswers } = useAnswerManager({
+        attemptId: attemptId || '',
+        enabled: !!attemptId && !testFinished,
+    })
+
+    const { submit, isSubmitting } = useTestSubmit({
+        attemptId: attemptId || '',
+        onSuccess: () => {
+            clearHighlightsRef.current?.()
+            clearAnswers()
+        },
+    })
+
+    const { timeLeft, formattedTime, isLowTime } = useTestTimer({
+        startTime,
+        timeLimitMinutes: test?.timeLimitMinutes || null,
+        onTimeout: () => {
+            setTestFinished(true)
+            submit(answers)
+        },
+        enabled: !!startTime && !testFinished && !isSubmitting,
+    })
+
     useEffect(() => {
         const initData = async () => {
             if (!testId || !attemptId) return
             try {
                 const testData = await testApi.getTest(testId)
+                setTest(testData)
                 const enhanced = enhanceTestWithQuestionNumbers(testData)
-                setSections(enhanced)
+                setSections(enhanced.sections)
 
+                // Get start time
                 const attemptDataStr = localStorage.getItem(
                     `attempt_${attemptId}`
                 )
-                const startTime = attemptDataStr
+                const attemptStartTime = attemptDataStr
                     ? JSON.parse(attemptDataStr).startedAt
                     : new Date().toISOString()
 
-                if (testData.timeLimitMinutes) {
-                    const remaining = calculateRemainingTime(
-                        startTime,
-                        testData.timeLimitMinutes
-                    )
-                    setTimeLeft(remaining)
-                    if (remaining === 0) setTestFinished(true)
-                }
-
-                const saved = localStorage.getItem(
-                    `${ANSWERS_STORAGE_PREFIX}${attemptId}`
-                )
-                if (saved) setAnswers(JSON.parse(saved))
+                setStartTime(attemptStartTime)
             } catch (err) {
                 console.error(err)
             } finally {
@@ -372,55 +288,25 @@ export default function ReadingTestPage() {
         initData()
     }, [testId, attemptId])
 
-    const handleFinalSubmit = useCallback(
-        async (isTimeout = false) => {
-            if (isSubmitting || !attemptId) return
-            setIsSubmitting(true)
-            try {
-                console.log(
-                    isTimeout
-                        ? 'Time is up! Submitting...'
-                        : 'Submitting test...'
-                )
-                const responses: QuestionSubmitItem[] = Object.entries(
-                    answers
-                ).map(([id, val]) => ({
-                    question_id: id,
-                    response_text:
-                        typeof val !== 'object' ? String(val) : undefined,
-                    response_data: typeof val === 'object' ? val : undefined,
-                }))
-                await testApi.submitAttempt(attemptId, { responses })
-                localStorage.removeItem(`${ANSWERS_STORAGE_PREFIX}${attemptId}`)
-                navigate(`/student/exams/results/${attemptId}`)
-            } catch (err) {
-                alert('Submission failed: ' + (err as any).message || err)
-                setIsSubmitting(false)
-            }
-        },
-        [answers, attemptId, navigate, isSubmitting]
-    )
-
-    useEffect(() => {
-        if (isLoading || testFinished || isSubmitting || timeLeft <= 0) return
-        const timerId = setInterval(() => {
-            setTimeLeft((prev) => {
-                if (prev <= 1) {
-                    handleFinalSubmit(true)
-                    return 0
-                }
-                return prev - 1
-            })
-        }, 1000)
-        return () => clearInterval(timerId)
-    }, [timeLeft, isLoading, testFinished, isSubmitting, handleFinalSubmit])
-
-    const handleAnswerChange = useCallback(
+    const onAnswerChange = useCallback(
         (id: string, val: any) => {
             if (testFinished) return
-            setAnswers((prev) => ({ ...prev, [id]: val }))
+            handleAnswerChange(id, val)
         },
-        [testFinished]
+        [testFinished, handleAnswerChange]
+    )
+
+    const handleFinalSubmit = useCallback(
+        async (isTimeout = false) => {
+            if (isTimeout) {
+                console.log('Time is up! Auto-submitting...')
+            }
+
+            if (window.confirm('Are you sure you want to submit?')) {
+                await submit(answers)
+            }
+        },
+        [answers, submit]
     )
 
     const handleNavigateQuestion = useCallback(
@@ -456,19 +342,30 @@ export default function ReadingTestPage() {
     if (isLoading) return <div className={s.loadingContainer}>Loading...</div>
     if (!sections.length) return <div>No content.</div>
 
+    const currentSection = sections[currentSectionIndex]
+    const currentPassage =
+        currentSection?.parts.find((p: any) => p.passage)?.passage || null
+
     return (
         <div className={`${s.pageWrapper} lightMode`}>
-            <ReadingHeader timeLeft={timeLeft} />
+            <TestHeader
+                skillName="IELTS Academic Reading"
+                icon="📖"
+                timeLeft={timeLeft}
+                formattedTime={formattedTime}
+                isLowTime={isLowTime}
+            />
             <main className={s.mainContent}>
-                <ReadingPassage
-                    section={sections[currentSectionIndex]}
+                <PassageViewer
+                    passage={currentPassage}
+                    sectionId={sections[currentSectionIndex].id}
                     testId={testId!}
                     clearHighlightsRef={clearHighlightsRef}
                 />
                 <QuestionGroupRenderer
                     section={sections[currentSectionIndex]}
                     answers={answers}
-                    onAnswerChange={handleAnswerChange}
+                    onAnswerChange={onAnswerChange}
                     registerRef={(id, el) =>
                         el
                             ? questionElementRefs.current.set(id, el)
@@ -477,7 +374,7 @@ export default function ReadingTestPage() {
                     attemptId={attemptId!}
                 />
             </main>
-            <ReadingFooter
+            <TestFooter
                 sections={sections}
                 currentIndex={currentSectionIndex}
                 onSectionChange={setCurrentSectionIndex}
@@ -507,75 +404,4 @@ export default function ReadingTestPage() {
     )
 }
 
-// ============================================
-// FOOTER COMPONENT
-// ============================================
-
-const ReadingFooter = React.memo(
-    ({
-        sections,
-        currentIndex,
-        onSectionChange,
-        currentQNum,
-        reviewed,
-        answers,
-        onNav,
-        onToggleReview,
-        onSubmit,
-        isSubmitting,
-    }: any) => {
-        const currentQuestions = useMemo(() => {
-            return (
-                sections[currentIndex]?.parts.flatMap((p: any) =>
-                    p.questionGroups.flatMap((g: any) => g.questions)
-                ) || []
-            )
-        }, [sections, currentIndex])
-
-        return (
-            <footer className={s.footer}>
-                <div className={s.footerRow}>
-                    <div className={s.passageNav}>
-                        {sections.map((s: any, i: number) => (
-                            <button
-                                key={s.id}
-                                className={`${s.passageButton} ${i === currentIndex ? s.active : ''}`}
-                                onClick={() => onSectionChange(i)}
-                            >
-                                {s.name || `Section ${i + 1}`}
-                            </button>
-                        ))}
-                    </div>
-                    <div className={s.footerActions}>
-                        <ButtonGhost
-                            size="sm"
-                            onClick={() => onToggleReview(currentQNum)}
-                        >
-                            Review
-                        </ButtonGhost>
-                        <ButtonPrimary
-                            size="md"
-                            onClick={onSubmit}
-                            loading={isSubmitting}
-                        >
-                            Submit
-                        </ButtonPrimary>
-                    </div>
-                </div>
-                <div className={s.footerRow}>
-                    <div className={s.questionNav}>
-                        {currentQuestions.map((q: any) => (
-                            <button
-                                key={q.id}
-                                className={`${s.navButton} ${q.globalNumber === currentQNum ? s.current : ''} ${answers[q.id] ? s.answered : ''} ${reviewed.has(q.globalNumber) ? s.reviewed : ''}`}
-                                onClick={() => onNav(q.globalNumber)}
-                            >
-                                {q.globalNumber}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            </footer>
-        )
-    }
-)
+export { UniversalQuestionRenderer, QuestionGroupRenderer }

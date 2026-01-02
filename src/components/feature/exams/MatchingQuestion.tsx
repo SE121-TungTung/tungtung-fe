@@ -52,7 +52,7 @@ export default function MatchingQuestion({
                         ref={(el) => registerRef(question.id, el)}
                     >
                         <label className={s.matchLabel}>
-                            <strong>{question.globalNumber}.</strong>{' '}
+                            <strong>{question.orderNumber}.</strong>{' '}
                             {question.questionText}
                         </label>
                         <select

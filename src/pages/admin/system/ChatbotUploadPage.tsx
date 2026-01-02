@@ -9,7 +9,7 @@ import Card from '@/components/common/card/Card'
 import s from './ChatbotUploadPage.module.css'
 import UploadIcon from '@/assets/File Add.svg'
 import FileIcon from '@/assets/File.svg'
-import { useDialog } from '@/context/DialogContext'
+import { useDialog } from '@/hooks/useDialog'
 
 export default function ChatbotUploadPage() {
     // Navigation Setup

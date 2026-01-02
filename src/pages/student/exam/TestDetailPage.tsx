@@ -1,17 +1,10 @@
-import { useState, useEffect, useMemo } from 'react'
-import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import s from './TestDetailPage.module.css'
 
-import NavigationMenu from '@/components/common/menu/NavigationMenu'
 import Card from '@/components/common/card/Card'
 import CollapsibleCard from '@/components/common/card/CollapsibleCard'
-import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import ButtonGhost from '@/components/common/button/ButtonGhost'
-
-import AvatarPlaceholder from '@/assets/avatar-placeholder.png'
-
-import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
-import { useSession } from '@/stores/session.store'
 
 import {
     testApi,
@@ -19,30 +12,17 @@ import {
     getDifficultyInfo,
     getQuestionTypeLabel,
 } from '@/lib/test'
-import type { TestTeacher, TestSectionTeacher } from '@/types/test.types'
+import type { TestTeacher } from '@/types/test.types'
 import { TestStatus, QuestionType } from '@/types/test.types'
+import Skeleton from '@/components/effect/Skeleton'
 
 export default function TestDetailPage() {
     const { testId } = useParams<{ testId: string }>()
     const navigate = useNavigate()
-    const location = useLocation()
-    const currentPath = location.pathname
-
-    const sessionState = useSession()
-    const userRole = sessionState?.user?.role || 'teacher'
 
     const [test, setTest] = useState<TestTeacher | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
-
-    const navItems = useMemo(
-        () => getNavItems(userRole as any, currentPath, navigate),
-        [userRole, currentPath, navigate]
-    )
-    const userMenuItems = useMemo(
-        () => getUserMenuItems(userRole as any, navigate),
-        [userRole, navigate]
-    )
 
     const loadTest = async () => {
         if (!testId) return
@@ -64,7 +44,7 @@ export default function TestDetailPage() {
         if (testId) {
             loadTest()
         }
-    }, [testId, loadTest])
+    }, [testId])
 
     const getStatusBadge = (status: TestStatus) => {
         const statusConfig = {
@@ -128,23 +108,32 @@ export default function TestDetailPage() {
 
     if (loading) {
         return (
-            <div className={s.pageWrapper}>
-                <header className={s.header}>
-                    <NavigationMenu
-                        items={navItems}
-                        rightSlotDropdownItems={userMenuItems}
-                        rightSlot={
-                            <img
-                                src={AvatarPlaceholder}
-                                className={s.avatar}
-                                alt="User Avatar"
-                            />
-                        }
+            <div className={s.pageWrapperWithoutHeader}>
+                <div className={s.pageHeader}>
+                    <div
+                        style={{
+                            display: 'flex',
+                            gap: 16,
+                            alignItems: 'center',
+                        }}
+                    >
+                        <Skeleton width={300} height={40} />
+                        <Skeleton width={100} height={30} />
+                    </div>
+                    <Skeleton
+                        variant="text"
+                        width="60%"
+                        style={{ marginTop: 16 }}
                     />
-                </header>
-                <div className={s.loadingContainer}>
-                    <div className={s.spinner}></div>
-                    <p>Đang tải bài thi...</p>
+                </div>
+
+                <div className={s.overviewGrid}>
+                    {[1, 2, 3, 4].map((i) => (
+                        <div key={i} className={s.overviewItem}>
+                            <Skeleton variant="text" width={80} />
+                            <Skeleton height={28} width={120} />
+                        </div>
+                    ))}
                 </div>
             </div>
         )
@@ -152,20 +141,7 @@ export default function TestDetailPage() {
 
     if (error || !test) {
         return (
-            <div className={s.pageWrapper}>
-                <header className={s.header}>
-                    <NavigationMenu
-                        items={navItems}
-                        rightSlotDropdownItems={userMenuItems}
-                        rightSlot={
-                            <img
-                                src={AvatarPlaceholder}
-                                className={s.avatar}
-                                alt="User Avatar"
-                            />
-                        }
-                    />
-                </header>
+            <div className={s.pageWrapperuWithoutHeader}>
                 <div className={s.errorContainer}>
                     <p className={s.errorMessage}>
                         ❌ {error || 'Không tìm thấy bài thi'}

@@ -194,3 +194,14 @@
         transform: translateY(0);
     }
 }
+
+.sectionTitle {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--brand-primary-600-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--boder-soft-light);
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+}

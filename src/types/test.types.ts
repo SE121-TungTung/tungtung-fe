@@ -1,8 +1,5 @@
 // ============================================
 // ENUMS
-
-import type { ReactNode } from 'react'
-
 // ============================================
 export enum QuestionType {
     // Reading & Listening
@@ -859,6 +856,7 @@ export interface QuestionGroupCreatePayload {
  * Test section create payload
  */
 export interface TestSectionCreatePayload {
+    id?: string | null
     structure_section_id?: string | null
     name: string
     order_number: number
@@ -929,6 +927,7 @@ export interface PassageCreatePayload {
 }
 
 export interface TestSectionPartCreatePayload {
+    id?: string | null
     structure_part_id?: string | null
     name: string
     order_number: number

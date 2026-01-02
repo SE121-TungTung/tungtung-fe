@@ -123,7 +123,7 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                 search: memberSearchTerm,
                 limit: 10,
             })
-            return users.items.map((user) => ({
+            return users.users.map((user) => ({
                 id: user.id,
                 firstName: user.firstName,
                 lastName: user.lastName,

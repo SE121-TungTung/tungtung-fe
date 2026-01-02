@@ -1,0 +1,45 @@
+.container {
+    flex: 1;
+    min-width: 400px;
+    background-color: #fff;
+    border: 1px solid #d9d9d9;
+    border-radius: var(--radius-md);
+    padding: 20px;
+    overflow-y: auto;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.title {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eee;
+    color: var(--text-primary-light);
+}
+
+.content {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text-primary-light);
+    white-space: pre-wrap;
+}
+
+.content p {
+    margin-bottom: 1em;
+}
+
+.content ::selection {
+    background-color: color-mix(
+        in srgb,
+        var(--brand-primary-light, #0066ff) 30%,
+        transparent
+    );
+}
+
+.emptyState {
+    text-align: center;
+    color: #999;
+    padding: 40px 20px;
+}

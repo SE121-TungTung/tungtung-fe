@@ -24,7 +24,7 @@ const studyMenuItems: ExtendedSideMenuItem[] = [
     {
         id: 'exams',
         label: 'Luyện thi',
-        href: '/coming-soon',
+        href: '/student/tests',
     },
     {
         id: 'roadmap',

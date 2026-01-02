@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { testApi } from '@/lib/test'
+import s from './SpeakingQuestion.module.css'
 
 export interface SpeakingQuestionProps {
     questionId: string
@@ -9,7 +10,16 @@ export interface SpeakingQuestionProps {
     attemptId: string
     registerRef: (id: string, element: HTMLElement) => void
     onSubmitted?: (result: any) => void
+    partNumber?: 1 | 2 | 3
 }
+
+type RecordingState =
+    | 'idle'
+    | 'preparing'
+    | 'recording'
+    | 'preview'
+    | 'submitting'
+    | 'submitted'
 
 export function SpeakingQuestion({
     questionId,
@@ -19,88 +29,133 @@ export function SpeakingQuestion({
     attemptId,
     registerRef,
     onSubmitted,
+    partNumber = 1,
 }: SpeakingQuestionProps) {
-    const [recording, setRecording] = useState(false)
+    const [state, setState] = useState<RecordingState>('idle')
     const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
         null
     )
-    const [submitted, setSubmitted] = useState(false)
-    const [submitting, setSubmitting] = useState(false)
+    const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null)
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null)
     const [recordingTime, setRecordingTime] = useState(0)
+    const [prepTime, setPrepTime] = useState(0)
     const [result, setResult] = useState<any>(null)
 
-    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+    const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+    const streamRef = useRef<MediaStream | null>(null)
+    const audioRef = useRef<HTMLAudioElement>(null)
+
+    const PREP_TIME = partNumber === 2 ? 60 : 0
+    const MAX_RECORDING_TIME = partNumber === 2 ? 120 : 180
 
     useEffect(() => {
         return () => {
-            if (timerRef.current) {
-                clearInterval(timerRef.current)
+            if (timerRef.current) clearInterval(timerRef.current)
+            if (streamRef.current) {
+                streamRef.current.getTracks().forEach((track) => track.stop())
             }
+            if (previewUrl) URL.revokeObjectURL(previewUrl)
         }
-    }, [])
+    }, [previewUrl])
+
+    const startPreparation = async () => {
+        if (partNumber !== 2) {
+            startRecording()
+            return
+        }
+
+        setState('preparing')
+        setPrepTime(PREP_TIME)
+
+        timerRef.current = setInterval(() => {
+            setPrepTime((prev) => {
+                if (prev <= 1) {
+                    clearInterval(timerRef.current!)
+                    startRecording()
+                    return 0
+                }
+                return prev - 1
+            })
+        }, 1000)
+    }
 
     const startRecording = async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
                 audio: true,
             })
+            streamRef.current = stream
+
             const recorder = new MediaRecorder(stream)
             const chunks: Blob[] = []
 
             recorder.ondataavailable = (e) => {
-                if (e.data.size > 0) {
-                    chunks.push(e.data)
-                }
+                if (e.data.size > 0) chunks.push(e.data)
             }
 
-            recorder.onstop = async () => {
+            recorder.onstop = () => {
                 const blob = new Blob(chunks, { type: 'audio/webm' })
-                await uploadSpeaking(blob)
+                setRecordedBlob(blob)
+                setPreviewUrl(URL.createObjectURL(blob))
+                setState('preview')
                 stream.getTracks().forEach((track) => track.stop())
             }
 
             recorder.start()
             setMediaRecorder(recorder)
-            setRecording(true)
+            setState('recording')
             setRecordingTime(0)
 
             timerRef.current = setInterval(() => {
-                setRecordingTime((prev) => prev + 1)
+                setRecordingTime((prev) => {
+                    if (prev >= MAX_RECORDING_TIME) {
+                        stopRecording()
+                        return prev
+                    }
+                    return prev + 1
+                })
             }, 1000)
         } catch (error) {
             console.error('Failed to start recording:', error)
             alert('Vui lòng cho phép truy cập microphone')
+            setState('idle')
         }
     }
 
     const stopRecording = () => {
-        if (mediaRecorder && recording) {
+        if (mediaRecorder && state === 'recording') {
             mediaRecorder.stop()
-            setRecording(false)
-            if (timerRef.current) {
-                clearInterval(timerRef.current)
-            }
+            if (timerRef.current) clearInterval(timerRef.current)
         }
     }
 
-    const uploadSpeaking = async (audioBlob: Blob) => {
-        setSubmitting(true)
+    const reRecord = () => {
+        if (previewUrl) {
+            URL.revokeObjectURL(previewUrl)
+            setPreviewUrl(null)
+        }
+        setRecordedBlob(null)
+        setRecordingTime(0)
+        setState('idle')
+    }
+
+    const submitRecording = async () => {
+        if (!recordedBlob) return
+
+        setState('submitting')
         try {
             const result = await testApi.submitSpeaking(
                 attemptId,
                 questionId,
-                audioBlob
+                recordedBlob
             )
-
-            console.log('Speaking submitted:', result)
             setResult(result)
-            setSubmitted(true)
+            setState('submitted')
             onSubmitted?.(result)
         } catch (error: any) {
             console.error('Failed to submit speaking:', error)
             alert(error.message || 'Nộp bài nói thất bại. Vui lòng thử lại.')
-        } finally {
-            setSubmitting(false)
+            setState('preview')
         }
     }
 
@@ -115,179 +170,135 @@ export function SpeakingQuestion({
             ref={(el) => {
                 if (el) registerRef(questionId, el)
             }}
-            style={{
-                marginBottom: '32px',
-                paddingBottom: '24px',
-                borderBottom: '1px solid #eee',
-            }}
+            className={s.container}
         >
-            <p
-                style={{
-                    fontSize: '15px',
-                    fontWeight: '600',
-                    marginBottom: '12px',
-                    color: 'var(--text-primary-light)',
-                }}
-            >
+            <p className={s.questionText}>
                 {globalNumber}. {questionText}
             </p>
 
             {audioUrl && (
-                <div style={{ marginBottom: '16px' }}>
-                    <audio src={audioUrl} controls style={{ width: '100%' }} />
+                <div className={s.audioWrapper}>
+                    <audio src={audioUrl} controls className={s.audio} />
                 </div>
             )}
 
-            <div
-                style={{
-                    background: '#f8f9fa',
-                    borderRadius: '8px',
-                    padding: '20px',
-                    textAlign: 'center',
-                }}
-            >
-                {!submitted ? (
-                    <>
-                        {!recording && !submitting && (
-                            <button
-                                onClick={startRecording}
-                                style={{
-                                    padding: '12px 32px',
-                                    background:
-                                        'var(--status-danger-500-light)',
-                                    color: '#fff',
-                                    border: 'none',
-                                    borderRadius: '8px',
-                                    fontSize: '15px',
-                                    fontWeight: '600',
-                                    cursor: 'pointer',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '8px',
-                                }}
-                            >
-                                🎤 Bắt đầu ghi âm
-                            </button>
-                        )}
+            <div className={s.recordingBox}>
+                {/* IDLE STATE */}
+                {state === 'idle' && (
+                    <button onClick={startPreparation} className={s.btnStart}>
+                        🎤{' '}
+                        {partNumber === 2
+                            ? 'Bắt đầu (1 phút chuẩn bị)'
+                            : 'Bắt đầu ghi âm'}
+                    </button>
+                )}
 
-                        {recording && (
-                            <div>
-                                <div
-                                    style={{
-                                        fontSize: '32px',
-                                        fontWeight: '700',
-                                        color: 'var(--status-danger-500-light)',
-                                        marginBottom: '16px',
-                                    }}
-                                >
-                                    {formatTime(recordingTime)}
-                                </div>
-                                <button
-                                    onClick={stopRecording}
-                                    style={{
-                                        padding: '12px 32px',
-                                        background: '#555',
-                                        color: '#fff',
-                                        border: 'none',
-                                        borderRadius: '8px',
-                                        fontSize: '15px',
-                                        fontWeight: '600',
-                                        cursor: 'pointer',
-                                        display: 'inline-flex',
-                                        alignItems: 'center',
-                                        gap: '8px',
-                                    }}
-                                >
-                                    ⏹️ Dừng ghi âm
-                                </button>
-                            </div>
-                        )}
+                {/* PREPARING STATE (Part 2 only) */}
+                {state === 'preparing' && (
+                    <div className={s.preparingState}>
+                        <div className={s.bigTimer}>{formatTime(prepTime)}</div>
+                        <p className={s.statusText}>⏳ Thời gian chuẩn bị...</p>
+                        <p className={s.hint}>Bạn có thể ghi chú ý tưởng</p>
+                    </div>
+                )}
 
-                        {submitting && (
-                            <p
-                                style={{
-                                    fontSize: '15px',
-                                    color: '#666',
-                                }}
-                            >
-                                Đang xử lý và chấm điểm...
-                            </p>
-                        )}
-                    </>
-                ) : (
-                    <div>
-                        <p
-                            style={{
-                                fontSize: '18px',
-                                fontWeight: '600',
-                                color: '#28a745',
-                                marginBottom: '16px',
-                            }}
+                {/* RECORDING STATE */}
+                {state === 'recording' && (
+                    <div className={s.recordingState}>
+                        <div
+                            className={s.bigTimer}
+                            style={{ color: '#ef4444' }}
                         >
-                            ✅ Đã nộp bài nói
+                            {formatTime(recordingTime)}
+                        </div>
+                        <div className={s.recordingIndicator}>
+                            <span className={s.redDot}></span>
+                            Đang ghi âm...
+                        </div>
+                        <button onClick={stopRecording} className={s.btnStop}>
+                            ⏹️ Dừng ghi âm
+                        </button>
+                    </div>
+                )}
+
+                {/* PREVIEW STATE */}
+                {state === 'preview' && previewUrl && (
+                    <div className={s.previewState}>
+                        <p className={s.statusText}>
+                            ✅ Đã ghi xong ({formatTime(recordingTime)})
                         </p>
 
-                        {result && (
-                            <div
-                                style={{
-                                    background: '#fff',
-                                    borderRadius: '8px',
-                                    padding: '16px',
-                                    textAlign: 'left',
-                                }}
+                        <audio
+                            ref={audioRef}
+                            src={previewUrl}
+                            controls
+                            className={s.previewAudio}
+                        />
+
+                        <div className={s.previewActions}>
+                            <button
+                                onClick={reRecord}
+                                className={s.btnRerecord}
                             >
-                                <p style={{ marginBottom: '8px' }}>
-                                    <strong>Điểm AI:</strong>{' '}
+                                🔄 Ghi lại
+                            </button>
+                            <button
+                                onClick={submitRecording}
+                                className={s.btnSubmit}
+                            >
+                                ✅ Nộp bài
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* SUBMITTING STATE */}
+                {state === 'submitting' && (
+                    <div className={s.submittingState}>
+                        <div className={s.spinner}></div>
+                        <p className={s.statusText}>
+                            Đang xử lý và chấm điểm...
+                        </p>
+                    </div>
+                )}
+
+                {/* SUBMITTED STATE */}
+                {state === 'submitted' && result && (
+                    <div className={s.submittedState}>
+                        <p className={s.successText}>✅ Đã nộp bài nói</p>
+
+                        <div className={s.resultBox}>
+                            <div className={s.scoreRow}>
+                                <strong>Điểm AI:</strong>
+                                <span className={s.scoreValue}>
                                     {result.aiScore.toFixed(1)}/9
-                                </p>
-                                <p style={{ marginBottom: '8px' }}>
-                                    <strong>Điểm đạt được:</strong>{' '}
-                                    {result.pointsEarned}/{result.maxPoints}
-                                </p>
-                                {result.transcript && (
-                                    <details style={{ marginTop: '12px' }}>
-                                        <summary
-                                            style={{
-                                                cursor: 'pointer',
-                                                fontWeight: '600',
-                                            }}
-                                        >
-                                            Xem transcript
-                                        </summary>
-                                        <p
-                                            style={{
-                                                marginTop: '8px',
-                                                fontSize: '14px',
-                                                lineHeight: '1.6',
-                                            }}
-                                        >
-                                            {result.transcript}
-                                        </p>
-                                    </details>
-                                )}
-                                {result.feedback && (
-                                    <details style={{ marginTop: '12px' }}>
-                                        <summary
-                                            style={{
-                                                cursor: 'pointer',
-                                                fontWeight: '600',
-                                            }}
-                                        >
-                                            Nhận xét
-                                        </summary>
-                                        <p
-                                            style={{
-                                                marginTop: '8px',
-                                                fontSize: '14px',
-                                                lineHeight: '1.6',
-                                            }}
-                                        >
-                                            {result.feedback}
-                                        </p>
-                                    </details>
-                                )}
+                                </span>
                             </div>
-                        )}
+                            <div className={s.scoreRow}>
+                                <strong>Điểm đạt được:</strong>
+                                <span>
+                                    {result.pointsEarned}/{result.maxPoints}
+                                </span>
+                            </div>
+
+                            {result.transcript && (
+                                <details className={s.details}>
+                                    <summary>Xem transcript</summary>
+                                    <p className={s.detailContent}>
+                                        {result.transcript}
+                                    </p>
+                                </details>
+                            )}
+
+                            {result.feedback && (
+                                <details className={s.details}>
+                                    <summary>Nhận xét</summary>
+                                    <p className={s.detailContent}>
+                                        {result.feedback}
+                                    </p>
+                                </details>
+                            )}
+                        </div>
                     </div>
                 )}
             </div>

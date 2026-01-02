@@ -66,7 +66,7 @@ export default function DiagramLabelingQuestion({
                                 fontSize: '15px',
                             }}
                         >
-                            {q.globalNumber}.
+                            {q.orderNumber}.
                         </label>
                         <input
                             id={`diag-${q.id}`}

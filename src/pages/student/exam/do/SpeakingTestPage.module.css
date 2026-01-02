@@ -1,0 +1,35 @@
+.pageWrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    background-color: #f0f2f5;
+    color: var(--text-primary-light, #222);
+}
+
+.mainContent {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    padding: 16px;
+    gap: 16px;
+}
+
+.recordingContainer {
+    flex: 1;
+    min-width: 400px;
+    background-color: #fff;
+    border: 1px solid #d9d9d9;
+    border-radius: var(--radius-md);
+    padding: 20px;
+    overflow-y: auto;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.loadingContainer {
+    display: grid;
+    place-items: center;
+    height: 100vh;
+    font-size: 1.2rem;
+    color: var(--text-primary-light);
+}

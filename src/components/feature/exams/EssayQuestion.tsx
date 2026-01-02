@@ -10,6 +10,7 @@ interface EssayQuestionProps {
     registerRef: (id: string, element: HTMLElement | null) => void
     minWords?: number
     maxWords?: number
+    hideHeader?: boolean
 }
 
 export function EssayQuestion({
@@ -21,6 +22,7 @@ export function EssayQuestion({
     registerRef,
     minWords = 150,
     maxWords = 250,
+    hideHeader = false,
 }: EssayQuestionProps) {
     const [wordCount, setWordCount] = useState(0)
 
@@ -40,17 +42,32 @@ export function EssayQuestion({
             ref={(el) => registerRef(questionId, el)}
             className={s.essayContainer}
         >
-            <div className={s.essayHeader}>
-                <p className={s.questionText}>
-                    <strong>{questionNumber}.</strong> {questionText}
-                </p>
+            {!hideHeader && (
+                <div className={s.essayHeader}>
+                    <p className={s.questionText}>
+                        <strong>{questionNumber}.</strong> {questionText}
+                    </p>
+                    <div
+                        className={s.wordCount}
+                        style={{ color: getWordCountColor() }}
+                    >
+                        {wordCount} / {minWords}-{maxWords} words
+                    </div>
+                </div>
+            )}
+
+            {hideHeader && (
                 <div
                     className={s.wordCount}
-                    style={{ color: getWordCountColor() }}
+                    style={{
+                        color: getWordCountColor(),
+                        marginBottom: '12px',
+                        textAlign: 'right',
+                    }}
                 >
                     {wordCount} / {minWords}-{maxWords} words
                 </div>
-            </div>
+            )}
 
             <textarea
                 className={s.essayTextarea}

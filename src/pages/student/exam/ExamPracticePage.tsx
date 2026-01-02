@@ -107,7 +107,7 @@ export default function ExamPracticePage() {
 
     useEffect(() => {
         loadTests()
-    }, [loadTests])
+    }, [])
 
     const handleGreetingComplete = useCallback(() => {
         setShowGradientName(true)

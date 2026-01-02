@@ -364,7 +364,7 @@ export default function ScheduleGeneratorPage() {
                                             marginLeft: 8,
                                         }}
                                     >
-                                        ({teachersData?.items?.length || 0}{' '}
+                                        ({teachersData?.users?.length || 0}{' '}
                                         người)
                                     </span>
                                 </div>
@@ -450,7 +450,7 @@ export default function ScheduleGeneratorPage() {
                             sessions={draftSessions}
                             onSessionsChange={setDraftSessions}
                             availableTeachers={
-                                teachersData?.items.map((t: any) => ({
+                                teachersData?.users.map((t: any) => ({
                                     id: t.id,
                                     name:
                                         `${t.first_name || ''} ${t.last_name || ''}`.trim() ||
@@ -621,7 +621,7 @@ export default function ScheduleGeneratorPage() {
                         startDate={formData.start_date}
                         endDate={formData.end_date}
                         items={
-                            teachersData?.items.map((t: any) => ({
+                            teachersData?.users.map((t: any) => ({
                                 id: t.id,
                                 name:
                                     `${t.first_name || ''} ${t.last_name || ''}`.trim() ||

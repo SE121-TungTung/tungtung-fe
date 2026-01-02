@@ -1,117 +1,60 @@
-import React, { useMemo, useState } from 'react'
+import React, { useState } from 'react'
 import s from './UserManagementPage.module.css'
 import Card from '@/components/common/card/Card'
 import { Button } from '@/components/core/Button'
 import IconPlus from '@/assets/Plus Thin.svg'
 import IconSearch from '@/assets/Lens.svg'
 import InputField from '@/components/common/input/InputField'
-import { ALL_ROLES, type Role, type User } from '@/types/auth'
+import { ALL_ROLES } from '@/types/auth'
 import { UserFormModal } from './UserFormModal'
 import { UserTable } from './UserTable'
 import { usePermissions } from '@/hooks/usePermissions'
-import {
-    keepPreviousData,
-    useMutation,
-    useQuery,
-    useQueryClient,
-} from '@tanstack/react-query'
-import { deleteUser, listUsers } from '@/lib/users'
 import { SelectField } from '@/components/common/input/SelectField'
+import { useDialog } from '@/hooks/useDialog'
+import type { User, Role } from '@/types/user.types'
+import Pagination from '@/components/common/menu/Pagination'
 
-type SortBy = 'name' | 'email' | 'role' | 'status' | 'createdAt'
-type SortOrder = 'asc' | 'desc'
+// Imports Hooks
+import { useUsers, useDeleteUser } from '@/hooks/domain/useUsers'
+import { useTableParams } from '@/hooks/useTableParams'
+import { useQueryClient } from '@tanstack/react-query'
 
 export const UserManagementPage: React.FC = () => {
+    // 1. Setup UI State (Modal)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [editingUser, setEditingUser] = useState<User | null>(null)
-
-    const [searchValue, setSearchValue] = useState('')
-    const [roleFilter, setRoleFilter] = useState<Role | ''>('')
-    const [sortBy, setSortBy] = useState<SortBy>('createdAt')
-    const [sortOrder, setSortOrder] = useState<SortOrder>('asc')
-
-    const { data: usersPage, isLoading } = useQuery({
-        queryKey: [
-            'users',
-            {
-                role: roleFilter || undefined,
-                search: searchValue,
-                skip: 0,
-                limit: 100,
-                include_deleted: false,
-            },
-        ],
-        queryFn: () =>
-            listUsers({
-                role: roleFilter || undefined,
-                search: searchValue,
-                skip: 0,
-                limit: 100,
-                include_deleted: false,
-            }),
-        placeholderData: keepPreviousData,
-    })
-    const users = useMemo(() => {
-        const usersRaw = usersPage?.items ?? []
-        const arr = [...usersRaw]
-        const dir = sortOrder === 'asc' ? 1 : -1
-        const get = (u: User) => {
-            switch (sortBy) {
-                case 'name':
-                    return `${u.firstName} ${u.lastName}`.toLowerCase()
-                case 'email':
-                    return u.email.toLowerCase()
-                case 'role':
-                    return u.role
-                case 'status':
-                    return u.status
-                case 'createdAt':
-                default:
-                    return u.createdAt
-            }
-        }
-        arr.sort((a, b) => {
-            const va = get(a),
-                vb = get(b)
-            if (va === vb) return 0
-            return va > vb ? dir : -dir
-        })
-        return arr
-    }, [usersPage, sortBy, sortOrder])
-
-    const queryClient = useQueryClient()
-
-    const { mutateAsync: deleteUserMutateAsync } = useMutation({
-        mutationFn: (id: string) => deleteUser(id),
-        onMutate: async (userId) => {
-            await queryClient.cancelQueries({ queryKey: ['users'] })
-
-            const previousUsers = queryClient.getQueryData(['users'])
-
-            queryClient.setQueryData(['users'], (old: any) => {
-                if (!old) return old
-                return {
-                    ...old,
-                    items: old.items.filter((u: User) => u.id !== userId),
-                    total: old.total - 1,
-                }
-            })
-
-            return { previousUsers }
-        },
-        onError: (err, userId, context) => {
-            if (context?.previousUsers) {
-                queryClient.setQueryData(['users'], context.previousUsers)
-            }
-            console.error('Delete user ', userId, 'with error:', err)
-        },
-        onSettled: () => {
-            queryClient.invalidateQueries({ queryKey: ['users'] })
-        },
-    })
-
+    const { alert: showAlert, confirm: showConfirm } = useDialog()
     const { canAny } = usePermissions()
     const canCreateUser = canAny(['user:create:student', 'user:create:teacher'])
+    const queryClient = useQueryClient()
+
+    // 2. Setup Table Logic (Search, Sort, Filter, Pagination)
+    const {
+        page,
+        search,
+        filters,
+        sort,
+        setPage,
+        setSearch,
+        setFilters,
+        setSort,
+        apiParams,
+    } = useTableParams<{ role: Role | '' }>({ role: '' })
+
+    // 3. Data Fetching Hook
+    const {
+        data: usersPage,
+        isLoading,
+        isFetching,
+    } = useUsers({
+        ...apiParams,
+        role: apiParams.role || undefined,
+    })
+
+    // 4. Mutation Hook (Delete)
+    const { mutateAsync: deleteUserMutate } = useDeleteUser()
+
+    // --- Handlers ---
 
     const handleOpenCreateModal = () => {
         setEditingUser(null)
@@ -128,26 +71,34 @@ export const UserManagementPage: React.FC = () => {
         setEditingUser(null)
     }
 
-    const handleDeleteUser = (user: User) => {
+    const handleUserSaved = () => {
+        queryClient.invalidateQueries({ queryKey: ['users'] })
+        handleCloseModal()
+    }
+
+    const handleDeleteUser = async (user: User) => {
         if (!user?.id) return
-        const ok = window.confirm(`Xóa người dùng ${user.email}?`)
-        if (ok) {
-            deleteUserMutateAsync(user.id).catch((err) => {
-                window.alert(
-                    `Không thể xóa người dùng ${user.email}: ${err.message}`
-                )
-            })
+
+        const confirmed = await showConfirm(`Xóa người dùng ${user.email}?`)
+
+        if (confirmed) {
+            try {
+                await deleteUserMutate(user.id)
+                showAlert('Đã xóa người dùng thành công', 'Thành công')
+            } catch (err: any) {
+                showAlert(`Không thể xóa: ${err.message}`, 'Lỗi')
+            }
         }
     }
 
-    const handleLockUser = (user: User) => {
-        // TODO: Tích hợp API
+    const handleLockUser = async (user: User) => {
         if (
-            window.confirm(
-                `Bạn có chắc chắn muốn ${user.status === 'suspended' ? 'mở khóa' : 'khóa'} tài khoản ${user.firstName} ${user.lastName}?`
+            await showConfirm(
+                `Bạn có chắc chắn muốn ${user.status === 'suspended' ? 'mở khóa' : 'khóa'} tài khoản ${user.firstName}?`
             )
         ) {
             console.log('Toggling lock for user:', user.id)
+            showAlert('Chức năng này chưa được triển khai.', 'Thông báo')
         }
     }
 
@@ -156,84 +107,74 @@ export const UserManagementPage: React.FC = () => {
             <main className={s.mainContent}>
                 <h1 className={s.pageTitle}>Quản lý người dùng</h1>
 
+                {/* FILTER CARD */}
                 <Card className={s.filterCard} variant="outline">
                     <div className={s.searchWrapper}>
                         <InputField
                             id="search"
                             label=""
                             placeholder="Tìm theo tên hoặc email..."
-                            value={searchValue}
-                            onChange={(e) => setSearchValue(e.target.value)}
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
                             leftIcon={<img src={IconSearch} alt="" />}
                         />
                     </div>
                     <div className={s.filterControls}>
+                        {/* Filter by Role */}
                         <SelectField
                             id="roleFilter"
                             label="Vai trò"
                             registration={{ name: 'roleFilter' as any }}
-                            value={roleFilter}
+                            value={filters.role}
                             onChange={(e) =>
-                                setRoleFilter(
-                                    (e.target as HTMLSelectElement).value as
-                                        | Role
-                                        | ''
-                                )
+                                setFilters({
+                                    role: (e.target as HTMLSelectElement)
+                                        .value as Role | '',
+                                })
                             }
                             options={[
                                 { label: 'Tất cả vai trò', value: '' as any },
                                 ...ALL_ROLES.map((r) => ({
-                                    label:
-                                        r === 'student'
-                                            ? 'Học sinh'
-                                            : r === 'teacher'
-                                              ? 'Giáo viên'
-                                              : r === 'office_admin'
-                                                ? 'Quản trị viên Văn phòng'
-                                                : r === 'center_admin'
-                                                  ? 'Quản trị viên Trung tâm'
-                                                  : 'Quản trị viên Hệ thống',
+                                    label: getRoleLabel(r),
                                     value: r,
                                 })),
                             ]}
                         />
 
+                        {/* Sort By Field */}
                         <SelectField
                             id="sortBy"
                             label="Sắp xếp"
                             registration={{ name: 'sortBy' as any }}
-                            value={sortBy}
+                            value={sort.field}
                             onChange={(e) =>
-                                setSortBy(
-                                    (e.target as HTMLSelectElement)
-                                        .value as SortBy
-                                )
+                                setSort({
+                                    ...sort,
+                                    field: (e.target as HTMLSelectElement)
+                                        .value,
+                                })
                             }
                             options={[
-                                {
-                                    label: 'Sắp theo ngày tạo',
-                                    value: 'createdAt',
-                                },
-                                { label: 'Sắp theo tên', value: 'name' },
-                                { label: 'Sắp theo email', value: 'email' },
-                                { label: 'Sắp theo vai trò', value: 'role' },
-                                {
-                                    label: 'Sắp theo trạng thái',
-                                    value: 'status',
-                                },
+                                { label: 'Ngày tạo', value: 'createdAt' },
+                                { label: 'Tên', value: 'firstName' },
+                                { label: 'Email', value: 'email' },
+                                { label: 'Vai trò', value: 'role' },
+                                { label: 'Trạng thái', value: 'status' },
                             ]}
                         />
 
+                        {/* Sort Order */}
                         <SelectField
                             id="sortOrder"
                             label="Thứ tự"
                             registration={{ name: 'sortOrder' as any }}
-                            value={sortOrder}
+                            value={sort.order}
                             onChange={(e) =>
-                                setSortOrder(
-                                    (e.target as HTMLSelectElement)
-                                        .value as SortOrder
-                                )
+                                setSort({
+                                    ...sort,
+                                    order: (e.target as HTMLSelectElement)
+                                        .value as 'asc' | 'desc',
+                                })
                             }
                             options={[
                                 { label: 'Giảm dần', value: 'desc' },
@@ -257,20 +198,22 @@ export const UserManagementPage: React.FC = () => {
                     )}
                 </Card>
 
-                <Card
-                    className={s.tableCard}
-                    variant="outline"
-                    controls={<div></div>}
-                >
-                    {' '}
+                {/* TABLE CARD */}
+                <Card className={s.tableCard} variant="outline">
                     <UserTable
-                        users={users}
-                        isLoading={isLoading}
+                        users={usersPage?.users || []}
+                        isLoading={isLoading || isFetching}
                         onEditUser={handleOpenEditModal}
                         onDeleteUser={handleDeleteUser}
                         onLockUser={handleLockUser}
                     />
-                    {/* TODO: Thêm Pagination component ở đây */}
+                    <div className={s.paginationWrapper}>
+                        <Pagination
+                            currentPage={page}
+                            totalPages={usersPage?.pages || 0}
+                            onPageChange={setPage}
+                        />
+                    </div>
                 </Card>
             </main>
 
@@ -278,7 +221,19 @@ export const UserManagementPage: React.FC = () => {
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
                 editingUser={editingUser}
+                onSuccess={handleUserSaved}
             />
         </div>
     )
+}
+
+function getRoleLabel(r: string) {
+    const map: Record<string, string> = {
+        student: 'Học sinh',
+        teacher: 'Giáo viên',
+        office_admin: 'Quản trị viên Văn phòng',
+        center_admin: 'Quản trị viên Trung tâm',
+        system_admin: 'Quản trị viên Hệ thống',
+    }
+    return map[r] || r
 }

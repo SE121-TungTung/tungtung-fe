@@ -717,8 +717,8 @@ export const testApi = {
         if (files) {
             Object.entries(files).forEach(([key, file]) => {
                 const blob = file.slice(0, file.size, file.type)
-                const newFile = new File([blob], key, { type: file.type })
-                formData.append('files', newFile)
+                const renamedFile = new File([blob], key, { type: file.type })
+                formData.append('files', renamedFile)
             })
         }
 
@@ -767,7 +767,7 @@ export const testApi = {
         payload: SubmitAttemptRequest
     ): Promise<SubmitResult> => {
         const response = await api<BackendSubmitAttemptResponse>(
-            `${BASE_URL}/${attemptId}/submit`, // ⚠️ Will change to /attempts/{attemptId}/submit
+            `${BASE_URL}/attempts/${attemptId}/submit`,
             {
                 method: 'POST',
                 body: JSON.stringify(payload),

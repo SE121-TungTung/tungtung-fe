@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import type {
     TestSectionCreatePayload,
     TestSectionPartCreatePayload,
@@ -9,13 +9,20 @@ import type {
 import { SkillArea, QuestionType, DifficultyLevel } from '@/types/test.types'
 
 export const useCreateTest = () => {
+    const generateId = useCallback(
+        () => Math.random().toString(36).substring(2, 9),
+        []
+    )
+
     const [sections, setSections] = useState<TestSectionCreatePayload[]>([
         {
+            id: generateId(),
             name: 'Section 1',
             order_number: 1,
             skill_area: SkillArea.READING,
             parts: [
                 {
+                    id: generateId(),
                     name: 'Part 1',
                     order_number: 1,
                     passage: {
@@ -33,19 +40,23 @@ export const useCreateTest = () => {
 
     const [uploadedFiles, setUploadedFiles] = useState<Record<string, File>>({})
 
-    const getFileKey = (sIdx: number, pIdx: number, type: 'audio' | 'image') =>
-        `section_${sIdx}_part_${pIdx}_${type}`
+    const getFileKey = useCallback(
+        (partId: string, type: 'audio' | 'image') => `part_${partId}_${type}`,
+        []
+    )
 
     // --- SECTION HANDLERS ---
     const handleAddSection = () => {
         setSections((prev) => [
             ...prev,
             {
+                id: generateId(),
                 name: `Section ${prev.length + 1}`,
                 order_number: prev.length + 1,
                 skill_area: SkillArea.READING,
                 parts: [
                     {
+                        id: generateId(),
                         name: 'Part 1',
                         order_number: 1,
                         passage: {
@@ -63,8 +74,9 @@ export const useCreateTest = () => {
     const handleRemoveSection = (sIdx: number) => {
         setSections((prev) => {
             if (prev.length <= 1) return prev
-            const next = prev.filter((_, i) => i !== sIdx)
-            return next.map((s, i) => ({ ...s, order_number: i + 1 }))
+            return prev
+                .filter((_, i) => i !== sIdx)
+                .map((s, i) => ({ ...s, order_number: i + 1 }))
         })
     }
 
@@ -72,62 +84,74 @@ export const useCreateTest = () => {
         sIdx: number,
         data: Partial<TestSectionCreatePayload>
     ) => {
-        setSections((prev) => {
-            const next = [...prev]
-            next[sIdx] = { ...next[sIdx], ...data }
-            return next
-        })
+        setSections((prev) =>
+            prev.map((section, i) =>
+                i === sIdx ? { ...section, ...data } : section
+            )
+        )
     }
 
     // --- PART HANDLERS ---
+    const handleAddPart = (sIdx: number) => {
+        setSections((prev) =>
+            prev.map((section, si) => {
+                if (si !== sIdx) return section
+                const contentType =
+                    section.skill_area === SkillArea.LISTENING
+                        ? 'listening_audio'
+                        : section.skill_area === SkillArea.SPEAKING
+                          ? 'speaking_cue_card'
+                          : 'reading_passage'
+
+                return {
+                    ...section,
+                    parts: [
+                        ...section.parts,
+                        {
+                            id: generateId(),
+                            name: `Part ${section.parts.length + 1}`,
+                            order_number: section.parts.length + 1,
+                            passage: {
+                                title: `Part ${section.parts.length + 1} Passage`,
+                                content_type: contentType,
+                                text_content: '',
+                            },
+                            question_groups: [],
+                        },
+                    ],
+                }
+            })
+        )
+    }
+
+    const handleRemovePart = (sIdx: number, pIdx: number) => {
+        setSections((prev) =>
+            prev.map((section, si) => {
+                if (si !== sIdx) return section
+                const newParts = section.parts
+                    .filter((_, pi) => pi !== pIdx)
+                    .map((p, i) => ({ ...p, order_number: i + 1 }))
+                return { ...section, parts: newParts }
+            })
+        )
+    }
+
     const updatePart = (
         sIdx: number,
         pIdx: number,
         data: Partial<TestSectionPartCreatePayload>
     ) => {
-        setSections((prev) => {
-            const next = [...prev]
-            next[sIdx].parts[pIdx] = { ...next[sIdx].parts[pIdx], ...data }
-            return next
-        })
-    }
-
-    const handleAddPart = (sIdx: number) => {
-        setSections((prev) => {
-            const next = [...prev]
-            const section = next[sIdx]
-            const contentType =
-                section.skill_area === SkillArea.LISTENING
-                    ? 'listening_audio'
-                    : section.skill_area === SkillArea.SPEAKING
-                      ? 'speaking_cue_card'
-                      : 'reading_passage'
-
-            section.parts.push({
-                name: `Part ${section.parts.length + 1}`,
-                order_number: section.parts.length + 1,
-                passage: {
-                    title: `Part ${section.parts.length + 1} Passage`,
-                    content_type: contentType,
-                    text_content: '',
-                },
-                question_groups: [],
+        setSections((prev) =>
+            prev.map((section, si) => {
+                if (si !== sIdx) return section
+                return {
+                    ...section,
+                    parts: section.parts.map((part, pi) =>
+                        pi === pIdx ? { ...part, ...data } : part
+                    ),
+                }
             })
-            return next
-        })
-    }
-
-    const handleRemovePart = (sIdx: number, pIdx: number) => {
-        setSections((prev) => {
-            const next = [...prev]
-            if (next[sIdx].parts.length <= 1) return prev
-            next[sIdx].parts.splice(pIdx, 1)
-            next[sIdx].parts = next[sIdx].parts.map((p, i) => ({
-                ...p,
-                order_number: i + 1,
-            }))
-            return next
-        })
+        )
     }
 
     const updatePartPassage = (
@@ -135,45 +159,51 @@ export const useCreateTest = () => {
         pIdx: number,
         data: Partial<PassageCreatePayload>
     ) => {
-        setSections((prev) => {
-            const next = [...prev]
-            const part = next[sIdx].parts[pIdx]
-            if (part.passage) {
-                part.passage = { ...part.passage, ...data }
-            }
-            return next
-        })
+        setSections((prev) =>
+            prev.map((section, si) => {
+                if (si !== sIdx) return section
+                return {
+                    ...section,
+                    parts: section.parts.map((part, pi) =>
+                        pi === pIdx
+                            ? {
+                                  ...part,
+                                  passage: { ...part.passage!, ...data },
+                              }
+                            : part
+                    ),
+                }
+            })
+        )
     }
 
     // --- QUESTION GROUP HANDLERS ---
-    const handleRemoveQuestion = (
-        sIdx: number,
-        pIdx: number,
-        gIdx: number,
-        qIdx: number
-    ) => {
-        setSections((prev) => {
-            const next = [...prev]
-            next[sIdx].parts[pIdx].question_groups[gIdx].questions.splice(
-                qIdx,
-                1
-            )
-            return next
-        })
-    }
-
     const handleAddQuestionGroup = (sIdx: number, pIdx: number) => {
-        setSections((prev) => {
-            const next = [...prev]
-            const part = next[sIdx].parts[pIdx]
-            part.question_groups.push({
-                name: `Questions ${part.question_groups.length * 5 + 1}-${(part.question_groups.length + 1) * 5}`,
-                order_number: part.question_groups.length + 1,
-                question_type: QuestionType.SHORT_ANSWER,
-                questions: [],
+        setSections((prev) =>
+            prev.map((section, si) => {
+                if (si !== sIdx) return section
+                return {
+                    ...section,
+                    parts: section.parts.map((part, pi) => {
+                        if (pi !== pIdx) return part
+                        return {
+                            ...part,
+                            question_groups: [
+                                ...part.question_groups,
+                                {
+                                    id: generateId(),
+                                    name: `Questions ${part.question_groups.length * 5 + 1}-${(part.question_groups.length + 1) * 5}`,
+                                    order_number:
+                                        part.question_groups.length + 1,
+                                    question_type: QuestionType.SHORT_ANSWER,
+                                    questions: [],
+                                },
+                            ],
+                        }
+                    }),
+                }
             })
-            return next
-        })
+        )
     }
 
     const handleRemoveQuestionGroup = (
@@ -181,14 +211,21 @@ export const useCreateTest = () => {
         pIdx: number,
         gIdx: number
     ) => {
-        setSections((prev) => {
-            const next = [...prev]
-            next[sIdx].parts[pIdx].question_groups.splice(gIdx, 1)
-            next[sIdx].parts[pIdx].question_groups = next[sIdx].parts[
-                pIdx
-            ].question_groups.map((g, i) => ({ ...g, order_number: i + 1 }))
-            return next
-        })
+        setSections((prev) =>
+            prev.map((section, si) => {
+                if (si !== sIdx) return section
+                return {
+                    ...section,
+                    parts: section.parts.map((part, pi) => {
+                        if (pi !== pIdx) return part
+                        const newGroups = part.question_groups
+                            .filter((_, gi) => gi !== gIdx)
+                            .map((g, i) => ({ ...g, order_number: i + 1 }))
+                        return { ...part, question_groups: newGroups }
+                    }),
+                }
+            })
+        )
     }
 
     const updateQuestionGroup = (
@@ -197,29 +234,97 @@ export const useCreateTest = () => {
         gIdx: number,
         data: Partial<QuestionGroupCreatePayload>
     ) => {
-        setSections((prev) => {
-            const next = [...prev]
-            const group = next[sIdx].parts[pIdx].question_groups[gIdx]
-            next[sIdx].parts[pIdx].question_groups[gIdx] = { ...group, ...data }
-            return next
-        })
+        setSections((prev) =>
+            prev.map((section, si) => {
+                if (si !== sIdx) return section
+                return {
+                    ...section,
+                    parts: section.parts.map((part, pi) => {
+                        if (pi !== pIdx) return part
+                        return {
+                            ...part,
+                            question_groups: part.question_groups.map(
+                                (group, gi) =>
+                                    gi === gIdx ? { ...group, ...data } : group
+                            ),
+                        }
+                    }),
+                }
+            })
+        )
     }
 
     // --- QUESTION HANDLERS ---
     const handleAddQuestion = (sIdx: number, pIdx: number, gIdx: number) => {
-        setSections((prev) => {
-            const next = [...prev]
-            const group = next[sIdx].parts[pIdx].question_groups[gIdx]
-            group.questions.push({
-                title: `Question ${group.questions.length + 1}`,
-                question_text: '',
-                question_type: group.question_type,
-                skill_area: next[sIdx].skill_area,
-                difficulty_level: DifficultyLevel.MEDIUM,
-                points: 1,
+        setSections((prev) =>
+            prev.map((section, si) => {
+                if (si !== sIdx) return section
+                return {
+                    ...section,
+                    parts: section.parts.map((part, pi) => {
+                        if (pi !== pIdx) return part
+                        return {
+                            ...part,
+                            question_groups: part.question_groups.map(
+                                (group, gi) => {
+                                    if (gi !== gIdx) return group
+                                    return {
+                                        ...group,
+                                        questions: [
+                                            ...group.questions,
+                                            {
+                                                id: generateId(),
+                                                title: `Question ${group.questions.length + 1}`,
+                                                question_text: '',
+                                                question_type:
+                                                    group.question_type,
+                                                skill_area: section.skill_area,
+                                                difficulty_level:
+                                                    DifficultyLevel.MEDIUM,
+                                                points: 1,
+                                            },
+                                        ],
+                                    }
+                                }
+                            ),
+                        }
+                    }),
+                }
             })
-            return next
-        })
+        )
+    }
+
+    const handleRemoveQuestion = (
+        sIdx: number,
+        pIdx: number,
+        gIdx: number,
+        qIdx: number
+    ) => {
+        setSections((prev) =>
+            prev.map((section, si) => {
+                if (si !== sIdx) return section
+                return {
+                    ...section,
+                    parts: section.parts.map((part, pi) => {
+                        if (pi !== pIdx) return part
+                        return {
+                            ...part,
+                            question_groups: part.question_groups.map(
+                                (group, gi) => {
+                                    if (gi !== gIdx) return group
+                                    return {
+                                        ...group,
+                                        questions: group.questions.filter(
+                                            (_, qi) => qi !== qIdx
+                                        ),
+                                    }
+                                }
+                            ),
+                        }
+                    }),
+                }
+            })
+        )
     }
 
     const updateQuestion = (
@@ -229,13 +334,34 @@ export const useCreateTest = () => {
         qIdx: number,
         data: Partial<QuestionCreatePayload>
     ) => {
-        setSections((prev) => {
-            const next = [...prev]
-            const questions =
-                next[sIdx].parts[pIdx].question_groups[gIdx].questions
-            questions[qIdx] = { ...questions[qIdx], ...data }
-            return next
-        })
+        setSections((prev) =>
+            prev.map((section, si) => {
+                if (si !== sIdx) return section
+                return {
+                    ...section,
+                    parts: section.parts.map((part, pi) => {
+                        if (pi !== pIdx) return part
+                        return {
+                            ...part,
+                            question_groups: part.question_groups.map(
+                                (group, gi) => {
+                                    if (gi !== gIdx) return group
+                                    return {
+                                        ...group,
+                                        questions: group.questions.map(
+                                            (q, qi) =>
+                                                qi === qIdx
+                                                    ? { ...q, ...data }
+                                                    : q
+                                        ),
+                                    }
+                                }
+                            ),
+                        }
+                    }),
+                }
+            })
+        )
     }
 
     // --- FILE HANDLERS ---
@@ -245,39 +371,66 @@ export const useCreateTest = () => {
         type: 'audio' | 'image',
         file: File | null
     ) => {
-        const key = getFileKey(sIdx, pIdx, type)
+        const part = sections[sIdx].parts[pIdx]
+        if (!part.id) return
+        const key = getFileKey(part.id, type)
 
-        setUploadedFiles((prev: Record<string, File>) => {
+        setUploadedFiles((prev) => {
             const next = { ...prev }
             if (file) next[key] = file
             else delete next[key]
             return next
         })
 
-        // ✅ FIX: Add "file:" prefix to match backend expectations
         updatePartPassage(sIdx, pIdx, {
             [type === 'audio' ? 'audio_url' : 'image_url']: file
-                ? `file:${key}` // ✅ Backend expects "file:filename" format
+                ? `file:${key}`
                 : '',
         })
     }
 
     const handleRemoveFile = (
-        sIndex: number,
-        pIndex: number,
+        sIdx: number,
+        pIdx: number,
         type: 'audio' | 'image'
     ) => {
-        const key = getFileKey(sIndex, pIndex, type)
+        const part = sections[sIdx].parts[pIdx]
+        if (!part.id) return
+
+        const key = getFileKey(part.id, type)
+
         setUploadedFiles((prev) => {
             const next = { ...prev }
             delete next[key]
             return next
         })
-        if (type === 'audio') {
-            updatePartPassage(sIndex, pIndex, { audio_url: '' })
-        } else {
-            updatePartPassage(sIndex, pIndex, { image_url: '' })
-        }
+
+        updatePartPassage(sIdx, pIdx, {
+            [type === 'audio' ? 'audio_url' : 'image_url']: '',
+        })
+    }
+
+    const cleanupOrphanFiles = () => {
+        const activeKeys = new Set<string>()
+        sections.forEach((section) => {
+            section.parts.forEach((part) => {
+                if (part.passage?.audio_url?.startsWith('file:')) {
+                    activeKeys.add(part.passage.audio_url.replace('file:', ''))
+                }
+                if (part.passage?.image_url?.startsWith('file:')) {
+                    activeKeys.add(part.passage.image_url.replace('file:', ''))
+                }
+            })
+        })
+
+        setUploadedFiles((prev) => {
+            const cleaned: Record<string, File> = {}
+            Object.keys(prev).forEach((key) => {
+                if (activeKeys.has(key)) cleaned[key] = prev[key]
+            })
+            return cleaned
+        })
+        return activeKeys
     }
 
     return {
@@ -299,5 +452,6 @@ export const useCreateTest = () => {
         handleRemoveQuestion,
         updateSection,
         updatePart,
+        cleanupOrphanFiles,
     }
 }

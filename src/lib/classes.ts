@@ -201,3 +201,10 @@ export async function getClass(id: string): Promise<Class> {
     })
     return mapClass(res)
 }
+
+export async function getTeacherClasses(): Promise<Class[]> {
+    const res = await api<BackendClass[]>(`${CLASSES_API_URL}/classes`, {
+        method: 'GET',
+    })
+    return res.map(mapClass)
+}

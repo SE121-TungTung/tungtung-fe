@@ -211,6 +211,23 @@ export default function CreateTestPage() {
 
         setLoading(true)
         try {
+            const activeKeys = new Set<string>()
+            sections.forEach((s) =>
+                s.parts.forEach((p) => {
+                    if (p.passage?.audio_url?.startsWith('file:'))
+                        activeKeys.add(p.passage.audio_url.replace('file:', ''))
+                    if (p.passage?.image_url?.startsWith('file:'))
+                        activeKeys.add(p.passage.image_url.replace('file:', ''))
+                })
+            )
+
+            const finalFiles: Record<string, File> = {}
+            Object.entries(uploadedFiles).forEach(([key, file]) => {
+                if (activeKeys.has(key)) {
+                    finalFiles[key] = file
+                }
+            })
+
             const payload: TestCreatePayload = {
                 title,
                 description: description || undefined,
@@ -227,7 +244,7 @@ export default function CreateTestPage() {
                 sections,
             }
 
-            const result = await testApi.createTest(payload, uploadedFiles)
+            const result = await testApi.createTest(payload, finalFiles)
 
             alert('Tạo bài thi thành công!')
             navigate(`/teacher/tests/${result.id}/view`)
@@ -610,8 +627,7 @@ export default function CreateTestPage() {
                                                 rightIcon={
                                                     uploadedFiles[
                                                         getFileKey(
-                                                            sIndex,
-                                                            pIndex,
+                                                            part.id ?? '',
                                                             'audio'
                                                         )
                                                     ] && (
@@ -653,8 +669,7 @@ export default function CreateTestPage() {
                                                 hint={
                                                     uploadedFiles[
                                                         getFileKey(
-                                                            sIndex,
-                                                            pIndex,
+                                                            part.id ?? '',
                                                             'audio'
                                                         )
                                                     ]?.name
@@ -663,8 +678,7 @@ export default function CreateTestPage() {
 
                                             {uploadedFiles[
                                                 getFileKey(
-                                                    sIndex,
-                                                    pIndex,
+                                                    part.id ?? '',
                                                     'audio'
                                                 )
                                             ] && (
@@ -691,8 +705,8 @@ export default function CreateTestPage() {
                                                         src={URL.createObjectURL(
                                                             uploadedFiles[
                                                                 getFileKey(
-                                                                    sIndex,
-                                                                    pIndex,
+                                                                    part.id ??
+                                                                        '',
                                                                     'audio'
                                                                 )
                                                             ]
@@ -724,8 +738,7 @@ export default function CreateTestPage() {
                                                     disabled={
                                                         !!uploadedFiles[
                                                             getFileKey(
-                                                                sIndex,
-                                                                pIndex,
+                                                                part.id ?? '',
                                                                 'audio'
                                                             )
                                                         ]
@@ -759,8 +772,7 @@ export default function CreateTestPage() {
                                                 rightIcon={
                                                     uploadedFiles[
                                                         getFileKey(
-                                                            sIndex,
-                                                            pIndex,
+                                                            part.id ?? '',
                                                             'image'
                                                         )
                                                     ] && (
@@ -800,8 +812,7 @@ export default function CreateTestPage() {
 
                                             {uploadedFiles[
                                                 getFileKey(
-                                                    sIndex,
-                                                    pIndex,
+                                                    part.id ?? '',
                                                     'image'
                                                 )
                                             ] && (
@@ -816,8 +827,8 @@ export default function CreateTestPage() {
                                                         src={URL.createObjectURL(
                                                             uploadedFiles[
                                                                 getFileKey(
-                                                                    sIndex,
-                                                                    pIndex,
+                                                                    part.id ??
+                                                                        '',
                                                                     'image'
                                                                 )
                                                             ]
@@ -839,8 +850,8 @@ export default function CreateTestPage() {
                                                         {
                                                             uploadedFiles[
                                                                 getFileKey(
-                                                                    sIndex,
-                                                                    pIndex,
+                                                                    part.id ??
+                                                                        '',
                                                                     'image'
                                                                 )
                                                             ].name

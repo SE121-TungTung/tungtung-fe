@@ -28,6 +28,7 @@ import GeneralDashboard from '@/pages/Dashboard'
 import TestDetailPage from '@/pages/student/exam/TestDetailPage'
 import ChatbotUploadPage from '@/pages/admin/system/ChatbotUploadPage'
 import { MainLayout } from './layouts/MainLayout'
+import TeacherClassPage from '@/pages/teacher/classes/TeacherClassPage'
 
 export const router = createBrowserRouter([
     {
@@ -103,11 +104,11 @@ export const router = createBrowserRouter([
                         ),
                     },
                     {
-                        path: '/student/exams',
+                        path: '/student/tests',
                         element: <ExamPracticePage />,
                     },
                     {
-                        path: '/student/exams/results/:attemptId',
+                        path: '/student/tests/results/:attemptId',
                         element: <TestResultPage />,
                     },
                     {
@@ -139,6 +140,23 @@ export const router = createBrowserRouter([
                     {
                         path: '/teacher',
                         element: <Navigate to="/dashboard" replace />,
+                    },
+                    {
+                        path: '/teacher/classes',
+                        element: (
+                            <ProtectedRoute allowedRoles={['teacher']}>
+                                <TeacherClassPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/teacher/classes/:classId',
+                        element: (
+                            <ProtectedRoute allowedRoles={['teacher']}>
+                                {/* <TeacherClassDetailPage /> - Sẽ làm sau */}
+                                <div>Chi tiết lớp học (Đang phát triển)</div>
+                            </ProtectedRoute>
+                        ),
                     },
                     {
                         path: '/teacher/tests',

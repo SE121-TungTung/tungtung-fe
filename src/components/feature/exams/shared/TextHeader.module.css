@@ -1,0 +1,34 @@
+.header {
+    background-color: #fff;
+    border-bottom: 1px solid #d9d9d9;
+    padding: 12px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.headerInfo {
+    font-size: 14px;
+    font-weight: 600;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.timer {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--status-danger-500-light);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.timer img {
+    width: 18px;
+    height: 18px;
+    opacity: 0.8;
+}

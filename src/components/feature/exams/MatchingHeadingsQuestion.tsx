@@ -53,7 +53,7 @@ export default function MatchingHeadingsQuestion({
                         ref={(el) => registerRef(question.id, el)}
                     >
                         <label className={s.paragraphLabel}>
-                            <strong>{question.globalNumber}.</strong>{' '}
+                            <strong>{question.orderNumber}.</strong>{' '}
                             {question.questionText}
                         </label>
                         <select

@@ -1,5 +1,5 @@
 import React from 'react'
-import type { User, Role, UserStatus } from '@/types/auth'
+import type { User, Role, UserStatus } from '@/types/user.types'
 import s from './UserTable.module.css'
 import avatarPlaceholder from '@/assets/avatar-placeholder.png'
 import {
@@ -12,6 +12,7 @@ import IconEdit from '@/assets/Edit Pen.svg'
 import IconDelete from '@/assets/Trash Bin.svg'
 import IconLock from '@/assets/Block.svg'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
+import Skeleton from '@/components/effect/Skeleton'
 
 const roleDisplayNames: Record<Role, string> = {
     student: 'Học sinh',
@@ -68,6 +69,67 @@ export const UserTable: React.FC<UserTableProps> = ({
         return true
     }
 
+    const UserRowSkeleton = () => (
+        <tr>
+            {/* Cột 1: Avatar + Tên */}
+            <td>
+                <div className={s.userCell}>
+                    <Skeleton variant="circle" width={40} height={40} />
+                    <div className={s.userInfo}>
+                        <Skeleton
+                            width={120}
+                            height={16}
+                            style={{ marginBottom: 4 }}
+                        />
+                        <Skeleton width={160} height={14} />
+                    </div>
+                </div>
+            </td>
+            {/* Cột 2: Liên hệ */}
+            <td>
+                <div className={s.contactCell}>
+                    <Skeleton width={100} height={20} />
+                </div>
+            </td>
+            {/* Cột 3: Vai trò */}
+            <td>
+                <Skeleton width={90} height={20} />
+            </td>
+            {/* Cột 4: Trạng thái (Badge) */}
+            <td>
+                <Skeleton
+                    width={100}
+                    height={24}
+                    style={{ borderRadius: 12 }}
+                />
+            </td>
+            {/* Cột 5: Ngày tạo */}
+            <td>
+                <Skeleton width={80} height={20} />
+            </td>
+            {/* Cột 6: Hành động (3 nút) */}
+            <td>
+                <div className={s.actionsCell}>
+                    <Skeleton
+                        width={32}
+                        height={32}
+                        style={{ borderRadius: 8 }}
+                    />
+                    <Skeleton
+                        width={32}
+                        height={32}
+                        style={{ borderRadius: 8 }}
+                    />
+                    <Skeleton
+                        width={32}
+                        height={32}
+                        style={{ borderRadius: 8 }}
+                    />
+                </div>
+            </td>
+        </tr>
+    )
+
     return (
         <table className={s.table}>
             <thead>
@@ -82,11 +144,11 @@ export const UserTable: React.FC<UserTableProps> = ({
             </thead>
             <tbody>
                 {isLoading ? (
-                    <tr>
-                        <td colSpan={6} className={s.loadingCell}>
-                            Đang tải...
-                        </td>
-                    </tr>
+                    <>
+                        {[...Array(10)].map((_, index) => (
+                            <UserRowSkeleton key={index} />
+                        ))}
+                    </>
                 ) : users.length === 0 ? (
                     <tr>
                         <td colSpan={6} className={s.loadingCell}>

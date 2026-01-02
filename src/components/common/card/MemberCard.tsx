@@ -12,6 +12,7 @@ export interface ClassMember {
     avatarUrl?: string | null
     role: 'student' | 'teacher'
     isOnline: boolean
+    email?: string
 }
 
 interface MemberCardProps {
@@ -32,7 +33,7 @@ export default function MemberCard({ member }: MemberCardProps) {
     const avatarSrc = member.avatarUrl || AvatarPlaceholder
 
     return (
-        <div className={s.card}>
+        <div className={s.card} title={member.email}>
             <img
                 src={avatarSrc}
                 alt={`${fullName}'s avatar`}

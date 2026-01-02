@@ -1,139 +1,243 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
 import s from './Dashboard.module.css'
-import { useNavigate, useLocation } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { isSameDay, isWithinInterval, parseISO } from 'date-fns'
 
-import NavigationMenu from '@/components/common/menu/NavigationMenu'
 import Card from '@/components/common/card/Card'
 import StatCard from '@/components/common/card/StatCard'
 import ScheduleTodayCard from '@/components/common/card/ScheduleToday'
 import TemplateCard from '@/components/common/card/TemplateCard'
 
-import AvatarImg from '@/assets/avatar-placeholder.png'
 import ChartBarIcon from '@/assets/Chart Bar.svg'
 import ChatIcon from '@/assets/Chat Square Double Text.svg'
 import YoutubeIcon from '@/assets/Arrow Right.svg'
 import TemplateImg from '@/assets/banner-placeholder.png'
-import RobotIcon from '@/assets/Robot.svg'
-import type { Lesson } from '@/components/common/typography/LessonItem'
-import Chatbot from '@/components/feature/chatbot/Chatbot'
 import { TextHorizontal } from '@/components/common/text/TextHorizontal'
 import TextType from '@/components/common/text/TextType'
-import { getMe } from '@/lib/users'
-import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
-import type { Role } from '@/types/auth'
+import CheckIcon from '@/assets/Check Circle.svg'
+import IconRefresh from '@/assets/Refresh.svg'
 
-const stats = [
-    {
-        id: 's1',
-        title: 'Điểm danh',
-        value: '99',
-        unit: '%',
-        subtitle: 'Tỉ lệ tham gia các buổi học hàng tháng',
-        active: true,
-    },
-    {
-        id: 's2',
-        title: 'Điểm hiện tại',
-        value: '4.5',
-        subtitle: 'Điểm đạt được trung bình từ các bài thi',
-    },
-    {
-        id: 's3',
-        title: 'Số bài kiểm tra',
-        value: '124',
-        subtitle: 'Số lần làm bài của bạn trên hệ thống',
-    },
-]
-
-const todaySessions: Lesson[] = [
-    {
-        id: '1',
-        sessionDate: '2025-03-10',
-        startTime: '08:00',
-        endTime: '09:30',
-        className: 'IELTS Intermediate A',
-        courseName: 'IELTS Intermediate A',
-        teacherName: 'Mr. John',
-        roomName: 'A1',
-        status: 'in_progress',
-        attendanceTaken: false,
-    },
-    {
-        id: '2',
-        sessionDate: '2025-03-10',
-        startTime: '10:00',
-        endTime: '11:30',
-        className: 'TOEIC Advanced B',
-        courseName: 'TOEIC Advanced B',
-        teacherName: 'Ms. Jane',
-        roomName: 'B2',
-        status: 'scheduled',
-        attendanceTaken: false,
-    },
-]
+import { getMe, getUserOverview, getMyClasses } from '@/lib/users'
+import type {
+    Lesson,
+    LessonStatus,
+} from '@/components/common/typography/LessonItem'
+import { getSessionAttendance, selfCheckIn } from '@/lib/attendance'
+import { queryClient } from '@/lib/query'
+import { useDialog } from '@/hooks/useDialog'
+import ButtonGlow from '@/components/common/button/ButtonGlow'
 
 export default function StudentDashboard() {
-    const navigate = useNavigate()
-    const location = useLocation()
-    const [isChatOpen, setIsChatOpen] = useState(false)
-
-    // Fetch current user
+    const { alert: showAlert } = useDialog()
+    // 1. Fetch User Info
     const { data: userData, isLoading: userLoading } = useQuery({
         queryKey: ['me'],
-        queryFn: () => getMe(),
+        queryFn: getMe,
     })
 
-    const userRole = 'student' as Role
-    const currentPath = location.pathname
+    // 2. Fetch Overview Stats
+    const { data: statsData } = useQuery({
+        queryKey: ['student-overview'],
+        queryFn: getUserOverview,
+    })
 
-    // Get nav items from config
-    const navItems = useMemo(
-        () => getNavItems(userRole, currentPath, navigate),
-        [currentPath, navigate]
+    // 3. Fetch Classes & Sessions
+    const { data: myClasses = [] } = useQuery({
+        queryKey: ['my-classes'],
+        queryFn: getMyClasses,
+    })
+
+    const activeSession = useMemo(() => {
+        const now = new Date()
+        let foundSession: { sessionId: string; classId: string } | null = null
+
+        // Loop qua tất cả các lớp để tìm session đang diễn ra
+        for (const cls of myClasses) {
+            if (!cls.sessions) continue
+            for (const session of cls.sessions) {
+                const sessionDateStr = session.session_date // YYYY-MM-DD
+
+                // Parse start/end time kết hợp với date
+                // Giả sử start_time dạng "08:00:00"
+                const startDateTime = parseISO(
+                    `${sessionDateStr}T${session.start_time}`
+                )
+                const endDateTime = parseISO(
+                    `${sessionDateStr}T${session.end_time}`
+                )
+
+                // Kiểm tra active: Thời gian hiện tại nằm trong khoảng diễn ra session
+                // Mở rộng thêm 15 phút trước giờ học để cho phép điểm danh sớm
+                const checkInWindowStart = new Date(
+                    startDateTime.getTime() - 15 * 60000
+                )
+
+                if (
+                    isWithinInterval(now, {
+                        start: checkInWindowStart,
+                        end: endDateTime,
+                    })
+                ) {
+                    foundSession = { sessionId: session.id, classId: cls.id }
+                    break
+                }
+            }
+            if (foundSession) break
+        }
+        return foundSession
+    }, [myClasses])
+
+    const { data: attendanceRecords = [] } = useQuery({
+        queryKey: ['session-attendance', activeSession?.sessionId],
+        queryFn: () => getSessionAttendance(activeSession!.sessionId),
+        enabled: !!activeSession?.sessionId, // Chỉ fetch khi có session đang diễn ra
+        refetchInterval: 10000, // Auto refresh mỗi 10s để cập nhật trạng thái
+    })
+
+    const isCheckedIn = useMemo(() => {
+        if (!userData || !attendanceRecords.length) return false
+        return attendanceRecords.some(
+            (r) => r.student_id === userData.id && r.status === 'present'
+        )
+    }, [attendanceRecords, userData])
+
+    const checkInMutation = useMutation({
+        mutationFn: (sessionId: string) => selfCheckIn(sessionId),
+        onSuccess: () => {
+            showAlert('Điểm danh thành công!', 'Thành công')
+            queryClient.invalidateQueries({ queryKey: ['session-attendance'] })
+            queryClient.invalidateQueries({ queryKey: ['student-overview'] })
+        },
+        onError: (error: any) => {
+            showAlert(
+                error?.message || 'Điểm danh thất bại. Vui lòng thử lại.',
+                'Lỗi'
+            )
+        },
+    })
+
+    const handleCheckIn = () => {
+        if (activeSession) {
+            checkInMutation.mutate(activeSession.sessionId)
+        } else {
+            showAlert(
+                'Hiện tại không có tiết học nào diễn ra để điểm danh.',
+                'Lỗi'
+            )
+        }
+    }
+
+    // --- Xử lý dữ liệu Stats ---
+    const stats = useMemo(
+        () => [
+            {
+                id: 's1',
+                title: 'Lớp đang học',
+                value: statsData?.active_courses?.toString() || '0',
+                subtitle: 'Số lớp học đang kích hoạt',
+                unit: '',
+                active: true,
+            },
+            {
+                id: 's2',
+                title: 'Điểm trung bình',
+                value: statsData?.average_test_score?.toString() || '0',
+                unit: '',
+                subtitle: 'Điểm số trung bình các bài kiểm tra',
+            },
+            {
+                id: 's3',
+                title: 'Bài kiểm tra',
+                value: statsData?.tests_taken?.toString() || '0',
+                unit: '',
+                subtitle: 'Tổng số bài kiểm tra đã hoàn thành',
+            },
+        ],
+        [statsData]
     )
 
-    const userMenuItems = useMemo(
-        () => getUserMenuItems(userRole, navigate),
-        [navigate]
-    )
+    const todaySessions = useMemo<Lesson[]>(() => {
+        if (!myClasses.length) return []
+        const today = new Date()
+        const sessionsList: Lesson[] = []
 
-    // Build greeting text with user's full name
-    const greetingTexts = userData
-        ? [
-              `Xin chào, ${userData.firstName} ${userData.lastName}!`,
-              `Chào mừng trở lại, ${userData.firstName} ${userData.lastName}!`,
-          ]
-        : ['Xin chào!', 'Chào mừng trở lại!']
+        myClasses.forEach((cls) => {
+            if (!cls.sessions) return
+            cls.sessions.forEach((session) => {
+                const sessionDate = parseISO(session.session_date)
+                if (isSameDay(sessionDate, today)) {
+                    sessionsList.push({
+                        id: session.id,
+                        sessionDate: session.session_date,
+                        startTime: session.start_time.slice(0, 5),
+                        endTime: session.end_time.slice(0, 5),
+                        className: cls.name,
+                        courseName: cls.course_name || 'N/A',
+                        teacherName: cls.teacher?.full_name || 'Chưa phân công',
+                        roomName: session.room_id
+                            ? `Phòng ${session.room_id}`
+                            : cls.room_name || 'Online',
+                        status: session.status as LessonStatus,
+                        attendanceTaken: false,
+                    })
+                }
+            })
+        })
+        return sessionsList.sort((a, b) =>
+            a.startTime.localeCompare(b.startTime)
+        )
+    }, [myClasses])
 
     const fullName = userData
         ? `${userData.firstName} ${userData.lastName}`
         : ''
 
+    const greetingTexts = userData
+        ? [`Xin chào, ${fullName}!`, `Chúc bạn một ngày học tập hiệu quả!`]
+        : ['Xin chào!', 'Chào mừng trở lại!']
+
+    const renderCheckInButton = () => {
+        if (isCheckedIn) {
+            return (
+                <ButtonGlow
+                    size="sm"
+                    variant="outline"
+                    disabled
+                    style={{
+                        borderColor: '#10b981',
+                        color: '#10b981',
+                        cursor: 'default',
+                    }}
+                    rightIcon={
+                        <img src={CheckIcon} alt="" style={{ width: 14 }} />
+                    }
+                >
+                    Đã điểm danh
+                </ButtonGlow>
+            )
+        }
+
+        if (activeSession) {
+            return (
+                <ButtonGlow
+                    size="sm"
+                    variant="outline"
+                    onClick={handleCheckIn}
+                    disabled={checkInMutation.isPending}
+                    rightIcon={<img src={IconRefresh} alt="" />}
+                >
+                    {checkInMutation.isPending
+                        ? 'Đang xử lý...'
+                        : 'Điểm danh ngay'}
+                </ButtonGlow>
+            )
+        }
+
+        return null
+    }
+
     return (
         <div className={s.dashboard}>
-            {/* Navigation */}
-            <header className={s.header}>
-                <NavigationMenu
-                    items={navItems}
-                    rightSlotDropdownItems={userMenuItems}
-                    rightSlot={
-                        <img
-                            src={userData?.avatarUrl || AvatarImg}
-                            style={{
-                                width: '36px',
-                                height: '36px',
-                                borderRadius: '50%',
-                                objectFit: 'cover',
-                                display: 'block',
-                            }}
-                            alt="User Avatar"
-                        />
-                    }
-                />
-            </header>
-
-            {/* Welcome Message */}
             <h1 className={s.welcomeMessage}>
                 {!userLoading && userData && (
                     <TextType
@@ -170,8 +274,8 @@ export default function StudentDashboard() {
             {/* Main Content */}
             <main className={s.mainContent}>
                 <Card
-                    title="Tổng quan"
-                    subtitle="Số liệu phân tích từ các hoạt động gần đây"
+                    title="Tổng quan học tập"
+                    subtitle="Tiến độ và kết quả gần đây của bạn"
                     direction="horizontal"
                 >
                     <div className={s.statsGrid}>
@@ -183,7 +287,7 @@ export default function StudentDashboard() {
                                 unit={stat.unit}
                                 subtitle={stat.subtitle}
                                 active={stat.active}
-                                icon={<img src={ChartBarIcon} />}
+                                icon={<img src={ChartBarIcon} alt="" />}
                             />
                         ))}
                     </div>
@@ -192,7 +296,11 @@ export default function StudentDashboard() {
                 <div className={s.mainRow}>
                     <ScheduleTodayCard
                         sessions={todaySessions}
-                        onCheckIn={() => alert('Điểm danh!')}
+                        // Truyền null vào onCheckIn để ẩn nút mặc định bên trong component nếu ta muốn custom control
+                        onCheckIn={undefined}
+                        // Truyền nút custom vào props controls (Bạn cần update ScheduleTodayCard để nhận prop này nếu chưa có)
+                        // Hoặc sử dụng logic dưới đây nếu ScheduleTodayCard chỉ nhận onCheckIn:
+                        controls={renderCheckInButton()}
                     />
 
                     <Card
@@ -204,7 +312,7 @@ export default function StudentDashboard() {
                                 <TextHorizontal
                                     icon={<img src={ChatIcon} alt="tip icon" />}
                                     iconStyle="flat"
-                                    title="Tip!"
+                                    title="Mẹo thi cử"
                                     description="Trong bài kiểm tra Listening, hãy tập trung nghe vào Keyword để tìm ra đáp án đúng!"
                                     mode="light"
                                 />
@@ -222,9 +330,9 @@ export default function StudentDashboard() {
                                         <span>Speaking</span>
                                     </>
                                 }
-                                title="How to pronounce /ed/ sound?"
-                                excerpt="This is the sample text. Real information will be added later when developing this website."
-                                ctaText="Go to Youtube"
+                                title="Luyện phát âm đuôi /ed/"
+                                excerpt="Bài học ngắn giúp bạn nắm vững quy tắc phát âm đuôi /ed/ trong 5 phút."
+                                ctaText="Xem ngay"
                                 ctaIcon={
                                     <img
                                         src={YoutubeIcon}
@@ -237,17 +345,6 @@ export default function StudentDashboard() {
                     </Card>
                 </div>
             </main>
-
-            {/* Chatbot FAB */}
-            <button
-                className={s.fab}
-                aria-label="Open chatbot"
-                onClick={() => setIsChatOpen(true)}
-            >
-                <img src={RobotIcon} alt="Chatbot" />
-            </button>
-
-            <Chatbot isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
         </div>
     )
 }

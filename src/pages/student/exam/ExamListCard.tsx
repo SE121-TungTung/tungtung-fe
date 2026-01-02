@@ -8,6 +8,7 @@ import BackIcon from '@/assets/arrow-left.svg'
 import ClockIcon from '@/assets/History.svg'
 import QuestionIcon from '@/assets/Card Question.svg'
 import CheckIcon from '@/assets/Check Circle.svg'
+import Skeleton from '@/components/effect/Skeleton'
 
 interface ExamListCardProps {
     title: string
@@ -43,6 +44,31 @@ export default function ExamListCard({
             Quay lại
         </ButtonGhost>
     ) : null
+
+    const ExamItemSkeleton = () => (
+        <li className={s.examItem} style={{ pointerEvents: 'none' }}>
+            <div className={s.examMain}>
+                <div className={s.examHeader}>
+                    <Skeleton
+                        width="40%"
+                        height={24}
+                        style={{ marginBottom: 8 }}
+                    />
+                    <Skeleton width={60} height={20} />
+                </div>
+                <Skeleton variant="text" count={2} />{' '}
+                <Skeleton width="80%" height={16} style={{ marginTop: 8 }} />
+                <div
+                    className={s.examMeta}
+                    style={{ marginTop: 12, display: 'flex', gap: 12 }}
+                >
+                    <Skeleton width={80} height={16} />
+                    <Skeleton width={80} height={16} />
+                    <Skeleton width={60} height={20} />
+                </div>
+            </div>
+        </li>
+    )
 
     const renderExamItem = (exam: TestListItem | StudentTestListItem) => {
         const isStudentView = 'canAttempt' in exam
@@ -149,7 +175,11 @@ export default function ExamListCard({
         >
             <div className={s.cardBody}>
                 {isLoading ? (
-                    <div className={s.emptyState}>Đang tải danh sách...</div>
+                    <ul className={s.examList}>
+                        {[1, 2, 3].map((i) => (
+                            <ExamItemSkeleton key={i} />
+                        ))}
+                    </ul>
                 ) : exams.length > 0 ? (
                     <ul className={s.examList}>{exams.map(renderExamItem)}</ul>
                 ) : (

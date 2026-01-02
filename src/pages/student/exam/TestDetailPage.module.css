@@ -28,7 +28,7 @@
     justify-content: center;
     gap: 20px;
     min-height: 400px;
-    color: var(--text-secondary-light);
+    color: var(--text-primary-light);
 }
 
 .spinner {
@@ -438,10 +438,11 @@
 /* ============================================ */
 .answerBox {
     padding: 12px 16px;
-    background: var(--status-success-100-light);
+    background: var(--color-green-200);
     border-left: 3px solid var(--status-success-500-light);
     border-radius: var(--radius-md);
     margin: 16px 0;
+    color: var(--text-primary-light);
 }
 
 .answerBox strong {
