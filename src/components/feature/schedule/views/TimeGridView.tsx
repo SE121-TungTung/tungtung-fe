@@ -68,6 +68,41 @@ export default function TimeGridView({
         return false
     }
 
+    const groupOverlappingSessions = (sessions: WeeklySession[]) => {
+        const sorted = [...sessions].sort((a, b) =>
+            a.start_time.localeCompare(b.start_time)
+        )
+        const groups: WeeklySession[][] = []
+
+        for (const session of sorted) {
+            let placed = false
+            for (const group of groups) {
+                if (isOverlappingWithGroup(session, group)) {
+                    group.push(session)
+                    placed = true
+                    break
+                }
+            }
+            if (!placed) {
+                groups.push([session])
+            }
+        }
+        return groups
+    }
+
+    const isOverlappingWithGroup = (
+        session: WeeklySession,
+        group: WeeklySession[]
+    ) => {
+        return group.some((s) => {
+            const start1 = session.start_time
+            const end1 = session.end_time
+            const start2 = s.start_time
+            const end2 = s.end_time
+            return start1 < end2 && start2 < end1
+        })
+    }
+
     return (
         <div className={s.timeGridContainer}>
             {/* Header */}
@@ -99,6 +134,8 @@ export default function TimeGridView({
                     const daySessions = getSessionsForDay(day)
                     const hasOverlaps = hasOverlap(daySessions)
 
+                    const groups = groupOverlappingSessions(daySessions)
+
                     return (
                         <div key={i} className={s.dayColumn}>
                             {/* Grid lines background */}
@@ -106,34 +143,39 @@ export default function TimeGridView({
                                 <div key={h} className={s.gridLine} />
                             ))}
 
-                            {/* Sessions */}
-                            {daySessions.map((session, idx) => {
-                                const style = getSessionStyle(session)
+                            {groups.map((group, groupIdx) =>
+                                group.map((session, indexInGroup) => {
+                                    const style = getSessionStyle(session)
 
-                                return (
-                                    <div
-                                        key={session.session_id}
-                                        className={`${s.gridSession} ${
-                                            hasOverlaps ? s.overlapping : ''
-                                        }`}
-                                        style={{
-                                            ...style,
-                                            // Stagger overlapping sessions
-                                            left: hasOverlaps
-                                                ? `${idx * 8}%`
-                                                : '2%',
-                                            width: hasOverlaps ? '88%' : '96%',
-                                            zIndex: hasOverlaps ? idx + 1 : 1,
-                                        }}
-                                    >
-                                        <SessionCard
-                                            session={session}
-                                            compact
-                                            onClick={onSessionClick}
-                                        />
-                                    </div>
-                                )
-                            })}
+                                    const widthPercent = 100 / group.length
+                                    const leftPercent =
+                                        indexInGroup * widthPercent
+
+                                    return (
+                                        <div
+                                            key={session.session_id}
+                                            className={s.gridSession}
+                                            style={{
+                                                ...style,
+                                                left: `${leftPercent}%`,
+                                                width: `${widthPercent}%`,
+                                                borderRight:
+                                                    indexInGroup <
+                                                    group.length - 1
+                                                        ? '1px solid white'
+                                                        : 'none',
+                                                zIndex: 10,
+                                            }}
+                                        >
+                                            <SessionCard
+                                                session={session}
+                                                compact
+                                                onClick={onSessionClick}
+                                            />
+                                        </div>
+                                    )
+                                })
+                            )}
 
                             {daySessions.length === 0 && (
                                 <div className={s.emptyDay}>—</div>

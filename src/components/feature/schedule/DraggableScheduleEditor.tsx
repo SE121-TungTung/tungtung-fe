@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import s from './DraggableScheduleEditor.module.css'
 import type { SessionProposal } from '@/types/schedule.types'
 import { SYSTEM_TIME_SLOTS } from '@/types/schedule.types'
-import { format, addDays, startOfWeek } from 'date-fns'
+import { format, addDays, startOfWeek, addWeeks } from 'date-fns'
 import { vi } from 'date-fns/locale'
+import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 
 interface DraggableScheduleEditorProps {
     startDate: Date
@@ -15,7 +16,7 @@ interface DraggableScheduleEditorProps {
 
 const TIME_SLOTS = SYSTEM_TIME_SLOTS.map((slot) => ({
     id: slot.slot_number,
-    label: `Kíp ${slot.slot_number}`,
+    label: `Ca ${slot.slot_number}`,
     time: `${slot.start_time.slice(0, 5)}-${slot.end_time.slice(0, 5)}`,
 }))
 
@@ -33,12 +34,59 @@ export default function DraggableScheduleEditor({
     const [editingSession, setEditingSession] = useState<string | null>(null)
     const [hoveredSlot, setHoveredSlot] = useState<string | null>(null)
 
-    const weekStart = startOfWeek(startDate, { weekStartsOn: 1 })
-    const weekDays = Array.from({ length: DAYS_OF_WEEK }, (_, i) =>
-        addDays(weekStart, i)
+    // Week navigation state
+    const [currentWeekOffset, setCurrentWeekOffset] = useState(0)
+
+    // Calculate date range from sessions
+    const dateRange = useMemo(() => {
+        if (sessions.length === 0) {
+            return {
+                minDate: startDate,
+                maxDate: startDate,
+                totalWeeks: 1,
+            }
+        }
+
+        const dates = sessions.map((s) => new Date(s.session_date))
+        const minDate = new Date(Math.min(...dates.map((d) => d.getTime())))
+        const maxDate = new Date(Math.max(...dates.map((d) => d.getTime())))
+
+        // Calculate total weeks
+        const diffTime = maxDate.getTime() - minDate.getTime()
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+        const totalWeeks = Math.ceil(diffDays / 7)
+
+        return { minDate, maxDate, totalWeeks }
+    }, [sessions, startDate])
+
+    // Calculate current week based on offset
+    const currentWeekStart = useMemo(() => {
+        const baseWeek = startOfWeek(dateRange.minDate, { weekStartsOn: 1 })
+        return addWeeks(baseWeek, currentWeekOffset)
+    }, [dateRange.minDate, currentWeekOffset])
+
+    const weekDays = useMemo(
+        () =>
+            Array.from({ length: DAYS_OF_WEEK }, (_, i) =>
+                addDays(currentWeekStart, i)
+            ),
+        [currentWeekStart]
     )
 
-    // Generate unique key cho session
+    // Week navigation handlers
+    const handlePrevWeek = () => {
+        if (currentWeekOffset > 0) {
+            setCurrentWeekOffset((prev) => prev - 1)
+        }
+    }
+
+    const handleNextWeek = () => {
+        if (currentWeekOffset < dateRange.totalWeeks - 1) {
+            setCurrentWeekOffset((prev) => prev + 1)
+        }
+    }
+
+    // Generate unique key for session
     const getSessionKey = (session: SessionProposal) => {
         return `${session.class_id}_${session.session_date}_${(session.time_slots || []).join('-')}`
     }
@@ -48,7 +96,7 @@ export default function DraggableScheduleEditor({
         return `${format(date, 'yyyy-MM-dd')}_${slotId}`
     }
 
-    // Get sessions bắt đầu tại slot này (chỉ lấy session có slot đầu tiên = slotId)
+    // Get sessions starting at slot
     const getSessionsStartingAtSlot = (date: Date, slotId: number) => {
         const dateStr = format(date, 'yyyy-MM-dd')
         return sessions.filter(
@@ -57,13 +105,12 @@ export default function DraggableScheduleEditor({
         )
     }
 
-    // Kiểm tra xem slot này có bị chiếm bởi session kéo dài từ slot trước không
+    // Check if slot is occupied by span
     const isSlotOccupiedBySpan = (date: Date, slotId: number) => {
         const dateStr = format(date, 'yyyy-MM-dd')
         return sessions.some((s) => {
             if (s.session_date !== dateStr) return false
             const slots = s.time_slots || []
-            // Slot này nằm trong time_slots nhưng không phải slot đầu tiên
             return slots.includes(slotId) && slots[0] !== slotId
         })
     }
@@ -71,8 +118,6 @@ export default function DraggableScheduleEditor({
     // Check conflict
     const hasConflict = (date: Date, slotId: number) => {
         const dateStr = format(date, 'yyyy-MM-dd')
-
-        // Lấy tất cả sessions có slot này (bao gồm cả span)
         const slotSessions = sessions.filter((s) => {
             return (
                 s.session_date === dateStr &&
@@ -82,11 +127,9 @@ export default function DraggableScheduleEditor({
 
         if (slotSessions.length <= 1) return false
 
-        // Check teacher conflict
         const teacherIds = slotSessions.map((s) => s.teacher_id)
         if (teacherIds.length > new Set(teacherIds).size) return true
 
-        // Check room conflict
         const roomIds = slotSessions.map((s) => s.room_id)
         if (roomIds.length > new Set(roomIds).size) return true
 
@@ -123,12 +166,11 @@ export default function DraggableScheduleEditor({
             SYSTEM_TIME_SLOTS[SYSTEM_TIME_SLOTS.length - 1].slot_number
         if (targetSlot + slotCount - 1 > maxSlot) {
             alert(
-                `Không thể xếp ${slotCount} kíp từ kíp ${targetSlot} (vượt quá kíp ${maxSlot})`
+                `Không thể xếp ${slotCount} ca từ ca ${targetSlot} (vượt quá ca ${maxSlot})`
             )
             return
         }
 
-        // Tạo time_slots mới bắt đầu từ targetSlot
         const newTimeSlots = Array.from(
             { length: slotCount },
             (_, i) => targetSlot + i
@@ -198,7 +240,36 @@ export default function DraggableScheduleEditor({
     return (
         <div className={s.container}>
             <div className={s.header}>
-                <h3 className={s.title}>Chỉnh sửa Thời Khóa Biểu</h3>
+                <div className={s.titleRow}>
+                    <h3 className={s.title}>Chỉnh sửa Thời Khóa Biểu</h3>
+                    {dateRange.totalWeeks > 1 && (
+                        <div className={s.weekNav}>
+                            <ButtonPrimary
+                                size="sm"
+                                variant="outline"
+                                onClick={handlePrevWeek}
+                                disabled={currentWeekOffset === 0}
+                            >
+                                ←
+                            </ButtonPrimary>
+                            <span className={s.weekIndicator}>
+                                Tuần {currentWeekOffset + 1} /{' '}
+                                {dateRange.totalWeeks}
+                            </span>
+                            <ButtonPrimary
+                                size="sm"
+                                variant="outline"
+                                onClick={handleNextWeek}
+                                disabled={
+                                    currentWeekOffset ===
+                                    dateRange.totalWeeks - 1
+                                }
+                            >
+                                →
+                            </ButtonPrimary>
+                        </div>
+                    )}
+                </div>
                 <div className={s.legend}>
                     <span className={s.legendItem}>
                         <span className={s.dotNormal}></span> Bình thường
@@ -214,7 +285,7 @@ export default function DraggableScheduleEditor({
 
             <div className={s.scheduleGrid}>
                 {/* Header Row */}
-                <div className={s.cornerCell}>Kíp \ Ngày</div>
+                <div className={s.cornerCell}>Ca \ Ngày</div>
                 {weekDays.map((day) => (
                     <div key={day.toISOString()} className={s.dayHeader}>
                         <div className={s.dayName}>
@@ -247,7 +318,6 @@ export default function DraggableScheduleEditor({
                             const isHovered = hoveredSlot === slotKey
                             const hasConflictInSlot = hasConflict(day, slot.id)
 
-                            // Nếu slot bị chiếm bởi span, không render gì
                             if (isOccupied) {
                                 return (
                                     <div
@@ -434,7 +504,7 @@ export default function DraggableScheduleEditor({
                                                                 s.slotInfo
                                                             }
                                                         >
-                                                            {spanRows} kíp (
+                                                            {spanRows} ca (
                                                             {(
                                                                 session.time_slots ||
                                                                 []
@@ -484,8 +554,8 @@ export default function DraggableScheduleEditor({
                                                                     s.infoRow
                                                                 }
                                                             >
-                                                                🕐 {spanRows}{' '}
-                                                                kíp liên tiếp
+                                                                🕐 {spanRows} ca
+                                                                liên tiếp
                                                             </div>
                                                         )}
                                                     </div>
@@ -506,8 +576,14 @@ export default function DraggableScheduleEditor({
 
             <div className={s.instructions}>
                 💡 <strong>Hướng dẫn:</strong> Kéo thả buổi học để di chuyển
-                (giữ nguyên số kíp) • Click ✏️ để chỉnh sửa • Click 🗑️ để xóa •
-                Buổi học nhiều kíp sẽ tự động kéo dài
+                (giữ nguyên số ca) • Click ✏️ để chỉnh sửa • Click 🗑️ để xóa •
+                Buổi học nhiều ca sẽ tự động kéo dài
+                {dateRange.totalWeeks > 1 && (
+                    <>
+                        {' '}
+                        • <strong>Dùng ← → để chuyển tuần</strong>
+                    </>
+                )}
             </div>
         </div>
     )

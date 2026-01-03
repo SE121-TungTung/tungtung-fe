@@ -2,18 +2,22 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    overflow-x: auto;
+    height: 600px;
+    overflow-y: auto;
     background: var(--surface-card-light);
     border-radius: var(--radius-md);
     border: 1px solid var(--boder-soft-light);
-    backdrop-filter: blur(20px);
+    position: relative;
 }
 
 .headerRow {
     display: grid;
-    grid-template-columns: 60px repeat(7, 1fr);
+    grid-template-columns: 60px repeat(7, minmax(0, 1fr));
     border-bottom: 1px solid var(--boder-soft-light);
-    background: rgba(255, 255, 255, 0.5);
+    background: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 20;
 }
 
 .timeHeader {
@@ -44,10 +48,9 @@
 
 .gridBody {
     display: grid;
-    grid-template-columns: 60px repeat(7, 1fr);
-    height: 600px;
-    overflow-y: auto;
+    grid-template-columns: 60px repeat(7, minmax(0, 1fr));
     position: relative;
+    min-height: fit-content;
 }
 
 .timeColumn {

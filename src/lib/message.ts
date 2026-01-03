@@ -19,6 +19,7 @@ import type {
     DeleteConversationResponse,
     DeleteMessageResponse,
 } from '@/types/message.types'
+import { is } from 'date-fns/locale'
 
 const BASE_URL = '/api/v1/messaging'
 
@@ -64,6 +65,7 @@ function mapParticipant(member: BackendMemberResponse): Participant {
 
 function mapMessage(msg: BackendMessageResponse): Message {
     let sender: Participant | undefined
+    let isUpdated = false
 
     if (msg.sender) {
         const fullName =
@@ -80,6 +82,10 @@ function mapMessage(msg: BackendMessageResponse): Message {
         }
     }
 
+    if (msg.updated_at) {
+        isUpdated = true
+    }
+
     return {
         id: msg.id,
         conversationId: msg.chat_room_id,
@@ -88,6 +94,8 @@ function mapMessage(msg: BackendMessageResponse): Message {
         messageType: msg.message_type,
         status: (msg.status as any) || 'read',
         createdAt: msg.timestamp,
+        updatedAt: msg.updated_at,
+        isEdited: isUpdated,
         attachments: msg.attachments || [],
         sender: sender,
     }

@@ -1,29 +1,25 @@
 import { useState, useMemo, useEffect } from 'react'
 import s from './MessagesPage.module.css'
 import { useSession } from '@/stores/session.store'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { messageApi } from '@/lib/message'
 import { ConversationList } from '@/components/feature/messages/ConversationList'
 import { ChatWindow } from '@/components/feature/messages/ChatWindow'
 import { ChatDetailsPanel } from '@/components/feature/messages/ChatDetailsPanel'
-import NavigationMenu from '@/components/common/menu/NavigationMenu'
-import Card from '@/components/common/card/Card'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import { NewChatModal } from '@/components/feature/messages/NewChatModal'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
-import { queryClient } from '@/lib/query'
-import DefaultAvatar from '@/assets/avatar-placeholder.png'
 import type { Conversation } from '@/types/message.types'
+import { useLocation } from 'react-router-dom'
+import { wsManager } from '@/lib/websocket'
+
+interface LocationState {
+    startChatWith?: string
+}
 
 export default function MessagesPage() {
     const sessionState = useSession()
-    const userRole = sessionState?.user?.role || 'student'
     const currentUserId = sessionState?.user?.id || ''
-
-    const navigate = useNavigate()
-    const session = useSession((state) => state.user)
-    const location = useLocation()
+    const queryClient = useQueryClient()
 
     const [activeConversationId, setActiveConversationId] = useState<
         string | null
@@ -124,17 +120,23 @@ export default function MessagesPage() {
         setIsAdmin(isUserAdmin)
     }, [detailedConversation, currentUserId])
 
-    // ✅ Refetch conversation details when new message arrives
     useEffect(() => {
-        const handleNewMessage = (event: MessageEvent) => {
+        const checkWsStatus = setInterval(() => {
+            console.log('🔌 WebSocket Status:', wsManager.getConnectionState())
+        }, 5000) // Check mỗi 5 giây
+
+        return () => clearInterval(checkWsStatus)
+    }, [])
+
+    useEffect(() => {
+        const handleNewMessage = (event: CustomEvent) => {
             try {
-                const data = JSON.parse(event.data)
+                const data = event.detail
 
                 if (
                     data.type === 'new_message' &&
                     data.room_id === activeConversationId
                 ) {
-                    // Refetch conversation details to update participants
                     queryClient.invalidateQueries({
                         queryKey: ['conversationDetails', activeConversationId],
                     })
@@ -152,6 +154,43 @@ export default function MessagesPage() {
             )
         }
     }, [activeConversationId])
+
+    const location = useLocation()
+
+    useEffect(() => {
+        const state = location.state as LocationState | null
+        const startChatWithUserId = state?.startChatWith
+
+        console.log('📍 [MessagesPage] State nhận được:', state)
+
+        if (startChatWithUserId) {
+            console.log(
+                '🚀 [MessagesPage] Bắt đầu tạo hội thoại với User:',
+                startChatWithUserId
+            )
+            window.history.replaceState({}, document.title)
+
+            messageApi
+                .getOrCreateDirectConversation(startChatWithUserId)
+                .then((conversation) => {
+                    queryClient.setQueryData(
+                        ['conversations'],
+                        (oldData: Conversation[] | undefined) => {
+                            if (!oldData) return [conversation]
+                            const exists = oldData.find(
+                                (c) => c.id === conversation.id
+                            )
+                            return exists ? oldData : [conversation, ...oldData]
+                        }
+                    )
+
+                    setActiveConversationId(conversation.id)
+                })
+                .catch((err) => {
+                    console.error('Failed to start chat:', err)
+                })
+        }
+    }, [location, queryClient])
 
     const handleStartChat = async (
         userIds: string[],
@@ -195,32 +234,9 @@ export default function MessagesPage() {
         setIsDetailsOpen(false)
     }
 
-    const navItems = useMemo(
-        () => getNavItems(userRole as any, location.pathname, navigate),
-        [userRole, location.pathname, navigate]
-    )
-
-    const userMenuItems = useMemo(
-        () => getUserMenuItems(userRole as any, navigate),
-        [userRole, navigate]
-    )
-
     if (error) {
         return (
-            <div className={s.pageWrapper}>
-                <header className={s.header}>
-                    <NavigationMenu
-                        items={navItems}
-                        rightSlotDropdownItems={userMenuItems}
-                        rightSlot={
-                            <img
-                                src={session?.avatarUrl || DefaultAvatar}
-                                className={s.avatar}
-                                alt="User Avatar"
-                            />
-                        }
-                    />
-                </header>
+            <div className={s.pageWrapperWithoutHeader}>
                 <main className={s.mainContent}>
                     <div style={{ textAlign: 'center', padding: '40px' }}>
                         <p style={{ color: '#ef4444' }}>

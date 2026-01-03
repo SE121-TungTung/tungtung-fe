@@ -53,6 +53,9 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         : 'Unknown'
     const messageTime = getMessageTime(message.createdAt)
 
+    const isPending = (message as any).isPending === true
+    const isEdited = message.isEdited === true
+
     // Handler khi bấm vào nút 3 chấm
     const handleMoreClick = (e: React.MouseEvent) => {
         e.stopPropagation()
@@ -117,17 +120,21 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                         <span className={s.senderName}>{senderName}</span>
                     )}
 
+                    {isEdited && !isPending && (
+                        <div className={s.editedBadge}>
+                            <span>Đã chỉnh sửa</span>
+                        </div>
+                    )}
+
                     <div className={s.bubbleContainer}>
                         {/* Action Button (Kebab Menu) */}
-                        {/* Chỉ hiện nút này nếu không đang edit */}
-                        {!isEditing && (
+                        {!isEditing && !isPending && (
                             <button
                                 ref={moreBtnRef}
                                 className={s.actionBtn}
                                 onClick={handleMoreClick}
                                 type="button"
                             >
-                                {/* Nếu chưa có icon SVG, dùng text tạm hoặc thay thế thẻ img bên dưới */}
                                 <img
                                     src={MoreIcon}
                                     alt="More"
@@ -140,7 +147,9 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                             </button>
                         )}
 
-                        <div className={s.bubble}>
+                        <div
+                            className={`${s.bubble} ${isPending ? s.sending : ''}`}
+                        >
                             {isEditing ? (
                                 <div className={s.editMode}>
                                     <textarea
@@ -182,11 +191,35 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                             ) : (
                                 <>
                                     <p className={s.text}>{message.content}</p>
-                                    {messageTime && (
-                                        <span className={s.time}>
-                                            {messageTime}
-                                        </span>
-                                    )}
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '6px',
+                                            marginTop: '4px',
+                                        }}
+                                    >
+                                        {messageTime && (
+                                            <span className={s.time}>
+                                                {messageTime}
+                                            </span>
+                                        )}
+                                        {/* ✅ Status indicator */}
+                                        {isPending && (
+                                            <span
+                                                className={s.statusIcon}
+                                                title="Đang gửi"
+                                            />
+                                        )}
+                                        {!isPending && isSent && (
+                                            <span
+                                                className={s.statusIcon}
+                                                title="Đã gửi"
+                                            >
+                                                ✓
+                                            </span>
+                                        )}
+                                    </div>
                                 </>
                             )}
                         </div>

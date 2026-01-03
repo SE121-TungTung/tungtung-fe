@@ -23,10 +23,9 @@ export default function MemberCard({ member }: MemberCardProps) {
     const navigate = useNavigate()
 
     const handleSendMessage = () => {
-        // Điều hướng đến trang nhắn tin với ID của thành viên
-        // Đường dẫn '/student/messages/:userId' là ví dụ
-        navigate(`/student/messages/${member.id}`)
-        console.log(`Sending message to ${member.firstName} ${member.lastName}`)
+        navigate('/messages', {
+            state: { startChatWith: member.id },
+        })
     }
 
     const fullName = `${member.firstName} ${member.lastName}`

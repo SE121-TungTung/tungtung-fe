@@ -115,37 +115,47 @@
 .sessionCardCompact {
     position: relative;
     width: 100%;
-    padding: var(--space-8);
+    height: 100%;
+    padding: 0;
     border-radius: var(--radius-sm);
     background: rgba(48, 131, 255, 0.12);
     border-left: 3px solid var(--brand-primary-500-light);
     cursor: pointer;
     transition: all 0.2s;
+
+    overflow: visible;
+}
+
+.cardInner {
+    width: 100%;
+    height: 100%;
+    padding: 4px 6px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .sessionCardCompact:hover {
     background: rgba(48, 131, 255, 0.2);
-    transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     z-index: 100;
 }
 
 .sessionTitle {
     font-weight: 600;
-    font-size: 12px;
+    font-size: 11px;
     color: var(--text-primary-light);
-    margin-bottom: var(--space-4);
+    margin-bottom: 2px;
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 .sessionMeta {
-    display: flex;
-    gap: var(--space-4);
-    align-items: center;
     font-size: 10px;
     color: var(--text-secondary-light);
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 /* Full card for list view */
@@ -163,7 +173,7 @@
 .sessionCardFull:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-    border-left-color: var(--brand-primary-600-light);
+    border-left-color: var(--brand-primary-500-light);
 }
 
 .cardHeader {
@@ -210,17 +220,18 @@
 .tooltip {
     position: absolute;
     top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    margin-top: var(--space-8);
-    padding: var(--space-12);
-    background: var(--surface-raised-light);
-    border: 1px solid var(--boder-soft-light);
-    border-radius: var(--radius-md);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    z-index: 1000;
+    left: 0;
+    margin-top: 4px;
+    width: max-content;
     min-width: 200px;
-    backdrop-filter: blur(20px);
+    max-width: 300px;
+    padding: 12px;
+    background: #fff;
+    border: 1px solid var(--boder-soft-light);
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    z-index: 9999;
+    pointer-events: none;
 }
 
 .tooltipHeader {
@@ -252,14 +263,21 @@
     border-radius: var(--radius-md);
     border: 1px solid var(--boder-soft-light);
     backdrop-filter: blur(20px);
-    overflow: hidden;
+
+    height: 600px;
+    overflow-y: auto;
+    position: relative;
 }
 
 .timeGridHeader {
     display: grid;
     grid-template-columns: 60px repeat(7, 1fr);
     border-bottom: 1px solid var(--boder-soft-light);
-    background: rgba(255, 255, 255, 0.5);
+
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: #fff;
 }
 
 .timeHeaderCell {
@@ -294,8 +312,7 @@
 .timeGridBody {
     display: grid;
     grid-template-columns: 60px repeat(7, 1fr);
-    height: 600px;
-    overflow-y: auto;
+
     position: relative;
 }
 
@@ -303,8 +320,8 @@
     border-right: 1px solid var(--boder-soft-light);
     position: sticky;
     left: 0;
-    background: rgba(255, 255, 255, 0.8);
-    z-index: 2;
+    background: #fff;
+    z-index: 100;
 }
 
 .timeSlot {
@@ -329,7 +346,19 @@
 
 .gridSession {
     position: absolute;
-    transition: all 0.2s;
+    transition:
+        box-shadow 0.2s,
+        z-index 0s;
+}
+
+.gridSession:hover {
+    z-index: 1000 !important;
+}
+
+.gridSession:hover .sessionCardCompact {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    background-color: #ebf5ff;
+    border-color: var(--brand-primary-500-light);
 }
 
 .gridSession.overlapping {
@@ -358,14 +387,21 @@
     border-radius: var(--radius-md);
     border: 1px solid var(--boder-soft-light);
     backdrop-filter: blur(20px);
-    overflow: hidden;
+
+    height: 600px;
+    overflow-y: auto;
+    position: relative;
 }
 
 .roomGridHeader {
     display: grid;
-    grid-template-columns: 140px repeat(7, 1fr);
+    grid-template-columns: 140px repeat(7, minmax(0, 1fr));
     border-bottom: 1px solid var(--boder-soft-light);
-    background: rgba(255, 255, 255, 0.5);
+
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: #fff;
 }
 
 .roomHeaderCell {
@@ -378,15 +414,15 @@
 }
 
 .roomGridBody {
-    max-height: 600px;
-    overflow-y: auto;
+    display: contents;
 }
 
 .roomRow {
     display: grid;
-    grid-template-columns: 140px repeat(7, 1fr);
+    grid-template-columns: 140px repeat(7, minmax(0, 1fr));
     border-bottom: 1px solid var(--boder-soft-light);
     min-height: 80px;
+    background: transparent;
 }
 
 .roomRow:last-child {

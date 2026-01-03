@@ -9,11 +9,14 @@ import type { Role } from '@/types/auth'
 import { useMemo } from 'react'
 import s from './MainLayout.module.css'
 import RobotIcon from '@/assets/Robot.svg'
+import { useWebSocketConnection } from '@/hooks/useWebSocketConnection'
 
 export const MainLayout = () => {
     const navigate = useNavigate()
     const location = useLocation()
     const session = useSession((state) => state.user)
+    const sessionState = useSession()
+    const currentUserId = sessionState?.user?.id
 
     const { isChatOpen, setChatOpen } = useUIStore()
 
@@ -27,6 +30,16 @@ export const MainLayout = () => {
         () => getUserMenuItems(userRole, navigate),
         [userRole, navigate]
     )
+
+    useWebSocketConnection({
+        currentUserId: currentUserId || undefined,
+        onError: (error) => {
+            console.error('WebSocket Error:', error)
+        },
+        onAuthError: (error) => {
+            console.error('WebSocket Auth Error:', error)
+        },
+    })
 
     return (
         <div className={s.pageWrapper}>

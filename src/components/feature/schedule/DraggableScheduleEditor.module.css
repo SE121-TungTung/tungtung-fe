@@ -1,35 +1,69 @@
+/* Container */
 .container {
     width: 100%;
     background: var(--surface-card-light);
     border-radius: var(--radius-lg);
-    padding: var(--space-24);
     border: 1px solid var(--boder-soft-light);
+    padding: var(--space-24);
+    backdrop-filter: blur(20px);
 }
 
+/* Header */
 .header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-16);
+    margin-bottom: var(--space-24);
+    padding-bottom: var(--space-16);
+    border-bottom: 1px solid var(--boder-soft-light);
+}
+
+.titleRow {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--space-20);
+    gap: var(--space-24);
 }
 
 .title {
-    font-size: 18px;
-    font-weight: 600;
+    font-size: 20px;
+    font-weight: 700;
     color: var(--text-primary-light);
     margin: 0;
 }
 
+/* Week Navigation */
+.weekNav {
+    display: flex;
+    align-items: center;
+    gap: var(--space-12);
+    padding: var(--space-8) var(--space-16);
+    background: var(--surface-raised-light);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--boder-soft-light);
+}
+
+.weekIndicator {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary-light);
+    min-width: 100px;
+    text-align: center;
+}
+
+/* Legend */
 .legend {
     display: flex;
-    gap: var(--space-16);
-    font-size: 12px;
+    gap: var(--space-24);
+    align-items: center;
 }
 
 .legendItem {
     display: flex;
     align-items: center;
     gap: var(--space-8);
+    font-size: 13px;
+    color: var(--text-primary-light);
 }
 
 .dotNormal,
@@ -41,7 +75,7 @@
 }
 
 .dotNormal {
-    background: var(--color-green-300);
+    background: var(--brand-primary-500-light);
 }
 
 .dotConflict {
@@ -52,9 +86,10 @@
     background: var(--brand-accent1-500-light);
 }
 
+/* Schedule Grid */
 .scheduleGrid {
     display: grid;
-    grid-template-columns: 120px repeat(7, 1fr);
+    grid-template-columns: 100px repeat(7, 1fr);
     gap: 1px;
     background: var(--boder-soft-light);
     border: 1px solid var(--boder-soft-light);
@@ -65,31 +100,32 @@
 .cornerCell {
     background: var(--surface-raised-light);
     padding: var(--space-12);
+    font-size: 13px;
     font-weight: 600;
-    font-size: 12px;
     color: var(--text-secondary-light);
+    text-align: center;
     display: flex;
     align-items: center;
     justify-content: center;
-    text-align: center;
 }
 
 .dayHeader {
     background: var(--surface-raised-light);
-    padding: var(--space-12) var(--space-8);
+    padding: var(--space-12);
     text-align: center;
 }
 
 .dayName {
-    font-weight: 600;
     font-size: 13px;
+    font-weight: 700;
     color: var(--text-primary-light);
-    margin-bottom: var(--space-4);
+    text-transform: capitalize;
 }
 
 .dayDate {
     font-size: 11px;
-    color: var(--text-muted-light);
+    color: var(--text-secondary-light);
+    margin-top: var(--space-4);
 }
 
 .rowGroup {
@@ -98,84 +134,103 @@
 
 .slotLabel {
     background: var(--surface-raised-light);
-    padding: var(--space-12);
+    padding: var(--space-8);
+    text-align: center;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
-    text-align: center;
+    gap: var(--space-4);
 }
 
 .slotName {
-    font-weight: 600;
     font-size: 12px;
+    font-weight: 600;
     color: var(--text-primary-light);
-    margin-bottom: var(--space-4);
 }
 
 .slotTime {
     font-size: 10px;
-    color: var(--text-muted-light);
+    color: var(--text-secondary-light);
 }
 
+/* Cells */
 .cell {
-    background: var(--background-primary-light);
-    min-height: 120px;
-    padding: var(--space-8);
+    background: white;
+    min-height: 80px;
+    padding: var(--space-4);
     position: relative;
-    transition: all 0.2s ease;
+    transition: all 0.2s;
 }
 
 .cellHover {
-    background: var(--palette-pacific-cyan-900);
-    border: 2px dashed var(--brand-accent1-500-light);
+    background: rgba(75, 163, 195, 0.1);
+    outline: 2px dashed var(--brand-accent1-500-light);
+    outline-offset: -2px;
 }
 
 .cellConflict {
-    background: var(--color-red-50);
+    background: rgba(214, 40, 57, 0.05);
+}
+
+.cellOccupied {
+    background: transparent;
+    pointer-events: none;
 }
 
 .emptySlot {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: var(--text-muted-light);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     font-size: 11px;
-    font-style: italic;
+    color: var(--text-muted-light);
+    opacity: 0.3;
+    pointer-events: none;
 }
 
+/* Session Card */
 .sessionCard {
-    background: var(--background-primary-light);
-    border: 1px solid var(--boder-soft-light);
+    background: var(--surface-card-light);
+    border: 1px solid var(--brand-primary-500-light);
+    border-left: 4px solid var(--brand-primary-500-light);
     border-radius: var(--radius-sm);
     padding: var(--space-8);
-    cursor: move;
-    transition: all 0.2s ease;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    cursor: grab;
+    transition: all 0.2s;
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .sessionCard:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 10;
 }
 
 .sessionCard:active {
     cursor: grabbing;
-    opacity: 0.7;
 }
 
 .sessionHeader {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
+    gap: var(--space-8);
     margin-bottom: var(--space-8);
+    padding-bottom: var(--space-8);
+    border-bottom: 1px solid var(--boder-soft-light);
 }
 
 .sessionClass {
-    font-weight: 600;
     font-size: 13px;
-    color: var(--brand-primary-500-light);
+    font-weight: 600;
+    color: var(--text-primary-light);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .sessionActions {
@@ -185,13 +240,13 @@
 
 .btnEdit,
 .btnDelete {
-    background: none;
+    background: transparent;
     border: none;
+    padding: var(--space-4);
     cursor: pointer;
     font-size: 14px;
-    padding: var(--space-2);
-    opacity: 0.7;
-    transition: opacity 0.2s ease;
+    opacity: 0.6;
+    transition: opacity 0.2s;
 }
 
 .btnEdit:hover,
@@ -203,30 +258,33 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
+    flex: 1;
 }
 
 .infoRow {
     font-size: 11px;
     color: var(--text-secondary-light);
-    display: flex;
-    align-items: center;
-    gap: var(--space-4);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
+/* Edit Form */
 .sessionEditForm {
     display: flex;
     flex-direction: column;
     gap: var(--space-8);
+    flex: 1;
 }
 
 .selectField,
 .inputField {
     width: 100%;
-    padding: var(--space-8);
-    font-size: 11px;
+    padding: var(--space-4) var(--space-8);
     border: 1px solid var(--boder-soft-light);
-    border-radius: var(--radius-xs);
-    background: var(--background-primary-light);
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    background: white;
     color: var(--text-primary-light);
 }
 
@@ -234,36 +292,30 @@
 .inputField:focus {
     outline: none;
     border-color: var(--brand-primary-500-light);
-}
-
-.instructions {
-    margin-top: var(--space-20);
-    padding: var(--space-12);
-    background: var(--palette-columbia-blue-800);
-    border: 1px solid var(--palette-columbia-blue-600);
-    border-radius: var(--radius-sm);
-    font-size: 11px;
-    color: var(--brand-primary-500-light);
-    line-height: 1.5;
-}
-
-.instructions strong {
-    font-weight: 600;
-}
-.cellOccupied {
-    visibility: hidden;
-    min-height: 120px;
+    box-shadow: 0 0 0 2px rgba(23, 86, 118, 0.1);
 }
 
 .slotInfo {
     font-size: 10px;
     color: var(--text-muted-light);
+    text-align: center;
     padding: var(--space-4);
     background: var(--surface-raised-light);
-    border-radius: var(--radius-xs);
-    text-align: center;
+    border-radius: var(--radius-sm);
 }
 
-.sessionCard[style*='grid-row'] {
-    min-height: auto;
+/* Instructions */
+.instructions {
+    margin-top: var(--space-24);
+    padding: var(--space-16);
+    background: var(--surface-raised-light);
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    color: var(--text-secondary-light);
+    line-height: 1.6;
+}
+
+.instructions strong {
+    color: var(--text-primary-light);
+    font-weight: 600;
 }

@@ -81,7 +81,7 @@ export default function ScheduleGeneratorPage() {
                 // Hard exception - không thể xếp đủ lịch
                 setErrorModal({
                     show: true,
-                    title: '⚠️ Không thể xếp đủ lịch',
+                    title: 'Không thể xếp đủ lịch',
                     message:
                         err.message ||
                         'Không đủ tài nguyên (phòng, giáo viên) để xếp đủ số buổi học yêu cầu trong khoảng thời gian này. Vui lòng:\n\n• Tăng khoảng thời gian (end_date)\n• Giảm số buổi học/tuần của lớp\n• Bỏ chặn một số khung giờ trong class_conflict/teacher_conflict',
@@ -168,7 +168,7 @@ export default function ScheduleGeneratorPage() {
             teacher_busy: 'Giáo viên bận',
             room_unavailable: 'Phòng không khả dụng',
             no_slots: 'Không có khung giờ',
-            max_slot_violation: 'Vượt giới hạn số kíp',
+            max_slot_violation: 'Vượt giới hạn số ca',
             request_class_conflict: 'Lớp bị cấm lịch',
             request_teacher_conflict: 'Giáo viên bị cấm lịch',
         }
@@ -216,7 +216,7 @@ export default function ScheduleGeneratorPage() {
                                     }
                                 />
                                 <InputField
-                                    label="Số kíp / buổi"
+                                    label="Số ca / buổi"
                                     type="number"
                                     min={1}
                                     max={4}
@@ -282,7 +282,7 @@ export default function ScheduleGeneratorPage() {
                                             setShowClassConflict(true)
                                         }
                                     >
-                                        🗓️ Cấm lịch Lớp (
+                                        Lịch bận Lớp (
                                         {countConflicts(
                                             formData.class_conflict
                                         )}
@@ -373,7 +373,7 @@ export default function ScheduleGeneratorPage() {
                                     variant="outline"
                                     onClick={() => setShowTeacherConflict(true)}
                                 >
-                                    🗓️ Cấm lịch Giáo viên (
+                                    Lịch bận Giáo viên (
                                     {countConflicts(formData.teacher_conflict)})
                                 </ButtonPrimary>
                             </div>
@@ -697,7 +697,7 @@ export default function ScheduleGeneratorPage() {
                                     marginBottom: 4,
                                 }}
                             >
-                                <strong>Kíp:</strong>{' '}
+                                <strong>Ca:</strong>{' '}
                                 {conflict.time_slots.join(', ')}
                             </div>
                             <div
@@ -739,7 +739,7 @@ export default function ScheduleGeneratorPage() {
                                             {sug.type === 'time_shift'
                                                 ? 'Đổi giờ'
                                                 : 'Đổi ngày'}
-                                            : {sug.date} - Kíp{' '}
+                                            : {sug.date} - Ca{' '}
                                             {sug.time_slots.join(', ')}
                                         </div>
                                     ))}

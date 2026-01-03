@@ -712,7 +712,8 @@ export const testApi = {
     ): Promise<{ id: string; title: string }> => {
         const formData = new FormData()
 
-        formData.append('test_data_str', JSON.stringify(payload))
+        const cleanedPayload = cleanCreatePayload(payload)
+        formData.append('test_data_str', JSON.stringify(cleanedPayload))
 
         if (files) {
             Object.entries(files).forEach(([key, file]) => {
@@ -992,4 +993,37 @@ export function getTestAvailabilityMessage(
     }
 
     return null
+}
+
+/**
+ * Remove temporary IDs from create payload before sending to backend
+ * Backend will generate proper UUIDs
+ */
+function cleanCreatePayload(payload: TestCreatePayload): TestCreatePayload {
+    return {
+        ...payload,
+        sections: payload.sections.map((section) => {
+            const { id: _sId, ...sectionRest } = section as any
+            return {
+                ...sectionRest,
+                parts: section.parts.map((part) => {
+                    const { id: _pId, ...partRest } = part as any
+                    return {
+                        ...partRest,
+                        question_groups: part.question_groups.map((group) => {
+                            const { id: _gId, ...groupRest } = group as any
+                            return {
+                                ...groupRest,
+                                questions: group.questions.map((question) => {
+                                    const { id: _qId, ...questionRest } =
+                                        question as any
+                                    return questionRest
+                                }),
+                            }
+                        }),
+                    }
+                }),
+            }
+        }),
+    }
 }

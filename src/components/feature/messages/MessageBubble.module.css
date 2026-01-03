@@ -2,6 +2,9 @@
     display: flex;
     gap: var(--space-12);
     max-width: 70%;
+}
+
+.bubbleWrapper[data-is-new='true'] {
     animation: fadeIn 0.2s ease-out;
 }
 
@@ -58,6 +61,25 @@
     color: rgba(255, 255, 255, 0.7);
 }
 
+.bubble.sending {
+    opacity: 0.7;
+    pointer-events: none;
+    position: relative;
+}
+
+.bubble.sending::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 10px;
+    height: 10px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
 .received {
     flex-direction: row;
     align-self: flex-start;
@@ -87,16 +109,18 @@
 }
 
 .bubble.sending {
-    opacity: 0.6;
+    opacity: 0.7;
+    pointer-events: none;
 }
 
 .bubble.sending::after {
     content: '';
     position: absolute;
-    bottom: 8px;
+    top: 50%;
     right: 12px;
-    width: 12px;
-    height: 12px;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 10px;
     border: 2px solid currentColor;
     border-top-color: transparent;
     border-radius: 50%;
@@ -105,7 +129,7 @@
 
 @keyframes spin {
     to {
-        transform: rotate(360deg);
+        transform: translateY(-50%) rotate(360deg);
     }
 }
 
@@ -146,6 +170,27 @@
         padding: var(--space-8) var(--space-12);
         font-size: 14px;
     }
+}
+
+.editedBadge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 4px;
+    font-size: 11px;
+    font-style: italic;
+    opacity: 0.7;
+    padding: 0 var(--space-4);
+}
+
+.sent .editedBadge {
+    color: var(--text-primary-light);
+    justify-content: flex-end;
+}
+
+.received .editedBadge {
+    color: var(--text-muted-light);
+    justify-content: flex-start;
 }
 
 .editMode {
@@ -224,4 +269,17 @@
     .received .actionBtn {
         right: -32px;
     }
+}
+
+.statusIcon {
+    font-size: 11px;
+    opacity: 0.6;
+}
+
+.sent .statusIcon {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.received .statusIcon {
+    color: var(--text-muted-light);
 }

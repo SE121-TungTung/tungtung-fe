@@ -56,7 +56,7 @@ export function NewChatModal({ onClose, onStartChat }: NewChatModalProps) {
                 limit: 5,
             })
 
-            return users.items.map((user) => ({
+            return users.users.map((user) => ({
                 id: user.id,
                 firstName: user.firstName,
                 lastName: user.lastName,

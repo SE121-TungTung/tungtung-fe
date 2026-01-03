@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from 'react'
 import s from './ChatWindow.module.css'
 import { MessageBubble } from './MessageBubble'
 import { ChatInput } from './ChatInput'
-import type { Conversation } from '@/types/message.types'
+import type { Conversation, Message } from '@/types/message.types'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { messageApi } from '@/lib/message'
 
@@ -16,17 +16,30 @@ import AvatarImg from '@/assets/avatar-placeholder.png'
 import { useDialog } from '@/hooks/useDialog'
 
 const DateSeparator = ({ dateString }: { dateString: string }) => {
-    const date = new Date(dateString)
-    let label = format(date, 'dd/MM/yyyy', { locale: vi })
+    if (!dateString) {
+        return null
+    }
+    try {
+        const date = new Date(dateString)
 
-    if (isToday(date)) label = 'Hôm nay'
-    if (isYesterday(date)) label = 'Hôm qua'
+        if (isNaN(date.getTime())) {
+            return null
+        }
 
-    return (
-        <div className={s.dateSeparator}>
-            <span>{label}</span>
-        </div>
-    )
+        let label = format(date, 'dd/MM/yyyy', { locale: vi })
+
+        if (isToday(date)) label = 'Hôm nay'
+        if (isYesterday(date)) label = 'Hôm qua'
+
+        return (
+            <div className={s.dateSeparator}>
+                <span>{label}</span>
+            </div>
+        )
+    } catch (error) {
+        console.error('Invalid date:', dateString, error)
+        return null
+    }
 }
 
 interface ChatWindowProps {
@@ -57,50 +70,32 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         refetchIntervalInBackground: true,
     })
 
-    // 🔍 DEBUG: Log messages để kiểm tra
     useEffect(() => {
-        console.log('📩 Messages updated:', {
-            conversationId: conversation.id,
-            messageCount: messages.length,
-            messages: messages,
-        })
-    }, [messages, conversation.id])
+        const handleNewMessage = (event: Event) => {
+            const customEvent = event as CustomEvent<any>
+            const data = customEvent.detail
 
-    useEffect(() => {
-        // Setup event listener for new messages
-        const handleNewMessage = (event: MessageEvent) => {
-            try {
-                const data = JSON.parse(event.data)
+            console.log('WebSocket event received:', data)
 
-                console.log('🔔 WebSocket event received:', data)
+            if (
+                data.type === 'new_message' &&
+                data.room_id === conversation.id
+            ) {
+                console.log('Invalidating queries for:', conversation.id)
 
-                if (
-                    data.type === 'new_message' &&
-                    data.room_id === conversation.id
-                ) {
-                    console.log('✅ Invalidating queries for:', conversation.id)
-
-                    // Invalidate queries to refetch messages
-                    queryClient.invalidateQueries({
-                        queryKey: ['messages', conversation.id],
-                    })
-                    queryClient.invalidateQueries({
-                        queryKey: ['conversations'],
-                    })
-                }
-            } catch (error) {
-                console.error('❌ Error handling WebSocket message:', error)
+                queryClient.invalidateQueries({
+                    queryKey: ['messages', conversation.id],
+                })
+                queryClient.invalidateQueries({
+                    queryKey: ['conversations'],
+                })
             }
         }
 
-        // Listen to custom event (dispatched by WebSocket manager)
-        window.addEventListener('ws-new-message', handleNewMessage as any)
+        window.addEventListener('ws-new-message', handleNewMessage)
 
         return () => {
-            window.removeEventListener(
-                'ws-new-message',
-                handleNewMessage as any
-            )
+            window.removeEventListener('ws-new-message', handleNewMessage)
         }
     }, [conversation.id, queryClient])
 
@@ -110,16 +105,87 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                 room_id: conversation.id,
                 content,
             }),
-        onSuccess: () => {
-            console.log('✅ Message sent successfully')
-            queryClient.invalidateQueries({
+
+        onMutate: async (content: string) => {
+            await queryClient.cancelQueries({
                 queryKey: ['messages', conversation.id],
             })
-            queryClient.invalidateQueries({ queryKey: ['conversations'] })
-            queryClient.invalidateQueries({ queryKey: ['totalUnreadCount'] })
+
+            const previousMessages = queryClient.getQueryData([
+                'messages',
+                conversation.id,
+            ])
+
+            const optimisticMessage = {
+                id: `temp-${Date.now()}`,
+                content,
+                senderId: currentUserId,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                isEdited: false,
+                isPending: true,
+                sender: {
+                    id: currentUserId,
+                    fullName: 'You',
+                    email: '',
+                    avatarUrl: null,
+                    firstName: '',
+                    lastName: '',
+                },
+            }
+
+            queryClient.setQueryData(
+                ['messages', conversation.id],
+                (old: any[] = []) => [...old, optimisticMessage]
+            )
+
+            return { previousMessages, optimisticMessage }
         },
-        onError: (error) => {
-            console.error('❌ Failed to send message:', error)
+
+        onSuccess: (response, _variables, context) => {
+            console.log('✅ Message sent successfully')
+
+            const realMessage = {
+                ...response,
+                isPending: false,
+                createdAt: response.createdAt || new Date().toISOString(),
+                updatedAt: response.updatedAt || new Date().toISOString(),
+            }
+
+            queryClient.setQueryData(
+                ['messages', conversation.id],
+                (old: any[] = []) => {
+                    if (!context?.optimisticMessage) return old
+
+                    return old.map((msg) =>
+                        msg.id === context.optimisticMessage.id
+                            ? realMessage
+                            : msg
+                    )
+                }
+            )
+
+            setTimeout(() => {
+                queryClient.invalidateQueries({
+                    queryKey: ['messages', conversation.id],
+                })
+                queryClient.invalidateQueries({ queryKey: ['conversations'] })
+                queryClient.invalidateQueries({
+                    queryKey: ['totalUnreadCount'],
+                })
+            }, 500)
+        },
+
+        onError: (error, _variables, context) => {
+            console.error('Failed to send message:', error)
+
+            if (context?.previousMessages) {
+                queryClient.setQueryData(
+                    ['messages', conversation.id],
+                    context.previousMessages
+                )
+            }
+
             showAlert(
                 'Không thể gửi tin nhắn. Vui lòng thử lại sau.',
                 'Lỗi gửi tin'
@@ -135,15 +201,74 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             messageId: string
             content: string
         }) => messageApi.editMessage(messageId, content),
-        onSuccess: () => {
-            queryClient.invalidateQueries({
+
+        onMutate: async ({ messageId, content }) => {
+            await queryClient.cancelQueries({
                 queryKey: ['messages', conversation.id],
             })
+
+            const previousMessages = queryClient.getQueryData([
+                'messages',
+                conversation.id,
+            ])
+
+            queryClient.setQueryData(
+                ['messages', conversation.id],
+                (old: Message[] = []) => {
+                    return old.map((msg) =>
+                        msg.id === messageId
+                            ? {
+                                  ...msg,
+                                  content: content,
+                                  isEdited: true,
+                                  updatedAt: new Date().toISOString(),
+                                  isPending: true,
+                              }
+                            : msg
+                    )
+                }
+            )
+
+            return { previousMessages, messageId }
         },
-        onError: (error) => {
+
+        onSuccess: (response, _variables, context) => {
+            console.log('✅ Message edited successfully')
+
+            queryClient.setQueryData(
+                ['messages', conversation.id],
+                (old: Message[] = []) => {
+                    return old.map((msg) =>
+                        msg.id === context?.messageId
+                            ? {
+                                  ...msg,
+                                  ...response,
+                                  isPending: false,
+                              }
+                            : msg
+                    )
+                }
+            )
+
+            setTimeout(() => {
+                queryClient.invalidateQueries({
+                    queryKey: ['messages', conversation.id],
+                })
+            }, 500)
+        },
+
+        onError: (error, _variables, context) => {
             console.error('Failed to edit message:', error)
+
+            if (context?.previousMessages) {
+                queryClient.setQueryData(
+                    ['messages', conversation.id],
+                    context.previousMessages
+                )
+            }
+
             showAlert(
-                'Không thể gửi chỉnh sửa nhắn. Vui lòng thử lại sau.',
+                'Không thể chỉnh sửa tin nhắn. Vui lòng thử lại sau.',
                 'Lỗi chỉnh sửa tin'
             )
         },

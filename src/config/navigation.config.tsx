@@ -19,7 +19,7 @@ const studyMenuItems: ExtendedSideMenuItem[] = [
     {
         id: 'classes',
         label: 'Lớp học',
-        href: '/coming-soon',
+        href: '/student/class',
     },
     {
         id: 'exams',

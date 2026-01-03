@@ -1,11 +1,9 @@
 import { useState, useCallback, useMemo } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 
 import s from './Class.module.css'
 
 // Components
-import NavigationMenu from '@/components/common/menu/NavigationMenu'
 import TabMenu, { type TabItem } from '@/components/common/menu/TabMenu'
 import SegmentedControl, {
     type SegItem,
@@ -24,19 +22,14 @@ import Card from '@/components/common/card/Card'
 import InputField from '@/components/common/input/InputField'
 
 // Assets
-import AvatarImg from '@/assets/avatar-placeholder.png'
 import SearchIcon from '@/assets/Book Search.svg'
-
-// Config & Stores
-import { useSession } from '@/stores/session.store'
-import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
-import type { Role } from '@/types/auth'
 
 // API & Types
 import { getMyClasses } from '@/lib/users' // Đảm bảo hàm này đã được export từ file users.ts
 import type { MyClass, ClassSession, MyClassUser } from '@/types/user.types'
 import type { ClassMember } from '@/components/common/card/MemberCard'
 import type { Lesson } from '@/components/common/typography/LessonItem'
+import { useNavigate } from 'react-router-dom'
 
 const tabItems: TabItem[] = [
     { label: 'Lịch học', value: 'schedule' },
@@ -75,13 +68,6 @@ const upcomingAssignments: Assignment[] = [
 ]
 
 export default function ClassPage() {
-    const sessionState = useSession()
-    const userRole = (sessionState?.user?.role as Role) || 'student'
-
-    const navigate = useNavigate()
-    const location = useLocation()
-    const currentPath = location.pathname
-
     const [activeTab, setActiveTab] = useState('schedule')
     const [viewMode, setViewMode] = useState('week')
     const [showGradientName, setShowGradientName] = useState(false)
@@ -108,15 +94,6 @@ export default function ClassPage() {
     const handleGreetingComplete = useCallback(() => {
         setShowGradientName(true)
     }, [])
-
-    const navItems = useMemo(
-        () => getNavItems(userRole, currentPath, navigate),
-        [userRole, currentPath, navigate]
-    )
-    const userMenuItems = useMemo(
-        () => getUserMenuItems(userRole, navigate),
-        [userRole, navigate]
-    )
 
     // 2. Map dữ liệu Members từ API sang UI
     const classMembers: ClassMember[] = useMemo(() => {
@@ -300,22 +277,7 @@ export default function ClassPage() {
     const className = currentClass?.name || 'Lớp học của tôi'
 
     return (
-        <div className={s.pageWrapper}>
-            {/* Header / Navigation */}
-            <header className={s.header}>
-                <NavigationMenu
-                    items={navItems}
-                    rightSlotDropdownItems={userMenuItems}
-                    rightSlot={
-                        <img
-                            src={sessionState?.user?.avatarUrl || AvatarImg}
-                            className={s.avatar}
-                            alt="User Avatar"
-                        />
-                    }
-                />
-            </header>
-
+        <div className={s.pageWrapperWithoutHeader}>
             {/* Main Content */}
             <main className={s.mainContent}>
                 <h1 className={s.pageTitle}>

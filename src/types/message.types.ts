@@ -64,6 +64,9 @@ export interface BackendMessageResponse {
     timestamp: string
     status: string
     attachments?: any[]
+    created_at: string
+    updated_at?: string
+    is_edited?: boolean
     sender?: {
         id: string
         first_name: string
@@ -116,11 +119,14 @@ export interface Message {
     content: string
     attachments: Attachment[]
     createdAt: string
+    updatedAt?: string
+    isEdited?: boolean
     messageType?: string
     status?: MessageStatus
     sender?: Participant
     isRead?: boolean
     isStarred?: boolean
+    isPending?: boolean
 }
 
 export interface Conversation {
