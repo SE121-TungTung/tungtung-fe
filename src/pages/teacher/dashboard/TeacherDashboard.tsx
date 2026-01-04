@@ -15,64 +15,21 @@ import BannerImg from '@/assets/banner-placeholder.png'
 
 import { TextHorizontal } from '@/components/common/text/TextHorizontal'
 import TextType from '@/components/common/text/TextType'
-import { getMe } from '@/lib/users'
-import type { Lesson } from '@/components/common/typography/LessonItem'
-
-const stats = [
-    {
-        id: 't1',
-        title: 'KPI Tháng này',
-        value: '92',
-        unit: '%',
-        subtitle: 'Hiệu suất giảng dạy và đánh giá từ học viên',
-        active: true,
-    },
-    {
-        id: 't2',
-        title: 'Giờ dạy tích lũy',
-        value: '48',
-        unit: 'h',
-        subtitle: 'Tổng số giờ đứng lớp trong tháng 10',
-    },
-    {
-        id: 't3',
-        title: 'Lớp phụ trách',
-        value: '4',
-        subtitle: 'Số lớp đang hoạt động dưới sự quản lý của bạn',
-    },
-]
-
-const teachingSessions: Lesson[] = [
-    {
-        id: '1',
-        sessionDate: '2025-03-10',
-        startTime: '08:00',
-        endTime: '09:30',
-        className: 'IELTS Intermediate A',
-        courseName: 'IELTS Intermediate A',
-        teacherName: 'Phan Duy Minh', // Self
-        roomName: 'A1',
-        status: 'in_progress',
-        attendanceTaken: true,
-    },
-    {
-        id: '2',
-        sessionDate: '2025-03-10',
-        startTime: '13:30',
-        endTime: '15:00',
-        className: 'TOEIC Basic 101',
-        courseName: 'TOEIC Preparation',
-        teacherName: 'Phan Duy Minh',
-        roomName: 'C3',
-        status: 'scheduled',
-        attendanceTaken: false,
-    },
-]
+import { getMe, getUserOverview } from '@/lib/users' // Thêm getUserOverview
+import type { TeacherOverviewStats } from '@/types/user.types'
+import Skeleton from '@/components/effect/Skeleton'
 
 export default function TeacherDashboard() {
+    // 1. Lấy thông tin User
     const { data: userData, isLoading: userLoading } = useQuery({
         queryKey: ['me'],
         queryFn: () => getMe(),
+    })
+
+    // 2. Lấy thông tin Overview thực tế từ API
+    const { data: overviewData, isLoading: statsLoading } = useQuery({
+        queryKey: ['user-overview'],
+        queryFn: () => getUserOverview<TeacherOverviewStats>(),
     })
 
     const greetingTexts = userData
@@ -86,67 +43,115 @@ export default function TeacherDashboard() {
         ? `${userData.firstName} ${userData.lastName}`
         : ''
 
+    // 3. Map dữ liệu từ API vào format của StatCard
+    const dynamicStats = [
+        {
+            id: 'active_classes',
+            title: 'Lớp phụ trách',
+            value: overviewData?.active_classes?.toString() || '0',
+            unit: '',
+            subtitle: 'Số lớp đang hoạt động bạn đang đứng lớp',
+            active: true,
+        },
+        {
+            id: 'total_students',
+            title: 'Tổng số học viên',
+            value: overviewData?.total_students?.toString() || '0',
+            unit: '',
+            subtitle: 'Tổng số học sinh trong các lớp bạn phụ trách',
+        },
+        {
+            id: 'sessions_today',
+            title: 'Buổi dạy hôm nay',
+            value: overviewData?.sessions_today?.toString() || '0',
+            unit: '',
+            subtitle: 'Lịch dạy dự kiến trong ngày hôm nay',
+        },
+        {
+            id: 'pending_grading',
+            title: 'Bài chờ chấm',
+            value: overviewData?.pending_grading_count?.toString() || '0',
+            unit: '',
+            subtitle: 'Số lượng bài thi học sinh đã nộp cần bạn chấm điểm',
+        },
+    ]
+
     return (
         <div className={s.dashboard}>
             <h1 className={s.welcomeMessage}>
-                {!userLoading && userData && (
-                    <TextType
-                        text={greetingTexts}
-                        typingSpeed={60}
-                        pauseDuration={4000}
-                        deletingSpeed={40}
-                        renderText={(text) => {
-                            const namePattern = new RegExp(fullName, 'g')
-                            const parts = text.split(namePattern)
-                            const names = text.match(namePattern) || []
-                            return (
-                                <>
-                                    {parts.map((part, i) => (
-                                        <React.Fragment key={i}>
-                                            {part}
-                                            {names[i] && (
-                                                <span
-                                                    className={s.gradientText}
-                                                >
-                                                    {names[i]}
-                                                </span>
-                                            )}
-                                        </React.Fragment>
-                                    ))}
-                                </>
-                            )
-                        }}
+                {userLoading ? (
+                    <Skeleton
+                        width="60%"
+                        height="3rem"
+                        style={{ margin: '0 auto' }}
                     />
+                ) : (
+                    !userLoading &&
+                    userData && (
+                        <TextType
+                            text={greetingTexts}
+                            typingSpeed={60}
+                            pauseDuration={4000}
+                            renderText={(text) => (
+                                <>
+                                    {text
+                                        .split(fullName)
+                                        .map((part, i, arr) => (
+                                            <React.Fragment key={i}>
+                                                {part}
+                                                {i < arr.length - 1 && (
+                                                    <span
+                                                        className={
+                                                            s.gradientText
+                                                        }
+                                                    >
+                                                        {fullName}
+                                                    </span>
+                                                )}
+                                            </React.Fragment>
+                                        ))}
+                                </>
+                            )}
+                        />
+                    )
                 )}
             </h1>
 
             <main className={s.mainContent}>
                 <Card
                     title="Tổng quan giảng dạy"
-                    subtitle="Số liệu KPI và hoạt động trong tháng"
+                    subtitle="Số liệu thực tế từ hệ thống quản lý"
                     direction="horizontal"
                 >
                     <div className={s.statsGrid}>
-                        {stats.map((stat) => (
-                            <StatCard
-                                key={stat.id}
-                                title={stat.title}
-                                value={stat.value}
-                                unit={stat.unit}
-                                subtitle={stat.subtitle}
-                                active={stat.active}
-                                icon={
-                                    <img src={ChartBarIcon} alt="stat icon" />
-                                }
-                            />
-                        ))}
+                        {statsLoading ? (
+                            <Skeleton height={140} variant="rect" count={4} />
+                        ) : (
+                            dynamicStats.map((stat) => (
+                                <StatCard
+                                    key={stat.id}
+                                    title={stat.title}
+                                    value={stat.value}
+                                    unit={stat.unit}
+                                    subtitle={stat.subtitle}
+                                    active={stat.active}
+                                    icon={
+                                        <img
+                                            src={ChartBarIcon}
+                                            alt="stat icon"
+                                        />
+                                    }
+                                />
+                            ))
+                        )}
                     </div>
                 </Card>
 
                 <div className={s.mainRow}>
+                    {/* Giữ nguyên các phần khác hoặc tích hợp API lịch dạy nếu cần */}
                     <ScheduleTodayCard
                         title="Lịch dạy hôm nay"
-                        sessions={teachingSessions}
+                        sessions={[]} // Ở đây nên fetch thêm API list sessions thực tế
                         onCheckIn={() => alert('Đã xác nhận giảng dạy!')}
                     />
 
@@ -156,13 +161,30 @@ export default function TeacherDashboard() {
                     >
                         <div className={s.suggestionBody}>
                             <div className={s.suggestionTip}>
-                                <TextHorizontal
-                                    icon={<img src={ChatIcon} alt="ai tip" />}
-                                    iconStyle="flat"
-                                    title="Gợi ý chấm bài"
-                                    description="Lớp IELTS Intermediate A vừa nộp bài Writing. AI đã chấm sơ bộ, hãy kiểm tra lại!"
-                                    mode="light"
-                                />
+                                {statsLoading ? (
+                                    <div style={{ width: '100%' }}>
+                                        <Skeleton
+                                            height={20}
+                                            width="40%"
+                                            style={{ marginBottom: '10px' }}
+                                        />
+                                        <Skeleton height={60} variant="rect" />
+                                    </div>
+                                ) : (
+                                    <TextHorizontal
+                                        icon={
+                                            <img src={ChatIcon} alt="ai tip" />
+                                        }
+                                        iconStyle="flat"
+                                        title="Gợi ý chấm bài"
+                                        description={
+                                            overviewData?.pending_grading_count
+                                                ? `Bạn đang có ${overviewData.pending_grading_count} bài cần chấm. Hãy sử dụng AI để hỗ trợ!`
+                                                : 'Hiện không có bài nộp mới cần chấm điểm.'
+                                        }
+                                        mode="light"
+                                    />
+                                )}
                             </div>
 
                             <TemplateCard
@@ -173,12 +195,12 @@ export default function TeacherDashboard() {
                                             src={DocumentIcon}
                                             width={14}
                                             alt="doc icon"
-                                        />{' '}
+                                        />
                                         <span>Lesson Plan</span>
                                     </>
                                 }
                                 title="Soạn giáo án tự động"
-                                excerpt="Sử dụng AI để tạo khung giáo án chi tiết cho buổi học Speaking sắp tới dựa trên trình độ học viên."
+                                excerpt="Sử dụng AI để tạo khung giáo án chi tiết cho buổi học sắp tới dựa trên tiến độ lớp."
                                 ctaText="Tạo ngay"
                                 ctaIcon={
                                     <img

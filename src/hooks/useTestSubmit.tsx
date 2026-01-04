@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { testApi } from '@/lib/test'
 import type { QuestionSubmitItem } from '@/types/test.types'
+import { useDialog } from './useDialog'
 
 interface UseTestSubmitOptions {
     attemptId: string
@@ -16,6 +17,7 @@ export function useTestSubmit({
 }: UseTestSubmitOptions) {
     const navigate = useNavigate()
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const { alert: showAlert } = useDialog()
 
     const submit = useCallback(
         async (
@@ -73,7 +75,9 @@ export function useTestSubmit({
                 onError?.(err)
 
                 // Show error to user
-                alert(`Submission failed: ${err.message || 'Unknown error'}`)
+                showAlert(
+                    `Submission failed: ${err.message || 'Unknown error'}`
+                )
             } finally {
                 setIsSubmitting(false)
             }

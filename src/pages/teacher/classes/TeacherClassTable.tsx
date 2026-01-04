@@ -26,7 +26,6 @@ export default function TeacherClassTable({ classes, isLoading }: Props) {
     const navigate = useNavigate()
 
     const handleRowClick = (classId: string) => {
-        // Điều hướng đến trang chi tiết (sẽ làm sau)
         navigate(`/teacher/classes/${classId}`)
     }
 
@@ -71,6 +70,7 @@ export default function TeacherClassTable({ classes, isLoading }: Props) {
                                 onClick={() => handleRowClick(c.id)}
                                 style={{ cursor: 'pointer' }}
                                 title="Nhấn để xem chi tiết"
+                                className={s.tableRow}
                             >
                                 <td>
                                     <div

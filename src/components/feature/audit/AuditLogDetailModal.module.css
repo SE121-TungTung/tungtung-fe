@@ -1,0 +1,168 @@
+/* AuditLogDetailModal.module.css */
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+}
+
+.modal {
+    background: var(--surface-page-light);
+    border-radius: 16px;
+    max-width: 800px;
+    width: 100%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    border-bottom: 1px solid var(--boder-soft-light);
+}
+
+.title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary-light);
+}
+
+.closeBtn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--text-secondary-light);
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.closeBtn:hover {
+    background: var(--surface-hover-light);
+    color: var(--text-primary-light);
+}
+
+.content {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.section {
+    margin-bottom: 24px;
+}
+
+.section:last-child {
+    margin-bottom: 0;
+}
+
+.sectionTitle {
+    margin: 0 0 12px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.infoGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 12px;
+}
+
+.infoItem {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.infoLabel {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary-light);
+    text-transform: uppercase;
+}
+
+.infoValue {
+    font-size: 14px;
+    color: var(--text-primary-light);
+    word-break: break-all;
+}
+
+.userAgent {
+    font-size: 13px;
+    color: var(--text-secondary-light);
+    line-height: 1.6;
+    padding: 12px;
+    background: var(--surface-raised-light);
+    border-radius: 8px;
+    margin: 0;
+}
+
+.errorText {
+    font-size: 14px;
+    color: var(--error-500);
+    line-height: 1.6;
+    padding: 12px;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 8px;
+    border-left: 3px solid var(--error-500);
+    margin: 0;
+}
+
+.emptyText {
+    font-size: 14px;
+    color: var(--text-tertiary-light);
+    font-style: italic;
+    margin: 0;
+}
+
+.jsonView {
+    background: var(--surface-raised-light);
+    border: 1px solid var(--boder-soft-light);
+    border-radius: 8px;
+    padding: 16px;
+    overflow-x: auto;
+    font-family: 'Fira Code', 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-primary-light);
+    margin: 0;
+}
+
+.footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--boder-soft-light);
+    display: flex;
+    justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+    .modal {
+        max-height: 95vh;
+    }
+
+    .infoGrid {
+        grid-template-columns: 1fr;
+    }
+}

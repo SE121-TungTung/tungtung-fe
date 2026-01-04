@@ -42,9 +42,5 @@
 
 .essayTextarea:focus {
     outline: none;
-    border-color: var(--brand-primary-light);
-}
-
-.essayTextarea::placeholder {
-    color: #9ca3af;
+    border-color: var(--brand-primary-500-light);
 }

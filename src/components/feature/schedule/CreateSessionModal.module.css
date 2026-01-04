@@ -1,0 +1,69 @@
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding-top: 8px;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.slotSection {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary-light);
+}
+
+.slotGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.slotButton {
+    padding: 8px 12px;
+    border: 1px solid var(--boder-soft-light);
+    border-radius: var(--radius-sm);
+    background-color: #fff;
+    color: var(--text-secondary-light);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.slotButton:hover {
+    background-color: var(--surface-raised-light);
+    border-color: var(--boder-hard-light);
+}
+
+.slotButton.selected {
+    background-color: var(--brand-primary-500-light);
+    color: #fff;
+    border-color: var(--brand-primary-500-light);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 16px;
+    border-top: 1px solid var(--boder-soft-light);
+    padding-top: 16px;
+}
+
+.errorMessage {
+    color: var(--status-danger-500-light);
+    font-size: 13px;
+    margin-top: 4px;
+}

@@ -1,6 +1,5 @@
 import { useState, useMemo, useCallback } from 'react'
 import s from './NotificationPage.module.css'
-import { useSession } from '@/stores/session.store'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
@@ -17,12 +16,13 @@ import { NotificationItem } from '@/components/common/list/NotificationItem'
 import Pagination from '@/components/common/menu/Pagination'
 
 import MarkReadIcon from '@/assets/Check.svg'
-import type { NotificationResponse } from '@/types/notification.types'
+import type {
+    NotificationResponse,
+    NotificationUI,
+} from '@/types/notification.types'
 
 const tabItems: TabItem[] = [
     { label: 'Tất cả', value: 'all' },
-    // Lưu ý: Hiện tại API getNotifications chưa support filter 'unread' server-side
-    // nên tab này sẽ tạm thời lọc ở client trên trang hiện tại hoặc cần update API sau.
     { label: 'Chưa đọc', value: 'unread' },
 ]
 
@@ -36,15 +36,23 @@ export default function NotificationPage() {
     const [activeTab, setActiveTab] = useState('all')
     const [currentPage, setCurrentPage] = useState(0)
 
-    // --- 1. Fetch Data ---
-    const { data: notifications = [], isLoading } = useQuery({
+    const { data, isLoading } = useQuery({
         queryKey: ['notifications', 'list', currentPage],
         queryFn: () =>
             getNotifications(currentPage * ITEMS_PER_PAGE, ITEMS_PER_PAGE),
         placeholderData: (previousData) => previousData,
     })
 
-    // --- 2. Mutations ---
+    const notifications = data?.notifications || []
+    const totalCount = data?.total || 0
+
+    const markAllMutation = useMutation({
+        mutationFn: markAllAsRead,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['notifications'] })
+        },
+    })
+
     const markReadMutation = useMutation({
         mutationFn: markAsRead,
         onSuccess: () => {
@@ -52,23 +60,7 @@ export default function NotificationPage() {
         },
     })
 
-    const markAllMutation = useMutation({
-        mutationFn: async () => {
-            // Vì API markAll có thể cần danh sách ID hoặc mark hết
-            // Ở đây ta dùng logic map qua danh sách hiện tại nếu API không hỗ trợ "mark all database"
-            const unreadIds = notifications
-                .filter((n) => !n.read_at)
-                .map((n) => n.id)
-            if (unreadIds.length > 0) {
-                await markAllAsRead(unreadIds)
-            }
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['notifications'] })
-        },
-    })
-
-    // --- 3. Handlers ---
+    // Handlers
     const handleGreetingComplete = useCallback(() => {
         setShowGradientName(true)
     }, [])
@@ -86,15 +78,14 @@ export default function NotificationPage() {
         markAllMutation.mutate()
     }
 
-    // --- 4. Processing Data for UI ---
-    // Vì NotificationItem có thể mong đợi props khác với API response gốc
-    // Ta map dữ liệu để tương thích (đặc biệt là field timestamp và isRead)
-    const mappedNotifications = useMemo(() => {
-        let data = notifications.map((n) => ({
-            ...n,
-            isRead: !!n.read_at,
-            timestamp: formatTime(n.created_at),
-        }))
+    const mappedNotifications = useMemo((): NotificationUI[] => {
+        let data = notifications.map(
+            (n): NotificationUI => ({
+                ...n,
+                isRead: !!n.read_at,
+                timestamp: formatTime(n.created_at),
+            })
+        )
 
         if (activeTab === 'unread') {
             data = data.filter((n) => !n.isRead)
@@ -102,12 +93,8 @@ export default function NotificationPage() {
         return data
     }, [notifications, activeTab])
 
-    // Tính toán phân trang
-    // Lưu ý: Do API getNotifications hiện tại trả về mảng thay vì { items, total }
-    // Ta sẽ tạm tính logic đơn giản: Nếu số lượng item trả về < limit -> Hết trang
-    // Hoặc hardcode totalPages nếu muốn UI hiện số.
-    const hasNextPage = notifications.length === ITEMS_PER_PAGE
-    const totalPages = hasNextPage ? currentPage + 2 : currentPage + 1
+    const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
+    const hasUnreadNotifications = notifications.some((n) => !n.read_at)
 
     return (
         <div className={s.pageWrapperWithoutHeader}>
@@ -154,7 +141,7 @@ export default function NotificationPage() {
                             leftIcon={<img src={MarkReadIcon} alt="Đã đọc" />}
                             onClick={handleMarkAllAsRead}
                             disabled={
-                                !notifications.some((n) => !n.read_at) ||
+                                !hasUnreadNotifications ||
                                 markAllMutation.isPending
                             }
                         >
@@ -174,7 +161,7 @@ export default function NotificationPage() {
                                 mappedNotifications.map((item) => (
                                     <NotificationItem
                                         key={item.id}
-                                        notification={item as any}
+                                        notification={item}
                                         onClick={() => handleItemClick(item)}
                                     />
                                 ))
@@ -193,7 +180,7 @@ export default function NotificationPage() {
                     )}
                 </Card>
 
-                {(currentPage > 0 || hasNextPage) && (
+                {totalPages > 1 && (
                     <div className={s.pagination}>
                         <Pagination
                             currentPage={currentPage}

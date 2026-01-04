@@ -7,6 +7,7 @@ import {
     SkillArea,
     DifficultyLevel,
     TestType,
+    TestStatus,
 } from '@/types/test.types'
 
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
@@ -22,8 +23,9 @@ import { useCreateTest } from '@/hooks/useCreateTest'
 
 export default function CreateTestPage() {
     const navigate = useNavigate()
-    const [loading, setLoading] = useState(false)
-
+    const [submittingStatus, setSubmittingStatus] = useState<
+        'idle' | 'draft' | 'published'
+    >('idle')
     // ========================================
     // Test Basic Info
     // ========================================
@@ -206,10 +208,10 @@ export default function CreateTestPage() {
 
         return true
     }
-    const handleSubmit = async () => {
+    const handleSubmit = async (status: TestStatus) => {
         if (!validateForm()) return
 
-        setLoading(true)
+        setSubmittingStatus(status === TestStatus.DRAFT ? 'draft' : 'published')
         try {
             const activeKeys = new Set<string>()
             sections.forEach((s) =>
@@ -241,6 +243,7 @@ export default function CreateTestPage() {
                 ai_grading_enabled: aiGradingEnabled,
                 start_time: startTime ? startTime : undefined,
                 end_time: endTime ? endTime : undefined,
+                status: status || TestStatus.DRAFT,
                 sections,
             }
 
@@ -265,7 +268,7 @@ export default function CreateTestPage() {
                 alert(error.message || 'Tạo bài thi thất bại')
             }
         } finally {
-            setLoading(false)
+            setSubmittingStatus('idle')
         }
     }
 
@@ -551,7 +554,7 @@ export default function CreateTestPage() {
                                         />
 
                                         <InputField
-                                            label="Tiêu đề Passage"
+                                            label="Tiêu đề"
                                             type="text"
                                             value={part.passage?.title || ''}
                                             onChange={(e) =>
@@ -566,348 +569,368 @@ export default function CreateTestPage() {
                                             placeholder="VD: The History of Coffee"
                                         />
 
-                                        <div
-                                            className={`${s.formField} ${s.fullWidth}`}
-                                        >
-                                            <InputField
-                                                label={
-                                                    section.skill_area ===
-                                                    SkillArea.LISTENING
-                                                        ? 'Audio Script (Listening)'
-                                                        : section.skill_area ===
-                                                            SkillArea.SPEAKING
-                                                          ? 'Cue Card Content'
-                                                          : 'Đoạn văn Reading'
-                                                }
-                                                enableMarkdown={true}
-                                                required={true}
-                                                value={
-                                                    part.passage
-                                                        ?.text_content || ''
-                                                }
-                                                onChange={(e) =>
-                                                    updatePartPassage(
-                                                        sIndex,
-                                                        pIndex,
-                                                        {
-                                                            text_content:
-                                                                e.target.value,
-                                                        }
-                                                    )
-                                                }
-                                                multiline={true}
-                                                style={{
-                                                    minHeight: '150px',
-                                                }}
-                                                placeholder={
-                                                    section.skill_area ===
-                                                    SkillArea.LISTENING
-                                                        ? 'Nhập nội dung audio script...'
-                                                        : section.skill_area ===
-                                                            SkillArea.SPEAKING
-                                                          ? 'Nhập nội dung cue card...'
-                                                          : 'Nhập đoạn văn reading...'
-                                                }
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* ============================================ */}
-                                    {/* PARTS - AUDIO UPLOAD */}
-                                    {/* ============================================ */}
-                                    {section.skill_area ===
-                                        SkillArea.LISTENING && (
-                                        <div className={`${s.formField}`}>
-                                            {/* Input chọn File Audio */}
-                                            <InputField
-                                                label="Audio File (Listening) *"
-                                                type="file"
-                                                accept="audio/*"
-                                                fullWidth
-                                                rightIcon={
-                                                    uploadedFiles[
-                                                        getFileKey(
-                                                            part.id ?? '',
-                                                            'audio'
-                                                        )
-                                                    ] && (
-                                                        <button
-                                                            onClick={() =>
-                                                                handleRemoveFile(
-                                                                    sIndex,
-                                                                    pIndex,
-                                                                    'audio'
-                                                                )
-                                                            }
-                                                            style={{
-                                                                cursor: 'pointer',
-                                                                border: 'none',
-                                                                background:
-                                                                    'none',
-                                                                color: '#ff4d4f',
-                                                                fontWeight:
-                                                                    'bold',
-                                                            }}
-                                                            title="Gỡ bỏ file"
-                                                        >
-                                                            ✕
-                                                        </button>
-                                                    )
-                                                }
-                                                onChange={(e) => {
-                                                    const file =
-                                                        (
-                                                            e.target as HTMLInputElement
-                                                        ).files?.[0] || null
-                                                    handleFileUpload(
-                                                        sIndex,
-                                                        pIndex,
-                                                        'audio',
-                                                        file
-                                                    )
-                                                }}
-                                                hint={
-                                                    uploadedFiles[
-                                                        getFileKey(
-                                                            part.id ?? '',
-                                                            'audio'
-                                                        )
-                                                    ]?.name
-                                                }
-                                            />
-
-                                            {uploadedFiles[
-                                                getFileKey(
-                                                    part.id ?? '',
-                                                    'audio'
-                                                )
-                                            ] && (
-                                                <div
-                                                    style={{
-                                                        marginTop: '8px',
-                                                        padding: '10px',
-                                                        background:
-                                                            'rgba(0,0,0,0.05)',
-                                                        borderRadius: '8px',
-                                                    }}
-                                                >
-                                                    <p
-                                                        style={{
-                                                            fontSize: '12px',
-                                                            marginBottom: '4px',
-                                                            color: 'var(--text-primary-light)',
-                                                        }}
-                                                    >
-                                                        Xem trước âm thanh:
-                                                    </p>
-                                                    <audio
-                                                        controls
-                                                        src={URL.createObjectURL(
-                                                            uploadedFiles[
-                                                                getFileKey(
-                                                                    part.id ??
-                                                                        '',
-                                                                    'audio'
-                                                                )
-                                                            ]
-                                                        )}
-                                                        style={{
-                                                            width: '100%',
-                                                            height: '32px',
-                                                        }}
-                                                    />
-                                                </div>
-                                            )}
-
-                                            {/* Input nhập URL Audio */}
-                                            <div
-                                                style={{
-                                                    marginTop: '12px',
-                                                }}
-                                            >
-                                                <InputField
-                                                    label="Hoặc nhập URL:"
-                                                    type="text"
-                                                    uiSize="sm"
-                                                    placeholder="https://example.com/audio.mp3"
-                                                    value={
-                                                        part.passage
-                                                            ?.audio_url || ''
+                                        <InputField
+                                            label="Topic"
+                                            type="text"
+                                            value={part.passage?.topic || ''}
+                                            onChange={(e) =>
+                                                updatePartPassage(
+                                                    sIndex,
+                                                    pIndex,
+                                                    {
+                                                        topic: e.target.value,
                                                     }
-                                                    // Disable nếu đã chọn file upload
-                                                    disabled={
-                                                        !!uploadedFiles[
+                                                )
+                                            }
+                                            placeholder="VD: Environment, Technology"
+                                        />
+
+                                        <SelectField
+                                            label="Mức độ khó"
+                                            value={
+                                                part.passage
+                                                    ?.difficulty_level ||
+                                                DifficultyLevel.MEDIUM
+                                            }
+                                            onChange={(e) =>
+                                                updatePartPassage(
+                                                    sIndex,
+                                                    pIndex,
+                                                    {
+                                                        difficulty_level: e
+                                                            .target
+                                                            .value as DifficultyLevel,
+                                                    }
+                                                )
+                                            }
+                                            options={Object.values(
+                                                DifficultyLevel
+                                            ).map((level) => ({
+                                                label:
+                                                    level
+                                                        .charAt(0)
+                                                        .toUpperCase() +
+                                                    level.slice(1),
+                                                value: level,
+                                            }))}
+                                        />
+
+                                        <InputField
+                                            className={`${s.fullWidth}`}
+                                            label={
+                                                section.skill_area ===
+                                                SkillArea.LISTENING
+                                                    ? 'Audio Script (Listening)'
+                                                    : section.skill_area ===
+                                                        SkillArea.SPEAKING
+                                                      ? 'Cue Card Content'
+                                                      : section.skill_area ===
+                                                          SkillArea.WRITING
+                                                        ? 'Writing Prompt'
+                                                        : 'Đoạn văn Reading'
+                                            }
+                                            enableMarkdown={true}
+                                            required={true}
+                                            value={
+                                                part.passage?.text_content || ''
+                                            }
+                                            onChange={(e) =>
+                                                updatePartPassage(
+                                                    sIndex,
+                                                    pIndex,
+                                                    {
+                                                        text_content:
+                                                            e.target.value,
+                                                    }
+                                                )
+                                            }
+                                            multiline={true}
+                                            style={{
+                                                minHeight: '150px',
+                                            }}
+                                            placeholder={
+                                                section.skill_area ===
+                                                SkillArea.LISTENING
+                                                    ? 'Nhập nội dung audio script...'
+                                                    : section.skill_area ===
+                                                        SkillArea.SPEAKING
+                                                      ? 'Nhập nội dung cue card...'
+                                                      : 'Nhập đoạn văn reading...'
+                                            }
+                                        />
+                                        {/* ============================================ */}
+                                        {/* PARTS - AUDIO UPLOAD */}
+                                        {/* ============================================ */}
+                                        {section.skill_area ===
+                                            SkillArea.LISTENING && (
+                                            <div className={`${s.formField}`}>
+                                                {/* Input chọn File Audio */}
+                                                <InputField
+                                                    label="Audio File (Listening) *"
+                                                    type="file"
+                                                    accept="audio/*"
+                                                    fullWidth
+                                                    rightIcon={
+                                                        uploadedFiles[
                                                             getFileKey(
                                                                 part.id ?? '',
                                                                 'audio'
                                                             )
-                                                        ]
+                                                        ] && (
+                                                            <button
+                                                                onClick={() =>
+                                                                    handleRemoveFile(
+                                                                        sIndex,
+                                                                        pIndex,
+                                                                        'audio'
+                                                                    )
+                                                                }
+                                                                style={{
+                                                                    cursor: 'pointer',
+                                                                    border: 'none',
+                                                                    background:
+                                                                        'none',
+                                                                    color: '#ff4d4f',
+                                                                    fontWeight:
+                                                                        'bold',
+                                                                }}
+                                                                title="Gỡ bỏ file"
+                                                            >
+                                                                ✕
+                                                            </button>
+                                                        )
                                                     }
                                                     onChange={(e) => {
-                                                        const urlValue =
-                                                            e.target.value
-
-                                                        updatePartPassage(
+                                                        const file =
+                                                            (
+                                                                e.target as HTMLInputElement
+                                                            ).files?.[0] || null
+                                                        handleFileUpload(
                                                             sIndex,
                                                             pIndex,
-                                                            {
-                                                                audio_url:
-                                                                    urlValue,
-                                                            }
+                                                            'audio',
+                                                            file
+                                                        )
+                                                    }}
+                                                    hint={
+                                                        uploadedFiles[
+                                                            getFileKey(
+                                                                part.id ?? '',
+                                                                'audio'
+                                                            )
+                                                        ]?.name
+                                                    }
+                                                />
+
+                                                {uploadedFiles[
+                                                    getFileKey(
+                                                        part.id ?? '',
+                                                        'audio'
+                                                    )
+                                                ] && (
+                                                    <div
+                                                        style={{
+                                                            marginTop: '8px',
+                                                            padding: '10px',
+                                                            background:
+                                                                'rgba(0,0,0,0.05)',
+                                                            borderRadius: '8px',
+                                                        }}
+                                                    >
+                                                        <p
+                                                            style={{
+                                                                fontSize:
+                                                                    '12px',
+                                                                marginBottom:
+                                                                    '4px',
+                                                                color: 'var(--text-primary-light)',
+                                                            }}
+                                                        >
+                                                            Xem trước âm thanh:
+                                                        </p>
+                                                        <audio
+                                                            controls
+                                                            src={URL.createObjectURL(
+                                                                uploadedFiles[
+                                                                    getFileKey(
+                                                                        part.id ??
+                                                                            '',
+                                                                        'audio'
+                                                                    )
+                                                                ]
+                                                            )}
+                                                            style={{
+                                                                width: '100%',
+                                                                height: '32px',
+                                                            }}
+                                                        />
+                                                    </div>
+                                                )}
+
+                                                {/* Input nhập URL Audio */}
+                                                <div
+                                                    style={{
+                                                        marginTop: '12px',
+                                                    }}
+                                                >
+                                                    <InputField
+                                                        label="Hoặc nhập URL:"
+                                                        type="text"
+                                                        uiSize="sm"
+                                                        placeholder="https://example.com/audio.mp3"
+                                                        value={
+                                                            part.passage
+                                                                ?.audio_url ||
+                                                            ''
+                                                        }
+                                                        // Disable nếu đã chọn file upload
+                                                        disabled={
+                                                            !!uploadedFiles[
+                                                                getFileKey(
+                                                                    part.id ??
+                                                                        '',
+                                                                    'audio'
+                                                                )
+                                                            ]
+                                                        }
+                                                        onChange={(e) => {
+                                                            const urlValue =
+                                                                e.target.value
+
+                                                            updatePartPassage(
+                                                                sIndex,
+                                                                pIndex,
+                                                                {
+                                                                    audio_url:
+                                                                        urlValue,
+                                                                }
+                                                            )
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {section.skill_area !==
+                                            SkillArea.LISTENING && (
+                                            <div className={s.formField}>
+                                                <InputField
+                                                    label="Hình ảnh (Diagram/Chart - tùy chọn)"
+                                                    type="file"
+                                                    accept="image/*"
+                                                    fullWidth
+                                                    rightIcon={
+                                                        uploadedFiles[
+                                                            getFileKey(
+                                                                part.id ?? '',
+                                                                'image'
+                                                            )
+                                                        ] && (
+                                                            <button
+                                                                onClick={() =>
+                                                                    handleRemoveFile(
+                                                                        sIndex,
+                                                                        pIndex,
+                                                                        'image'
+                                                                    )
+                                                                }
+                                                                style={{
+                                                                    cursor: 'pointer',
+                                                                    border: 'none',
+                                                                    background:
+                                                                        'none',
+                                                                    color: '#ff4d4f',
+                                                                }}
+                                                            >
+                                                                ✕
+                                                            </button>
+                                                        )
+                                                    }
+                                                    onChange={(e) => {
+                                                        const file =
+                                                            (
+                                                                e.target as HTMLInputElement
+                                                            ).files?.[0] || null
+                                                        handleFileUpload(
+                                                            sIndex,
+                                                            pIndex,
+                                                            'image',
+                                                            file
                                                         )
                                                     }}
                                                 />
-                                            </div>
-                                        </div>
-                                    )}
 
-                                    {section.skill_area ===
-                                        SkillArea.READING && (
-                                        <div className={s.formField}>
-                                            <InputField
-                                                label="Hình ảnh (Diagram/Chart - tùy chọn)"
-                                                type="file"
-                                                accept="image/*"
-                                                fullWidth
-                                                rightIcon={
-                                                    uploadedFiles[
-                                                        getFileKey(
-                                                            part.id ?? '',
-                                                            'image'
-                                                        )
-                                                    ] && (
-                                                        <button
-                                                            onClick={() =>
-                                                                handleRemoveFile(
-                                                                    sIndex,
-                                                                    pIndex,
-                                                                    'image'
-                                                                )
-                                                            }
-                                                            style={{
-                                                                cursor: 'pointer',
-                                                                border: 'none',
-                                                                background:
-                                                                    'none',
-                                                                color: '#ff4d4f',
-                                                            }}
-                                                        >
-                                                            ✕
-                                                        </button>
+                                                {uploadedFiles[
+                                                    getFileKey(
+                                                        part.id ?? '',
+                                                        'image'
                                                     )
-                                                }
-                                                onChange={(e) => {
-                                                    const file =
-                                                        (
-                                                            e.target as HTMLInputElement
-                                                        ).files?.[0] || null
-                                                    handleFileUpload(
-                                                        sIndex,
-                                                        pIndex,
-                                                        'image',
-                                                        file
-                                                    )
-                                                }}
-                                            />
-
-                                            {uploadedFiles[
-                                                getFileKey(
-                                                    part.id ?? '',
-                                                    'image'
-                                                )
-                                            ] && (
-                                                <div
-                                                    style={{
-                                                        marginTop: '10px',
-                                                        position: 'relative',
-                                                        width: 'fit-content',
-                                                    }}
-                                                >
-                                                    <img
-                                                        src={URL.createObjectURL(
-                                                            uploadedFiles[
-                                                                getFileKey(
-                                                                    part.id ??
-                                                                        '',
-                                                                    'image'
-                                                                )
-                                                            ]
-                                                        )}
-                                                        alt="Preview"
+                                                ] && (
+                                                    <div
                                                         style={{
-                                                            maxWidth: '100%',
-                                                            maxHeight: '150px',
-                                                            borderRadius: '8px',
-                                                            border: '1px solid #ddd',
-                                                        }}
-                                                    />
-                                                    <p
-                                                        style={{
-                                                            fontSize: '11px',
-                                                            color: '#666',
+                                                            marginTop: '10px',
+                                                            position:
+                                                                'relative',
+                                                            width: 'fit-content',
                                                         }}
                                                     >
-                                                        {
-                                                            uploadedFiles[
-                                                                getFileKey(
-                                                                    part.id ??
-                                                                        '',
-                                                                    'image'
-                                                                )
-                                                            ].name
-                                                        }
-                                                    </p>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
+                                                        <img
+                                                            src={URL.createObjectURL(
+                                                                uploadedFiles[
+                                                                    getFileKey(
+                                                                        part.id ??
+                                                                            '',
+                                                                        'image'
+                                                                    )
+                                                                ]
+                                                            )}
+                                                            alt="Preview"
+                                                            style={{
+                                                                maxWidth:
+                                                                    '100%',
+                                                                maxHeight:
+                                                                    '150px',
+                                                                borderRadius:
+                                                                    '8px',
+                                                                border: '1px solid #ddd',
+                                                            }}
+                                                        />
+                                                        <p
+                                                            style={{
+                                                                fontSize:
+                                                                    '11px',
+                                                                color: '#666',
+                                                            }}
+                                                        >
+                                                            {
+                                                                uploadedFiles[
+                                                                    getFileKey(
+                                                                        part.id ??
+                                                                            '',
+                                                                        'image'
+                                                                    )
+                                                                ].name
+                                                            }
+                                                        </p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
 
-                                    <InputField
-                                        label="Topic"
-                                        type="text"
-                                        value={part.passage?.topic || ''}
-                                        onChange={(e) =>
-                                            updatePartPassage(sIndex, pIndex, {
-                                                topic: e.target.value,
-                                            })
-                                        }
-                                        placeholder="VD: Environment, Technology"
-                                    />
-
-                                    <SelectField
-                                        label="Mức độ khó"
-                                        value={
-                                            part.passage?.difficulty_level ||
-                                            DifficultyLevel.MEDIUM
-                                        }
-                                        onChange={(e) =>
-                                            updatePartPassage(sIndex, pIndex, {
-                                                difficulty_level: e.target
-                                                    .value as DifficultyLevel,
-                                            })
-                                        }
-                                        options={Object.values(
-                                            DifficultyLevel
-                                        ).map((level) => ({
-                                            label:
-                                                level.charAt(0).toUpperCase() +
-                                                level.slice(1),
-                                            value: level,
-                                        }))}
-                                    />
-
-                                    <InputField
-                                        label="Hướng dẫn part"
-                                        enableMarkdown={true}
-                                        value={part.instructions || ''}
-                                        multiline={true}
-                                        onChange={(e) =>
-                                            updatePart(sIndex, pIndex, {
-                                                instructions: e.target.value,
-                                            })
-                                        }
-                                        className={`${s.fullWidth}`}
-                                    />
+                                        <InputField
+                                            label="Hướng dẫn part"
+                                            enableMarkdown={true}
+                                            value={part.instructions || ''}
+                                            multiline={true}
+                                            onChange={(e) =>
+                                                updatePart(sIndex, pIndex, {
+                                                    instructions:
+                                                        e.target.value,
+                                                })
+                                            }
+                                            className={`${s.fullWidth}`}
+                                        />
+                                    </div>
 
                                     {/* ============================================ */}
                                     {/* QUESTION GROUPS */}
@@ -1203,11 +1226,19 @@ export default function CreateTestPage() {
                             Hủy
                         </ButtonGhost>
                         <ButtonPrimary
-                            onClick={handleSubmit}
-                            loading={loading}
-                            disabled={loading}
+                            onClick={() => handleSubmit(TestStatus.PUBLISHED)}
+                            loading={submittingStatus === 'published'}
+                            disabled={submittingStatus !== 'idle'}
                         >
                             Tạo bài thi
+                        </ButtonPrimary>
+                        <ButtonPrimary
+                            onClick={() => handleSubmit(TestStatus.DRAFT)}
+                            loading={submittingStatus === 'draft'}
+                            disabled={submittingStatus !== 'idle'}
+                            variant="outline"
+                        >
+                            Lưu nháp
                         </ButtonPrimary>
                     </div>
                 </div>

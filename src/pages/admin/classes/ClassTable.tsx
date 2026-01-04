@@ -1,5 +1,5 @@
 import { type Class, type ClassStatus } from '@/lib/classes'
-import s from './ClassTable.module.css' // Dùng CSS module
+import s from './ClassTable.module.css'
 import {
     StatusBadge,
     type StatusBadgeVariant,
@@ -8,6 +8,7 @@ import { usePermissions } from '@/hooks/usePermissions'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import IconEdit from '@/assets/Edit Pen.svg'
 import IconDelete from '@/assets/Trash Bin.svg'
+import Skeleton from '@/components/effect/Skeleton'
 
 const classStatusMap: Record<
     ClassStatus,
@@ -42,6 +43,65 @@ export default function ClassTable({
     const canEdit = can('class:update')
     const canDelete = can('class:delete')
 
+    const ClassRowSkeleton = () => (
+        <tr>
+            {/* Tên lớp & Sĩ số */}
+            <td>
+                <div className={s.userInfo}>
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 4,
+                        }}
+                    >
+                        <Skeleton width={160} height={16} />
+                        <Skeleton width={80} height={12} />
+                    </div>
+                </div>
+            </td>
+            {/* Khóa học */}
+            <td>
+                <Skeleton width={120} height={16} />
+            </td>
+            {/* Giáo viên */}
+            <td>
+                <Skeleton width={100} height={16} />
+            </td>
+            {/* Phòng */}
+            <td>
+                <Skeleton width={60} height={16} />
+            </td>
+            {/* Trạng thái */}
+            <td>
+                <Skeleton
+                    width={100}
+                    height={24}
+                    style={{ borderRadius: 12 }}
+                />
+            </td>
+            {/* Thời gian */}
+            <td>
+                <Skeleton width={140} height={16} />
+            </td>
+            {/* Hành động */}
+            <td>
+                <div className={s.actionsCell}>
+                    <Skeleton
+                        width={36}
+                        height={36}
+                        style={{ borderRadius: 8 }}
+                    />
+                    <Skeleton
+                        width={36}
+                        height={36}
+                        style={{ borderRadius: 8 }}
+                    />
+                </div>
+            </td>
+        </tr>
+    )
+
     return (
         <table className={s.table}>
             <thead>
@@ -57,14 +117,15 @@ export default function ClassTable({
             </thead>
             <tbody>
                 {isLoading ? (
-                    <tr>
-                        <td colSpan={7} className={s.loadingOrEmpty}>
-                            Đang tải...
-                        </td>
-                    </tr>
+                    // Render 5 skeleton rows
+                    <>
+                        {[...Array(5)].map((_, i) => (
+                            <ClassRowSkeleton key={i} />
+                        ))}
+                    </>
                 ) : classes.length === 0 ? (
                     <tr>
-                        <td colSpan={7} className={s.loadingOrEmpty}>
+                        <td colSpan={7} className={s.emptyState}>
                             Không có lớp học nào.
                         </td>
                     </tr>
@@ -79,7 +140,8 @@ export default function ClassTable({
                                             {c.name}
                                         </span>
                                         <span className={s.userEmail}>
-                                            {c.maxStudents} học viên
+                                            {c.currentStudents}/{c.maxStudents}{' '}
+                                            học viên
                                         </span>
                                     </div>
                                 </td>

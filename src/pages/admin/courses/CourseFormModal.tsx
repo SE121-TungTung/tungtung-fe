@@ -11,6 +11,7 @@ import { SelectField } from '@/components/common/input/SelectField'
 import { Modal } from '@/components/core/Modal'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import styles from './CourseFormModal.module.css'
+import { useDialog } from '@/hooks/useDialog'
 
 interface Props {
     isOpen: boolean
@@ -42,6 +43,7 @@ export const CourseFormModal: React.FC<Props> = ({
 }) => {
     const isEdit = Boolean(editing)
     const formId = 'course-form'
+    const { alert: showAlert } = useDialog()
 
     const {
         register,
@@ -93,7 +95,7 @@ export const CourseFormModal: React.FC<Props> = ({
             onClose()
         } catch (error) {
             console.error('Failed to save course:', error)
-            // TODO: Hiển thị lỗi cho người dùng
+            showAlert('Lưu khóa học thất bại. Vui lòng thử lại.')
         }
     }
 
@@ -183,17 +185,14 @@ export const CourseFormModal: React.FC<Props> = ({
                 </div>
 
                 {/* Dùng textarea cho Mô tả */}
-                <div>
-                    <label htmlFor="description" className={styles.inputLabel}>
-                        Mô tả (Tùy chọn)
-                    </label>
-                    <textarea
-                        id="description"
-                        placeholder="Mô tả ngắn về nội dung khóa học..."
-                        rows={4}
-                        {...register('description')}
-                    />
-                </div>
+                <InputField
+                    label="Mô tả ngắn về nội dung khóa học"
+                    id="description"
+                    multiline
+                    placeholder="Mô tả ngắn về nội dung khóa học..."
+                    rows={4}
+                    {...register('description')}
+                />
             </form>
         </Modal>
     )

@@ -54,7 +54,7 @@ export default function TestDetailPage() {
             },
             [TestStatus.PUBLISHED]: {
                 label: 'Đã xuất bản',
-                color: 'var(--status-success-500-light)',
+                color: 'var(--status-success-500-dark)',
             },
             [TestStatus.ACTIVE]: {
                 label: 'Đang hoạt động',

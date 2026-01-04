@@ -34,23 +34,21 @@ export interface Notification {
     sent_channels?: Record<string, any> | null
 }
 
-export interface NotificationResponse {
-    id: string
-    user_id: string
-    title: string
-    content: string
-    notification_type: NotificationType
-    priority: NotificationPriority
-    data?: Record<string, any>
-    action_url?: string | null
-    channels: string[]
-    read_at: string | null
-    created_at: string
-    sent_channels?: Record<string, any> | null
+// export interface NotificationResponse extends Notification {}
+
+export interface NotificationUI extends Notification {
+    isRead: boolean
+    timestamp: string
 }
 
 export function isNotificationType(value: string): value is NotificationType {
     return Object.values(NotificationType).includes(value as NotificationType)
+}
+
+export interface NotificationListResponse {
+    // notifications: NotificationResponse[]
+    notifications: Notification[]
+    total: number
 }
 
 export interface UnreadCountResponse {

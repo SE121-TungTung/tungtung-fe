@@ -86,16 +86,25 @@ export default function ExamPracticePage() {
         setLoading(true)
         setError(null)
         try {
+            let data: any
             if (userRole === 'student') {
-                const data = await testApi.listStudentTests({
+                data = await testApi.listStudentTests({
                     limit: 100,
                 })
-                setTests(data.tests)
             } else {
-                const data = await testApi.listTests({
+                data = await testApi.listTests({
                     limit: 100,
                 })
+            }
+            if (Array.isArray(data)) {
+                setTests(data)
+            } else if (data && Array.isArray(data.tests)) {
                 setTests(data.tests)
+            } else if (data && Array.isArray(data.items)) {
+                setTests(data.items)
+            } else {
+                console.warn('Unexpected API response structure:', data)
+                setTests([])
             }
         } catch (err: any) {
             console.error('Failed to load tests:', err)

@@ -1,6 +1,7 @@
 import { api } from '@/lib/api'
 import type {
     NotificationResponse,
+    NotificationListResponse,
     UnreadCountResponse,
 } from '@/types/notification.types'
 
@@ -9,12 +10,12 @@ const BASE_URL = '/api/v1/notifications'
 export async function getNotifications(
     skip = 0,
     limit = 50
-): Promise<NotificationResponse[]> {
+): Promise<NotificationListResponse> {
     const qs = new URLSearchParams()
     qs.set('skip', String(skip))
     qs.set('limit', String(limit))
 
-    return api<NotificationResponse[]>(`${BASE_URL}?${qs.toString()}`, {
+    return api<NotificationListResponse>(`${BASE_URL}?${qs.toString()}`, {
         method: 'GET',
     })
 }
@@ -34,6 +35,11 @@ export async function markAsRead(
     })
 }
 
-export async function markAllAsRead(notificationIds: string[]): Promise<void> {
-    await Promise.all(notificationIds.map((id) => markAsRead(id)))
+export async function markAllAsRead(): Promise<{
+    message: string
+    count: number
+}> {
+    return api<{ message: string; count: number }>(`${BASE_URL}/read-all`, {
+        method: 'PUT',
+    })
 }

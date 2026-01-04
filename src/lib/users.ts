@@ -179,8 +179,8 @@ export async function changePassword(body: ChangePasswordPayload) {
 }
 
 // 8. Get Overview
-export async function getUserOverview(): Promise<StudentOverviewStats> {
-    return api<StudentOverviewStats>('/api/v1/users/overview', {
+export async function getUserOverview<T = any>(): Promise<T> {
+    return api<T>('/api/v1/users/overview', {
         method: 'GET',
     })
 }

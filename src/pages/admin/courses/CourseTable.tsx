@@ -8,9 +8,10 @@ import { usePermissions } from '@/hooks/usePermissions'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import IconEdit from '@/assets/Edit Pen.svg'
 import IconDelete from '@/assets/Trash Bin.svg'
+import Skeleton from '@/components/effect/Skeleton'
 
 const courseLevelDisplayNames: Record<CourseLevel, string> = {
-    beginner: 'Sơ cấp',
+    beginner: 'Mất gốc',
     elementary: 'Cơ bản',
     intermediate: 'Trung cấp',
     upper_intermediate: 'Trung cấp+',
@@ -58,6 +59,65 @@ export default function CourseTable({
         return courseLevelDisplayNames[level] || level
     }
 
+    const CourseRowSkeleton = () => (
+        <tr>
+            {/* Tên & Mô tả */}
+            <td>
+                <div className={s.userInfo}>
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 4,
+                        }}
+                    >
+                        <Skeleton width={140} height={16} />
+                        <Skeleton width={200} height={12} />
+                    </div>
+                </div>
+            </td>
+            {/* Học phí */}
+            <td>
+                <Skeleton width={80} height={16} />
+            </td>
+            {/* Cấp độ */}
+            <td>
+                <Skeleton width={90} height={16} />
+            </td>
+            {/* Trạng thái */}
+            <td>
+                <Skeleton
+                    width={100}
+                    height={24}
+                    style={{ borderRadius: 12 }}
+                />
+            </td>
+            {/* Thời lượng */}
+            <td>
+                <Skeleton width={60} height={16} />
+            </td>
+            {/* Ngày tạo */}
+            <td>
+                <Skeleton width={80} height={16} />
+            </td>
+            {/* Hành động */}
+            <td>
+                <div className={s.actionsCell}>
+                    <Skeleton
+                        width={36}
+                        height={36}
+                        style={{ borderRadius: 8 }}
+                    />
+                    <Skeleton
+                        width={36}
+                        height={36}
+                        style={{ borderRadius: 8 }}
+                    />
+                </div>
+            </td>
+        </tr>
+    )
+
     return (
         <table className={s.table}>
             <thead>
@@ -73,14 +133,18 @@ export default function CourseTable({
             </thead>
             <tbody>
                 {isLoading ? (
-                    <tr>
-                        <td colSpan={7} className={s.loadingOrEmpty}>
-                            Đang tải...
-                        </td>
-                    </tr>
+                    // Render 5 skeleton rows
+                    <>
+                        {[...Array(5)].map((_, i) => (
+                            <CourseRowSkeleton key={i} />
+                        ))}
+                    </>
                 ) : courses.length === 0 ? (
                     <tr>
-                        <td colSpan={7} className={s.loadingOrEmpty}>
+                        <td
+                            colSpan={7}
+                            style={{ textAlign: 'center', padding: '24px' }}
+                        >
                             Không có khóa học nào.
                         </td>
                     </tr>
@@ -99,7 +163,10 @@ export default function CourseTable({
                                                 ? c.description.substring(
                                                       0,
                                                       40
-                                                  ) + '...'
+                                                  ) +
+                                                  (c.description.length > 40
+                                                      ? '...'
+                                                      : '')
                                                 : 'Chưa có mô tả'}
                                         </span>
                                     </div>

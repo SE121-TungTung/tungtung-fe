@@ -640,18 +640,24 @@ export const testApi = {
                 ? `${BASE_URL}/student?${queryString}`
                 : `${BASE_URL}/student`
 
-            const response = await api<{
-                total: number
-                skip: number
-                limit: number
-                tests: BackendStudentTestListItem[]
-            }>(url, { method: 'GET' })
+            const response = await api<any>(url, { method: 'GET' })
+
+            if (Array.isArray(response)) {
+                return {
+                    total: response.length,
+                    skip: params?.skip || 0,
+                    limit: params?.limit || response.length,
+                    tests: response.map(mapStudentTestListItem),
+                }
+            }
 
             return {
-                total: response.total,
-                skip: response.skip,
-                limit: response.limit,
-                tests: response.tests.map(mapStudentTestListItem),
+                total: response.total || 0,
+                skip: response.skip || 0,
+                limit: response.limit || 0,
+                tests: (response.tests || response.items || []).map(
+                    mapStudentTestListItem
+                ),
             }
         } catch (error) {
             console.error('Error fetching student tests:', error)

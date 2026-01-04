@@ -1,32 +1,29 @@
-import { useMemo, useState } from 'react'
-import {
-    useQuery,
-    useMutation,
-    useQueryClient,
-    keepPreviousData,
-} from '@tanstack/react-query'
+import { useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+
+// Components
 import ClassTable from './ClassTable'
 import { ClassFormModal } from './ClassFormModal'
-import {
-    listClasses,
-    deleteClass,
-    type Class,
-    type ClassStatus,
-} from '@/lib/classes'
 import InputField from '@/components/common/input/InputField'
 import { SelectField } from '@/components/common/input/SelectField'
 import { Button } from '@/components/core/Button'
-import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import Card from '@/components/common/card/Card'
+import Pagination from '@/components/common/menu/Pagination'
+
+// Assets & Styles
 import s from './ClassManagementPage.module.css'
 import IconPlus from '@/assets/Plus Thin.svg'
 import IconSearch from '@/assets/Lens.svg'
+
+// Hooks & Types
 import { usePermissions } from '@/hooks/usePermissions'
+import { useTableParams } from '@/hooks/useTableParams'
+import { useDialog } from '@/hooks/useDialog'
+import { useClasses, useDeleteClass } from '@/hooks/domain/useClasses'
+import { type Class, type ClassStatus } from '@/lib/classes'
 
-type SortBy = 'name' | 'startDate' | 'createdAt' | 'maxStudents'
-type SortOrder = 'asc' | 'desc'
-
-const CLASS_STATUS_OPTIONS: { label: string; value: ClassStatus | '' }[] = [
+// Options Constants
+const CLASS_STATUS_OPTIONS = [
     { label: 'Tất cả trạng thái', value: '' },
     { label: 'Đã lên lịch', value: 'scheduled' },
     { label: 'Đang diễn ra', value: 'active' },
@@ -36,10 +33,10 @@ const CLASS_STATUS_OPTIONS: { label: string; value: ClassStatus | '' }[] = [
 ]
 
 const SORT_BY_OPTIONS = [
-    { label: 'Sắp theo ngày tạo', value: 'createdAt' },
+    { label: 'Sắp theo ngày tạo', value: 'created_at' },
     { label: 'Sắp theo tên', value: 'name' },
-    { label: 'Sắp theo ngày bắt đầu', value: 'startDate' },
-    { label: 'Sắp theo sĩ số', value: 'maxStudents' },
+    { label: 'Sắp theo ngày bắt đầu', value: 'start_date' },
+    { label: 'Sắp theo sĩ số', value: 'max_students' },
 ]
 
 const SORT_ORDER_OPTIONS = [
@@ -47,124 +44,91 @@ const SORT_ORDER_OPTIONS = [
     { label: 'Tăng dần', value: 'asc' },
 ]
 
+// Định nghĩa Filter Interface
+interface ClassFilters {
+    status: ClassStatus | ''
+}
+
 export default function ClassManagementPage() {
     const qc = useQueryClient()
     const { can } = usePermissions()
+    const { confirm, alert } = useDialog()
     const canCreateClass = can('class:create')
 
-    // State cho Modal
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [editingClass, setEditingClass] = useState<Class | null>(null)
 
-    // State cho Filters
-    const [searchValue, setSearchValue] = useState('')
-    const [status, setStatus] = useState<ClassStatus | ''>('')
-    const [page, setPage] = useState(1)
-    const [limit] = useState(10)
-
-    // State cho Sorting
-    const [sortBy, setSortBy] = useState<SortBy>('createdAt')
-    const [sortOrder, setSortOrder] = useState<SortOrder>('asc')
-
-    // Query (Sử dụng client-side sorting)
-    const queryKey = useMemo(
-        () => [
-            'classes',
-            {
-                search: searchValue,
-                status: status || undefined,
-                page,
-                limit,
-            },
-        ],
-        [searchValue, status, page, limit]
-    )
-
-    const classesQuery = useQuery({
-        queryKey,
-        queryFn: () =>
-            listClasses({
-                search: searchValue,
-                status: status || '',
-                page,
-                limit,
-            }),
-        placeholderData: keepPreviousData,
+    // 1. Setup Table Logic
+    const {
+        page,
+        search,
+        filters,
+        sort,
+        setPage,
+        setSearch,
+        setFilters,
+        setSort,
+        apiParams,
+    } = useTableParams<ClassFilters>({
+        status: '',
     })
 
-    // Client-side Sorting
-    const classes = useMemo(() => {
-        const classesRaw = classesQuery.data?.items ?? []
-        const arr = [...classesRaw]
-        const dir = sortOrder === 'asc' ? 1 : -1
-        const get = (c: Class) => {
-            switch (sortBy) {
-                case 'name':
-                    return c.name.toLowerCase()
-                case 'startDate':
-                    return c.startDate
-                case 'maxStudents':
-                    return c.maxStudents
-                case 'createdAt':
-                default:
-                    return c.createdAt
-            }
-        }
-        arr.sort((a, b) => {
-            const va = get(a),
-                vb = get(b)
-            if (va === vb) return 0
-            return va > vb ? dir : -dir
-        })
-        return arr
-    }, [classesQuery.data, sortBy, sortOrder])
-
-    // Mutation
-    const { mutate: doDelete } = useMutation({
-        mutationFn: async (classItem: Class) => {
-            if (!window.confirm(`Xóa lớp học "${classItem.name}"?`)) return
-            await deleteClass(classItem.id)
-        },
-        onSuccess: () => {
-            qc.invalidateQueries({ queryKey: ['classes'] })
-        },
-        onError: (err) => {
-            window.alert(`Không thể xóa lớp học: ${err.message}`)
-        },
+    // 2. Data Fetching Hook
+    const {
+        data: classesData,
+        isLoading,
+        isFetching,
+    } = useClasses({
+        ...apiParams,
+        status: (apiParams.status as ClassStatus) || undefined,
+        sortDir: apiParams.sortOrder,
+        sortBy: apiParams.sortBy,
     })
 
-    // Modal Handlers
+    // 3. Delete Hook
+    const { mutateAsync: deleteClassMutate } = useDeleteClass()
+
+    // Handlers
     const handleOpenCreateModal = () => {
         setEditingClass(null)
         setIsModalOpen(true)
     }
+
     const handleOpenEditModal = (c: Class) => {
         setEditingClass(c)
         setIsModalOpen(true)
     }
+
     const handleCloseModal = () => {
         setIsModalOpen(false)
         setEditingClass(null)
     }
 
-    const data = classesQuery.data
+    const handleDeleteClass = async (classItem: Class) => {
+        const confirmed = await confirm(`Xóa lớp học "${classItem.name}"?`)
+        if (!confirmed) return
+
+        try {
+            await deleteClassMutate(classItem.id)
+        } catch (err: any) {
+            await alert(`Không thể xóa lớp học: ${err.message}`, 'Lỗi')
+        }
+    }
 
     return (
         <div className={s.pageWrapperWithoutHeader}>
             <main className={s.mainContent}>
                 <h1 className={s.pageTitle}>Quản lý Lớp học</h1>
 
-                {/* Filter Card */}
+                {/* FILTER CARD */}
                 <Card className={s.filterCard} variant="outline">
                     <div className={s.searchWrapper}>
                         <InputField
                             id="search"
                             label=""
                             placeholder="Tìm theo tên lớp..."
-                            value={searchValue}
-                            onChange={(e: any) =>
-                                setSearchValue(e.target.value)
-                            }
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
                             leftIcon={<img src={IconSearch} alt="" />}
                         />
                     </div>
@@ -173,20 +137,21 @@ export default function ClassManagementPage() {
                             id="statusFilter"
                             label="Trạng thái"
                             registration={{ name: 'statusFilter' as any }}
-                            value={status}
+                            value={filters.status}
                             options={CLASS_STATUS_OPTIONS}
-                            onChange={(e: any) => setStatus(e.target.value)}
+                            onChange={(e) =>
+                                setFilters({
+                                    status: e.target.value as ClassStatus | '',
+                                })
+                            }
                         />
                         <SelectField
                             id="sortBy"
                             label="Sắp xếp"
                             registration={{ name: 'sortBy' as any }}
-                            value={sortBy}
+                            value={sort.field}
                             onChange={(e) =>
-                                setSortBy(
-                                    (e.target as HTMLSelectElement)
-                                        .value as SortBy
-                                )
+                                setSort({ ...sort, field: e.target.value })
                             }
                             options={SORT_BY_OPTIONS}
                         />
@@ -194,12 +159,12 @@ export default function ClassManagementPage() {
                             id="sortOrder"
                             label="Thứ tự"
                             registration={{ name: 'sortOrder' as any }}
-                            value={sortOrder}
+                            value={sort.order}
                             onChange={(e) =>
-                                setSortOrder(
-                                    (e.target as HTMLSelectElement)
-                                        .value as SortOrder
-                                )
+                                setSort({
+                                    ...sort,
+                                    order: e.target.value as 'asc' | 'desc',
+                                })
                             }
                             options={SORT_ORDER_OPTIONS}
                         />
@@ -220,63 +185,34 @@ export default function ClassManagementPage() {
                     )}
                 </Card>
 
-                {/* Table Card */}
+                {/* TABLE CARD */}
                 <Card className={s.tableCard} variant="outline">
                     <ClassTable
-                        classes={classes} // Truyền mảng đã sort
+                        classes={classesData?.items || []}
                         onEditClass={handleOpenEditModal}
-                        onDeleteClass={(c) => doDelete(c)}
-                        isLoading={classesQuery.isLoading}
+                        onDeleteClass={handleDeleteClass}
+                        isLoading={isLoading || isFetching}
                     />
-                </Card>
 
-                {/* Pagination */}
-                <div
-                    style={{
-                        width: '100%',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: 'var(--space-16) var(--space-8)',
-                    }}
-                >
-                    <div
-                        style={{
-                            fontSize: 'var(--font-size-sm)',
-                            color: 'var(--color-text-secondary)',
-                        }}
-                    >
-                        Tổng: {data?.total ?? 0} — Trang {data?.page ?? page}/
-                        {data?.pages ?? 1}
+                    {/* PAGINATION */}
+                    <div className={s.pagination}>
+                        <Pagination
+                            currentPage={page}
+                            totalPages={classesData?.pages || 0}
+                            onPageChange={setPage}
+                        />
+
+                        {!isLoading && classesData && (
+                            <div className={s.paginationInfo}>
+                                Hiển thị {classesData.items?.length || 0} /{' '}
+                                {classesData.total || 0} lớp học
+                            </div>
+                        )}
                     </div>
-                    <div style={{ display: 'flex', gap: 'var(--space-8)' }}>
-                        <ButtonPrimary
-                            variant="outline"
-                            size="sm"
-                            disabled={
-                                (data?.page ?? 1) <= 1 ||
-                                classesQuery.isFetching
-                            }
-                            onClick={() => setPage((p) => Math.max(1, p - 1))}
-                        >
-                            ← Trước
-                        </ButtonPrimary>
-                        <ButtonPrimary
-                            variant="outline"
-                            size="sm"
-                            disabled={
-                                (data?.page ?? 1) >= (data?.pages ?? 1) ||
-                                classesQuery.isFetching
-                            }
-                            onClick={() => setPage((p) => p + 1)}
-                        >
-                            Sau →
-                        </ButtonPrimary>
-                    </div>
-                </div>
+                </Card>
             </main>
 
-            {/* Modal */}
+            {/* MODAL */}
             <ClassFormModal
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}

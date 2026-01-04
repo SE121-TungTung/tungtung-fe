@@ -1,227 +1,40 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
 import s from './ReadingTestPage.module.css'
 
-// --- Components ---
-import SentenceCompletionQuestion from '@/components/feature/exams/SentenceCompletionQuestion'
-import TrueFalseNotGivenQuestion from '@/components/feature/exams/TrueFalseNotGivenQuestion'
-import MultipleChoiceQuestion from '@/components/feature/exams/MultipleChoiceQuestion'
-import { SpeakingQuestion } from '@/components/feature/exams/SpeakingQuestion'
-import { EssayQuestion } from '@/components/feature/exams/EssayQuestion'
-
 // --- Libs & Types ---
 import { testApi } from '@/lib/test'
-import {
-    type Test,
-    type TestSection,
-    type TestSectionPart,
-    type QuestionGroup,
-    type Question,
-    QuestionType,
-} from '@/types/test.types'
+import { type Test } from '@/types/test.types'
 
+// --- Hooks ---
 import { useTestTimer } from '@/hooks/useTestTimer'
 import { useAnswerManager } from '@/hooks/useAnswerManager'
 import { useTestSubmit } from '@/hooks/useTestSubmit'
+
+// --- Components ---
 import { TestHeader } from '@/components/feature/exams/shared/TextHeader'
 import { PassageViewer } from '@/components/feature/exams/MediaViewers/PassageViewer'
 import { TestFooter } from '@/components/feature/exams/shared/TextFooter'
+
+// --- Import QuestionGroupRenderer từ file riêng ---
+import {
+    QuestionGroupRenderer,
+    type EnhancedSection,
+} from '../QuestionGroupRenderer'
+
+// --- Utils ---
 import { enhanceTestWithQuestionNumbers } from '@/utils/examHelpers'
-
-interface EnhancedQuestion extends Question {
-    globalNumber: number
-}
-
-interface EnhancedQuestionGroup extends Omit<QuestionGroup, 'questions'> {
-    questions: EnhancedQuestion[]
-}
-
-interface EnhancedPart extends Omit<TestSectionPart, 'questionGroups'> {
-    questionGroups: EnhancedQuestionGroup[]
-}
-
-interface EnhancedSection extends Omit<TestSection, 'parts'> {
-    parts: EnhancedPart[]
-}
-
-const UniversalQuestionRenderer = React.memo(
-    ({
-        group,
-        answers,
-        onAnswerChange,
-        registerRef,
-        attemptId,
-    }: {
-        group: EnhancedQuestionGroup
-        answers: { [key: string]: any }
-        onAnswerChange: (id: string, val: any) => void
-        registerRef: (id: string, el: HTMLElement | null) => void
-        attemptId: string
-    }) => {
-        return (
-            <>
-                {group.questions.map((q) => {
-                    const commonProps = {
-                        key: q.id,
-                        question: { ...q, number: q.globalNumber } as any,
-                        registerRef: registerRef,
-                    }
-
-                    switch (q.questionType) {
-                        case QuestionType.TRUE_FALSE_NOT_GIVEN:
-                            return (
-                                <TrueFalseNotGivenQuestion
-                                    {...commonProps}
-                                    selectedValue={answers[q.id] || null}
-                                    onChange={(v) => onAnswerChange(q.id, v)}
-                                />
-                            )
-                        case QuestionType.MULTIPLE_CHOICE:
-                            return (
-                                <MultipleChoiceQuestion
-                                    {...commonProps}
-                                    selectedValue={
-                                        answers[q.id]
-                                            ? String(answers[q.id])
-                                            : null
-                                    }
-                                    onChange={(v) => onAnswerChange(q.id, v)}
-                                />
-                            )
-                        case QuestionType.SHORT_ANSWER:
-                        case QuestionType.SENTENCE_COMPLETION:
-                            return (
-                                <SentenceCompletionQuestion
-                                    {...commonProps}
-                                    value={answers[q.id] || ''}
-                                    onChange={(v) => onAnswerChange(q.id, v)}
-                                />
-                            )
-                        case QuestionType.WRITING_TASK_1:
-                        case QuestionType.WRITING_TASK_2:
-                            return (
-                                <EssayQuestion
-                                    key={q.id}
-                                    questionId={q.id}
-                                    questionNumber={q.globalNumber}
-                                    questionText={q.questionText || ''}
-                                    value={answers[q.id] || ''}
-                                    onChange={(v: any) =>
-                                        onAnswerChange(q.id, v)
-                                    }
-                                    registerRef={registerRef}
-                                />
-                            )
-                        case QuestionType.SPEAKING_PART_1:
-                        case QuestionType.SPEAKING_PART_2:
-                        case QuestionType.SPEAKING_PART_3:
-                            return (
-                                <SpeakingQuestion
-                                    key={q.id}
-                                    questionId={q.id}
-                                    globalNumber={q.globalNumber}
-                                    questionText={q.questionText || ''}
-                                    attemptId={attemptId}
-                                    registerRef={registerRef}
-                                />
-                            )
-                        default:
-                            return (
-                                <div
-                                    key={q.id}
-                                    className="p-2 text-sm text-gray-400"
-                                >
-                                    Type {q.questionType} not supported
-                                </div>
-                            )
-                    }
-                })}
-            </>
-        )
-    }
-)
-
-const QuestionGroupRenderer = React.memo(
-    ({
-        section,
-        answers,
-        onAnswerChange,
-        registerRef,
-        attemptId,
-    }: {
-        section: EnhancedSection
-        answers: { [key: string]: any }
-        onAnswerChange: (id: string, val: any) => void
-        registerRef: (id: string, el: HTMLElement | null) => void
-        attemptId: string
-    }) => (
-        <div className={s.questionContainer}>
-            <div className={s.questionScrollArea}>
-                {section.parts.map((part) => (
-                    <React.Fragment key={part.id}>
-                        {part.instructions && (
-                            <div className={s.partInstructions}>
-                                {part.instructions}
-                            </div>
-                        )}
-                        {part.audioUrl && (
-                            <audio
-                                src={part.audioUrl}
-                                controls
-                                className={s.partAudio}
-                            />
-                        )}
-                        {part.imageUrl && (
-                            <img
-                                src={part.imageUrl}
-                                alt="Visual"
-                                className={s.partImage}
-                            />
-                        )}
-
-                        {part.questionGroups.map((group) => (
-                            <div
-                                key={group.id}
-                                className={s.questionGroupBlock}
-                            >
-                                {group.instructions && (
-                                    <div className={s.questionInstruction}>
-                                        {group.instructions}
-                                    </div>
-                                )}
-                                {group.imageUrl && (
-                                    <img
-                                        src={group.imageUrl}
-                                        alt="Group visual"
-                                        className={s.groupImage}
-                                    />
-                                )}
-                                <UniversalQuestionRenderer
-                                    group={group}
-                                    answers={answers}
-                                    onAnswerChange={onAnswerChange}
-                                    registerRef={registerRef}
-                                    attemptId={attemptId}
-                                />
-                            </div>
-                        ))}
-                    </React.Fragment>
-                ))}
-            </div>
-        </div>
-    )
-)
 
 // ============================================
 // MAIN COMPONENT
 // ============================================
-
 export default function ReadingTestPage() {
     const { testId, attemptId } = useParams<{
         testId: string
         attemptId: string
     }>()
 
+    // --- STATE ---
     const [sections, setSections] = useState<EnhancedSection[]>([])
     const [test, setTest] = useState<Test | null>(null)
     const [isLoading, setIsLoading] = useState(true)
@@ -233,11 +46,13 @@ export default function ReadingTestPage() {
     const [testFinished, setTestFinished] = useState(false)
     const [startTime, setStartTime] = useState('')
 
+    // --- REFS ---
     const questionElementRefs = useRef<Map<string, HTMLElement | null>>(
         new Map()
     )
     const clearHighlightsRef = useRef<(() => void) | null>(null)
 
+    // --- HOOKS ---
     const { answers, handleAnswerChange, clearAnswers } = useAnswerManager({
         attemptId: attemptId || '',
         enabled: !!attemptId && !testFinished,
@@ -261,12 +76,15 @@ export default function ReadingTestPage() {
         enabled: !!startTime && !testFinished && !isSubmitting,
     })
 
+    // --- INITIALIZE DATA ---
     useEffect(() => {
         const initData = async () => {
             if (!testId || !attemptId) return
+
             try {
                 const testData = await testApi.getTest(testId)
                 setTest(testData)
+
                 const enhanced = enhanceTestWithQuestionNumbers(testData)
                 setSections(enhanced.sections)
 
@@ -285,9 +103,11 @@ export default function ReadingTestPage() {
                 setIsLoading(false)
             }
         }
+
         initData()
     }, [testId, attemptId])
 
+    // --- HANDLERS ---
     const onAnswerChange = useCallback(
         (id: string, val: any) => {
             if (testFinished) return
@@ -312,6 +132,7 @@ export default function ReadingTestPage() {
     const handleNavigateQuestion = useCallback(
         (qNum: number) => {
             setCurrentQuestionNumber(qNum)
+
             let targetId: string | undefined
             const sectionIdx = sections.findIndex((s) =>
                 s.parts.some((p) =>
@@ -339,8 +160,14 @@ export default function ReadingTestPage() {
         [sections]
     )
 
-    if (isLoading) return <div className={s.loadingContainer}>Loading...</div>
-    if (!sections.length) return <div>No content.</div>
+    // --- RENDER ---
+    if (isLoading) {
+        return <div className={s.loadingContainer}>Loading...</div>
+    }
+
+    if (!sections.length) {
+        return <div>No content.</div>
+    }
 
     const currentSection = sections[currentSectionIndex]
     const currentPassage =
@@ -355,6 +182,7 @@ export default function ReadingTestPage() {
                 formattedTime={formattedTime}
                 isLowTime={isLowTime}
             />
+
             <main className={s.mainContent}>
                 <PassageViewer
                     passage={currentPassage}
@@ -362,6 +190,8 @@ export default function ReadingTestPage() {
                     testId={testId!}
                     clearHighlightsRef={clearHighlightsRef}
                 />
+
+                {/* Sử dụng QuestionGroupRenderer đã tách */}
                 <QuestionGroupRenderer
                     section={sections[currentSectionIndex]}
                     answers={answers}
@@ -374,6 +204,7 @@ export default function ReadingTestPage() {
                     attemptId={attemptId!}
                 />
             </main>
+
             <TestFooter
                 sections={sections}
                 currentIndex={currentSectionIndex}
@@ -403,5 +234,3 @@ export default function ReadingTestPage() {
         </div>
     )
 }
-
-export { UniversalQuestionRenderer, QuestionGroupRenderer }

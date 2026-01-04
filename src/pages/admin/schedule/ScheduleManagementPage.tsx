@@ -15,11 +15,17 @@ import ScheduleFilters from '@/components/feature/schedule/ScheduleFilters'
 import TimeGridView from '@/components/feature/schedule/views/TimeGridView'
 import RoomGridView from '@/components/feature/schedule/views/RoomGridView'
 import ScheduleListView from '@/components/feature/schedule/views/ScheduleListView'
+import ButtonGhost from '@/components/common/button/ButtonGhost'
+import CreateSessionModal from '@/components/feature/schedule/CreateSessionModal'
+import { getClass, listClasses } from '@/lib/classes'
+import { listUsers } from '@/lib/users'
+import { listRooms, type Room } from '@/lib/rooms'
 
 export default function ScheduleManagementPage() {
     const navigate = useNavigate()
     const [currentDate, setCurrentDate] = useState(new Date())
     const [viewMode, setViewMode] = useState<ViewMode>('time-grid')
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
     // Filter states
     const [selectedRoom, setSelectedRoom] = useState<string | undefined>()
@@ -53,6 +59,42 @@ export default function ScheduleManagementPage() {
             return response
         },
     })
+
+    const { data: classesData } = useQuery({
+        queryKey: ['classes', 'active', 'list'],
+        queryFn: () => listClasses({ status: 'active', limit: 100 }),
+        staleTime: 5 * 60 * 1000,
+    })
+
+    const { data: teachersData } = useQuery({
+        queryKey: ['users', 'teachers', 'list'],
+        queryFn: () => listUsers({ role: 'teacher', limit: 100 }),
+        staleTime: 5 * 60 * 1000,
+    })
+
+    const { data: roomsData } = useQuery({
+        queryKey: ['rooms', 'all', 'list'],
+        queryFn: () => listRooms({ limit: 100 }),
+        staleTime: 60 * 60 * 1000,
+    })
+
+    const classOptions = useMemo(() => {
+        const list = classesData?.items || []
+        return list.map((c) => ({ label: c.name, value: c.id }))
+    }, [classesData])
+
+    const teacherOptions = useMemo(() => {
+        const list = teachersData?.users || []
+        return list.map((t) => ({
+            label: t.fullName,
+            value: t.id,
+        }))
+    }, [teachersData])
+
+    const roomOptions = useMemo(() => {
+        const list = roomsData?.items || []
+        return list.map((r: Room) => ({ label: r.name, value: r.id }))
+    }, [roomsData])
 
     const sessions = useMemo(() => {
         return weeklyData?.schedule || []
@@ -262,6 +304,9 @@ export default function ScheduleManagementPage() {
                             {filteredSessions.length} buổi học
                         </div>
                     )}
+                    <ButtonGhost onClick={() => setIsCreateModalOpen(true)}>
+                        + Thêm buổi học
+                    </ButtonGhost>
                     <ButtonPrimary
                         onClick={() => navigate('/admin/schedule/generate')}
                     >
@@ -290,6 +335,14 @@ export default function ScheduleManagementPage() {
 
                 {/* Render appropriate view */}
                 {renderView()}
+
+                <CreateSessionModal
+                    isOpen={isCreateModalOpen}
+                    onClose={() => setIsCreateModalOpen(false)}
+                    classes={classOptions}
+                    teachers={teacherOptions}
+                    rooms={roomOptions}
+                />
             </main>
         </div>
     )

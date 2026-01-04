@@ -1,4 +1,6 @@
 import React from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import s from './PromptViewer.module.css'
 
 interface PromptViewerProps {
@@ -29,10 +31,27 @@ export const PromptViewer = React.memo(
                     </div>
                 )}
 
+                {/* ✅ Markdown Prompt */}
                 <div className={s.promptContent}>
-                    {prompt.split('\n\n').map((para, idx) => (
-                        <p key={idx}>{para}</p>
-                    ))}
+                    <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                            p: ({ children }) => (
+                                <p className={s.paragraph}>{children}</p>
+                            ),
+                            strong: ({ children }) => (
+                                <strong className={s.bold}>{children}</strong>
+                            ),
+                            ul: ({ children }) => (
+                                <ul className={s.list}>{children}</ul>
+                            ),
+                            li: ({ children }) => (
+                                <li className={s.listItem}>{children}</li>
+                            ),
+                        }}
+                    >
+                        {prompt}
+                    </ReactMarkdown>
                 </div>
 
                 <div className={s.requirements}>

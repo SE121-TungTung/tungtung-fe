@@ -1,4 +1,9 @@
 import { useRef, useState, useEffect } from 'react'
+
+import PlayIcon from '@/assets/Media Play.svg'
+import PauseIcon from '@/assets/Media Pause.svg'
+import VolumnIcon from '@/assets/Media Volume Up.svg'
+
 import s from './AudioPlayer.module.css'
 
 interface AudioPlayerProps {
@@ -21,6 +26,8 @@ export function AudioPlayer({
     const [volume, setVolume] = useState(1)
     const [playbackRate, setPlaybackRate] = useState(1)
     const [showTranscriptText, setShowTranscriptText] = useState(false)
+
+    const progressPercent = duration ? (currentTime / duration) * 100 : 0
 
     useEffect(() => {
         const audio = audioRef.current
@@ -109,12 +116,6 @@ export function AudioPlayer({
             <div className={s.audioCard}>
                 <audio ref={audioRef} src={audioUrl} preload="metadata" />
 
-                {/* Waveform/Visual (optional) */}
-                <div className={s.visualizer}>
-                    <span className={s.audioIcon}>🎧</span>
-                    <span className={s.audioTitle}>IELTS Listening Audio</span>
-                </div>
-
                 {/* Progress Bar */}
                 <div className={s.progressSection}>
                     <span className={s.timeLabel}>
@@ -127,6 +128,10 @@ export function AudioPlayer({
                         value={currentTime}
                         onChange={handleSeek}
                         className={s.progressBar}
+                        style={{
+                            backgroundSize: `${progressPercent}% 100%`,
+                        }}
+                        disabled={!duration}
                     />
                     <span className={s.timeLabel}>{formatTime(duration)}</span>
                 </div>
@@ -135,7 +140,11 @@ export function AudioPlayer({
                 <div className={s.controls}>
                     {/* Play/Pause */}
                     <button onClick={togglePlay} className={s.playButton}>
-                        {isPlaying ? '⏸️' : '▶️'}
+                        {isPlaying ? (
+                            <img src={PauseIcon} alt="Pause"></img>
+                        ) : (
+                            <img src={PlayIcon} alt="Pause"></img>
+                        )}
                     </button>
 
                     {/* Speed Control */}
@@ -156,7 +165,7 @@ export function AudioPlayer({
 
                     {/* Volume Control */}
                     <div className={s.volumeControl}>
-                        <span>🔊</span>
+                        <img src={VolumnIcon} alt="Volume" />
                         <input
                             type="range"
                             min="0"
@@ -165,6 +174,9 @@ export function AudioPlayer({
                             value={volume}
                             onChange={handleVolumeChange}
                             className={s.volumeSlider}
+                            style={{
+                                backgroundSize: `${volume * 100}% 100%`,
+                            }}
                         />
                     </div>
                 </div>

@@ -85,6 +85,7 @@ export interface BackendChatHistoryMessage {
     attachments: any[]
     is_read: boolean
     is_starred: boolean
+    is_edited: boolean
 }
 
 // ============================================

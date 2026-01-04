@@ -83,6 +83,11 @@ const teacherNavItems: AppNavItem[] = [
             },
         ],
     },
+    {
+        id: 'messages',
+        label: 'Tin nhắn',
+        href: '/messages',
+    },
 ]
 
 const adminNavItems: AppNavItem[] = [
@@ -108,14 +113,14 @@ const adminNavItems: AppNavItem[] = [
                 href: '/admin/rooms',
             },
             {
-                id: 'classes',
-                label: 'Quản lý lớp học',
-                href: '/admin/classes',
-            },
-            {
                 id: 'courses',
                 label: 'Quản lý khóa học',
                 href: '/admin/courses',
+            },
+            {
+                id: 'classes',
+                label: 'Quản lý lớp học',
+                href: '/admin/classes',
             },
             {
                 id: 'schedules',
@@ -148,7 +153,8 @@ const adminNavItems: AppNavItem[] = [
             {
                 id: 'audit-logs',
                 label: 'Nhật ký hệ thống',
-                href: '/coming-soon',
+                href: '/admin/audit-logs',
+                allowedRoles: ['system_admin', 'center_admin'],
             },
         ],
     },

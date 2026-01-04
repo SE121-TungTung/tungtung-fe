@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import s from './EssayQuestion.module.css'
+import InputField from '@/components/common/input/InputField'
 
 interface EssayQuestionProps {
     questionId: string
@@ -32,9 +33,9 @@ export function EssayQuestion({
     }, [value])
 
     const getWordCountColor = () => {
-        if (wordCount < minWords) return '#dc2626' // red
-        if (wordCount > maxWords) return '#f59e0b' // orange
-        return '#10b981' // green
+        if (wordCount < minWords) return '#dc2626'
+        if (wordCount > maxWords) return '#f59e0b'
+        return '#10b981'
     }
 
     return (
@@ -69,7 +70,9 @@ export function EssayQuestion({
                 </div>
             )}
 
-            <textarea
+            <InputField
+                fullWidth
+                multiline={true}
                 className={s.essayTextarea}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}

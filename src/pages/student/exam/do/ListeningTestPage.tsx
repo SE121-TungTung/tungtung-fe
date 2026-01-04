@@ -21,10 +21,10 @@ import {
 } from '@/types/test.types'
 
 // Reuse components from Reading
-import { QuestionGroupRenderer } from './ReadingTestPage'
 import { TestHeader } from '@/components/feature/exams/shared/TextHeader'
 import { TestFooter } from '@/components/feature/exams/shared/TextFooter'
 import { enhanceTestWithQuestionNumbers } from '@/utils/examHelpers'
+import { QuestionGroupRenderer } from '../QuestionGroupRenderer'
 
 // Or define types locally if not exported
 interface EnhancedQuestion extends Question {

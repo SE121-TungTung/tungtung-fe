@@ -20,7 +20,6 @@ import ScheduleManagementPage from '@/pages/admin/schedule/ScheduleManagementPag
 import ScheduleGeneratorPage from '@/pages/admin/schedule/ScheduleGeneratorPage'
 import ComingSoon from '@/components/core/ComingSoon'
 import { ResetPasswordPage } from '@/pages/auth/ResetPassword'
-import ReadingTestPage from '@/pages/student/exam/do/ReadingTestPage'
 import TestResultPage from '@/pages/student/exam/TestResultPage'
 import CreateTestPage from '@/pages/student/exam/CreateTestPage'
 import FirstLoginGuard from '@/components/feature/auth/FirstLoginGuard'
@@ -29,6 +28,8 @@ import TestDetailPage from '@/pages/student/exam/TestDetailPage'
 import ChatbotUploadPage from '@/pages/admin/system/ChatbotUploadPage'
 import { MainLayout } from './layouts/MainLayout'
 import TeacherClassPage from '@/pages/teacher/classes/TeacherClassPage'
+import TestTakerWrapper from '@/pages/student/exam/do/TestTakerWrapper'
+import AuditLogPage from '@/pages/admin/audit/AuditLogPage'
 
 export const router = createBrowserRouter([
     {
@@ -58,8 +59,14 @@ export const router = createBrowserRouter([
 
             // No Nav
             {
+                // Main test taking route
                 path: '/student/exams/:testId/take/:attemptId',
-                element: <ReadingTestPage />,
+                element: <TestTakerWrapper />,
+            },
+            {
+                // Alternative route for backward compatibility
+                path: '/test/:testId/attempt/:attemptId',
+                element: <TestTakerWrapper />,
             },
 
             // Profile (accessible to all authenticated users)
@@ -106,6 +113,10 @@ export const router = createBrowserRouter([
                     {
                         path: '/student/tests',
                         element: <ExamPracticePage />,
+                    },
+                    {
+                        path: '/student/exams/:testId/take/:attemptId/results',
+                        element: <TestResultPage />,
                     },
                     {
                         path: '/student/tests/results/:attemptId',
@@ -278,6 +289,16 @@ export const router = createBrowserRouter([
                                 ]}
                             >
                                 <ScheduleGeneratorPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/admin/audit-logs',
+                        element: (
+                            <ProtectedRoute
+                                allowedRoles={['system_admin', 'center_admin']}
+                            >
+                                <AuditLogPage />
                             </ProtectedRoute>
                         ),
                     },

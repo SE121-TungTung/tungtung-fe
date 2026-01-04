@@ -4,7 +4,26 @@ const API =
     import.meta.env.VITE_API_URL ||
     'https://tungtung-be-production.up.railway.app'
 
-const getAccessToken = () => localStorage.getItem('access_token')
+const getAccessToken = () => {
+    const token = localStorage.getItem('access_token')
+    if (!token) return null
+
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]))
+        const exp = payload.exp * 1000
+
+        if (Date.now() >= exp) {
+            console.warn('⚠️ Token expired, clearing...')
+            localStorage.removeItem('access_token')
+            return null
+        }
+
+        return token
+    } catch (error) {
+        console.error('Invalid token format:', error)
+        return null
+    }
+}
 const getRefreshToken = () => localStorage.getItem('refresh_token')
 
 let isRefreshing = false

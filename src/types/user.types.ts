@@ -136,6 +136,32 @@ export interface StudentOverviewStats {
     average_test_score: number
 }
 
+export interface TeacherOverviewStats {
+    role: 'teacher'
+    active_classes: number
+    total_students: number
+    sessions_today: number
+    pending_grading_count: number
+}
+
+export interface AdminOverviewStats {
+    role: 'center_admin' | 'office_admin'
+    total_students: number
+    total_teachers: number
+    active_classes: number
+    sessions_today_count: number
+}
+
+export interface SystemAdminOverviewStats {
+    role: 'system_admin'
+    total_users: number
+    total_courses: number
+    total_active_classes: number
+    user_distribution: Record<string, number>
+}
+
+export type UserOverviewStats = StudentOverviewStats | TeacherOverviewStats
+
 // --- CLASS / SESSION RELATED TYPES ---
 export interface ClassSession {
     id: string

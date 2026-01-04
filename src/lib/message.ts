@@ -65,7 +65,6 @@ function mapParticipant(member: BackendMemberResponse): Participant {
 
 function mapMessage(msg: BackendMessageResponse): Message {
     let sender: Participant | undefined
-    let isUpdated = false
 
     if (msg.sender) {
         const fullName =
@@ -82,10 +81,6 @@ function mapMessage(msg: BackendMessageResponse): Message {
         }
     }
 
-    if (msg.updated_at) {
-        isUpdated = true
-    }
-
     return {
         id: msg.id,
         conversationId: msg.chat_room_id,
@@ -95,7 +90,7 @@ function mapMessage(msg: BackendMessageResponse): Message {
         status: (msg.status as any) || 'read',
         createdAt: msg.timestamp,
         updatedAt: msg.updated_at,
-        isEdited: isUpdated,
+        isEdited: msg.is_edited,
         attachments: msg.attachments || [],
         sender: sender,
     }
@@ -114,6 +109,7 @@ function mapHistoryMessage(msg: BackendChatHistoryMessage): Message {
         attachments: msg.attachments || [],
         isRead: msg.is_read,
         isStarred: msg.is_starred,
+        isEdited: msg.is_edited,
         sender: msg.sender_id
             ? {
                   id: msg.sender_id,

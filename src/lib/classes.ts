@@ -169,7 +169,7 @@ export type CreateClassDto = {
 }
 
 export async function createClass(body: CreateClassDto): Promise<Class> {
-    const res = await api<BackendClass>(CLASSES_API_URL, {
+    const res = await api<BackendClass>(`${CLASSES_API_URL}/`, {
         method: 'POST',
         body: JSON.stringify(body),
     })
@@ -203,7 +203,7 @@ export async function getClass(id: string): Promise<Class> {
 }
 
 export async function getTeacherClasses(): Promise<Class[]> {
-    const res = await api<BackendClass[]>(`${CLASSES_API_URL}/classes`, {
+    const res = await api<BackendClass[]>(`/api/v1/teacher/classes`, {
         method: 'GET',
     })
     return res.map(mapClass)

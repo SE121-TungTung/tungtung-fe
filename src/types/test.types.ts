@@ -873,6 +873,7 @@ export interface TestCreatePayload {
     title: string
     description?: string | null
     instructions?: string | null
+
     time_limit_minutes?: number | null
     passing_score?: number | null
     max_attempts?: number | null
@@ -881,11 +882,15 @@ export interface TestCreatePayload {
     start_time?: string | null
     end_time?: string | null
     ai_grading_enabled?: boolean
+
     class_id?: string | null
     course_id?: string | null
     test_type?: TestType | null
     exam_type_id?: string | null
     structure_id?: string | null
+
+    status?: TestStatus
+
     sections: TestSectionCreatePayload[]
 }
 
