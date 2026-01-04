@@ -74,6 +74,7 @@
     font-size: 14px;
     background: var(--palette-white);
     transition: all 0.2s;
+    color: var(--text-primary-light);
 }
 
 .searchInput:focus {

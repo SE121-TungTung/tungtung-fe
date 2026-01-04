@@ -18,11 +18,7 @@ import BackIcon from '@/assets/arrow-left.svg'
 
 import { useSession } from '@/stores/session.store'
 
-// API imports
-import {
-    testApi,
-    // , getSkillAreaLabel
-} from '@/lib/test'
+import { testApi } from '@/lib/test'
 import type { StudentTestListItem, TestListItem } from '@/types/test.types'
 import { SkillArea } from '@/types/test.types'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
@@ -152,10 +148,13 @@ export default function ExamPracticePage() {
         }
     }
 
+    const handleGradingClick = (examId: string) => {
+        navigate(`/teacher/grading/${examId}`)
+    }
+
     const filteredExams = useMemo(() => {
         let examsToShow = tests
 
-        // Filter by content mode and skill
         if (contentMode === 'skill' && selectedSkill) {
             examsToShow = tests.filter((test) => {
                 if ('skill' in test) {
@@ -165,7 +164,6 @@ export default function ExamPracticePage() {
             })
         }
 
-        // Filter by search term
         if (searchTerm.trim()) {
             examsToShow = examsToShow.filter((test) =>
                 test.title.toLowerCase().includes(searchTerm.toLowerCase())
@@ -188,7 +186,7 @@ export default function ExamPracticePage() {
             return (
                 <div className={s.examListContainer}>
                     <div className={s.errorState}>
-                        <p>⚠ {error}</p>
+                        <p>⚠️ {error}</p>
                         <ButtonPrimary onClick={loadTests}>
                             Thử lại
                         </ButtonPrimary>
@@ -197,9 +195,7 @@ export default function ExamPracticePage() {
             )
         }
 
-        // Mode 1: Theo Kỹ năng
         if (contentMode === 'skill') {
-            // Chưa chọn skill → Hiện skill cards
             if (selectedSkill === null) {
                 return (
                     <div className={s.skillGrid}>
@@ -215,7 +211,6 @@ export default function ExamPracticePage() {
                 )
             }
 
-            // Đã chọn skill → Hiện exams theo displayMode
             const skillInfo = skills.find((s) => s.value === selectedSkill)
             const title = `Bài thi kỹ năng: ${skillInfo?.name || ''}`
 
@@ -247,6 +242,11 @@ export default function ExamPracticePage() {
                         exams={filteredExams}
                         onBackClick={handleBackFromList}
                         onExamClick={handleExamClick}
+                        onGradingClick={
+                            userRole === 'teacher'
+                                ? handleGradingClick
+                                : undefined
+                        }
                         isLoading={false}
                         viewMode="list"
                         userRole={userRole as any}
@@ -255,7 +255,6 @@ export default function ExamPracticePage() {
             }
         }
 
-        // Mode 2: Tất cả đề thi
         if (displayMode === 'grid') {
             return (
                 <div className={s.examSection}>
@@ -273,6 +272,9 @@ export default function ExamPracticePage() {
                     title="Tất cả bài thi"
                     exams={filteredExams}
                     onExamClick={handleExamClick}
+                    onGradingClick={
+                        userRole === 'teacher' ? handleGradingClick : undefined
+                    }
                     isLoading={false}
                     viewMode="list"
                     userRole={userRole as any}
@@ -304,7 +306,6 @@ export default function ExamPracticePage() {
                 </h1>
 
                 <div className={s.controlsBar}>
-                    {/* Search - chỉ hiện khi đang xem danh sách đề */}
                     {(selectedSkill !== null || contentMode === 'all') && (
                         <div className={s.searchWrapper}>
                             <InputField
@@ -320,7 +321,6 @@ export default function ExamPracticePage() {
                     )}
 
                     <div className={s.viewControls}>
-                        {/* Content Mode: Theo Kỹ năng | Tất cả */}
                         <SegmentedControl
                             items={contentModeItems}
                             value={contentMode}
@@ -332,7 +332,6 @@ export default function ExamPracticePage() {
                             size="sm"
                         />
 
-                        {/* Display Mode: Lưới | Danh sách - chỉ hiện khi đang xem list đề */}
                         {(selectedSkill !== null || contentMode === 'all') && (
                             <SegmentedControl
                                 items={displayModeItems}

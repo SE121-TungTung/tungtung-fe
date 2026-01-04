@@ -238,13 +238,15 @@ export interface BackendTestListResponse {
     id: string
     title: string
     description: string | null
-    skill: string // SkillArea
-    difficulty: string // DifficultyLevel
+    skill: string
+    difficulty: string
     test_type: string | null
     duration_minutes: number
     total_questions: number
     created_at: string
-    status?: string // Added by service, not in schema
+    status?: string
+    pending_attempts_count?: number
+    total_attempts_count?: number
 }
 
 /**
@@ -606,6 +608,8 @@ export interface TestListItem {
     totalQuestions: number
     createdAt: string
     status?: TestStatus | null
+    pendingAttemptsCount?: number
+    totalAttemptsCount?: number
 }
 
 /**
@@ -795,6 +799,35 @@ export interface Passage {
     audioUrl: string | null
     imageUrl: string | null
     durationSeconds: number | null
+}
+
+/**
+ * Teacher attempt summary (for grading list)
+ */
+export interface TestAttemptSummaryResponse {
+    id: string
+    student_id: string
+    student_name: string
+    status: string
+    score: number | null
+    started_at: string
+    submitted_at: string | null
+}
+
+/**
+ * Grading request types
+ */
+export interface GradeQuestionRequest {
+    question_id: string
+    teacher_points_earned: number
+    teacher_band_score?: number | null
+    teacher_rubric_scores?: Record<string, number> | null
+    teacher_feedback?: string | null
+}
+
+export interface GradeAttemptRequest {
+    questions: GradeQuestionRequest[]
+    overall_feedback?: string | null
 }
 
 // ============================================

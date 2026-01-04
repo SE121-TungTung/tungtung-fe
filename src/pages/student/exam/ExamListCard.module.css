@@ -76,6 +76,31 @@
     white-space: nowrap;
 }
 
+.pendingBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    background: linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%);
+    color: white;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.85;
+        transform: scale(1.02);
+    }
+}
+
 .examDesc {
     font-size: 13px;
     color: var(--text-secondary-light);
@@ -157,6 +182,15 @@
     flex-shrink: 0;
 }
 
+/* ✅ NEW: Teacher actions container */
+.teacherActions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+    min-width: 140px;
+}
+
 .ctaText {
     font-size: 14px;
     font-weight: 500;
@@ -203,6 +237,16 @@
 
     .examAction {
         align-self: flex-end;
+        width: 100%;
+    }
+
+    .teacherActions {
+        width: 100%;
+        align-items: stretch;
+    }
+
+    .teacherActions > * {
+        width: 100%;
     }
 
     .examMeta {

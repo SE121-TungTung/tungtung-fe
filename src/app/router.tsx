@@ -32,6 +32,8 @@ import TestTakerWrapper from '@/pages/student/exam/do/TestTakerWrapper'
 import AuditLogPage from '@/pages/admin/audit/AuditLogPage'
 import TeacherClassDetailPage from '@/pages/teacher/classes/TeacherClassDetailPage'
 import EditTestPage from '@/pages/student/exam/EditTestPage'
+import TeacherGradingPage from '@/pages/teacher/grading/TeacherGradingPage'
+import GradeAttemptPage from '@/pages/teacher/grading/GradeAttemptPage'
 
 export const router = createBrowserRouter([
     {
@@ -199,6 +201,22 @@ export const router = createBrowserRouter([
                         element: (
                             <ProtectedRoute allowedRoles={['teacher']}>
                                 <EditTestPage />,
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/teacher/grading/:testId',
+                        element: (
+                            <ProtectedRoute allowedRoles={['teacher']}>
+                                <TeacherGradingPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/teacher/grading/:testId/attempts/:attemptId',
+                        element: (
+                            <ProtectedRoute allowedRoles={['teacher']}>
+                                <GradeAttemptPage />
                             </ProtectedRoute>
                         ),
                     },

@@ -65,6 +65,8 @@ import {
     type QuestionGradingResult,
     type BatchSubmitSpeakingRequest,
     type PreUploadResponse,
+    type GradeAttemptRequest,
+    type TestAttemptSummaryResponse,
 } from '@/types/test.types'
 
 const BASE_URL = '/api/v1/tests'
@@ -345,6 +347,8 @@ function mapTestListItem(dto: BackendTestListResponse): TestListItem {
         totalQuestions: dto.total_questions,
         createdAt: dto.created_at,
         status: parseEnum(TestStatus, dto.status),
+        pendingAttemptsCount: dto.pending_attempts_count,
+        totalAttemptsCount: dto.total_attempts_count,
     }
 }
 
@@ -982,8 +986,51 @@ export const testApi = {
     },
 
     /**
+     * List attempts for teacher (for grading)
+     * Endpoint: GET /tests/{test_id}/attempts
+     */
+    listTestAttemptsForTeacher: async (
+        testId: string
+    ): Promise<TestAttemptSummaryResponse[]> => {
+        const response = await api<TestAttemptSummaryResponse[]>(
+            `${BASE_URL}/${testId}/attempts`,
+            { method: 'GET' }
+        )
+        return response
+    },
+
+    /**
+     * Get attempt detail for teacher (with all answers)
+     * Endpoint: GET /tests/attempts/{attempt_id}/teacher
+     */
+    getAttemptDetailForTeacher: async (attemptId: string): Promise<any> => {
+        const response = await api<any>(
+            `${BASE_URL}/attempts/${attemptId}/teacher`,
+            { method: 'GET' }
+        )
+        return response
+    },
+
+    /**
+     * Grade attempt (teacher)
+     * Endpoint: POST /tests/attempts/{attempt_id}/grade
+     */
+    gradeAttempt: async (
+        attemptId: string,
+        payload: GradeAttemptRequest
+    ): Promise<{ status: string; attempt_id: string }> => {
+        return api<{ status: string; attempt_id: string }>(
+            `${BASE_URL}/attempts/${attemptId}/grade`,
+            {
+                method: 'POST',
+                body: JSON.stringify(payload),
+            }
+        )
+    },
+
+    /**
      * Update existing test
-     * Endpoint: PUT /tests/{test_id}
+     * Endpoint: PATCH /tests/{test_id}
      *
      * ⚠️ Requires: TEACHER, OFFICE_ADMIN, CENTER_ADMIN, or SYSTEM_ADMIN role
      *
@@ -1011,7 +1058,7 @@ export const testApi = {
         }
 
         return api<{ id: string; title: string }>(`${BASE_URL}/${testId}`, {
-            method: 'PUT',
+            method: 'PATCH',
             body: formData,
         })
     },
