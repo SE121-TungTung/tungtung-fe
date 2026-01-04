@@ -1,307 +1,226 @@
-import { useState, useRef, useEffect } from 'react'
-import { testApi } from '@/lib/test'
+import { useState, useRef, useCallback } from 'react'
+import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
+import ButtonGhost from '@/components/common/button/ButtonGhost'
 import s from './SpeakingQuestion.module.css'
 
-export interface SpeakingQuestionProps {
+interface SpeakingQuestionProps {
     questionId: string
     globalNumber: number
     questionText: string
-    audioUrl?: string | null
-    attemptId: string
-    registerRef: (id: string, element: HTMLElement) => void
-    onSubmitted?: (result: any) => void
-    partNumber?: 1 | 2 | 3
+    audioUrl?: string
+    onUpload: (
+        questionId: string,
+        audioBlob: Blob,
+        duration: number
+    ) => Promise<void>
+    uploadStatus?: 'idle' | 'uploading' | 'uploaded' | 'error'
+    uploadError?: string
+    uploadedAudioUrl?: string
+    registerRef: (id: string, el: HTMLElement | null) => void
 }
 
-type RecordingState =
-    | 'idle'
-    | 'preparing'
-    | 'recording'
-    | 'preview'
-    | 'submitting'
-    | 'submitted'
-
-export function SpeakingQuestion({
+export const SpeakingQuestion = ({
     questionId,
     globalNumber,
     questionText,
     audioUrl,
-    attemptId,
+    onUpload,
+    uploadStatus = 'idle',
+    uploadError,
+    uploadedAudioUrl,
     registerRef,
-    onSubmitted,
-    partNumber = 1,
-}: SpeakingQuestionProps) {
-    const [state, setState] = useState<RecordingState>('idle')
-    const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
-        null
-    )
-    const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null)
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+}: SpeakingQuestionProps) => {
+    // Recording state
+    const [isRecording, setIsRecording] = useState(false)
     const [recordingTime, setRecordingTime] = useState(0)
-    const [prepTime, setPrepTime] = useState(0)
-    const [result, setResult] = useState<any>(null)
+    const [localAudioUrl, setLocalAudioUrl] = useState<string | null>(null)
 
-    const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-    const streamRef = useRef<MediaStream | null>(null)
-    const audioRef = useRef<HTMLAudioElement>(null)
+    // Refs
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+    const chunksRef = useRef<Blob[]>([])
+    const timerRef = useRef<number | null>(null)
+    const startTimeRef = useRef<number>(0)
 
-    const PREP_TIME = partNumber === 2 ? 60 : 0
-    const MAX_RECORDING_TIME = partNumber === 2 ? 120 : 180
-
-    useEffect(() => {
-        return () => {
-            if (timerRef.current) clearInterval(timerRef.current)
-            if (streamRef.current) {
-                streamRef.current.getTracks().forEach((track) => track.stop())
-            }
-            if (previewUrl) URL.revokeObjectURL(previewUrl)
-        }
-    }, [previewUrl])
-
-    const startPreparation = async () => {
-        if (partNumber !== 2) {
-            startRecording()
-            return
-        }
-
-        setState('preparing')
-        setPrepTime(PREP_TIME)
-
-        timerRef.current = setInterval(() => {
-            setPrepTime((prev) => {
-                if (prev <= 1) {
-                    clearInterval(timerRef.current!)
-                    startRecording()
-                    return 0
-                }
-                return prev - 1
-            })
-        }, 1000)
-    }
-
-    const startRecording = async () => {
+    // ============================================
+    // START RECORDING
+    // ============================================
+    const startRecording = useCallback(async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
-                audio: true,
+                audio: {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    sampleRate: 44100,
+                },
             })
-            streamRef.current = stream
 
-            const recorder = new MediaRecorder(stream)
-            const chunks: Blob[] = []
+            const mediaRecorder = new MediaRecorder(stream, {
+                mimeType: 'audio/webm;codecs=opus',
+            })
 
-            recorder.ondataavailable = (e) => {
-                if (e.data.size > 0) chunks.push(e.data)
+            mediaRecorderRef.current = mediaRecorder
+            chunksRef.current = []
+
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) {
+                    chunksRef.current.push(e.data)
+                }
             }
 
-            recorder.onstop = () => {
-                const blob = new Blob(chunks, { type: 'audio/webm' })
-                setRecordedBlob(blob)
-                setPreviewUrl(URL.createObjectURL(blob))
-                setState('preview')
+            mediaRecorder.onstop = async () => {
+                const blob = new Blob(chunksRef.current, { type: 'audio/webm' })
+                const url = URL.createObjectURL(blob)
+                setLocalAudioUrl(url)
+
+                // Upload to backend
+                const duration = Math.floor(recordingTime / 1000)
+                try {
+                    await onUpload(questionId, blob, duration)
+                } catch (error) {
+                    console.error('Upload failed:', error)
+                }
+
+                // Stop all tracks
                 stream.getTracks().forEach((track) => track.stop())
             }
 
-            recorder.start()
-            setMediaRecorder(recorder)
-            setState('recording')
-            setRecordingTime(0)
+            // Start recording
+            mediaRecorder.start()
+            setIsRecording(true)
+            startTimeRef.current = Date.now()
 
+            // Start timer
             timerRef.current = setInterval(() => {
-                setRecordingTime((prev) => {
-                    if (prev >= MAX_RECORDING_TIME) {
-                        stopRecording()
-                        return prev
-                    }
-                    return prev + 1
-                })
-            }, 1000)
+                setRecordingTime(Date.now() - startTimeRef.current)
+            }, 100)
         } catch (error) {
             console.error('Failed to start recording:', error)
-            alert('Vui lòng cho phép truy cập microphone')
-            setState('idle')
+            alert('Could not access microphone. Please check permissions.')
         }
-    }
+    }, [questionId, onUpload, recordingTime])
 
-    const stopRecording = () => {
-        if (mediaRecorder && state === 'recording') {
-            mediaRecorder.stop()
-            if (timerRef.current) clearInterval(timerRef.current)
-        }
-    }
+    // ============================================
+    // STOP RECORDING
+    // ============================================
+    const stopRecording = useCallback(() => {
+        if (mediaRecorderRef.current && isRecording) {
+            mediaRecorderRef.current.stop()
+            setIsRecording(false)
 
-    const reRecord = () => {
-        if (previewUrl) {
-            URL.revokeObjectURL(previewUrl)
-            setPreviewUrl(null)
+            if (timerRef.current) {
+                clearInterval(timerRef.current)
+                timerRef.current = null
+            }
         }
-        setRecordedBlob(null)
+    }, [isRecording])
+
+    // ============================================
+    // RE-RECORD
+    // ============================================
+    const reRecord = useCallback(() => {
+        setLocalAudioUrl(null)
         setRecordingTime(0)
-        setState('idle')
-    }
+    }, [])
 
-    const submitRecording = async () => {
-        if (!recordedBlob) return
-
-        setState('submitting')
-        try {
-            const result = await testApi.submitSpeaking(
-                attemptId,
-                questionId,
-                recordedBlob
-            )
-            setResult(result)
-            setState('submitted')
-            onSubmitted?.(result)
-        } catch (error: any) {
-            console.error('Failed to submit speaking:', error)
-            alert(error.message || 'Nộp bài nói thất bại. Vui lòng thử lại.')
-            setState('preview')
-        }
-    }
-
-    const formatTime = (seconds: number) => {
-        const mins = Math.floor(seconds / 60)
+    // ============================================
+    // FORMAT TIME
+    // ============================================
+    const formatTime = (ms: number) => {
+        const seconds = Math.floor(ms / 1000)
+        const minutes = Math.floor(seconds / 60)
         const secs = seconds % 60
-        return `${mins}:${secs.toString().padStart(2, '0')}`
+        return `${minutes}:${secs.toString().padStart(2, '0')}`
     }
+
+    // ============================================
+    // RENDER
+    // ============================================
+    const audioToPlay = uploadedAudioUrl || localAudioUrl || audioUrl
 
     return (
         <div
-            ref={(el) => {
-                if (el) registerRef(questionId, el)
-            }}
-            className={s.container}
+            ref={(el) => registerRef(questionId, el)}
+            className={s.questionCard}
         >
-            <p className={s.questionText}>
-                {globalNumber}. {questionText}
-            </p>
+            {/* Question Header */}
+            <div className={s.questionHeader}>
+                <span className={s.questionNumber}>
+                    Question {globalNumber}
+                </span>
+                <span className={s.uploadStatus}>
+                    {uploadStatus === 'uploading' && '⏳ Uploading...'}
+                    {uploadStatus === 'uploaded' && '✅ Uploaded'}
+                    {uploadStatus === 'error' && '❌ Failed'}
+                </span>
+            </div>
 
-            {audioUrl && (
-                <div className={s.audioWrapper}>
-                    <audio src={audioUrl} controls className={s.audio} />
-                </div>
-            )}
+            {/* Question Text */}
+            <div className={s.questionText}>{questionText}</div>
 
-            <div className={s.recordingBox}>
-                {/* IDLE STATE */}
-                {state === 'idle' && (
-                    <button onClick={startPreparation} className={s.btnStart}>
-                        🎤{' '}
-                        {partNumber === 2
-                            ? 'Bắt đầu (1 phút chuẩn bị)'
-                            : 'Bắt đầu ghi âm'}
-                    </button>
-                )}
+            {/* Recording Controls */}
+            <div className={s.recordingControls}>
+                {!isRecording &&
+                    !localAudioUrl &&
+                    uploadStatus !== 'uploaded' && (
+                        <ButtonPrimary onClick={startRecording}>
+                            🎤 Start Recording
+                        </ButtonPrimary>
+                    )}
 
-                {/* PREPARING STATE (Part 2 only) */}
-                {state === 'preparing' && (
-                    <div className={s.preparingState}>
-                        <div className={s.bigTimer}>{formatTime(prepTime)}</div>
-                        <p className={s.statusText}>⏳ Thời gian chuẩn bị...</p>
-                        <p className={s.hint}>Bạn có thể ghi chú ý tưởng</p>
-                    </div>
-                )}
-
-                {/* RECORDING STATE */}
-                {state === 'recording' && (
-                    <div className={s.recordingState}>
-                        <div
-                            className={s.bigTimer}
-                            style={{ color: '#ef4444' }}
-                        >
-                            {formatTime(recordingTime)}
-                        </div>
+                {isRecording && (
+                    <>
                         <div className={s.recordingIndicator}>
-                            <span className={s.redDot}></span>
-                            Đang ghi âm...
+                            <span className={s.recordingDot}>●</span>
+                            Recording... {formatTime(recordingTime)}
                         </div>
-                        <button onClick={stopRecording} className={s.btnStop}>
-                            ⏹️ Dừng ghi âm
-                        </button>
-                    </div>
+                        <ButtonPrimary
+                            onClick={stopRecording}
+                            variant="gradient"
+                        >
+                            ⏹ Stop
+                        </ButtonPrimary>
+                    </>
                 )}
 
-                {/* PREVIEW STATE */}
-                {state === 'preview' && previewUrl && (
-                    <div className={s.previewState}>
-                        <p className={s.statusText}>
-                            ✅ Đã ghi xong ({formatTime(recordingTime)})
-                        </p>
-
+                {(localAudioUrl || uploadedAudioUrl) && !isRecording && (
+                    <div className={s.playbackSection}>
                         <audio
-                            ref={audioRef}
-                            src={previewUrl}
                             controls
-                            className={s.previewAudio}
+                            src={audioToPlay || undefined}
+                            className={s.audioPlayer}
                         />
 
-                        <div className={s.previewActions}>
-                            <button
-                                onClick={reRecord}
-                                className={s.btnRerecord}
-                            >
-                                🔄 Ghi lại
-                            </button>
-                            <button
-                                onClick={submitRecording}
-                                className={s.btnSubmit}
-                            >
-                                ✅ Nộp bài
-                            </button>
-                        </div>
-                    </div>
-                )}
-
-                {/* SUBMITTING STATE */}
-                {state === 'submitting' && (
-                    <div className={s.submittingState}>
-                        <div className={s.spinner}></div>
-                        <p className={s.statusText}>
-                            Đang xử lý và chấm điểm...
-                        </p>
-                    </div>
-                )}
-
-                {/* SUBMITTED STATE */}
-                {state === 'submitted' && result && (
-                    <div className={s.submittedState}>
-                        <p className={s.successText}>✅ Đã nộp bài nói</p>
-
-                        <div className={s.resultBox}>
-                            <div className={s.scoreRow}>
-                                <strong>Điểm AI:</strong>
-                                <span className={s.scoreValue}>
-                                    {result.aiScore.toFixed(1)}/9
-                                </span>
-                            </div>
-                            <div className={s.scoreRow}>
-                                <strong>Điểm đạt được:</strong>
-                                <span>
-                                    {result.pointsEarned}/{result.maxPoints}
-                                </span>
-                            </div>
-
-                            {result.transcript && (
-                                <details className={s.details}>
-                                    <summary>Xem transcript</summary>
-                                    <p className={s.detailContent}>
-                                        {result.transcript}
-                                    </p>
-                                </details>
-                            )}
-
-                            {result.feedback && (
-                                <details className={s.details}>
-                                    <summary>Nhận xét</summary>
-                                    <p className={s.detailContent}>
-                                        {result.feedback}
-                                    </p>
-                                </details>
-                            )}
-                        </div>
+                        {uploadStatus !== 'uploaded' && (
+                            <ButtonGhost onClick={reRecord} size="sm">
+                                🔄 Re-record
+                            </ButtonGhost>
+                        )}
                     </div>
                 )}
             </div>
+
+            {/* Upload Status Messages */}
+            {uploadStatus === 'uploading' && (
+                <div className={s.uploadingMessage}>
+                    Uploading your audio...
+                </div>
+            )}
+
+            {uploadStatus === 'uploaded' && (
+                <div className={s.successMessage}>
+                    ✅ Audio uploaded successfully! You can move to the next
+                    question.
+                </div>
+            )}
+
+            {uploadStatus === 'error' && uploadError && (
+                <div className={s.errorMessage}>
+                    ❌ Upload failed: {uploadError}
+                    <ButtonGhost onClick={reRecord} size="sm">
+                        Try Again
+                    </ButtonGhost>
+                </div>
+            )}
         </div>
     )
 }

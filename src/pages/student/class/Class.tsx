@@ -29,7 +29,6 @@ import { getMyClasses } from '@/lib/users' // Đảm bảo hàm này đã đư�
 import type { MyClass, ClassSession, MyClassUser } from '@/types/user.types'
 import type { ClassMember } from '@/components/common/card/MemberCard'
 import type { Lesson } from '@/components/common/typography/LessonItem'
-import { useNavigate } from 'react-router-dom'
 
 const tabItems: TabItem[] = [
     { label: 'Lịch học', value: 'schedule' },

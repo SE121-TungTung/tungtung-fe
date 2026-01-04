@@ -125,15 +125,7 @@ export default function TestResultPage() {
                     <div className={s.statCard}>
                         <div className={s.statLabel}>Thời gian</div>
                         <div className={s.statValue}>
-                            {result.endTime
-                                ? Math.round(
-                                      (new Date(result.endTime).getTime() -
-                                          new Date(
-                                              result.startTime
-                                          ).getTime()) /
-                                          60000
-                                  ) + ' phút'
-                                : 'N/A'}
+                            {result.timeTakenSeconds}
                         </div>
                     </div>
                 </div>
@@ -158,9 +150,9 @@ export default function TestResultPage() {
                                 <span className={s.questionNumber}>
                                     Câu {index + 1}
                                 </span>
-                                {detail.aiScore !== null && (
+                                {detail.bandScore !== null && (
                                     <span className={s.questionScore}>
-                                        {detail.aiScore.toFixed(1)} /{' '}
+                                        {detail.bandScore.toFixed(1)} /{' '}
                                         {detail.maxPoints}
                                     </span>
                                 )}

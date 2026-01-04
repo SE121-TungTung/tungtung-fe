@@ -1,6 +1,6 @@
 import { api } from '@/lib/api'
 import type {
-    NotificationResponse,
+    Notification,
     NotificationListResponse,
     UnreadCountResponse,
 } from '@/types/notification.types'
@@ -15,7 +15,7 @@ export async function getNotifications(
     qs.set('skip', String(skip))
     qs.set('limit', String(limit))
 
-    return api<NotificationListResponse>(`${BASE_URL}?${qs.toString()}`, {
+    return api<NotificationListResponse>(`${BASE_URL}/?${qs.toString()}`, {
         method: 'GET',
     })
 }
@@ -29,8 +29,8 @@ export async function getUnreadCount(): Promise<number> {
 
 export async function markAsRead(
     notificationId: string
-): Promise<NotificationResponse> {
-    return api<NotificationResponse>(`${BASE_URL}/${notificationId}/read`, {
+): Promise<Notification> {
+    return api<Notification>(`${BASE_URL}/${notificationId}/read`, {
         method: 'PUT',
     })
 }

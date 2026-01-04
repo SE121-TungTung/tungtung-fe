@@ -1,0 +1,289 @@
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+}
+
+.modalContainer {
+    background: white;
+    border-radius: 12px;
+    max-width: 700px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.modalHeader h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #999;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.closeButton:hover {
+    background: #f5f5f5;
+    color: #333;
+}
+
+/* Overall Section */
+.overallSection {
+    padding: 24px;
+    display: flex;
+    gap: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.bandScoreCard {
+    flex: 1;
+    text-align: center;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+}
+
+.bandScore {
+    font-size: 48px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.bandLabel {
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+}
+
+.pointsCard {
+    flex: 1;
+    text-align: center;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+}
+
+.points {
+    font-size: 32px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.pointsLabel {
+    font-size: 14px;
+    color: #666;
+}
+
+/* Criteria Section */
+.criteriaSection {
+    padding: 24px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.criteriaSection h3 {
+    margin: 0 0 16px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+.criteriaGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.criteriaCard {
+    padding: 16px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.criteriaIcon {
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.criteriaTitle {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.criteriaScore {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1976d2;
+}
+
+/* Parts Section */
+.partsSection {
+    padding: 24px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.partsSection h3 {
+    margin: 0 0 16px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+.partsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.partCard {
+    padding: 16px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.partName {
+    font-size: 14px;
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.partScore {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1976d2;
+    margin-bottom: 4px;
+}
+
+.partDescription {
+    font-size: 12px;
+    color: #999;
+}
+
+/* Summary Section */
+.summarySection {
+    padding: 24px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.summarySection h3 {
+    margin: 0 0 16px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+.summaryStats {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.stat {
+    text-align: center;
+}
+
+.statValue {
+    display: block;
+    font-size: 32px;
+    font-weight: 700;
+    color: #333;
+}
+
+.statLabel {
+    display: block;
+    font-size: 13px;
+    color: #666;
+    margin-top: 4px;
+}
+
+/* Notice Box */
+.noticeBox {
+    margin: 24px;
+    padding: 16px;
+    background: #fff3e0;
+    border-left: 4px solid #ff9800;
+    border-radius: 4px;
+    display: flex;
+    gap: 12px;
+}
+
+.noticeIcon {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.noticeBox strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #333;
+}
+
+.noticeBox p {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+    line-height: 1.5;
+}
+
+/* Actions */
+.modalActions {
+    padding: 24px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .modalContainer {
+        max-width: 100%;
+        max-height: 100vh;
+        border-radius: 0;
+    }
+
+    .overallSection {
+        flex-direction: column;
+    }
+
+    .criteriaGrid,
+    .partsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .summaryStats {
+        flex-direction: column;
+        gap: 12px;
+    }
+}

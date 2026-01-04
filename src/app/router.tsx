@@ -30,6 +30,7 @@ import { MainLayout } from './layouts/MainLayout'
 import TeacherClassPage from '@/pages/teacher/classes/TeacherClassPage'
 import TestTakerWrapper from '@/pages/student/exam/do/TestTakerWrapper'
 import AuditLogPage from '@/pages/admin/audit/AuditLogPage'
+import TeacherClassDetailPage from '@/pages/teacher/classes/TeacherClassDetailPage'
 
 export const router = createBrowserRouter([
     {
@@ -164,8 +165,7 @@ export const router = createBrowserRouter([
                         path: '/teacher/classes/:classId',
                         element: (
                             <ProtectedRoute allowedRoles={['teacher']}>
-                                {/* <TeacherClassDetailPage /> - Sẽ làm sau */}
-                                <div>Chi tiết lớp học (Đang phát triển)</div>
+                                <TeacherClassDetailPage />
                             </ProtectedRoute>
                         ),
                     },

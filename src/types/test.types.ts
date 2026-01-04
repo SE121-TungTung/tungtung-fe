@@ -947,3 +947,67 @@ export interface TestSectionPartCreatePayload {
     instructions?: string | null
     question_groups: QuestionGroupCreatePayload[]
 }
+
+export interface PreUploadResponse {
+    fileUploadId: string
+    audioUrl: string
+    questionId: string
+    fileSize: number
+    durationSeconds?: number
+    uploadedAt: string
+}
+
+export interface SpeakingResponseItem {
+    questionId: string
+    fileUploadId: string
+    durationSeconds?: number
+    flaggedForReview?: boolean
+}
+
+export interface BatchSubmitSpeakingRequest {
+    responses: SpeakingResponseItem[]
+}
+
+export interface QuestionGradingResult {
+    questionId: string
+    questionPart: string
+    questionText?: string
+    audioUrl: string
+    durationSeconds?: number
+    aiBandScore?: number
+    aiRubricScores?: Record<string, number>
+    aiFeedback?: string
+    aiTranscript?: string
+    aiPointsEarned?: number
+    processed: boolean
+    errorMessage?: string
+    maxPoints: number
+}
+
+export interface OverallSpeakingScores {
+    fluencyCoherence?: number
+    lexicalResource?: number
+    grammaticalRange?: number
+    pronunciation?: number
+    overallBand?: number
+    part1AvgBand?: number
+    part2AvgBand?: number
+    part3AvgBand?: number
+}
+
+export interface BatchSubmitSpeakingResponse {
+    attemptId: string
+    testId: string
+    submittedAt: string
+    totalQuestions: number
+    processedCount: number
+    failedCount: number
+    questionResults: QuestionGradingResult[]
+    aiOverallScores?: OverallSpeakingScores
+    aiOverallFeedback?: string
+    aiTotalPoints?: number
+    maxTotalPoints: number
+    status: string
+    requiresTeacherReview: boolean
+    processingTimeSeconds?: number
+}

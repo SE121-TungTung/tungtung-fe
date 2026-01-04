@@ -60,6 +60,11 @@ import {
     ContentStatus,
     type BackendPassageResponse,
     type Passage,
+    type BatchSubmitSpeakingResponse,
+    type OverallSpeakingScores,
+    type QuestionGradingResult,
+    type BatchSubmitSpeakingRequest,
+    type PreUploadResponse,
 } from '@/types/test.types'
 
 const BASE_URL = '/api/v1/tests'
@@ -275,7 +280,6 @@ function mapTest(dto: BackendTestResponse): Test {
         instructions: dto.instructions,
         testType: parseEnum(TestType, dto.test_type),
         timeLimitMinutes: dto.time_limit_minutes,
-        // ✅ New config fields
         totalPoints: dto.total_points,
         passingScore: dto.passing_score,
         maxAttempts: dto.max_attempts,
@@ -451,6 +455,81 @@ function mapSpeakingSubmission(
         aiScore: dto.ai_score,
         transcript: dto.transcript,
         feedback: dto.feedback,
+    }
+}
+
+/**
+ * Map backend pre-upload response to frontend
+ */
+function mapPreUploadResponse(dto: any): PreUploadResponse {
+    return {
+        fileUploadId: dto.file_upload_id,
+        audioUrl: dto.audio_url,
+        questionId: dto.question_id,
+        fileSize: dto.file_size,
+        durationSeconds: dto.duration_seconds,
+        uploadedAt: dto.uploaded_at,
+    }
+}
+
+/**
+ * Map backend question grading result to frontend
+ */
+function mapQuestionGradingResult(dto: any): QuestionGradingResult {
+    return {
+        questionId: dto.question_id,
+        questionPart: dto.question_part,
+        questionText: dto.question_text,
+        audioUrl: dto.audio_url,
+        durationSeconds: dto.duration_seconds,
+        aiBandScore: dto.ai_band_score,
+        aiRubricScores: dto.ai_rubric_scores,
+        aiFeedback: dto.ai_feedback,
+        aiTranscript: dto.ai_transcript,
+        aiPointsEarned: dto.ai_points_earned,
+        processed: dto.processed,
+        errorMessage: dto.error_message,
+        maxPoints: dto.max_points,
+    }
+}
+
+/**
+ * Map backend overall speaking scores to frontend
+ */
+function mapOverallSpeakingScores(dto: any): OverallSpeakingScores {
+    return {
+        fluencyCoherence: dto.fluency_coherence,
+        lexicalResource: dto.lexical_resource,
+        grammaticalRange: dto.grammatical_range,
+        pronunciation: dto.pronunciation,
+        overallBand: dto.overall_band,
+        part1AvgBand: dto.part_1_avg_band,
+        part2AvgBand: dto.part_2_avg_band,
+        part3AvgBand: dto.part_3_avg_band,
+    }
+}
+
+/**
+ * Map backend batch submit speaking response to frontend
+ */
+function mapBatchSubmitSpeaking(dto: any): BatchSubmitSpeakingResponse {
+    return {
+        attemptId: dto.attempt_id,
+        testId: dto.test_id,
+        submittedAt: dto.submitted_at,
+        totalQuestions: dto.total_questions,
+        processedCount: dto.processed_count,
+        failedCount: dto.failed_count,
+        questionResults: dto.question_results.map(mapQuestionGradingResult),
+        aiOverallScores: dto.ai_overall_scores
+            ? mapOverallSpeakingScores(dto.ai_overall_scores)
+            : undefined,
+        aiOverallFeedback: dto.ai_overall_feedback,
+        aiTotalPoints: dto.ai_total_points,
+        maxTotalPoints: dto.max_total_points,
+        status: dto.status,
+        requiresTeacherReview: dto.requires_teacher_review,
+        processingTimeSeconds: dto.processing_time_seconds,
     }
 }
 
@@ -826,6 +905,80 @@ export const testApi = {
             { method: 'GET' }
         )
         return mapAttemptDetail(response)
+    },
+
+    /**
+     * Pre-upload speaking audio WITHOUT grading
+     * Endpoint: POST /tests/attempts/{attempt_id}/speaking/upload/{question_id}
+     *
+     * This is STEP 1 of the new two-step speaking workflow:
+     * 1. Pre-upload all audio files (this method)
+     * 2. Batch submit all responses for grading (batchSubmitSpeaking)
+     *
+     * @param attemptId - ID of the attempt
+     * @param questionId - ID of the speaking question
+     * @param audioFile - Audio file (Blob or File)
+     * @returns Pre-upload response with file_upload_id
+     */
+    preUploadSpeakingAudio: async (
+        attemptId: string,
+        questionId: string,
+        audioFile: Blob | File
+    ): Promise<PreUploadResponse> => {
+        const formData = new FormData()
+        formData.append('audio', audioFile, 'recording.mp3')
+
+        const response = await api<any>(
+            `${BASE_URL}/attempts/${attemptId}/speaking/upload/${questionId}`,
+            {
+                method: 'POST',
+                body: formData,
+            }
+        )
+
+        return mapPreUploadResponse(response)
+    },
+
+    /**
+     * Batch submit speaking responses for AI grading
+     * Endpoint: POST /tests/attempts/{attempt_id}/speaking/batch-submit
+     *
+     * This is STEP 2 of the new two-step speaking workflow:
+     * 1. Pre-upload all audio files (preUploadSpeakingAudio)
+     * 2. Batch submit all responses for grading (this method)
+     *
+     * Benefits:
+     * - Upload all audio files first (can be done in parallel)
+     * - Then submit all at once for AI grading
+     * - AI can analyze all responses together for better overall scoring
+     *
+     * @param attemptId - ID of the attempt
+     * @param request - Batch submit request with all speaking responses
+     * @returns Batch submit response with AI grading results
+     */
+    batchSubmitSpeaking: async (
+        attemptId: string,
+        request: BatchSubmitSpeakingRequest
+    ): Promise<BatchSubmitSpeakingResponse> => {
+        // Convert camelCase frontend types to snake_case backend format
+        const payload = {
+            responses: request.responses.map((r) => ({
+                question_id: r.questionId,
+                file_upload_id: r.fileUploadId,
+                duration_seconds: r.durationSeconds,
+                flagged_for_review: r.flaggedForReview || false,
+            })),
+        }
+
+        const response = await api<any>(
+            `${BASE_URL}/attempts/${attemptId}/speaking/batch-submit`,
+            {
+                method: 'POST',
+                body: JSON.stringify(payload),
+            }
+        )
+
+        return mapBatchSubmitSpeaking(response)
     },
 }
 
