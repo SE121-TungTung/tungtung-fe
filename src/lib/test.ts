@@ -980,6 +980,61 @@ export const testApi = {
 
         return mapBatchSubmitSpeaking(response)
     },
+
+    /**
+     * Update existing test
+     * Endpoint: PUT /tests/{test_id}
+     *
+     * ⚠️ Requires: TEACHER, OFFICE_ADMIN, CENTER_ADMIN, or SYSTEM_ADMIN role
+     *
+     * @param testId - ID of the test to update
+     * @param payload - Updated test data
+     * @param files - Optional files (audio, images)
+     * @returns Updated test info
+     */
+    updateTest: async (
+        testId: string,
+        payload: TestCreatePayload,
+        files?: { [key: string]: File }
+    ): Promise<{ id: string; title: string }> => {
+        const formData = new FormData()
+
+        const cleanedPayload = cleanCreatePayload(payload)
+        formData.append('test_data_str', JSON.stringify(cleanedPayload))
+
+        if (files) {
+            Object.entries(files).forEach(([key, file]) => {
+                const blob = file.slice(0, file.size, file.type)
+                const renamedFile = new File([blob], key, { type: file.type })
+                formData.append('files', renamedFile)
+            })
+        }
+
+        return api<{ id: string; title: string }>(`${BASE_URL}/${testId}`, {
+            method: 'PUT',
+            body: formData,
+        })
+    },
+
+    /**
+     * Publish a draft test
+     * Endpoint: PATCH /tests/{test_id}/publish
+     *
+     * Changes test status from DRAFT to PUBLISHED
+     *
+     * @param testId - ID of the test
+     * @returns Updated test info
+     */
+    publishTest: async (
+        testId: string
+    ): Promise<{ id: string; status: string }> => {
+        return api<{ id: string; status: string }>(
+            `${BASE_URL}/${testId}/publish`,
+            {
+                method: 'PATCH',
+            }
+        )
+    },
 }
 
 // ============================================

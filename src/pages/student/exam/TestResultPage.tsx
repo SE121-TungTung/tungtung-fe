@@ -1,9 +1,10 @@
-// src/pages/student/exam/TestResultPage.tsx
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect /*, useMemo */ } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { testApi, getAttemptStatusInfo } from '@/lib/test'
-import type { AttemptDetail, QuestionResultDetail } from '@/types/test.types'
-import { AttemptStatus, QuestionType, SkillArea } from '@/types/test.types'
+import type {
+    AttemptDetail /*, QuestionResultDetail*/,
+} from '@/types/test.types'
+import { AttemptStatus /*QuestionType, SkillArea */ } from '@/types/test.types'
 
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import ButtonGhost from '@/components/common/button/ButtonGhost'
@@ -11,23 +12,23 @@ import ButtonGhost from '@/components/common/button/ButtonGhost'
 import s from './TestResultPage.module.css'
 
 // Helper to determine skill from question type
-const getSkillFromQuestionType = (questionType: QuestionType): SkillArea => {
-    const speakingTypes = [
-        QuestionType.SPEAKING_PART_1,
-        QuestionType.SPEAKING_PART_2,
-        QuestionType.SPEAKING_PART_3,
-    ]
-    const writingTypes = [
-        QuestionType.WRITING_TASK_1,
-        QuestionType.WRITING_TASK_2,
-    ]
+// const getSkillFromQuestionType = (questionType: QuestionType): SkillArea => {
+//     const speakingTypes = [
+//         QuestionType.SPEAKING_PART_1,
+//         QuestionType.SPEAKING_PART_2,
+//         QuestionType.SPEAKING_PART_3,
+//     ]
+//     const writingTypes = [
+//         QuestionType.WRITING_TASK_1,
+//         QuestionType.WRITING_TASK_2,
+//     ]
 
-    if (speakingTypes.includes(questionType)) return SkillArea.SPEAKING
-    if (writingTypes.includes(questionType)) return SkillArea.WRITING
+//     if (speakingTypes.includes(questionType)) return SkillArea.SPEAKING
+//     if (writingTypes.includes(questionType)) return SkillArea.WRITING
 
-    // Default to Reading for MCQ types
-    return SkillArea.READING
-}
+//     // Default to Reading for MCQ types
+//     return SkillArea.READING
+// }
 
 export default function TestResultPage() {
     const { attemptId } = useParams<{ attemptId: string }>()
@@ -37,26 +38,26 @@ export default function TestResultPage() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
-    const resultsBySection = useMemo(() => {
-        if (!result) return []
+    // const resultsBySection = useMemo(() => {
+    //     if (!result) return []
 
-        const grouped = new Map<SkillArea, QuestionResultDetail[]>()
+    //     const grouped = new Map<SkillArea, QuestionResultDetail[]>()
 
-        result.details.forEach((detail) => {
-            const skill = getSkillFromQuestionType(detail.questionType)
-            if (!grouped.has(skill)) {
-                grouped.set(skill, [])
-            }
-            grouped.get(skill)!.push(detail)
-        })
+    //     result.details.forEach((detail) => {
+    //         const skill = getSkillFromQuestionType(detail.questionType)
+    //         if (!grouped.has(skill)) {
+    //             grouped.set(skill, [])
+    //         }
+    //         grouped.get(skill)!.push(detail)
+    //     })
 
-        return Array.from(grouped.entries()).map(([skill, questions]) => ({
-            skill,
-            questions,
-            score: questions.reduce((sum, q) => sum + q.pointsEarned, 0),
-            maxScore: questions.reduce((sum, q) => sum + q.maxPoints, 0),
-        }))
-    }, [result])
+    //     return Array.from(grouped.entries()).map(([skill, questions]) => ({
+    //         skill,
+    //         questions,
+    //         score: questions.reduce((sum, q) => sum + q.pointsEarned, 0),
+    //         maxScore: questions.reduce((sum, q) => sum + q.maxPoints, 0),
+    //     }))
+    // }, [result])
 
     useEffect(() => {
         if (!attemptId) {

@@ -15,6 +15,7 @@ import {
 import type { TestTeacher } from '@/types/test.types'
 import { TestStatus, QuestionType } from '@/types/test.types'
 import Skeleton from '@/components/effect/Skeleton'
+import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 
 export default function TestDetailPage() {
     const { testId } = useParams<{ testId: string }>()
@@ -23,6 +24,29 @@ export default function TestDetailPage() {
     const [test, setTest] = useState<TestTeacher | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+
+    const [isPublishing, setIsPublishing] = useState(false)
+    const handlePublish = async () => {
+        if (
+            !window.confirm(
+                'Bạn có chắc muốn xuất bản bài thi này? Học sinh sẽ có thể thấy và làm bài.'
+            )
+        ) {
+            return
+        }
+
+        setIsPublishing(true)
+        try {
+            await testApi.publishTest(testId!)
+            alert('Đã xuất bản bài thi thành công!')
+            await loadTest()
+        } catch (error: any) {
+            console.error('Failed to publish test:', error)
+            alert('Xuất bản thất bại: ' + (error.message || 'Vui lòng thử lại'))
+        } finally {
+            setIsPublishing(false)
+        }
+    }
 
     const loadTest = async () => {
         if (!testId) return
@@ -171,13 +195,72 @@ export default function TestDetailPage() {
                             ← Quay lại
                         </ButtonGhost>
                         <div className={s.actions}>
-                            {/* Future: Edit button */}
-                            {/* <ButtonPrimary onClick={() => navigate(`/teacher/tests/${testId}/edit`)}>
+                            <ButtonPrimary
+                                onClick={() =>
+                                    navigate(`/teacher/tests/${testId}/edit`)
+                                }
+                            >
                                 Chỉnh sửa
-                            </ButtonPrimary> */}
+                            </ButtonPrimary>
+
+                            {test.status === TestStatus.DRAFT && (
+                                <ButtonPrimary
+                                    onClick={handlePublish}
+                                    loading={isPublishing}
+                                    disabled={isPublishing}
+                                    variant="gradient"
+                                >
+                                    Xuất bản
+                                </ButtonPrimary>
+                            )}
                         </div>
                     </div>
                 </div>
+
+                {test.status === TestStatus.DRAFT && (
+                    <Card
+                        variant="outline"
+                        style={{
+                            background:
+                                'linear-gradient(135deg, #fff3cd 0%, #fff9e6 100%)',
+                            border: '2px solid #ffc107',
+                        }}
+                    >
+                        <div
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '16px',
+                                padding: '8px',
+                            }}
+                        >
+                            <div style={{ flex: 1 }}>
+                                <h3
+                                    style={{
+                                        margin: 0,
+                                        fontSize: '18px',
+                                        fontWeight: 600,
+                                        color: '#856404',
+                                    }}
+                                >
+                                    Bài thi đang ở trạng thái Nháp
+                                </h3>
+                                <p
+                                    style={{
+                                        margin: '6px 0 0',
+                                        fontSize: '14px',
+                                        color: '#856404',
+                                        lineHeight: 1.5,
+                                    }}
+                                >
+                                    Học sinh chưa thể thấy bài thi này. Nhấn nút{' '}
+                                    <strong>"Xuất bản"</strong> phía trên để
+                                    công khai bài thi cho học sinh.
+                                </p>
+                            </div>
+                        </div>
+                    </Card>
+                )}
 
                 {/* OVERVIEW CARD */}
                 <Card title="Tổng quan" variant="outline">

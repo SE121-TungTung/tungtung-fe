@@ -31,6 +31,7 @@ import TeacherClassPage from '@/pages/teacher/classes/TeacherClassPage'
 import TestTakerWrapper from '@/pages/student/exam/do/TestTakerWrapper'
 import AuditLogPage from '@/pages/admin/audit/AuditLogPage'
 import TeacherClassDetailPage from '@/pages/teacher/classes/TeacherClassDetailPage'
+import EditTestPage from '@/pages/student/exam/EditTestPage'
 
 export const router = createBrowserRouter([
     {
@@ -190,6 +191,14 @@ export const router = createBrowserRouter([
                         element: (
                             <ProtectedRoute allowedRoles={['teacher']}>
                                 <TestDetailPage />,
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/teacher/tests/:testId/edit',
+                        element: (
+                            <ProtectedRoute allowedRoles={['teacher']}>
+                                <EditTestPage />,
                             </ProtectedRoute>
                         ),
                     },
