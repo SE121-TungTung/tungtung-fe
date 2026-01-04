@@ -16,6 +16,11 @@ import {
     type TestSection,
     QuestionType,
 } from '@/types/test.types'
+import SummaryCompletionGroup from '@/components/feature/exams/SummaryCompletionGroup'
+import MatchingQuestion from '@/components/feature/exams/MatchingQuestion'
+import MatchingHeadingsQuestion from '@/components/feature/exams/MatchingHeadingsQuestion'
+import YesNoNotGivenQuestion from '@/components/feature/exams/YesNoNotGivenQuestion'
+import DiagramLabelingQuestion from '@/components/feature/exams/DiagramLabelingQuestion'
 
 // Enhanced Types
 export interface EnhancedQuestion extends Question {
@@ -50,6 +55,65 @@ interface UniversalQuestionRendererProps {
 export const UniversalQuestionRenderer =
     React.memo<UniversalQuestionRendererProps>(
         ({ group, answers, onAnswerChange, registerRef, onUploadSpeaking }) => {
+            if (!group.questions.length) return null
+
+            const groupType: QuestionType = group.questions[0].questionType
+
+            if (
+                groupType === QuestionType.MATCHING_INFORMATION ||
+                groupType === QuestionType.MATCHING_FEATURES
+            ) {
+                return (
+                    <MatchingQuestion
+                        key={group.id}
+                        group={group}
+                        answers={answers}
+                        onAnswerChange={onAnswerChange}
+                        registerRef={registerRef}
+                    />
+                )
+            }
+
+            if (groupType === QuestionType.MATCHING_HEADINGS) {
+                return (
+                    <MatchingHeadingsQuestion
+                        key={group.id}
+                        group={group}
+                        answers={answers}
+                        onAnswerChange={onAnswerChange}
+                        registerRef={registerRef}
+                    />
+                )
+            }
+
+            if (
+                [
+                    QuestionType.SUMMARY_COMPLETION,
+                    QuestionType.NOTE_COMPLETION,
+                ].includes(groupType)
+            ) {
+                return (
+                    <SummaryCompletionGroup
+                        key={group.id}
+                        group={group}
+                        answers={answers}
+                        onAnswerChange={onAnswerChange}
+                        registerRef={registerRef}
+                    />
+                )
+            }
+
+            if (groupType === QuestionType.DIAGRAM_LABELING) {
+                return (
+                    <DiagramLabelingQuestion
+                        key={group.id}
+                        group={group}
+                        answers={answers}
+                        onAnswerChange={onAnswerChange}
+                        registerRef={registerRef}
+                    />
+                )
+            }
             return (
                 <>
                     {group.questions.map((q) => {
@@ -63,6 +127,17 @@ export const UniversalQuestionRenderer =
                             case QuestionType.TRUE_FALSE_NOT_GIVEN:
                                 return (
                                     <TrueFalseNotGivenQuestion
+                                        {...commonProps}
+                                        selectedValue={answers[q.id] || null}
+                                        onChange={(v) =>
+                                            onAnswerChange(q.id, v)
+                                        }
+                                    />
+                                )
+
+                            case QuestionType.YES_NO_NOT_GIVEN:
+                                return (
+                                    <YesNoNotGivenQuestion
                                         {...commonProps}
                                         selectedValue={answers[q.id] || null}
                                         onChange={(v) =>
