@@ -8,7 +8,7 @@ interface SpeakingQuestionProps {
     globalNumber: number
     questionText: string
     audioUrl?: string
-    onUpload: (
+    onUpload?: (
         questionId: string,
         audioBlob: Blob,
         duration: number
@@ -74,12 +74,13 @@ export const SpeakingQuestion = ({
 
                 // Upload to backend
                 const duration = Math.floor(recordingTime / 1000)
-                try {
-                    await onUpload(questionId, blob, duration)
-                } catch (error) {
-                    console.error('Upload failed:', error)
+                if (onUpload) {
+                    try {
+                        await onUpload(questionId, blob, duration)
+                    } catch (error) {
+                        console.error('Upload failed:', error)
+                    }
                 }
-
                 // Stop all tracks
                 stream.getTracks().forEach((track) => track.stop())
             }

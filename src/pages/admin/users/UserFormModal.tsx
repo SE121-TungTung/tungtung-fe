@@ -7,7 +7,6 @@ import {
     type Role,
     ALL_ROLES,
     type UpdateUserPayload,
-    type EmergencyContact,
 } from '@/types/user.types'
 import { Modal } from '@/components/core/Modal'
 import InputField from '@/components/common/input/InputField'

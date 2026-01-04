@@ -1,6 +1,3 @@
-// src/components/feature/schedule/CreateSessionModal.tsx
-
-import React from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { Modal } from '@/components/core/Modal'

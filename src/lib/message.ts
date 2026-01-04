@@ -19,7 +19,6 @@ import type {
     DeleteConversationResponse,
     DeleteMessageResponse,
 } from '@/types/message.types'
-import { is } from 'date-fns/locale'
 
 const BASE_URL = '/api/v1/messaging'
 

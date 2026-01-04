@@ -17,7 +17,7 @@ import RoomGridView from '@/components/feature/schedule/views/RoomGridView'
 import ScheduleListView from '@/components/feature/schedule/views/ScheduleListView'
 import ButtonGhost from '@/components/common/button/ButtonGhost'
 import CreateSessionModal from '@/components/feature/schedule/CreateSessionModal'
-import { getClass, listClasses } from '@/lib/classes'
+import { listClasses } from '@/lib/classes'
 import { listUsers } from '@/lib/users'
 import { listRooms, type Room } from '@/lib/rooms'
 

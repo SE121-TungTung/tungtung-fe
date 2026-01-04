@@ -1,5 +1,5 @@
 import s from './MultipleChoiceQuestion.module.css'
-import type { Question, QuestionOption } from '@/types/test.types'
+import type { Question } from '@/types/test.types'
 
 interface MultipleChoiceQuestionProps {
     question: Question & { globalNumber: number }

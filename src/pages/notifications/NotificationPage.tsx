@@ -16,10 +16,7 @@ import { NotificationItem } from '@/components/common/list/NotificationItem'
 import Pagination from '@/components/common/menu/Pagination'
 
 import MarkReadIcon from '@/assets/Check.svg'
-import type {
-    NotificationResponse,
-    NotificationUI,
-} from '@/types/notification.types'
+import type { Notification, NotificationUI } from '@/types/notification.types'
 
 const tabItems: TabItem[] = [
     { label: 'Tất cả', value: 'all' },
@@ -65,7 +62,7 @@ export default function NotificationPage() {
         setShowGradientName(true)
     }, [])
 
-    const handleItemClick = (item: NotificationResponse) => {
+    const handleItemClick = (item: Notification) => {
         if (!item.read_at) {
             markReadMutation.mutate(item.id)
         }

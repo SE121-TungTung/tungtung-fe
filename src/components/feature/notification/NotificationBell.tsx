@@ -8,7 +8,7 @@ import {
 } from '@/lib/notifications'
 import { createPortal } from 'react-dom'
 import s from './NotificationBell.module.css'
-import type { NotificationResponse } from '@/types/notification.types'
+import type { Notification } from '@/types/notification.types'
 
 interface NotificationBellProps {
     className?: string
@@ -31,13 +31,13 @@ export default function NotificationBell({
     })
 
     // Query notifications
-    const { data: notifications = [] } = useQuery({
+    const { data: notificationList = [] } = useQuery({
         queryKey: ['notifications', 'recent'],
-        queryFn: () => getNotifications(0, 10), // Tăng limit lên một chút để list đầy đặn hơn
+        queryFn: () => getNotifications(0, 10),
         enabled: isOpen,
+        select: (data) => data.notifications,
     })
 
-    // Mutation: Mark single as read
     const markReadMutation = useMutation({
         mutationFn: markAsRead,
         onSuccess: () => {
@@ -45,18 +45,14 @@ export default function NotificationBell({
         },
     })
 
-    // Mutation: Mark ALL as read
     const markAllMutation = useMutation({
         mutationFn: async () => {
-            // Lọc ra các ID chưa đọc
-            const unreadIds = notifications
-                .filter((n) => !n.read_at)
-                .map((n) => n.id)
+            const unreadIds = notificationList
+                .filter((n: Notification) => !n.read_at)
+                .map((n: Notification) => n.id)
 
             if (unreadIds.length > 0) {
-                // Gọi song song markAsRead cho từng ID (Giả lập mark-all nếu BE chưa có)
-                // Nếu BE có endpoint /mark-all, hãy thay thế dòng này
-                await Promise.all(unreadIds.map((id) => markAsRead(id)))
+                await Promise.all(unreadIds.map((id: string) => markAsRead(id)))
             }
         },
         onSuccess: () => {
@@ -106,7 +102,7 @@ export default function NotificationBell({
         return () => document.removeEventListener('click', handleClickOutside)
     }, [isOpen])
 
-    const handleNotificationClick = (notification: NotificationResponse) => {
+    const handleNotificationClick = (notification: Notification) => {
         if (!notification.read_at) {
             markReadMutation.mutate(notification.id)
         }
@@ -219,8 +215,8 @@ export default function NotificationBell({
                         </div>
 
                         <div className={s.list}>
-                            {notifications.length > 0 ? (
-                                notifications.map((notification) => (
+                            {notificationList.length > 0 ? (
+                                notificationList.map((notification) => (
                                     <button
                                         key={notification.id}
                                         className={`${s.item} ${

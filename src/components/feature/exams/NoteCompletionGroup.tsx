@@ -34,7 +34,7 @@ export default function NoteCompletionGroup({
                         ref={(el) => registerRef(q.id, el)}
                     >
                         <label htmlFor={`note-${q.id}`}>
-                            <strong>{q.globalNumber}.</strong> {q.questionText}
+                            <strong>{q.orderNumber}.</strong> {q.questionText}
                         </label>
                         <input
                             id={`note-${q.id}`}

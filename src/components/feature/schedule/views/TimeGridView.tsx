@@ -50,23 +50,23 @@ export default function TimeGridView({
     }
 
     // Detect time overlap between sessions
-    const hasOverlap = (daySessions: WeeklySession[]): boolean => {
-        if (daySessions.length <= 1) return false
+    // const hasOverlap = (daySessions: WeeklySession[]): boolean => {
+    //     if (daySessions.length <= 1) return false
 
-        for (let i = 0; i < daySessions.length - 1; i++) {
-            for (let j = i + 1; j < daySessions.length; j++) {
-                const s1Start = daySessions[i].start_time
-                const s1End = daySessions[i].end_time
-                const s2Start = daySessions[j].start_time
-                const s2End = daySessions[j].end_time
+    //     for (let i = 0; i < daySessions.length - 1; i++) {
+    //         for (let j = i + 1; j < daySessions.length; j++) {
+    //             const s1Start = daySessions[i].start_time
+    //             const s1End = daySessions[i].end_time
+    //             const s2Start = daySessions[j].start_time
+    //             const s2End = daySessions[j].end_time
 
-                if (s1Start < s2End && s2Start < s1End) {
-                    return true
-                }
-            }
-        }
-        return false
-    }
+    //             if (s1Start < s2End && s2Start < s1End) {
+    //                 return true
+    //             }
+    //         }
+    //     }
+    //     return false
+    // }
 
     const groupOverlappingSessions = (sessions: WeeklySession[]) => {
         const sorted = [...sessions].sort((a, b) =>
@@ -132,7 +132,7 @@ export default function TimeGridView({
                 {/* Day columns */}
                 {days.map((day, i) => {
                     const daySessions = getSessionsForDay(day)
-                    const hasOverlaps = hasOverlap(daySessions)
+                    // const hasOverlaps = hasOverlap(daySessions)
 
                     const groups = groupOverlappingSessions(daySessions)
 
@@ -143,7 +143,7 @@ export default function TimeGridView({
                                 <div key={h} className={s.gridLine} />
                             ))}
 
-                            {groups.map((group, groupIdx) =>
+                            {groups.map((group) =>
                                 group.map((session, indexInGroup) => {
                                     const style = getSessionStyle(session)
 

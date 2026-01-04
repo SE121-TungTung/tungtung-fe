@@ -98,7 +98,7 @@ export function useWebSocketConnection(options: UseWebSocketOptions = {}) {
             }
         })
 
-        const unsubscribeStatus = wsManager.onStatusChange((connected) => {
+        const unsubscribeStatus = wsManager.onStatusChange(() => {
             // Không cần log quá nhiều ở đây nếu không cần thiết
         })
 
@@ -109,7 +109,7 @@ export function useWebSocketConnection(options: UseWebSocketOptions = {}) {
         const unsubscribeAuthError = wsManager.onAuthError(handleAuthError)
 
         // 3. KẾT NỐI (Idempotent - Gọi nhiều lần không sao)
-        wsManager.connect().catch((err) => {
+        wsManager.connect().catch(() => {
             // Lỗi đã được log trong wsManager, không cần log lại ở đây
         })
 

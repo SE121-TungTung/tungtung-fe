@@ -134,20 +134,18 @@ export default function ExamPracticePage() {
 
     const handleExamClick = async (examId: string) => {
         if (userRole === 'student') {
-            // Student: Start attempt và chuyển sang page làm bài
             try {
                 const attempt = await testApi.startAttempt(examId)
                 localStorage.setItem(
                     `attempt_${attempt.attemptId}`,
                     JSON.stringify(attempt)
                 )
-                navigate(`/student/exams/${examId}/take/${attempt.attemptId}`)
+                navigate(`/student/tests/${examId}/take/${attempt.attemptId}`)
             } catch (error: any) {
                 console.error('Failed to start exam:', error)
                 alert(error.message || 'Không thể bắt đầu bài thi')
             }
         } else {
-            // Teacher: Chuyển sang page xem chi tiết
             navigate(`/teacher/tests/${examId}/view`)
         }
     }

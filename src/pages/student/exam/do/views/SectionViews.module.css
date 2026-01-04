@@ -48,6 +48,13 @@
     gap: 16px;
 }
 
+.hint {
+    margin: 10px 0px;
+    color: var(--text-primary-light);
+    font-size: small;
+    font-style: italic;
+}
+
 /* ============================================
    TRANSCRIPT SECTION (Listening)
    ============================================ */

@@ -197,8 +197,8 @@ export const scheduleApi = {
         const last = sorted[sorted.length - 1]
 
         // Import SYSTEM_TIME_SLOTS từ types
-        const firstSlot = first // Simplified - trong thực tế cần map với SYSTEM_TIME_SLOTS
-        const lastSlot = last
+        // const firstSlot = first
+        // const lastSlot = last
 
         if (first === last) {
             return `Tiết ${first}`

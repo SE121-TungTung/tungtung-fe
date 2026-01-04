@@ -12,6 +12,9 @@ export const useTableParams = <TFilter>(initialFilter: TFilter) => {
 
     const handlePageChange = (newPage: number) => setPage(newPage)
 
+    const handlePageSizeChange = (newPageSize: number) =>
+        setPageSize(newPageSize)
+
     const handleSearchChange = (value: string) => {
         setSearch(value)
         setPage(0)
@@ -38,6 +41,7 @@ export const useTableParams = <TFilter>(initialFilter: TFilter) => {
         },
         // Handlers
         setPage: handlePageChange,
+        setPageSize: handlePageSizeChange,
         setSearch: handleSearchChange,
         setSort,
         setFilters: handleFilterChange,

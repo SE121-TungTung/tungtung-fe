@@ -40,7 +40,7 @@ export default function SummaryCompletionGroup({
                         ref={(el) => registerRef(q.id, el)}
                     >
                         <label htmlFor={`sum-${q.id}`}>
-                            <strong>{q.globalNumber}.</strong>
+                            <strong>{q.orderNumber}.</strong>
                         </label>
                         <input
                             id={`sum-${q.id}`}

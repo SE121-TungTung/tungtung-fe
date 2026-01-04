@@ -8,7 +8,6 @@ import type {
     ChangePasswordPayload,
     ListUsersParams,
     ListUsersResponse,
-    StudentOverviewStats,
     MyClass,
     AttendanceRecord,
     StudentCheckInResponse,

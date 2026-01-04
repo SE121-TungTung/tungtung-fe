@@ -44,11 +44,12 @@ interface UniversalQuestionRendererProps {
     onAnswerChange: (id: string, val: any) => void
     registerRef: (id: string, el: HTMLElement | null) => void
     attemptId: string
+    onUploadSpeaking?: (qid: string, blob: Blob, dur: number) => Promise<void>
 }
 
 export const UniversalQuestionRenderer =
     React.memo<UniversalQuestionRendererProps>(
-        ({ group, answers, onAnswerChange, registerRef, attemptId }) => {
+        ({ group, answers, onAnswerChange, registerRef, onUploadSpeaking }) => {
             return (
                 <>
                     {group.questions.map((q) => {
@@ -122,8 +123,8 @@ export const UniversalQuestionRenderer =
                                         questionId={q.id}
                                         globalNumber={q.globalNumber}
                                         questionText={q.questionText || ''}
-                                        attemptId={attemptId}
                                         registerRef={registerRef}
+                                        onUpload={onUploadSpeaking}
                                     />
                                 )
 
