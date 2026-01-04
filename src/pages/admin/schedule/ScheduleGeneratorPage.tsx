@@ -17,10 +17,12 @@ import ConflictMatrix from '@/components/feature/schedule/ConflictMatrix'
 import { Modal } from '@/components/core/Modal'
 import { listRooms } from '@/lib/rooms'
 import DraggableScheduleEditor from '@/components/feature/schedule/DraggableScheduleEditor'
+import { useDialog } from '@/hooks/useDialog'
 
 export default function ScheduleGeneratorPage() {
     const navigate = useNavigate()
     const [step, setStep] = useState<1 | 2>(1)
+    const { alert } = useDialog()
 
     const [showClassConflict, setShowClassConflict] = useState(false)
     const [showTeacherConflict, setShowTeacherConflict] = useState(false)
@@ -30,13 +32,12 @@ export default function ScheduleGeneratorPage() {
         start_date: '',
         end_date: '',
         class_ids: [],
-        max_slots_per_session: 2, // ✅ Changed default to 2
+        max_slots_per_session: 2,
         prefer_morning: true,
         class_conflict: {},
         teacher_conflict: {},
     })
 
-    // ✅ Store complete generate response
     const [generateResponse, setGenerateResponse] =
         useState<ScheduleGenerateResponse | null>(null)
     const [draftSessions, setDraftSessions] = useState<SessionProposal[]>([])
@@ -65,20 +66,16 @@ export default function ScheduleGeneratorPage() {
     const generateMutation = useMutation({
         mutationFn: scheduleApi.generateDraft,
         onSuccess: (data: ScheduleGenerateResponse) => {
-            // ✅ Store complete response
             setGenerateResponse(data)
             setDraftSessions(data.sessions || [])
             setStep(2)
 
-            // ✅ Show conflicts modal if any
             if (data.conflicts && data.conflicts.length > 0) {
                 setShowConflictsModal(true)
             }
         },
         onError: (err: any) => {
-            // ✅ Handle specific error types
             if (err.status === 409) {
-                // Hard exception - không thể xếp đủ lịch
                 setErrorModal({
                     show: true,
                     title: 'Không thể xếp đủ lịch',
@@ -138,17 +135,16 @@ export default function ScheduleGeneratorPage() {
             return alert('Không có dữ liệu để lưu')
         }
 
-        // ✅ Correct payload structure matching ScheduleApplyRequest
         const payload = {
             total_classes: generateResponse.total_classes,
-            successful_sessions: draftSessions.length, // Use current edited count
+            successful_sessions: draftSessions.length,
             conflict_count: generateResponse.conflict_count,
-            sessions: draftSessions, // Use edited sessions
+            sessions: draftSessions,
             conflicts: generateResponse.conflicts,
             statistics: generateResponse.statistics,
         }
 
-        console.log('✅ Apply payload:', payload)
+        console.log('Apply payload:', payload)
         applyMutation.mutate(payload)
     }
 
@@ -162,7 +158,6 @@ export default function ScheduleGeneratorPage() {
         )
     }
 
-    // ✅ Get conflict type label
     const getConflictTypeLabel = (type: string) => {
         const labels: Record<string, string> = {
             teacher_busy: 'Giáo viên bận',

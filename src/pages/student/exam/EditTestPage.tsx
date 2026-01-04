@@ -21,10 +21,13 @@ import Skeleton from '@/components/effect/Skeleton'
 import { useEditTest } from '@/hooks/useEditTest'
 
 import s from './CreateTestPage.module.css'
+import { useDialog } from '@/hooks/useDialog'
 
 export default function EditTestPage() {
     const { testId } = useParams<{ testId: string }>()
     const navigate = useNavigate()
+
+    const { alert, confirm } = useDialog()
 
     const {
         sections,
@@ -310,7 +313,7 @@ export default function EditTestPage() {
     }
 
     const handlePublish = async () => {
-        if (!window.confirm('Bạn có chắc muốn xuất bản bài thi này?')) {
+        if (!confirm('Bạn có chắc muốn xuất bản bài thi này?')) {
             return
         }
 

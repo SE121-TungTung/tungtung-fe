@@ -8,6 +8,7 @@ import ButtonGhost from '@/components/common/button/ButtonGhost'
 import s from './NewChatModal.module.css'
 import { listUsers } from '@/lib/users'
 import DefaultAvatar from '@/assets/avatar-placeholder.png'
+import { useDialog } from '@/hooks/useDialog'
 
 interface UserResult {
     id: string
@@ -28,6 +29,7 @@ interface NewChatModalProps {
 }
 
 export function NewChatModal({ onClose, onStartChat }: NewChatModalProps) {
+    const { alert } = useDialog()
     const [searchTerm, setSearchTerm] = useState('')
     const [selectedUsers, setSelectedUsers] = useState<UserResult[]>([])
 

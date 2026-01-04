@@ -11,6 +11,7 @@ import { NewChatModal } from '@/components/feature/messages/NewChatModal'
 import type { Conversation } from '@/types/message.types'
 import { useLocation } from 'react-router-dom'
 import { wsManager } from '@/lib/websocket'
+import { useDialog } from '@/hooks/useDialog'
 
 interface LocationState {
     startChatWith?: string
@@ -20,6 +21,7 @@ export default function MessagesPage() {
     const sessionState = useSession()
     const currentUserId = sessionState?.user?.id || ''
     const queryClient = useQueryClient()
+    const { alert } = useDialog()
 
     const [activeConversationId, setActiveConversationId] = useState<
         string | null

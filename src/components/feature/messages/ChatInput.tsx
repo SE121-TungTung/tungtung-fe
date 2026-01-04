@@ -7,6 +7,7 @@ import SendIcon from '@/assets/Send Paper Plane.svg'
 import ClipIcon from '@/assets/Attachment.svg'
 import EmojiIcon from '@/assets/Action Favourite.svg'
 import ButtonCircle from '@/components/common/button/ButtonCircle'
+import { useDialog } from '@/hooks/useDialog'
 
 interface ChatInputProps {
     onSendMessage: (text: string) => void
@@ -20,6 +21,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     const [text, setText] = useState('')
     const [showEmoji, setShowEmoji] = useState(false)
     const emojiRef = useRef<HTMLDivElement>(null)
+    const { alert } = useDialog()
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {

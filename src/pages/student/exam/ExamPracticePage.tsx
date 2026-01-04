@@ -29,6 +29,7 @@ import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import ExamGrid from '@/components/feature/exams/ExamGrid'
 import ButtonGhost from '@/components/common/button/ButtonGhost'
 import { useNavigate } from 'react-router-dom'
+import { useDialog } from '@/hooks/useDialog'
 
 const contentModeItems: SegItem[] = [
     { label: 'Theo Kỹ năng', value: 'skill' },
@@ -67,6 +68,7 @@ export default function ExamPracticePage() {
     const sessionState = useSession()
     const userRole = sessionState?.user?.role || 'student'
     const navigate = useNavigate()
+    const { alert } = useDialog()
 
     const [contentMode, setContentMode] = useState<'skill' | 'all'>('skill')
     const [displayMode, setDisplayMode] = useState<'grid' | 'list'>('grid')

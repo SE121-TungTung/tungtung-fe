@@ -8,6 +8,7 @@ import MoreIcon from '@/assets/Menu Hamburger.svg'
 import { ConversationContextMenu } from './ConversationContextMenu'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { messageApi } from '@/lib/message'
+import { useDialog } from '@/hooks/useDialog'
 
 interface ConversationItemProps {
     conversation: Conversation
@@ -27,6 +28,8 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
         y: number
     } | null>(null)
     const queryClient = useQueryClient()
+
+    const { alert } = useDialog()
 
     const displayName = conversation.name || 'Chưa đặt tên'
     const displayAvatar = conversation.avatarUrl || DefaultAvatar

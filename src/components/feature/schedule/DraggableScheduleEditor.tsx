@@ -5,6 +5,7 @@ import { SYSTEM_TIME_SLOTS } from '@/types/schedule.types'
 import { format, addDays, startOfWeek, addWeeks } from 'date-fns'
 import { vi } from 'date-fns/locale'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
+import { useDialog } from '@/hooks/useDialog'
 
 interface DraggableScheduleEditorProps {
     startDate: Date
@@ -29,6 +30,7 @@ export default function DraggableScheduleEditor({
     availableTeachers = [],
     availableRooms = [],
 }: DraggableScheduleEditorProps) {
+    const { alert } = useDialog()
     const [draggedSession, setDraggedSession] =
         useState<SessionProposal | null>(null)
     const [editingSession, setEditingSession] = useState<string | null>(null)

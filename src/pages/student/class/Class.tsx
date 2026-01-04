@@ -29,6 +29,7 @@ import { getMyClasses } from '@/lib/users' // Đảm bảo hàm này đã đư�
 import type { MyClass, ClassSession, MyClassUser } from '@/types/user.types'
 import type { ClassMember } from '@/components/common/card/MemberCard'
 import type { Lesson } from '@/components/common/typography/LessonItem'
+import { useDialog } from '@/hooks/useDialog'
 
 const tabItems: TabItem[] = [
     { label: 'Lịch học', value: 'schedule' },
@@ -70,6 +71,7 @@ export default function ClassPage() {
     const [activeTab, setActiveTab] = useState('schedule')
     const [viewMode, setViewMode] = useState('week')
     const [showGradientName, setShowGradientName] = useState(false)
+    const { alert } = useDialog()
 
     const [memberSearchTerm, setMemberSearchTerm] = useState('')
     const [memberFilterRole, setMemberFilterRole] = useState<

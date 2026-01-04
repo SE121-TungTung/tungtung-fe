@@ -16,10 +16,13 @@ import type { TestTeacher } from '@/types/test.types'
 import { TestStatus, QuestionType } from '@/types/test.types'
 import Skeleton from '@/components/effect/Skeleton'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
+import { useDialog } from '@/hooks/useDialog'
 
 export default function TestDetailPage() {
     const { testId } = useParams<{ testId: string }>()
     const navigate = useNavigate()
+
+    const { alert, confirm } = useDialog()
 
     const [test, setTest] = useState<TestTeacher | null>(null)
     const [loading, setLoading] = useState(true)
@@ -28,7 +31,7 @@ export default function TestDetailPage() {
     const [isPublishing, setIsPublishing] = useState(false)
     const handlePublish = async () => {
         if (
-            !window.confirm(
+            !confirm(
                 'Bạn có chắc muốn xuất bản bài thi này? Học sinh sẽ có thể thấy và làm bài.'
             )
         ) {

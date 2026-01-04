@@ -120,7 +120,6 @@ export default function SpeakingTestPage() {
                             globalNumber={q.globalNumber}
                             questionText={q.questionText || ''}
                             audioUrl={q.audioUrl}
-                            attemptId={attemptId!}
                             registerRef={() => {}}
                         />
                     ))}

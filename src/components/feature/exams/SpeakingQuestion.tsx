@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import ButtonGhost from '@/components/common/button/ButtonGhost'
 import s from './SpeakingQuestion.module.css'
+import { useDialog } from '@/hooks/useDialog'
 
 interface SpeakingQuestionProps {
     questionId: string
@@ -30,6 +31,8 @@ export const SpeakingQuestion = ({
     uploadedAudioUrl,
     registerRef,
 }: SpeakingQuestionProps) => {
+    const { alert } = useDialog()
+
     // Recording state
     const [isRecording, setIsRecording] = useState(false)
     const [recordingTime, setRecordingTime] = useState(0)

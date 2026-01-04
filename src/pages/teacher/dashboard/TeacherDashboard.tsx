@@ -15,11 +15,13 @@ import BannerImg from '@/assets/banner-placeholder.png'
 
 import { TextHorizontal } from '@/components/common/text/TextHorizontal'
 import TextType from '@/components/common/text/TextType'
-import { getMe, getUserOverview } from '@/lib/users' // Thêm getUserOverview
+import { getMe, getUserOverview } from '@/lib/users'
 import type { TeacherOverviewStats } from '@/types/user.types'
 import Skeleton from '@/components/effect/Skeleton'
+import { useDialog } from '@/hooks/useDialog'
 
 export default function TeacherDashboard() {
+    const { alert } = useDialog()
     // 1. Lấy thông tin User
     const { data: userData, isLoading: userLoading } = useQuery({
         queryKey: ['me'],

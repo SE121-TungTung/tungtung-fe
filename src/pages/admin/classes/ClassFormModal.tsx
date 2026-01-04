@@ -17,6 +17,7 @@ import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import styles from './ClassFormModal.module.css'
 import { useQuery } from '@tanstack/react-query'
 import { prune } from '@/utils/prune'
+import { useDialog } from '@/hooks/useDialog'
 
 interface Props {
     isOpen: boolean
@@ -41,6 +42,7 @@ export const ClassFormModal: React.FC<Props> = ({
 }) => {
     const isEdit = Boolean(editing)
     const formId = 'class-form'
+    const { alert } = useDialog()
 
     const {
         data: coursesData,

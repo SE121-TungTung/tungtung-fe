@@ -20,9 +20,11 @@ import TestNavigator from '@/components/feature/exams/TestNavigator'
 import CollapsibleCard from '@/components/common/card/CollapsibleCard'
 import { SelectField } from '@/components/common/input/SelectField'
 import { useCreateTest } from '@/hooks/useCreateTest'
+import { useDialog } from '@/hooks/useDialog'
 
 export default function CreateTestPage() {
     const navigate = useNavigate()
+    const { alert } = useDialog()
     const [submittingStatus, setSubmittingStatus] = useState<
         'idle' | 'draft' | 'published'
     >('idle')
@@ -997,17 +999,9 @@ export default function CreateTestPage() {
                                                         options={Object.values(
                                                             QuestionType
                                                         ).map((type) => ({
-                                                            label: type
-                                                                .toLowerCase()
-                                                                .replace(
-                                                                    /_/g,
-                                                                    ' '
-                                                                )
-                                                                .replace(
-                                                                    /\b\w/g,
-                                                                    (l) =>
-                                                                        l.toUpperCase()
-                                                                ),
+                                                            label: getQuestionTypeLabel(
+                                                                type
+                                                            ),
                                                             value: type,
                                                         }))}
                                                     />

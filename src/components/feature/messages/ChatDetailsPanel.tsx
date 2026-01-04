@@ -20,6 +20,7 @@ import LeaveIcon from '@/assets/Close X Thin.svg'
 import BlockIcon from '@/assets/Block.svg'
 import CloseIcon from '@/assets/Close X Thin.svg'
 import { createPortal } from 'react-dom'
+import { useDialog } from '@/hooks/useDialog'
 
 interface UserResult {
     id: string
@@ -51,6 +52,7 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
     const [showSearch, setShowSearch] = useState(false)
     const queryClient = useQueryClient()
     const isGroup = conversation.isGroup
+    const { alert } = useDialog()
 
     const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(
         null
@@ -151,7 +153,7 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
             setIsRenameModalOpen(false)
         },
         onError: (error: any) => {
-            console.error(error) // Fix: Use 'error'
+            console.error(error)
             alert(error?.message || 'Lỗi đổi tên')
         },
     })
@@ -165,7 +167,7 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
             onClose()
         },
         onError: (error: any) => {
-            console.error(error) // Fix: Use 'error'
+            console.error(error)
             alert('Lỗi khi rời nhóm')
         },
     })
@@ -182,7 +184,7 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
             alert('Đã thêm thành viên!')
         },
         onError: (error: any) => {
-            console.error(error) // Fix: Use 'error'
+            console.error(error)
             alert('Lỗi thêm thành viên')
         },
     })
@@ -208,7 +210,6 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
             onClose()
         },
         onError: (error: any) => {
-            // Fix: Use 'error'
             console.error(error)
             alert('Không thể xóa cuộc trò chuyện')
         },

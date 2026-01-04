@@ -7,6 +7,7 @@ import { useSpeakingUpload } from '@/hooks/useSpeakingUpload'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import type { EnhancedSection } from '../../QuestionGroupRenderer'
 import type { BatchSubmitSpeakingResponse, Question } from '@/types/test.types'
+import { useDialog } from '@/hooks/useDialog'
 
 interface SpeakingSectionViewProps {
     section: EnhancedSection
@@ -26,6 +27,7 @@ const SpeakingSectionView: React.FC<SpeakingSectionViewProps> = ({
     const currentPart = section.parts[0]
     const currentQuestions = currentPart?.questionGroups[0]?.questions || []
     const partNumber = (partIndex + 1) as 1 | 2 | 3
+    const { alert } = useDialog()
 
     // Upload management
     const {

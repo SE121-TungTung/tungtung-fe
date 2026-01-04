@@ -25,6 +25,7 @@ import { TestHeader } from '@/components/feature/exams/shared/TextHeader'
 import { TestFooter } from '@/components/feature/exams/shared/TextFooter'
 import { enhanceTestWithQuestionNumbers } from '@/utils/examHelpers'
 import { QuestionGroupRenderer } from '../QuestionGroupRenderer'
+import { useDialog } from '@/hooks/useDialog'
 
 // Or define types locally if not exported
 interface EnhancedQuestion extends Question {
@@ -51,6 +52,8 @@ export default function ListeningTestPage() {
         testId: string
         attemptId: string
     }>()
+
+    const { confirm } = useDialog()
 
     const [sections, setSections] = useState<EnhancedSection[]>([])
     const [test, setTest] = useState<Test | null>(null)
@@ -156,7 +159,7 @@ export default function ListeningTestPage() {
     )
 
     const handleFinalSubmit = useCallback(async () => {
-        if (window.confirm('Are you sure you want to submit?')) {
+        if (await confirm('Are you sure you want to submit?')) {
             await submit(answers)
         }
     }, [answers, submit])

@@ -24,6 +24,7 @@ import {
 
 // --- Utils ---
 import { enhanceTestWithQuestionNumbers } from '@/utils/examHelpers'
+import { useDialog } from '@/hooks/useDialog'
 
 // ============================================
 // MAIN COMPONENT
@@ -33,6 +34,8 @@ export default function ReadingTestPage() {
         testId: string
         attemptId: string
     }>()
+
+    const { confirm } = useDialog()
 
     // --- STATE ---
     const [sections, setSections] = useState<EnhancedSection[]>([])
@@ -122,7 +125,7 @@ export default function ReadingTestPage() {
                 console.log('Time is up! Auto-submitting...')
             }
 
-            if (window.confirm('Are you sure you want to submit?')) {
+            if (await confirm('Are you sure you want to submit?')) {
                 await submit(answers)
             }
         },
