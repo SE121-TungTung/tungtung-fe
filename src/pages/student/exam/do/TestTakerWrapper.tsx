@@ -67,7 +67,7 @@ export default function TestTakerWrapper() {
             clearHighlightsRef.current?.()
             clearAnswers()
             setTestFinished(true)
-            navigate(`/test/${testId}/attempt/${attemptId}/results`)
+            navigate(`/student/tests/results/${attemptId}`)
         },
     })
 

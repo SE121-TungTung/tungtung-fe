@@ -374,8 +374,8 @@ function mapStudentTestListItem(
         ),
         latestAttemptScore: dto.latest_attempt_score,
         status: parseEnum(TestStatus, dto.status) || TestStatus.DRAFT,
-        skill: SkillArea.LISTENING,
-        difficulty: DifficultyLevel.VERY_EASY,
+        skill: dto.skill,
+        difficulty: dto.difficulty,
         durationMinutes: 0,
         createdAt: '',
     }

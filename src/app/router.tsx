@@ -61,7 +61,7 @@ export const router = createBrowserRouter([
             // No Nav
             {
                 // Main test taking route
-                path: '/student/exams/:testId/take/:attemptId',
+                path: '/student/tests/:testId/take/:attemptId',
                 element: <TestTakerWrapper />,
             },
             {

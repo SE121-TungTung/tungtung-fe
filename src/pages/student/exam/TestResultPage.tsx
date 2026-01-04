@@ -57,7 +57,7 @@ export default function TestResultPage() {
                 <div className={s.errorBox}>
                     <h2>❌ Lỗi</h2>
                     <p>{error}</p>
-                    <ButtonPrimary onClick={() => navigate('/student/exams')}>
+                    <ButtonPrimary onClick={() => navigate('/student/tests')}>
                         Quay lại danh sách bài thi
                     </ButtonPrimary>
                 </div>
@@ -77,6 +77,7 @@ export default function TestResultPage() {
 
     const statusInfo = getAttemptStatusInfo(result.status)
     const isPending = result.status === AttemptStatus.SUBMITTED
+    const isAutoGraded = result.details.every((d) => d.autoGraded)
 
     return (
         <div className={s.container}>
@@ -86,6 +87,12 @@ export default function TestResultPage() {
                     <h1 className={s.title}>Kết quả bài thi</h1>
                     <h2 className={s.testTitle}>{result.testTitle}</h2>
                 </div>
+
+                {isPending && !isAutoGraded && (
+                    <div className={s.pendingNotice}>
+                        <p>Bài thi của bạn đang chờ giáo viên chấm điểm.</p>
+                    </div>
+                )}
 
                 {/* Status Badge */}
                 <div className={s.statusBadge}>
@@ -150,10 +157,16 @@ export default function TestResultPage() {
                                 <span className={s.questionNumber}>
                                     Câu {index + 1}
                                 </span>
-                                {detail.bandScore !== null && (
+                                {detail.pointsEarned !== undefined && (
                                     <span className={s.questionScore}>
-                                        {detail.bandScore.toFixed(1)} /{' '}
+                                        {detail.pointsEarned} /{' '}
                                         {detail.maxPoints}
+                                    </span>
+                                )}
+
+                                {detail.bandScore !== null && (
+                                    <span className={s.bandScore}>
+                                        Band: {detail.bandScore.toFixed(1)}
                                     </span>
                                 )}
                             </div>
@@ -185,16 +198,16 @@ export default function TestResultPage() {
 
                 {/* Actions */}
                 <div className={s.actions}>
-                    <ButtonGhost onClick={() => navigate('/student/exams')}>
+                    <ButtonGhost onClick={() => navigate('/student/tests')}>
                         Quay lại danh sách
                     </ButtonGhost>
-                    <ButtonPrimary
+                    {/* <ButtonPrimary
                         onClick={() =>
                             navigate(`/student/exams/${result.testId}/take`)
                         }
                     >
                         Làm lại bài thi
-                    </ButtonPrimary>
+                    </ButtonPrimary> */}
                 </div>
             </div>
         </div>

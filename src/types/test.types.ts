@@ -254,6 +254,8 @@ export interface BackendStudentTestListItem {
     id: string
     title: string
     description: string | null
+    skill: SkillArea
+    difficulty: DifficultyLevel
     test_type: string | null
     time_limit_minutes: number | null
     total_questions: number

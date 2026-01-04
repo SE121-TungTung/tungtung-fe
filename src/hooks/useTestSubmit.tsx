@@ -65,7 +65,7 @@ export function useTestSubmit({
 
                 // Navigate to results
                 if (redirectToResults) {
-                    navigate(`/student/exams/results/${attemptId}`)
+                    navigate(`/student/tests/results/${attemptId}`)
                 }
             } catch (error) {
                 const err = error as Error

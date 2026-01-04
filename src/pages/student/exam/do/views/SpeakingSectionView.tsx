@@ -34,7 +34,6 @@ const SpeakingSectionView: React.FC<SpeakingSectionViewProps> = ({
         submitError,
         uploadAudio,
         batchSubmit,
-        retryUpload,
         getProgress,
         isReadyToSubmit,
     } = useSpeakingUpload(attemptId)
