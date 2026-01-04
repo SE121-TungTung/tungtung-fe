@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { getTeacherClasses, type Class, type ClassStatus } from '@/lib/classes'
+import { getTeacherClasses, type ClassStatus } from '@/lib/classes'
 import InputField from '@/components/common/input/InputField'
 import { SelectField } from '@/components/common/input/SelectField'
 import Card from '@/components/common/card/Card'
