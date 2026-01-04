@@ -85,49 +85,59 @@ export type ListRoomsResp = {
 }
 
 export async function listRooms(
-    p: {
-        search?: string
-        page?: number
-        limit?: number
-        sortBy?: 'name' | 'capacity' | 'created_at'
-        sortOrder?: 'asc' | 'desc'
-        includeDeleted?: boolean
-    } = {}
+    p: ListRoomsParams & { includeDeleted?: boolean } = {}
 ) {
     const {
         search = '',
         page = 1,
         limit = 10,
         sortBy,
-        sortOrder,
-        includeDeleted = false,
+        sortDir,
+        status,
+        roomType,
+        minCapacity,
     } = p
 
     const qs = new URLSearchParams()
-    qs.set('skip', String(Math.max(0, (page - 1) * limit)))
-    qs.set('limit', String(limit))
+    qs.set('skip', '0')
+    qs.set('limit', '1000')
     if (search) qs.set('search', search)
-    if (sortBy) qs.set('sort_by', sortBy)
-    if (sortOrder) qs.set('sort_order', sortOrder)
-    if (includeDeleted) qs.set('include_deleted', 'true')
 
     const url = `/api/v1/rooms/${qs.toString() ? `?${qs.toString()}` : ''}`
-    const res = await api<any>(url, {
-        method: 'GET',
-    })
+    const res = await api<any>(url, { method: 'GET' })
 
     const raw = res.items ?? res.rooms ?? (Array.isArray(res) ? res : [])
+    let items = raw.map(mapRoom)
+
+    if (status) {
+        items = items.filter((r: Room) => r.status === status)
+    }
+    if (roomType) {
+        items = items.filter((r: Room) => r.roomType === roomType)
+    }
+    if (minCapacity) {
+        items = items.filter((r: Room) => r.capacity >= Number(minCapacity))
+    }
+
+    if (sortBy) {
+        items.sort((a: any, b: any) => {
+            const valA = a[sortBy === 'created_at' ? 'createdAt' : sortBy]
+            const valB = b[sortBy === 'created_at' ? 'createdAt' : sortBy]
+            if (sortDir === 'asc') return valA > valB ? 1 : -1
+            return valA < valB ? 1 : -1
+        })
+    }
+
+    const total = items.length
+    const startIndex = (page - 1) * limit
+    const paginatedItems = items.slice(startIndex, startIndex + limit)
+
     return {
-        items: raw.map(mapRoom),
-        total: res.total ?? raw.length,
-        page: res.page ?? page,
-        size: res.size ?? limit,
-        pages:
-            res.pages ??
-            Math.max(
-                1,
-                Math.ceil((res.total ?? raw.length) / (res.size ?? limit))
-            ),
+        items: paginatedItems,
+        total: total,
+        page: page,
+        size: limit,
+        pages: Math.ceil(total / limit),
     }
 }
 

@@ -99,55 +99,55 @@ export const listClasses = async (
 ): Promise<PaginatedResponse<Class>> => {
     const {
         page = 1,
-        limit = 100,
-        search,
+        limit = 10,
+        search = '',
         status,
         courseId,
         teacherId,
         sortBy,
-        sortDir,
+        sortDir = 'desc',
     } = params
 
     const queryParams = new URLSearchParams()
-    queryParams.append('skip', String((page - 1) * limit))
-    queryParams.append('limit', String(limit))
-
+    queryParams.append('skip', '0')
+    queryParams.append('limit', '1000')
     if (search) queryParams.append('search', search)
-    if (sortBy) queryParams.append('sort_by', sortBy)
-    if (sortDir) queryParams.append('sort_order', sortDir)
-    if (status) queryParams.append('status', status)
-    if (courseId) queryParams.append('course_id', courseId)
-    if (teacherId) queryParams.append('teacher_id', teacherId)
 
     const url = `${CLASSES_API_URL}?${queryParams.toString()}`
+    const res = await api<any>(url, { method: 'GET' })
 
-    const res = await api<any>(url, {
-        method: 'GET',
-    })
+    const rawItems: BackendClass[] = res.items ?? (Array.isArray(res) ? res : [])
+    let items = rawItems.map(mapClass)
 
-    let rawItems: BackendClass[] = []
-    let total = 0
-    let totalPages = 1
-
-    if (Array.isArray(res)) {
-        rawItems = res
-        total = res.length
-        totalPages = Math.ceil(total / limit) || 1
-    } else if (res.items && Array.isArray(res.items)) {
-        rawItems = res.items
-        total = res.total ?? rawItems.length
-        totalPages = res.pages ?? Math.ceil(total / limit)
-    } else if (res.data && Array.isArray(res.data)) {
-        rawItems = res.data
-        total = res.total ?? rawItems.length
+    if (status) {
+        items = items.filter((c) => c.status === status)
+    }
+    if (courseId) {
+        items = items.filter((c) => c.course.id === courseId)
+    }
+    if (teacherId) {
+        items = items.filter((c) => c.teacher.id === teacherId)
     }
 
+    if (sortBy) {
+        items.sort((a: any, b: any) => {
+            const valA = a[sortBy] || ''
+            const valB = b[sortBy] || ''
+            if (sortDir === 'asc') return valA > valB ? 1 : -1
+            return valA < valB ? 1 : -1
+        })
+    }
+
+    const total = items.length
+    const startIndex = (page - 1) * limit
+    const paginatedItems = items.slice(startIndex, startIndex + limit)
+
     return {
-        items: rawItems.map(mapClass),
+        items: paginatedItems,
         total: total,
-        page: res.page ?? page,
-        size: res.size ?? limit,
-        pages: totalPages,
+        page: page,
+        size: limit,
+        pages: Math.ceil(total / limit),
     }
 }
 

@@ -92,6 +92,7 @@ export default function CourseManagementPage() {
         level: (apiParams.level as CourseLevel) || undefined,
         status: (apiParams.status as CourseStatus) || undefined,
         sortBy: apiParams.sortBy as ListCoursesParams['sortBy'],
+        sortOrder: sort.order as 'asc' | 'desc',
     })
 
     const { mutateAsync: deleteCourseMutate } = useDeleteCourse()

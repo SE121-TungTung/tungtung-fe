@@ -99,9 +99,10 @@ export default function RoomManagementPage() {
         ...apiParams,
         roomType: (apiParams.roomType as RoomType) || undefined,
         status: (apiParams.status as RoomStatus) || undefined,
-        capacity:
+        minCapacity:
             apiParams.capacity === '' ? undefined : Number(apiParams.capacity),
         sortBy: apiParams.sortBy as ListRoomsParams['sortBy'],
+        sortDir: sort.order as 'asc' | 'desc',
     })
 
     // 3. Delete Hook
