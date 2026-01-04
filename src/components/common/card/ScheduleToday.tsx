@@ -5,6 +5,7 @@ import LessonItem, {
     type Lesson,
 } from '@/components/common/typography/LessonItem'
 import Icon from '@/assets/Escape Top Right.svg'
+import Skeleton from '@/components/effect/Skeleton'
 
 export interface ScheduleTodayCardProps {
     title?: React.ReactNode
@@ -12,6 +13,7 @@ export interface ScheduleTodayCardProps {
     onCheckIn?: () => void
     mode?: 'light' | 'dark'
     controls?: React.ReactNode
+    isLoading?: boolean
 }
 
 export default function ScheduleTodayCard({
@@ -20,6 +22,7 @@ export default function ScheduleTodayCard({
     onCheckIn,
     mode = 'light',
     controls,
+    isLoading = false,
 }: ScheduleTodayCardProps) {
     return (
         <section className={`${s.root} ${s[mode]}`}>
@@ -30,13 +33,13 @@ export default function ScheduleTodayCard({
                 </div>
                 <div className={s.controls}>
                     {controls}
-                    {onCheckIn && (
+                    {onCheckIn && !isLoading && (
                         <ButtonGlow
                             size="sm"
                             variant="outline"
                             mode={mode}
                             onClick={onCheckIn}
-                            rightIcon={<img src={Icon} alt="refresh icon" />}
+                            rightIcon={<img src={Icon} alt="checkin icon" />}
                         >
                             Điểm danh ngay
                         </ButtonGlow>
@@ -45,7 +48,19 @@ export default function ScheduleTodayCard({
             </header>
 
             <div className={s.panel}>
-                {sessions.length === 0 ? (
+                {isLoading ? (
+                    <div className={s.grid}>
+                        <Skeleton
+                            height={100}
+                            variant="rect"
+                            count={2}
+                            style={{
+                                borderRadius: '12px',
+                                marginBottom: '12px',
+                            }}
+                        />
+                    </div>
+                ) : sessions.length === 0 ? (
                     <div className={s.empty}>
                         Hôm nay bạn không có lịch học.
                     </div>

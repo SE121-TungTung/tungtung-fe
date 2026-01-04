@@ -1,173 +1,161 @@
 .root {
     --radius: var(--radius-pill, 999px);
-    --h: 32px;
-    --px: 10px;
+
+    --h: 36px;
+    --px: 4px;
     --fs: 13px;
+
     --fg: var(--Text-primary, #0b1520);
-    --muted: var(--Text-secondary, rgba(0, 0, 0, 0.7));
-    --bg: var(--Container-background, rgba(255, 255, 255, 0.6));
-    --bd: var(--Border-glass, rgba(255, 255, 255, 0.1));
+    --muted: var(--Text-secondary, rgba(0, 0, 0, 0.6));
+    --bg: var(--Container-background, rgba(235, 238, 242, 0.6));
+    --bd: var(--Border-glass, rgba(0, 0, 0, 0.05));
 
     color: var(--fg);
-    width: max-content;
     border-radius: var(--radius);
-    padding: 2px 2px 0;
+    padding: var(--px);
+    display: inline-flex;
+    position: relative;
+    user-select: none;
+    max-width: 100%;
 }
 
-.block {
+.fullWidth {
+    display: flex;
     width: 100%;
+}
+.fullWidth .tab {
+    flex: 1;
+}
+
+.autoWidth .tab {
+    flex: 0 0 auto;
+    min-width: 60px;
 }
 
 .row {
     position: relative;
     display: flex;
+    width: 100%;
+    align-items: center;
     gap: 0;
 }
 
 .tab {
     position: relative;
-    z-index: 1;
-    flex: 1 1 0;
-    height: var(--h);
-    padding: 0 var(--px);
+    z-index: 2;
+    height: calc(var(--h) - (var(--px) * 2));
+    padding: 0 16px;
     appearance: none;
     border: 0;
     background: transparent;
     color: var(--muted);
     font:
-        500 var(--fs) / 20px Inter,
+        600 var(--fs) / 1 Inter,
         system-ui,
         sans-serif;
     cursor: pointer;
     border-radius: var(--radius);
     white-space: nowrap;
     text-align: center;
+    transition: color 0.2s ease;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
-.tab:hover {
+
+.tab:hover:not(:disabled) {
     color: var(--fg);
+    opacity: 0.8;
 }
+
 .disabled {
-    opacity: 0.5;
+    opacity: 0.4;
     cursor: not-allowed;
 }
+
 .active {
     color: var(--fg);
 }
 
 .label {
     pointer-events: none;
+    position: relative;
+    z-index: 2;
 }
 
 .indicator {
     position: absolute;
-    left: 2px;
-    top: 2px;
-    height: calc(var(--h) - 4px);
-    border-radius: var(--radius);
+    left: 0;
+    top: 0;
+    bottom: 0;
+    height: 100%;
+
+    border-radius: calc(var(--radius) - 2px);
+
     transition:
-        transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1),
-        width 240ms;
-}
-.indicator::after {
-    content: '';
-    position: absolute;
-    left: 12px;
-    right: 12px;
-    bottom: 2px;
-    height: 2px;
-    border-radius: 2px;
-    filter: blur(3px);
+        transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
+        width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+    z-index: 1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-/* divider dưới dãy tab */
-.divider {
-    height: 1px;
-    margin-top: 6px;
-    border-radius: 10px;
-    background: radial-gradient(
-        50% 50% at 50% 50%,
-        rgba(0, 0, 0, 0.2),
-        rgba(0, 0, 0, 0)
-    );
-}
-
-/* variants */
 .glass {
-    background:
-        linear-gradient(
-            0deg,
-            rgba(255, 255, 255, 0.2),
-            rgba(255, 255, 255, 0) 60%
-        ),
-        var(--bg);
-    border: 1px solid var(--bd);
-    box-shadow:
-        0 1px 0 #0001,
-        0 4px 8px #0001;
-    backdrop-filter: blur(12px);
-}
-.glass .indicator {
     background: linear-gradient(
         180deg,
-        rgba(255, 255, 255, 0.95) 0%,
-        rgba(255, 255, 255, 0.7) 100%
+        rgba(255, 255, 255, 0.7) 0%,
+        rgba(255, 255, 255, 0.4) 100%
     );
-    outline: 1px solid color-mix(in oklab, var(--fg) 10%, transparent);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(10px);
 }
+.glass .indicator {
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
 .flat {
-    background: rgba(0, 0, 0, 0.04);
-    border: 1px solid color-mix(in oklab, var(--fg) 15%, transparent);
+    background: rgba(0, 0, 0, 0.05);
+    border: none;
 }
 .flat .indicator {
     background: #fff;
-    outline: 1px solid color-mix(in oklab, var(--fg) 12%, transparent);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* modes */
-.dark {
-    --fg: #fff;
-    --muted: rgba(255, 255, 255, 0.85);
-    --bg: rgba(0, 0, 0, 0.5);
-    --bd: rgba(255, 255, 255, 0.08);
-}
-.dark .divider {
-    background: radial-gradient(
-        50% 50% at 50% 50%,
-        rgba(255, 255, 255, 0.2),
-        rgba(255, 255, 255, 0)
-    );
-}
-.dark.flat {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.12);
-}
-.dark.flat .indicator {
-    background: rgba(255, 255, 255, 0.08);
-    outline: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-/* sizes */
+/* Sizes */
 .xs {
-    --h: 24px;
-    --px: 6px;
-    --fs: 12px;
+    --h: 28px;
+    --fs: 11px;
+    --px: 3px;
 }
 .sm {
-    --h: 28px;
-    --px: 8px;
+    --h: 32px;
     --fs: 12px;
+    --px: 3px;
 }
 .md {
-    /* default */
+    --h: 40px;
+    --fs: 14px;
+    --px: 4px;
 }
 .lg {
-    --h: 36px;
-    --px: 12px;
-    --fs: 14px;
+    --h: 48px;
+    --fs: 15px;
+    --px: 5px;
 }
 
-/* disabled root */
-.isDisabled {
-    opacity: 0.6;
-    pointer-events: none;
+/* Dark Mode Overrides */
+.dark {
+    --fg: #fff;
+    --muted: rgba(255, 255, 255, 0.6);
+    --bg: rgba(255, 255, 255, 0.08);
+}
+.dark .indicator {
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: none;
+}
+.dark.flat .indicator {
+    background: rgba(60, 60, 60, 1);
 }

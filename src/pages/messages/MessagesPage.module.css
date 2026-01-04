@@ -1,155 +1,186 @@
-.pageWrapper {
-    background: linear-gradient(115deg, #e4ecf7, #fff);
-    min-height: 100vh;
-    padding: 24px clamp(24px, 5vw, 80px);
-}
-
-.header {
-    margin-bottom: 40px;
-    position: relative;
-    z-index: 10;
-    width: 70%;
-    align-self: center;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    object-fit: cover;
-    display: block;
+.pageWrapperWithoutHeader {
+    width: 100%;
+    display: flex;
 }
 
 .mainContent {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 32px;
     width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    height: calc(100vh - 120px - 32px);
+    gap: 32px;
 }
 
 .pageTitle {
-    font-size: clamp(2rem, 4vw, 3rem);
+    font-size: clamp(2rem, 4vw, 2.75rem);
     font-weight: 700;
-    text-align: center;
     color: var(--text-primary-light);
-    letter-spacing: -0.04em;
-    line-height: 1.15;
-    min-height: 1.15em;
-    white-space: nowrap;
-}
-
-.gradientText {
-    background: linear-gradient(
-        111deg,
-        var(--brand-secondary-500-light) 0%,
-        #ef325f 49.15%,
-        var(--brand-primary-500-light) 100%
-    );
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    display: inline;
-    line-height: 1.15;
-}
-
-.chatContainerCard {
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    text-align: center;
     width: 100%;
-    max-width: 1400px;
-    height: 75vh;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    margin-bottom: var(--space-8);
+    flex-shrink: 0;
 }
 
 .container {
     display: grid;
-    grid-template-columns: 360px 1fr;
-    height: 100%;
-    width: 100%;
+    grid-template-columns: 320px 1fr;
+    flex: 1;
+    min-height: 0;
     overflow: hidden;
-    transition: grid-template-columns 0.3s ease-out;
-    --chat-header-height: 73px;
+    position: relative;
+    transition: all 0.3s ease;
+    height: auto;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    background: white;
 }
 
-.container.isDetailsActive {
-    grid-template-columns: 360px 1fr 320px;
-}
-
+/* --- SIDEBAR STYLES --- */
 .conversationPanel {
     border-right: 1px solid var(--boder-soft-light);
+    background-color: var(--surface-card-light);
     display: flex;
     flex-direction: column;
+    min-height: 0;
     overflow: hidden;
-    background-color: var(--surface-card-light);
-    grid-column: 1 / 2;
-    grid-row: 1 / 2;
 }
 
-.chatPanel {
+.sidebarHeader {
+    padding: var(--space-16) var(--space-20);
+    border-bottom: 1px solid var(--boder-soft-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--surface-card-light);
+    min-height: 68px;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.sidebarTitle {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary-light);
+    margin: 0;
+}
+
+/* --- LOADING STATE --- */
+.loadingContainer {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    justify-content: center;
     height: 100%;
+    color: #888;
+    gap: 12px;
+}
+
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid var(--brand-primary-500-light, #3b82f6);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* --- CHAT PANEL --- */
+.chatPanel {
     background-color: var(--surface-page-light);
-    grid-column: 2 / 3;
-    grid-row: 1 / 2;
+    position: relative;
+    min-height: 0;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
 }
 
 .noChatSelected {
-    display: grid;
-    place-items: center;
     height: 100%;
-    color: var(--text-secondary-light);
-    text-align: center;
-    font-size: 15px;
-    background-color: var(--surface-raised-light);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted-light);
+    background: var(--surface-page-light);
 }
 
+/* --- DETAIL PANEL --- */
 .detailsPanel {
-    grid-column: 3 / 4;
-    grid-row: 1 / 2;
+    background: var(--surface-card-light);
+    border-left: 1px solid var(--boder-soft-light);
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    height: 100%;
+}
+
+.container.isDetailsActive {
+    grid-template-columns: 320px 1fr 350px;
+}
+
+.container.isDetailsActive .detailsPanel {
+    transform: translateX(0);
 }
 
 @media (max-width: 1200px) {
     .container.isDetailsActive {
-        grid-template-columns: 300px 1fr 280px;
+        grid-template-columns: 280px 1fr 320px;
     }
 }
 
-@media (max-width: 800px) {
-    .container {
-        grid-template-columns: 1fr;
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
     }
+    100% {
+        transform: rotate(360deg);
+    }
+}
 
-    .chatPanel {
-        display: none;
-    }
+@media (max-width: 1024px) {
     .detailsPanel {
-        display: none;
+        width: 100%;
+        max-width: 400px;
     }
 
-    .container.isChatActive .conversationPanel {
-        display: none;
-    }
-    .container.isChatActive .chatPanel {
-        display: flex;
-    }
-    .container.isChatActive .detailsPanel {
-        display: none;
+    .container.isDetailsActive {
+        grid-template-columns: 0px 1fr 350px;
     }
 
     .container.isDetailsActive .conversationPanel {
         display: none;
     }
-    .container.isDetailsActive .chatPanel {
-        display: none;
+}
+
+@media (max-width: 768px) {
+    .container {
+        grid-template-columns: 1fr;
+    }
+    .container.isDetailsActive {
+        grid-template-columns: 1fr;
+    }
+
+    .detailsPanel {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 20;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
     }
     .container.isDetailsActive .detailsPanel {
-        display: flex;
+        transform: translateX(0);
+    }
+    .conversationPanel {
+        display: none;
     }
 }

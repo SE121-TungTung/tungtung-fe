@@ -1,168 +1,336 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import s from './MessagesPage.module.css'
 import { useSession } from '@/stores/session.store'
-
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { messageApi } from '@/lib/message'
 import { ConversationList } from '@/components/feature/messages/ConversationList'
 import { ChatWindow } from '@/components/feature/messages/ChatWindow'
-
-import NavigationMenu from '@/components/common/menu/NavigationMenu'
-import Card from '@/components/common/card/Card'
-import TextType from '@/components/common/text/TextType'
-import AvatarImg from '@/assets/avatar-placeholder.png'
-
-import { MOCK_CONVERSATIONS, MOCK_MESSAGES } from './mockData'
-import type { Conversation, Message } from '@/types/message.types'
-
 import { ChatDetailsPanel } from '@/components/feature/messages/ChatDetailsPanel'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
+import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
+import { NewChatModal } from '@/components/feature/messages/NewChatModal'
+import type { Conversation } from '@/types/message.types'
+import { useLocation } from 'react-router-dom'
+import { wsManager } from '@/lib/websocket'
+import { useDialog } from '@/hooks/useDialog'
+
+interface LocationState {
+    startChatWith?: string
+}
 
 export default function MessagesPage() {
     const sessionState = useSession()
-    const userRole = sessionState?.user?.role || 'student'
-    const navigate = useNavigate()
-    const location = useLocation()
-    const currentPath = location.pathname
-    const currentUserId = sessionState?.user?.id || 'user_1'
+    const currentUserId = sessionState?.user?.id || ''
+    const queryClient = useQueryClient()
+    const { alert } = useDialog()
 
-    const navItems = useMemo(
-        () => getNavItems(userRole as any, currentPath, navigate),
-        [userRole, currentPath, navigate]
-    )
-    const userMenuItems = useMemo(
-        () => getUserMenuItems(userRole as any, navigate),
-        [userRole, navigate]
-    )
-
-    const [conversations, setConversations] = useState<Conversation[]>([])
-    const [messages, setMessages] = useState<Record<string, Message[]>>({})
     const [activeConversationId, setActiveConversationId] = useState<
         string | null
     >(null)
-    const [showGradientName, setShowGradientName] = useState(false)
-
+    const [highlightedMessageId, setHighlightedMessageId] = useState<
+        string | null
+    >(null)
     const [isDetailsOpen, setIsDetailsOpen] = useState(false)
+    const [showNewChatModal, setShowNewChatModal] = useState(false)
+    const [isAdmin, setIsAdmin] = useState(false)
+
+    const {
+        data: conversations = [],
+        isLoading,
+        error,
+    } = useQuery<Conversation[]>({
+        queryKey: ['conversations'],
+        queryFn: messageApi.getConversations,
+        staleTime: 30000,
+        refetchInterval: 60000,
+    })
+
+    const { data: detailedConversation } = useQuery({
+        queryKey: ['conversationDetails', activeConversationId],
+        queryFn: async () => {
+            if (!activeConversationId) return null
+
+            const baseConversation = conversations.find(
+                (c) => c.id === activeConversationId
+            )
+
+            if (!baseConversation) return null
+
+            // For group/class conversations, fetch full details with participants
+            if (baseConversation.isGroup) {
+                return messageApi.getGroupDetails(
+                    activeConversationId,
+                    currentUserId
+                )
+            } else {
+                // const roomDetails = await messageApi.getGroupDetails(
+                //     activeConversationId,
+                //     currentUserId
+                // )
+
+                // const otherMember = roomDetails.participants.find(
+                //     (p) => p.id !== currentUserId
+                // )
+
+                // if (otherMember) {
+                //     return messageApi.getOrCreateDirectConversation(
+                //         otherMember.id
+                //     )
+                // }
+
+                // return roomDetails
+                return messageApi.getGroupDetails(
+                    activeConversationId,
+                    currentUserId
+                )
+            }
+        },
+        enabled: !!activeConversationId,
+        staleTime: 30000,
+    })
+
+    // Use detailed conversation if available, otherwise fallback to basic one
+    const activeConversation = useMemo(() => {
+        if (!activeConversationId) return null
+
+        // If we have detailed data with participants, use it
+        if (detailedConversation) {
+            const baseData = conversations.find(
+                (c) => c.id === activeConversationId
+            )
+            return {
+                ...baseData,
+                ...detailedConversation,
+                // Preserve unread count from base conversation
+                unreadCount: baseData?.unreadCount ?? 0,
+            } as Conversation
+        }
+
+        // Fallback to basic conversation (without participants)
+        return conversations.find((c) => c.id === activeConversationId) || null
+    }, [conversations, activeConversationId, detailedConversation])
 
     useEffect(() => {
-        setConversations(MOCK_CONVERSATIONS)
-        setMessages(MOCK_MESSAGES)
-        if (window.innerWidth > 800 && MOCK_CONVERSATIONS.length > 0) {
-            setActiveConversationId(MOCK_CONVERSATIONS[0].id)
+        if (!detailedConversation?.participants) {
+            setIsAdmin(false)
+            return
         }
+
+        const isUserAdmin = detailedConversation.participants.some(
+            (p) => p.id === currentUserId && p.role === 'admin'
+        )
+
+        setIsAdmin(isUserAdmin)
+    }, [detailedConversation, currentUserId])
+
+    useEffect(() => {
+        const checkWsStatus = setInterval(() => {
+            console.log('🔌 WebSocket Status:', wsManager.getConnectionState())
+        }, 5000) // Check mỗi 5 giây
+
+        return () => clearInterval(checkWsStatus)
     }, [])
 
-    const handleGreetingComplete = useCallback(() => {
-        setShowGradientName(true)
-    }, [])
+    useEffect(() => {
+        const handleNewMessage = (event: CustomEvent) => {
+            try {
+                const data = event.detail
 
-    const handleCloseChat = () => {
-        setActiveConversationId(null)
+                if (
+                    data.type === 'new_message' &&
+                    data.room_id === activeConversationId
+                ) {
+                    queryClient.invalidateQueries({
+                        queryKey: ['conversationDetails', activeConversationId],
+                    })
+                }
+            } catch (error) {
+                console.error('Error handling WebSocket message:', error)
+            }
+        }
+
+        window.addEventListener('ws-new-message', handleNewMessage as any)
+        return () => {
+            window.removeEventListener(
+                'ws-new-message',
+                handleNewMessage as any
+            )
+        }
+    }, [activeConversationId])
+
+    const location = useLocation()
+
+    useEffect(() => {
+        const state = location.state as LocationState | null
+        const startChatWithUserId = state?.startChatWith
+
+        console.log('📍 [MessagesPage] State nhận được:', state)
+
+        if (startChatWithUserId) {
+            console.log(
+                '🚀 [MessagesPage] Bắt đầu tạo hội thoại với User:',
+                startChatWithUserId
+            )
+            window.history.replaceState({}, document.title)
+
+            messageApi
+                .getOrCreateDirectConversation(startChatWithUserId)
+                .then((conversation) => {
+                    queryClient.setQueryData(
+                        ['conversations'],
+                        (oldData: Conversation[] | undefined) => {
+                            if (!oldData) return [conversation]
+                            const exists = oldData.find(
+                                (c) => c.id === conversation.id
+                            )
+                            return exists ? oldData : [conversation, ...oldData]
+                        }
+                    )
+
+                    setActiveConversationId(conversation.id)
+                })
+                .catch((err) => {
+                    console.error('Failed to start chat:', err)
+                })
+        }
+    }, [location, queryClient])
+
+    const handleStartChat = async (
+        userIds: string[],
+        groupName?: string,
+        groupAvatar?: File,
+        groupDesc?: string
+    ) => {
+        try {
+            if (userIds.length === 1 && !groupName) {
+                // Direct chat
+                const conversation =
+                    await messageApi.getOrCreateDirectConversation(userIds[0])
+                setActiveConversationId(conversation.id)
+            } else {
+                // Group chat
+                const newGroup = await messageApi.createGroup({
+                    title: groupName || 'Nhóm chat mới',
+                    member_ids: userIds,
+                    avatar: groupAvatar,
+                    description: groupDesc,
+                })
+                setActiveConversationId(newGroup.id)
+            }
+
+            await queryClient.invalidateQueries({ queryKey: ['conversations'] })
+            setShowNewChatModal(false)
+        } catch (error) {
+            console.error('Failed to start chat:', error)
+            alert('Không thể tạo cuộc trò chuyện. Vui lòng thử lại.')
+        }
     }
 
-    const handleToggleDetails = () => {
-        setIsDetailsOpen((prev) => !prev)
+    const handleNavigateToMessage = (messageId: string) => {
+        setHighlightedMessageId(messageId)
+        setTimeout(() => setHighlightedMessageId(null), 3000)
     }
 
     const handleSelectConversation = (id: string) => {
         setActiveConversationId(id)
+        setHighlightedMessageId(null)
         setIsDetailsOpen(false)
     }
 
-    const activeConversation = conversations.find(
-        (c) => c.id === activeConversationId
-    )
-    const activeMessages = messages[activeConversationId || ''] || []
-
-    const containerClasses = [
-        s.container,
-        activeConversationId ? s.isChatActive : '',
-        isDetailsOpen ? s.isDetailsActive : '',
-    ].join(' ')
+    if (error) {
+        return (
+            <div className={s.pageWrapperWithoutHeader}>
+                <main className={s.mainContent}>
+                    <div style={{ textAlign: 'center', padding: '40px' }}>
+                        <p style={{ color: '#ef4444' }}>
+                            Không thể tải tin nhắn. Vui lòng thử lại sau.
+                        </p>
+                    </div>
+                </main>
+            </div>
+        )
+    }
 
     return (
-        <div className={s.pageWrapper}>
-            {/* --- Header --- */}
-            <header className={s.header}>
-                <NavigationMenu
-                    items={navItems}
-                    rightSlotDropdownItems={userMenuItems}
-                    rightSlot={
-                        <img
-                            src={sessionState?.user?.avatarUrl || AvatarImg}
-                            className={s.avatar}
-                            alt="User Avatar"
-                        />
-                    }
-                />
-            </header>
-
-            {/* --- Main Content --- */}
+        <div className={s.pageWrapperWithoutHeader}>
             <main className={s.mainContent}>
-                {/* Tiêu đề trang */}
-                <h1 className={s.pageTitle}>
-                    <TextType
-                        text="Tin nhắn "
-                        typingSpeed={50}
-                        loop={false}
-                        showCursor={!showGradientName}
-                        onSentenceComplete={handleGreetingComplete}
-                    />
-                    {showGradientName && (
-                        <TextType
-                            as="span"
-                            className={s.gradientText}
-                            text="của bạn"
-                            typingSpeed={70}
-                            loop={false}
-                        />
-                    )}
-                </h1>
-
-                {/* --- Container Chat (Nội dung chính) --- */}
-                <Card
-                    variant="flat"
-                    mode="light"
-                    className={s.chatContainerCard}
+                <div
+                    className={`${s.container} ${activeConversation && isDetailsOpen ? s.isDetailsActive : ''}`}
                 >
-                    <div className={containerClasses}>
-                        <aside className={s.conversationPanel}>
-                            <ConversationList
-                                conversations={conversations}
-                                activeConversationId={activeConversationId}
-                                onSelectConversation={handleSelectConversation}
+                    {/* 1. CONVERSATION LIST */}
+                    <aside className={s.conversationPanel}>
+                        <div className={s.sidebarHeader}>
+                            <h3 className={s.sidebarTitle}>Đoạn chat</h3>
+                            <ButtonPrimary
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setShowNewChatModal(true)}
+                            >
+                                + Mới
+                            </ButtonPrimary>
+                        </div>
+
+                        <ConversationList
+                            conversations={conversations}
+                            activeId={activeConversationId}
+                            onSelectConversation={handleSelectConversation}
+                            currentUserId={currentUserId}
+                            isLoading={isLoading}
+                        />
+                    </aside>
+
+                    {/* 2. CHAT WINDOW */}
+                    <section className={s.chatPanel}>
+                        {activeConversation ? (
+                            <ChatWindow
+                                key={activeConversation.id}
+                                conversation={activeConversation}
                                 currentUserId={currentUserId}
+                                onCloseChat={() =>
+                                    setActiveConversationId(null)
+                                }
+                                onToggleDetails={() =>
+                                    setIsDetailsOpen(!isDetailsOpen)
+                                }
+                                highlightedMessageId={highlightedMessageId}
+                            />
+                        ) : (
+                            <div className={s.noChatSelected}>
+                                <img
+                                    src="/assets/chat-placeholder.svg"
+                                    alt=""
+                                    style={{
+                                        width: 120,
+                                        opacity: 0.5,
+                                        marginBottom: 16,
+                                    }}
+                                />
+                                <p>Chọn một cuộc trò chuyện để bắt đầu</p>
+                            </div>
+                        )}
+                    </section>
+
+                    {/* 3. DETAILS PANEL */}
+                    {activeConversation && isDetailsOpen && (
+                        <aside className={s.detailsPanel}>
+                            <ChatDetailsPanel
+                                conversation={activeConversation}
+                                currentUserId={currentUserId}
+                                isAdmin={isAdmin}
+                                onClose={() => setIsDetailsOpen(false)}
+                                onNavigateToMessage={handleNavigateToMessage}
                             />
                         </aside>
-
-                        <section className={s.chatPanel}>
-                            {activeConversation ? (
-                                <ChatWindow
-                                    key={activeConversation.id}
-                                    conversation={activeConversation}
-                                    messages={activeMessages}
-                                    currentUserId={currentUserId}
-                                    onCloseChat={handleCloseChat}
-                                    onToggleDetails={handleToggleDetails}
-                                />
-                            ) : (
-                                <div className={s.noChatSelected}>
-                                    <p>Chọn một cuộc trò chuyện để bắt đầu</p>
-                                </div>
-                            )}
-                        </section>
-
-                        {activeConversation && isDetailsOpen && (
-                            <aside className={s.detailsPanel}>
-                                <ChatDetailsPanel
-                                    conversation={activeConversation}
-                                    currentUserId={currentUserId}
-                                    onClose={handleToggleDetails}
-                                />
-                            </aside>
-                        )}
-                    </div>
-                </Card>
+                    )}
+                </div>
             </main>
+
+            {/* NEW CHAT MODAL */}
+            {showNewChatModal && (
+                <NewChatModal
+                    onClose={() => setShowNewChatModal(false)}
+                    onStartChat={handleStartChat}
+                />
+            )}
         </div>
     )
 }

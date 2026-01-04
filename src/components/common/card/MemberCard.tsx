@@ -12,6 +12,7 @@ export interface ClassMember {
     avatarUrl?: string | null
     role: 'student' | 'teacher'
     isOnline: boolean
+    email?: string
 }
 
 interface MemberCardProps {
@@ -22,17 +23,16 @@ export default function MemberCard({ member }: MemberCardProps) {
     const navigate = useNavigate()
 
     const handleSendMessage = () => {
-        // Điều hướng đến trang nhắn tin với ID của thành viên
-        // Đường dẫn '/student/messages/:userId' là ví dụ
-        navigate(`/student/messages/${member.id}`)
-        console.log(`Sending message to ${member.firstName} ${member.lastName}`)
+        navigate('/messages', {
+            state: { startChatWith: member.id },
+        })
     }
 
     const fullName = `${member.firstName} ${member.lastName}`
     const avatarSrc = member.avatarUrl || AvatarPlaceholder
 
     return (
-        <div className={s.card}>
+        <div className={s.card} title={member.email}>
             <img
                 src={avatarSrc}
                 alt={`${fullName}'s avatar`}

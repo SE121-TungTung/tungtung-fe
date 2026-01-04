@@ -99,7 +99,7 @@ export const listClasses = async (
 ): Promise<PaginatedResponse<Class>> => {
     const {
         page = 1,
-        limit = 100, // Tăng limit mặc định để load nhiều lớp hơn trong dropdown
+        limit = 100,
         search,
         status,
         courseId,
@@ -169,7 +169,7 @@ export type CreateClassDto = {
 }
 
 export async function createClass(body: CreateClassDto): Promise<Class> {
-    const res = await api<BackendClass>(CLASSES_API_URL, {
+    const res = await api<BackendClass>(`${CLASSES_API_URL}/`, {
         method: 'POST',
         body: JSON.stringify(body),
     })
@@ -200,4 +200,11 @@ export async function getClass(id: string): Promise<Class> {
         method: 'GET',
     })
     return mapClass(res)
+}
+
+export async function getTeacherClasses(): Promise<Class[]> {
+    const res = await api<BackendClass[]>(`/api/v1/teacher/classes`, {
+        method: 'GET',
+    })
+    return res.map(mapClass)
 }

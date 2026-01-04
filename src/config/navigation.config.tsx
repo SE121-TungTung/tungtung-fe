@@ -3,6 +3,7 @@ import type { SideMenuItem } from '@/components/common/menu/SideMenuSet'
 import type { Role } from '@/types/auth.ts'
 import type { NavigateFunction } from 'react-router-dom'
 import IconLogout from '@/assets/Action Dislike.svg'
+import { UnreadBadge } from '@/components/feature/messages/UnreadBadge'
 
 type ExtendedSideMenuItem = SideMenuItem & {
     allowedRoles?: Role[]
@@ -23,12 +24,12 @@ const studyMenuItems: ExtendedSideMenuItem[] = [
     {
         id: 'exams',
         label: 'Luyện thi',
-        href: '/student/exams',
+        href: '/student/tests',
     },
     {
         id: 'roadmap',
         label: 'Lộ trình',
-        href: '/student/roadmap',
+        href: '/coming-soon',
     },
 ]
 
@@ -36,7 +37,7 @@ const studentNavItems: AppNavItem[] = [
     {
         id: 'dashboard',
         label: 'Dashboard',
-        href: '/student/dashboard',
+        href: '/dashboard',
     },
     {
         id: 'study',
@@ -46,12 +47,12 @@ const studentNavItems: AppNavItem[] = [
     {
         id: 'notifications',
         label: 'Thông báo',
-        href: '/student/notifications',
+        href: '/notifications',
     },
     {
         id: 'messages',
         label: 'Tin nhắn',
-        href: '/student/messages',
+        href: '/messages',
     },
 ]
 
@@ -59,7 +60,7 @@ const teacherNavItems: AppNavItem[] = [
     {
         id: 'dashboard',
         label: 'Dashboard',
-        href: '/teacher/dashboard',
+        href: '/dashboard',
     },
     {
         id: 'classes',
@@ -69,7 +70,23 @@ const teacherNavItems: AppNavItem[] = [
     {
         id: 'exams',
         label: 'Quản lý đề thi',
-        href: '/teacher/exams',
+        dropdownItems: [
+            {
+                id: 'create-test',
+                label: 'Tạo đề thi mới',
+                href: '/teacher/tests/create',
+            },
+            {
+                id: 'manage-tests',
+                label: 'Quản lý đề thi',
+                href: '/teacher/tests',
+            },
+        ],
+    },
+    {
+        id: 'messages',
+        label: 'Tin nhắn',
+        href: '/messages',
     },
 ]
 
@@ -77,7 +94,7 @@ const adminNavItems: AppNavItem[] = [
     {
         id: 'dashboard',
         label: 'Tổng quan',
-        href: '/admin/dashboard',
+        href: '/dashboard',
         allowedRoles: ['office_admin', 'center_admin', 'system_admin'],
     },
     {
@@ -96,38 +113,57 @@ const adminNavItems: AppNavItem[] = [
                 href: '/admin/rooms',
             },
             {
-                id: 'classes',
-                label: 'Quản lý lớp học',
-                href: '/admin/classes',
-            },
-            {
                 id: 'courses',
                 label: 'Quản lý khóa học',
                 href: '/admin/courses',
+            },
+            {
+                id: 'classes',
+                label: 'Quản lý lớp học',
+                href: '/admin/classes',
             },
             {
                 id: 'schedules',
                 label: 'Quản lý lịch học',
                 href: '/admin/schedule',
             },
-        ],
-    },
-    {
-        id: 'hr',
-        label: 'Nhân sự',
-        allowedRoles: ['center_admin', 'system_admin'],
-        dropdownItems: [
             {
                 id: 'kpi',
                 label: 'Quản lý KPI',
-                href: '/admin/kpi',
+                href: '/coming-soon',
             },
             {
                 id: 'salary',
                 label: 'Quản lý Lương',
-                href: '/admin/salary',
+                href: '/coming-soon',
             },
         ],
+    },
+    {
+        id: 'system',
+        label: 'Hệ thống',
+        allowedRoles: ['office_admin', 'center_admin', 'system_admin'],
+        dropdownItems: [
+            {
+                id: 'chatbot-documents',
+                label: 'Tài liệu Chatbot',
+                href: '/admin/system/chatbot-documents',
+                allowedRoles: ['system_admin', 'center_admin'],
+            },
+            {
+                id: 'audit-logs',
+                label: 'Nhật ký hệ thống',
+                href: '/admin/audit-logs',
+                allowedRoles: ['system_admin', 'center_admin'],
+            },
+        ],
+    },
+    {
+        id: 'messages',
+        label: 'Tin nhắn',
+        href: '/messages',
+        allowedRoles: ['office_admin', 'center_admin', 'system_admin'],
+        rightIcon: <UnreadBadge />,
     },
 ]
 
@@ -140,12 +176,12 @@ const commonUserMenu: ExtendedSideMenuItem[] = [
     {
         id: 'settings',
         label: 'Cài đặt',
-        href: '/settings',
+        href: '/coming-soon',
     },
     {
         id: 'help',
         label: 'Trợ giúp',
-        href: '/help',
+        href: '/coming-soon',
     },
     {
         id: 'logout',
@@ -181,7 +217,7 @@ export const getNavItems = (
     }
 
     return navs.map((item): NavItem => {
-        const { /* allowedRoles, */ dropdownItems, ...restOfItem } = item
+        const { dropdownItems, rightIcon, ...restOfItem } = item
 
         const finalDropdownItems = (
             dropdownItems as ExtendedSideMenuItem[] | undefined
@@ -190,7 +226,7 @@ export const getNavItems = (
                 (sub) => !sub.allowedRoles || sub.allowedRoles.includes(role)
             )
             .map((sub) => {
-                const { /* allowedRoles, */ href, ...restOfSub } = sub
+                const { href, ...restOfSub } = sub
                 return {
                     ...restOfSub,
                     onClick: () => href && navigate(href),
@@ -199,6 +235,7 @@ export const getNavItems = (
 
         return {
             ...restOfItem,
+            rightIcon,
             active:
                 item.href === activeHref ||
                 (finalDropdownItems &&

@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useFieldArray } from 'react-hook-form'
 import {
     createRoom,
     updateRoom,
@@ -10,15 +10,15 @@ import {
 } from '@/lib/rooms'
 import InputField from '@/components/common/input/InputField'
 import { SelectField } from '@/components/common/input/SelectField'
-import { Modal } from '@/components/core/Modal' // Thêm Modal
-import { ButtonPrimary } from '@/components/common/button/ButtonPrimary' // Thêm ButtonPrimary
-import styles from './RoomFormModal.module.css' // Sử dụng CSS Module
+import { Modal } from '@/components/core/Modal'
+import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
+import styles from './RoomFormModal.module.css'
 
 interface Props {
-    isOpen: boolean // Đổi 'open' thành 'isOpen' cho nhất quán
+    isOpen: boolean
     onClose: () => void
     onSaved?: (room: Room) => void
-    editing: Room | null // Bỏ '?' vì logic ở page đã xử lý null
+    editing: Room | null
 }
 
 const ROOM_TYPES: { label: string; value: RoomType }[] = [
@@ -36,7 +36,11 @@ const ROOM_STATUS: { label: string; value: RoomStatus }[] = [
     { label: 'Đang giữ chỗ', value: 'reserved' },
 ]
 
-// Đổi 'export default function' thành 'export const'
+// Định nghĩa form interface mở rộng để chứa mảng thiết bị tạm thời
+type RoomFormValues = Omit<CreateRoomDto, 'equipment'> & {
+    equipmentList: { name: string; quantity: number }[]
+}
+
 export const RoomFormModal: React.FC<Props> = ({
     isOpen,
     onClose,
@@ -44,14 +48,15 @@ export const RoomFormModal: React.FC<Props> = ({
     editing,
 }) => {
     const isEdit = Boolean(editing)
-    const formId = 'room-form' // ID cho form
+    const formId = 'room-form'
 
     const {
         register,
+        control,
         handleSubmit,
         reset,
         formState: { errors, isSubmitting },
-    } = useForm<CreateRoomDto>({
+    } = useForm<RoomFormValues>({
         defaultValues: {
             name: '',
             capacity: 25,
@@ -59,14 +64,27 @@ export const RoomFormModal: React.FC<Props> = ({
             room_type: 'classroom',
             status: 'available',
             notes: '',
-            equipment: {},
+            equipmentList: [],
         },
     })
 
+    const { fields, append, remove } = useFieldArray({
+        control,
+        name: 'equipmentList',
+    })
+
     useEffect(() => {
-        // Logic reset form khi modal mở/thay đổi 'editing'
         if (isOpen) {
             if (editing) {
+                const equipmentArray = editing.equipment
+                    ? Object.entries(editing.equipment).map(
+                          ([key, value]: [string, any]) => ({
+                              name: key,
+                              quantity: value.quantity || 1,
+                          })
+                      )
+                    : []
+
                 reset({
                     name: editing.name,
                     capacity: editing.capacity,
@@ -74,10 +92,9 @@ export const RoomFormModal: React.FC<Props> = ({
                     room_type: editing.roomType,
                     status: editing.status,
                     notes: editing.notes ?? '',
-                    equipment: editing.equipment ?? {},
+                    equipmentList: equipmentArray,
                 })
             } else {
-                // Reset về defaultValues khi tạo mới
                 reset({
                     name: '',
                     capacity: 25,
@@ -85,16 +102,33 @@ export const RoomFormModal: React.FC<Props> = ({
                     room_type: 'classroom',
                     status: 'available',
                     notes: '',
-                    equipment: {},
+                    equipmentList: [],
                 })
             }
         }
     }, [isOpen, editing, reset])
 
-    const onSubmit = async (data: CreateRoomDto) => {
-        const payload = {
-            ...data,
+    const onSubmit = async (data: RoomFormValues) => {
+        const equipmentJson = data.equipmentList.reduce(
+            (acc, item) => {
+                if (item.name.trim()) {
+                    acc[item.name.trim()] = { quantity: item.quantity }
+                }
+                return acc
+            },
+            {} as Record<string, { quantity: number }>
+        )
+
+        const payload: CreateRoomDto = {
+            name: data.name,
+            capacity: data.capacity,
+            location: data.location,
+            room_type: data.room_type,
+            status: data.status,
+            notes: data.notes,
+            equipment: equipmentJson,
         }
+
         try {
             const saved =
                 isEdit && editing
@@ -104,7 +138,6 @@ export const RoomFormModal: React.FC<Props> = ({
             onClose()
         } catch (error) {
             console.error('Failed to save room:', error)
-            // TODO: Hiển thị lỗi cho người dùng
         }
     }
 
@@ -138,7 +171,6 @@ export const RoomFormModal: React.FC<Props> = ({
                 onSubmit={handleSubmit(onSubmit)}
                 className={styles.form}
             >
-                {/* Sử dụng grid2Cols cho layout */}
                 <div className={styles.grid2Cols}>
                     <InputField
                         label="Tên phòng"
@@ -197,52 +229,100 @@ export const RoomFormModal: React.FC<Props> = ({
                     {...register('notes')}
                 />
 
+                <div className={styles.sectionDivider} />
+
                 <div>
-                    <label htmlFor="equipment" className={styles.inputLabel}>
-                        Thiết bị (JSON - Tùy chọn)
-                    </label>
-                    <textarea
-                        id="equipment"
-                        placeholder='{"projector": {"quantity": 1, "status": "working"}}'
-                        rows={4}
-                        defaultValue={
-                            editing?.equipment
-                                ? JSON.stringify(editing.equipment, null, 2)
-                                : ''
-                        }
-                        {...register('equipment', {
-                            setValueAs: (v) => {
-                                if (!v) return {}
+                    <h3 className={styles.inputLabel}>Thiết bị (Tùy chọn)</h3>
 
-                                if (
-                                    typeof v === 'object' &&
-                                    !Array.isArray(v)
-                                ) {
-                                    return v
-                                }
-
-                                if (typeof v === 'string') {
-                                    const trimmed = v.trim()
-                                    if (trimmed === '') return {}
-
-                                    try {
-                                        const parsed = JSON.parse(trimmed)
-                                        return typeof parsed === 'object' &&
-                                            !Array.isArray(parsed)
-                                            ? parsed
-                                            : {}
-                                    } catch {
-                                        return {}
+                    <div className={styles.equipmentList}>
+                        {fields.map((field, index) => (
+                            <div
+                                key={field.id}
+                                className={styles.equipmentItem}
+                            >
+                                {/* Input Tên thiết bị */}
+                                <InputField
+                                    label="Tên thiết bị"
+                                    id={`equip-${index}-name`}
+                                    placeholder="VD: Máy chiếu"
+                                    {...register(
+                                        `equipmentList.${index}.name`,
+                                        {
+                                            required: 'Nhập tên',
+                                        }
+                                    )}
+                                    error={
+                                        errors.equipmentList?.[index]?.name
+                                            ?.message
                                     }
-                                }
-                                return {}
-                            },
-                        })}
-                    />
-                    <p className={styles.fieldHelperText}>
-                        JSON thiết bị. Ví dụ: {`{"projector": {"quantity": 1}}`}
-                        . Để trống nếu không có.
-                    </p>
+                                    className={styles.inputGroup}
+                                />
+
+                                {/* Input Số lượng */}
+                                <InputField
+                                    type="number"
+                                    label="Số lượng"
+                                    id={`equip-${index}-qty`}
+                                    placeholder="1"
+                                    {...register(
+                                        `equipmentList.${index}.quantity`,
+                                        {
+                                            valueAsNumber: true,
+                                            min: { value: 1, message: 'Min 1' },
+                                        }
+                                    )}
+                                    error={
+                                        errors.equipmentList?.[index]?.quantity
+                                            ?.message
+                                    }
+                                    className={styles.inputGroup}
+                                />
+
+                                {/* Nút Xóa */}
+                                <button
+                                    type="button"
+                                    className={styles.removeBtn}
+                                    onClick={() => remove(index)}
+                                    title="Xóa thiết bị"
+                                >
+                                    {/* Icon thùng rác đơn giản (SVG) */}
+                                    <svg
+                                        width="20"
+                                        height="20"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Nút Thêm mới */}
+                    <button
+                        type="button"
+                        className={styles.addBtn}
+                        onClick={() => append({ name: '', quantity: 1 })}
+                    >
+                        <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                        >
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Thêm thiết bị
+                    </button>
                 </div>
             </form>
         </Modal>

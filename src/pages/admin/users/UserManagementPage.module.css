@@ -1,7 +1,8 @@
-.pageWrapper {
-    background: linear-gradient(115deg, #e4ecf7, #fff);
-    min-height: 100vh;
-    padding: 24px clamp(24px, 5vw, 80px);
+.pageWrapperWithoutHeader {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .header {
@@ -92,6 +93,14 @@
 .filterCard,
 .tableCard {
     animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.paginationWrapper {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color-light);
+    display: flex;
+    justify-content: center;
 }
 
 @keyframes slideUp {

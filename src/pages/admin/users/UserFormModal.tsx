@@ -1,20 +1,28 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { type UserFormValues, userFormSchema } from '@/forms/user.schema'
-import { type User, type Role, ALL_ROLES } from '@/types/auth'
+import {
+    type User,
+    type Role,
+    ALL_ROLES,
+    type UpdateUserPayload,
+} from '@/types/user.types'
 import { Modal } from '@/components/core/Modal'
 import InputField from '@/components/common/input/InputField'
 import { SelectField } from '@/components/common/input/SelectField'
 import styles from './UserFormModal.module.css'
-import { usePermissions } from '@/hooks/usePermissions'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
-import { createUser, listClasses, updateUser } from '@/lib/users'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { createUser, updateUser } from '@/lib/users'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { listClasses } from '@/lib/classes'
+import ButtonGhost from '@/components/common/button/ButtonGhost'
+import { useDialog } from '@/hooks/useDialog'
 
 interface UserFormModalProps {
     isOpen: boolean
     onClose: () => void
+    onSuccess: () => void
     editingUser: User | null
 }
 
@@ -34,217 +42,300 @@ const roleOptions = ALL_ROLES.map((role) => ({
 export const UserFormModal: React.FC<UserFormModalProps> = ({
     isOpen,
     onClose,
+    onSuccess,
     editingUser,
 }) => {
-    const { can } = usePermissions()
+    // const { can } = usePermissions()
+    const qc = useQueryClient()
     const isEditMode = !!editingUser
-    const formId = 'user-form'
-    const queryClient = useQueryClient()
+    const { alert: showAlert } = useDialog()
 
+    // 1. Fetch Classes (Create only)
+    const { data: classesData, isLoading: isLoadingClasses } = useQuery({
+        queryKey: ['classes', 'list'],
+        queryFn: () => listClasses({ limit: 100 }),
+        enabled: isOpen && !isEditMode, // Chỉ fetch khi tạo mới
+        staleTime: 5 * 60 * 1000,
+    })
+
+    const classOptions = useMemo(() => {
+        const list = classesData?.items || []
+        return [
+            { label: 'Không chọn', value: '' },
+            ...list.map((c) => ({ label: c.name, value: c.id })),
+        ]
+    }, [classesData])
+
+    // 2. Setup Form
     const {
         register,
-        handleSubmit: rhfHandleSubmit,
+        handleSubmit,
         reset,
+        setValue,
         formState: { errors, isSubmitting },
     } = useForm<UserFormValues>({
         resolver: zodResolver(userFormSchema),
         defaultValues: {
-            firstName: '',
-            lastName: '',
-            email: '',
-            phone: '',
-            dateOfBirth: '',
-            address: '',
             role: 'student',
+            defaultClassId: '',
+            emergencyContact: { name: '', relationship: '', phone: '' },
         },
     })
 
+    // 3. Reset form data
     useEffect(() => {
         if (isOpen) {
-            if (isEditMode) {
-                reset({
-                    id: editingUser.id,
-                    firstName: editingUser.firstName,
-                    lastName: editingUser.lastName,
-                    email: editingUser.email,
-                    phone: editingUser.phone || '',
-                    dateOfBirth: editingUser.dateOfBirth?.split('T')[0] || '',
-                    address: editingUser.address || '',
-                    role: editingUser.role,
-                })
+            if (editingUser) {
+                // --- MAP DATA KHI EDIT ---
+                // Lưu ý: BackendUser có thể chưa trả về emergency_contact nếu API get list chưa include
+                // Giả sử editingUser đã có field emergency_contact (cần check lại type User frontend)
+                // Nếu User frontend chưa có, ta tạm để trống hoặc fetch detail user nếu cần thiết.
+                setValue('firstName', editingUser.firstName)
+                setValue('lastName', editingUser.lastName)
+                setValue('email', editingUser.email)
+                setValue('phone', editingUser.phone || '')
+                setValue('dateOfBirth', editingUser.dateOfBirth || '')
+                setValue('address', editingUser.address || '')
+                setValue('role', editingUser.role)
+                setValue('id', editingUser.id)
+
+                if (editingUser.emergencyContact) {
+                    setValue(
+                        'emergencyContact.name',
+                        editingUser.emergencyContact.name || ''
+                    )
+                    setValue(
+                        'emergencyContact.relationship',
+                        editingUser.emergencyContact.relationship || ''
+                    )
+                    setValue(
+                        'emergencyContact.phone',
+                        editingUser.emergencyContact.phone || ''
+                    )
+                } else {
+                    setValue('emergencyContact', {
+                        name: '',
+                        relationship: '',
+                        phone: '',
+                    })
+                }
             } else {
+                // --- RESET KHI CREATE ---
                 reset({
-                    id: undefined,
+                    role: 'student',
+                    defaultClassId: '',
                     firstName: '',
                     lastName: '',
                     email: '',
                     phone: '',
-                    dateOfBirth: '',
                     address: '',
-                    role: 'student',
+                    dateOfBirth: '',
+                    emergencyContact: { name: '', relationship: '', phone: '' },
                 })
             }
         }
-    }, [isOpen, isEditMode, editingUser, reset])
+    }, [isOpen, editingUser, reset, setValue])
 
-    const availableRoles = roleOptions.filter((option) => {
-        const currentUserRole = can('user:create:admin')
-            ? 'system_admin'
-            : can('user:delete')
-              ? 'center_admin'
-              : 'office_admin'
-
-        if (currentUserRole === 'system_admin') {
-            return true
-        }
-        if (currentUserRole === 'center_admin') {
-            return option.value !== 'system_admin'
-        }
-        if (currentUserRole === 'office_admin') {
-            return option.value === 'student' || option.value === 'teacher'
-        }
-        return false
+    // 4. Mutations
+    const createUserMutation = useMutation({
+        mutationFn: async (data: { payload: any; opts: any }) => {
+            return createUser(data.payload, data.opts)
+        },
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ['users'] })
+            onSuccess()
+            reset()
+            showAlert('Tạo người dùng thành công!')
+        },
+        onError: (err: any) => {
+            showAlert(err?.message || 'Lỗi tạo người dùng')
+        },
     })
 
-    const { data: classPage, isLoading: isLoadingClasses } = useQuery({
-        queryKey: ['classes', { limit: 100 }],
-        queryFn: () => listClasses({ limit: 100 }),
-        staleTime: 60_000,
-    })
-    const classOptions = (classPage?.items ?? []).map((c) => ({
-        label: c.name,
-        value: c.id,
-    }))
-
-    const onSubmitForm = async (values: UserFormValues) => {
-        if (isEditMode && editingUser) {
-            const payload = {
-                first_name: values.firstName || undefined,
-                last_name: values.lastName || undefined,
-                phone: values.phone || undefined,
-                address: values.address || undefined,
-                // Add other fields as necessary:
-                // emergency_contact: values.emergencyContact,
-                // preferences: values.preferences,
-            }
-            await updateUser(editingUser.id, payload)
-            await queryClient.invalidateQueries({ queryKey: ['users'] })
+    const updateUserMutation = useMutation({
+        mutationFn: async (data: {
+            id: string
+            payload: UpdateUserPayload
+        }) => {
+            // Không truyền avatar file vì Admin không được sửa
+            return updateUser(data.id, data.payload)
+        },
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ['users'] })
             onClose()
-            return
-        }
+            reset()
+            showAlert('Cập nhật thành công!')
+        },
+        onError: (err: any) => {
+            alert(err?.message || 'Lỗi cập nhật người dùng')
+        },
+    })
 
-        const payload = {
-            email: values.email,
-            first_name: values.firstName,
-            last_name: values.lastName,
-            phone: values.phone || undefined,
-            date_of_birth: values.dateOfBirth || undefined,
-            address: values.address || undefined,
-            role: values.role,
+    // 5. Submit Handler
+    const onSubmit = (data: UserFormValues) => {
+        if (isEditMode && editingUser) {
+            const updatePayload: UpdateUserPayload = {
+                first_name: data.firstName,
+                last_name: data.lastName,
+                phone: data.phone,
+                address: data.address,
+                emergency_contact: data.emergencyContact,
+            }
+
+            updateUserMutation.mutate({
+                id: editingUser.id,
+                payload: updatePayload,
+            })
+        } else {
+            // --- CREATE PAYLOAD ---
+            createUserMutation.mutate({
+                payload: {
+                    email: data.email,
+                    first_name: data.firstName,
+                    last_name: data.lastName,
+                    phone: data.phone,
+                    role: data.role,
+                    date_of_birth: data.dateOfBirth,
+                    address: data.address,
+                    // Lưu ý: Nếu BE CreateUser model hỗ trợ emergency_contact thì thêm vào đây
+                    // Hiện tại UserCreate model chỉ có fields cơ bản, nên ta bỏ qua hoặc update sau
+                },
+                opts: { defaultClassId: data.defaultClassId },
+            })
         }
-        const defaultClassId = values.defaultClassId || undefined
-        await createUser(payload, { defaultClassId })
-        await queryClient.invalidateQueries({ queryKey: ['users'] })
-        onClose()
     }
 
     return (
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            title={isEditMode ? 'Chỉnh sửa Người dùng' : 'Tạo Người dùng Mới'}
+            title={isEditMode ? 'Cập nhật hồ sơ' : 'Thêm người dùng mới'}
             footer={
                 <div className={styles.footer}>
-                    <ButtonPrimary
-                        variant="outline"
+                    <ButtonGhost
                         onClick={onClose}
-                        disabled={isSubmitting}
+                        className={styles.cancelButton}
                     >
                         Hủy
-                    </ButtonPrimary>
+                    </ButtonGhost>
                     <ButtonPrimary
-                        variant="solid"
-                        type="submit"
-                        form={formId}
-                        loading={isSubmitting}
+                        onClick={handleSubmit(onSubmit)}
+                        disabled={
+                            isSubmitting ||
+                            createUserMutation.isPending ||
+                            updateUserMutation.isPending
+                        }
+                        className={styles.submitButton}
                     >
-                        {isEditMode ? 'Lưu thay đổi' : 'Tạo người dùng'}
+                        {isEditMode ? 'Lưu thay đổi' : 'Tạo mới'}
                     </ButtonPrimary>
                 </div>
             }
         >
-            <form
-                id={formId}
-                onSubmit={rhfHandleSubmit(onSubmitForm)}
-                className={styles.form}
-            >
+            <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
+                {/* --- NHÓM 1: THÔNG TIN CƠ BẢN --- */}
+                <h5 className={styles.sectionTitle}>Thông tin cơ bản</h5>
+
                 <div className={styles.grid2Cols}>
                     <InputField
                         label="Họ"
                         id="firstName"
                         {...register('firstName')}
                         error={errors.firstName?.message}
-                        placeholder="Nguyễn Văn"
+                        autoFocus
                     />
                     <InputField
                         label="Tên"
                         id="lastName"
                         {...register('lastName')}
                         error={errors.lastName?.message}
-                        placeholder="An"
                     />
                 </div>
 
-                <InputField
-                    label="Email"
-                    id="email"
-                    type="email"
-                    disabled={isEditMode}
-                    {...register('email')}
-                    error={errors.email?.message}
-                    placeholder="example@email.com"
-                />
                 <div className={styles.grid2Cols}>
                     <InputField
-                        label="Số điện thoại"
-                        id="phone"
-                        {...register('phone')}
-                        error={errors.phone?.message}
-                        placeholder="090..."
+                        label="Email"
+                        id="email"
+                        type="email"
+                        {...register('email')}
+                        error={errors.email?.message}
+                        disabled={isEditMode} // Không cho sửa Email
+                        placeholder="example@domain.com"
                     />
+                    <SelectField
+                        label="Vai trò"
+                        id="role"
+                        registration={register('role')}
+                        options={roleOptions}
+                        error={errors.role?.message}
+                        disabled={isEditMode} // Không cho sửa Role
+                    />
+                </div>
+
+                <div className={styles.grid2Cols}>
                     <InputField
                         label="Ngày sinh"
                         id="dateOfBirth"
                         type="date"
                         {...register('dateOfBirth')}
                         error={errors.dateOfBirth?.message}
+                        disabled={isEditMode} // Không cho sửa DoB theo BE
+                    />
+                    <InputField
+                        label="Số điện thoại"
+                        id="phone"
+                        {...register('phone')}
+                        error={errors.phone?.message}
                     />
                 </div>
 
-                <SelectField
-                    label="Vai trò"
-                    id="role"
-                    registration={register('role')}
-                    options={availableRoles}
-                    error={errors.role?.message}
-                    disabled={isEditMode && !can('user:delete')}
-                />
-
-                <SelectField
-                    label="Lớp mặc định (tùy chọn)"
-                    id="defaultClassId"
-                    registration={register('defaultClassId')}
-                    options={classOptions}
-                    error={errors.defaultClassId?.message}
-                    disabled={isLoadingClasses}
-                />
-
                 <InputField
-                    label="Địa chỉ (Tùy chọn)"
+                    label="Địa chỉ"
                     id="address"
                     {...register('address')}
                     error={errors.address?.message}
                 />
+
+                {/* --- NHÓM 2: LIÊN HỆ KHẨN CẤP (MỚI) --- */}
+                <h5 className={styles.sectionTitle} style={{ marginTop: 12 }}>
+                    Liên hệ khẩn cấp
+                </h5>
+
+                <div className={styles.grid2Cols}>
+                    <InputField
+                        label="Tên người liên hệ"
+                        {...register('emergencyContact.name')}
+                    />
+                    <InputField
+                        label="Mối quan hệ"
+                        {...register('emergencyContact.relationship')}
+                        placeholder="VD: Bố, Mẹ..."
+                    />
+                </div>
+                <InputField
+                    label="SĐT Khẩn cấp"
+                    {...register('emergencyContact.phone')}
+                />
+
+                {/* --- NHÓM 3: CẤU HÌNH LỚP (CHỈ CREATE) --- */}
+                {!isEditMode && (
+                    <>
+                        <h5
+                            className={styles.sectionTitle}
+                            style={{ marginTop: 12 }}
+                        >
+                            Cấu hình học tập
+                        </h5>
+                        <SelectField
+                            label="Gán vào lớp (Tùy chọn)"
+                            id="defaultClassId"
+                            registration={register('defaultClassId')}
+                            options={classOptions}
+                            error={errors.defaultClassId?.message}
+                            disabled={isLoadingClasses}
+                        />
+                    </>
+                )}
             </form>
         </Modal>
     )

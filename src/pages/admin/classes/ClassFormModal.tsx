@@ -17,6 +17,7 @@ import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import styles from './ClassFormModal.module.css'
 import { useQuery } from '@tanstack/react-query'
 import { prune } from '@/utils/prune'
+import { useDialog } from '@/hooks/useDialog'
 
 interface Props {
     isOpen: boolean
@@ -41,6 +42,7 @@ export const ClassFormModal: React.FC<Props> = ({
 }) => {
     const isEdit = Boolean(editing)
     const formId = 'class-form'
+    const { alert } = useDialog()
 
     const {
         data: coursesData,
@@ -66,7 +68,7 @@ export const ClassFormModal: React.FC<Props> = ({
         retry: 0,
         refetchOnWindowFocus: false,
     })
-    const teacherOptions = (teachersData?.items ?? []).map((t) => ({
+    const teacherOptions = (teachersData?.users ?? []).map((t) => ({
         label: `${t.lastName} ${t.firstName}`,
         value: t.id,
     }))
@@ -271,8 +273,9 @@ export const ClassFormModal: React.FC<Props> = ({
                     <InputField
                         type="number"
                         step="0.01"
-                        label="Học phí (tuỳ chọn)"
+                        label="Học phí"
                         id="fee_amount"
+                        required
                         {...register('fee_amount', { valueAsNumber: true })}
                     />
                 </div>

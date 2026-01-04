@@ -1,8 +1,9 @@
 import React, { useId, useState, forwardRef } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import s from './InputField.module.css'
 import FieldMessage from '@/components/common/typography/FieldMessage'
 
-// Import SVG URLs directly
 import ActionEyeVisable from '@/assets/Action Eye Visible.svg'
 import ActionEyeInvisable from '@/assets/Action Invisible.svg'
 
@@ -11,7 +12,7 @@ type Size = 'sm' | 'md' | 'lg'
 type Mode = 'light' | 'dark'
 
 export interface InputFieldProps
-    extends React.InputHTMLAttributes<HTMLInputElement> {
+    extends React.InputHTMLAttributes<HTMLInputElement | HTMLTextAreaElement> {
     label?: string
     hint?: string
     error?: string
@@ -22,9 +23,15 @@ export interface InputFieldProps
     mode?: Mode
     fullWidth?: boolean
     enablePasswordToggle?: boolean
+    multiline?: boolean
+    rows?: number
+    enableMarkdown?: boolean // Thuộc tính mới
 }
 
-const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
+const InputField = forwardRef<
+    HTMLInputElement | HTMLTextAreaElement,
+    InputFieldProps
+>(
     (
         {
             label,
@@ -35,10 +42,14 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
             variant = 'glass',
             uiSize = 'md',
             mode = 'light',
+            enableMarkdown = false,
             fullWidth,
             enablePasswordToggle,
+            multiline = false,
+            rows = 4,
             type = 'text',
             className = '',
+            value,
             id,
             ...rest
         },
@@ -48,7 +59,11 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
         const inputId = id ?? `in-${autoId}`
 
         const [reveal, setReveal] = useState(false)
-        const isPassword = type === 'password'
+        const [isPreview, setIsPreview] = useState(false)
+
+        const isPassword = type === 'password' && !multiline
+        const isFile = type === 'file'
+
         const inputType =
             isPassword && enablePasswordToggle
                 ? reveal
@@ -56,86 +71,107 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
                     : 'password'
                 : type
 
-        const hasLeftIcon = Boolean(leftIcon)
-        const hasRightIcon =
-            Boolean(rightIcon) || (isPassword && enablePasswordToggle)
-
-        const wrapCls = [
+        const wrapperClasses = [
             s.wrapper,
-            s[mode],
-            s[`size-${uiSize}`],
-            error ? s.invalid : '',
-            fullWidth ? s.block : '',
-            className,
-        ]
-            .filter(Boolean)
-            .join(' ')
-
-        const inputCls = [
-            s.input,
             s[`variant-${variant}`],
-            hasLeftIcon ? s.withPrefix : '',
-            hasRightIcon ? s.withSuffix : '',
-        ]
-            .filter(Boolean)
-            .join(' ')
+            s[`size-${uiSize}`],
+            s[mode],
+            fullWidth ? s.fullWidth : '',
+            error ? s.invalid : '',
+            multiline ? s.isMultiline : '',
+            isFile ? s.isFile : '',
+            className,
+        ].join(' ')
+
+        const InputComponent = multiline ? 'textarea' : 'input'
 
         return (
-            <div className={wrapCls} data-testid="input-field-wrapper">
-                {label && (
-                    <label htmlFor={inputId} className={s.label}>
-                        {label}
-                    </label>
-                )}
-                <div className={s.fieldRow}>
-                    {leftIcon && (
+            <div className={wrapperClasses}>
+                <div className={s.labelRow}>
+                    {label && (
+                        <label htmlFor={inputId} className={s.label}>
+                            {label}
+                        </label>
+                    )}
+
+                    {enableMarkdown && multiline && (
+                        <div className={s.mdTabs}>
+                            <button
+                                type="button"
+                                className={!isPreview ? s.activeTab : ''}
+                                onClick={() => setIsPreview(false)}
+                            >
+                                Soạn thảo
+                            </button>
+                            <button
+                                type="button"
+                                className={isPreview ? s.activeTab : ''}
+                                onClick={() => setIsPreview(true)}
+                            >
+                                Xem trước
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                <div className={s.inputContainer}>
+                    {leftIcon && !isPreview && (
                         <span className={[s.icon, s.prefix].join(' ')}>
                             {leftIcon}
                         </span>
                     )}
 
-                    <input
-                        ref={ref}
-                        id={inputId}
-                        type={inputType}
-                        className={inputCls}
-                        aria-invalid={!!error}
-                        aria-describedby={
-                            error ? `${inputId}-error` : undefined
-                        }
-                        {...rest}
-                    />
+                    {isPreview && enableMarkdown && multiline ? (
+                        <div
+                            className={`${s.input} ${s.previewArea}`}
+                            style={{ minHeight: `${rows * 24}px` }}
+                        >
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                {String(value || '')}
+                            </ReactMarkdown>
+                        </div>
+                    ) : (
+                        <InputComponent
+                            id={inputId}
+                            // @ts-expect-error - TS doesn't recognize dynamic component with ref
+                            ref={ref}
+                            className={s.input}
+                            type={multiline ? undefined : inputType}
+                            rows={multiline ? rows : undefined}
+                            value={value}
+                            {...rest}
+                        />
+                    )}
 
-                    {isPassword && enablePasswordToggle ? (
+                    {/* Toggle Password Icon */}
+                    {isPassword && enablePasswordToggle && !multiline ? (
                         <button
                             type="button"
-                            className={[s.icon, s.suffix, s.toggle].join(' ')}
-                            onClick={() => setReveal(!reveal)}
-                            aria-label={
-                                reveal ? 'Hide password' : 'Show password'
-                            }
-                            title={reveal ? 'Hide password' : 'Show password'}
-                        >
-                            {reveal ? (
-                                <img
-                                    src={ActionEyeVisable}
-                                    alt="Hide password"
-                                />
-                            ) : (
-                                <img
-                                    src={ActionEyeInvisable}
-                                    alt="Show password"
-                                />
+                            className={[s.icon, s.suffix, s.toggleBtn].join(
+                                ' '
                             )}
+                            onClick={() => setReveal(!reveal)}
+                            tabIndex={-1}
+                        >
+                            <img
+                                src={
+                                    reveal
+                                        ? ActionEyeVisable
+                                        : ActionEyeInvisable
+                                }
+                                alt={reveal ? 'Hide password' : 'Show password'}
+                            />
                         </button>
                     ) : (
-                        rightIcon && (
+                        rightIcon &&
+                        !isPreview && (
                             <span className={[s.icon, s.suffix].join(' ')}>
                                 {rightIcon}
                             </span>
                         )
                     )}
                 </div>
+
                 {error ? (
                     <FieldMessage
                         id={`${inputId}-error`}

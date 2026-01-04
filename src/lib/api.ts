@@ -1,9 +1,38 @@
+import { refreshAccessToken } from './auth'
+
 const API =
     import.meta.env.VITE_API_URL ||
     'https://tungtung-be-production.up.railway.app'
 
-const getToken = () =>
-    localStorage.getItem('token') ?? sessionStorage.getItem('token')
+const getAccessToken = () => {
+    const token = localStorage.getItem('access_token')
+    if (!token) return null
+
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]))
+        const exp = payload.exp * 1000
+
+        if (Date.now() >= exp) {
+            console.warn('⚠️ Token expired, clearing...')
+            localStorage.removeItem('access_token')
+            return null
+        }
+
+        return token
+    } catch (error) {
+        console.error('Invalid token format:', error)
+        return null
+    }
+}
+const getRefreshToken = () => localStorage.getItem('refresh_token')
+
+let isRefreshing = false
+let refreshSubscribers: ((token: string) => void)[] = []
+
+const onRefreshed = (token: string) => {
+    refreshSubscribers.forEach((callback) => callback(token))
+    refreshSubscribers = []
+}
 
 async function parseBody<T>(res: Response): Promise<T> {
     if (res.status === 204) return undefined as T
@@ -45,36 +74,110 @@ async function parseError(res: Response): Promise<never> {
     throw error
 }
 
-export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
-    const token = getToken()
+interface ExtendedRequestInit extends RequestInit {
+    _retry?: boolean
+    _skipRefresh?: boolean // ← NEW: Flag to skip auto-refresh
+}
+
+// Auth endpoints that should NOT trigger auto-refresh
+const AUTH_ENDPOINTS = [
+    '/api/v1/auth/login',
+    '/api/v1/auth/login-json',
+    '/api/v1/auth/refresh',
+    '/api/v1/auth/password-reset/request',
+    '/api/v1/auth/password-reset/confirm',
+    '/api/v1/auth/password-reset/validate-token',
+]
+
+export async function api<T>(
+    path: string,
+    init: ExtendedRequestInit = {}
+): Promise<T> {
+    const accessToken = getAccessToken()
     const url = path.startsWith('http')
         ? path
         : `${API.replace(/\/$/, '')}${path}`
 
+    const headers = new Headers(init.headers || {})
+    if (!headers.has('Accept')) {
+        headers.set('Accept', 'application/json, text/plain;q=0.9, */*;q=0.8')
+    }
+
+    if (accessToken && !headers.has('Authorization')) {
+        headers.set('Authorization', `Bearer ${accessToken}`)
+    }
+
     const isFormData = init.body instanceof FormData
-    const { headers: initHeaders, ...restOfInit } = init
+    if (init.body && !isFormData && !headers.has('Content-Type')) {
+        headers.set('Content-Type', 'application/json')
+    }
 
-    const finalHeaders = new Headers({
-        Accept: 'application/json, text/plain;q=0.9, */*;q=0.8',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...(initHeaders as Record<string, string>),
-    })
+    const res = await fetch(url, { ...init, headers })
 
-    if (init.body && !isFormData) {
-        if (!finalHeaders.has('Content-Type')) {
-            finalHeaders.set('Content-Type', 'application/json')
+    // Check if this is an auth endpoint that should not trigger refresh
+    const isAuthEndpoint = AUTH_ENDPOINTS.some((endpoint) =>
+        path.includes(endpoint)
+    )
+    const shouldSkipRefresh = init._skipRefresh || isAuthEndpoint
+
+    if (res.status === 401) {
+        // Don't try to refresh for auth endpoints or if explicitly skipped
+        if (shouldSkipRefresh) {
+            return parseError(res)
+        }
+
+        if (!init._retry) {
+            if (isRefreshing) {
+                return new Promise<T>((resolve) => {
+                    refreshSubscribers.push((newToken) => {
+                        const newHeaders = new Headers(headers)
+                        newHeaders.set('Authorization', `Bearer ${newToken}`)
+                        resolve(
+                            api<T>(path, {
+                                ...init,
+                                headers: newHeaders,
+                                _retry: true,
+                            })
+                        )
+                    })
+                })
+            }
+
+            init._retry = true
+            isRefreshing = true
+
+            try {
+                const refreshToken = getRefreshToken()
+                if (!refreshToken) throw new Error('No refresh token')
+
+                const data = await refreshAccessToken(refreshToken)
+
+                localStorage.setItem('access_token', data.access_token)
+                if (data.refresh_token) {
+                    localStorage.setItem('refresh_token', data.refresh_token)
+                }
+
+                onRefreshed(data.access_token)
+
+                const newHeaders = new Headers(headers)
+                newHeaders.set('Authorization', `Bearer ${data.access_token}`)
+                return api<T>(path, { ...init, headers: newHeaders })
+            } catch (error) {
+                console.error('Refresh token failed', error)
+                localStorage.removeItem('token')
+                localStorage.removeItem('access_token')
+                localStorage.removeItem('refresh_token')
+
+                // Only redirect if not already on login page
+                if (!window.location.pathname.includes('/login')) {
+                    window.location.href = '/login'
+                }
+                throw error
+            } finally {
+                isRefreshing = false
+            }
         }
     }
-
-    if (isFormData) {
-        finalHeaders.delete('Content-Type')
-    }
-
-    const res = await fetch(url, {
-        credentials: 'include',
-        ...restOfInit,
-        headers: finalHeaders,
-    })
 
     if (!res.ok) {
         return parseError(res)

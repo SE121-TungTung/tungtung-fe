@@ -53,8 +53,9 @@ export interface ListCoursesParams {
     search?: string
     level?: CourseLevel | ''
     status?: CourseStatus | ''
-    sortBy?: string
-    sortDir?: 'asc' | 'desc'
+    sortBy?: 'name' | 'fee_amount' | 'created_at' | 'duration_hours'
+    sortOrder?: 'asc' | 'desc'
+    includeDeleted?: boolean
 }
 
 type PaginatedResponse<T> = {
@@ -66,14 +67,7 @@ type PaginatedResponse<T> = {
 }
 
 export const listCourses = async (
-    p: {
-        search?: string
-        page?: number
-        limit?: number
-        sortBy?: 'name' | 'fee_amount' | 'created_at' | 'duration_hours'
-        sortOrder?: 'asc' | 'desc'
-        includeDeleted?: boolean
-    } = {}
+    p: ListCoursesParams = {}
 ): Promise<PaginatedResponse<Course>> => {
     const {
         search = '',

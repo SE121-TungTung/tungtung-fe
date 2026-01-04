@@ -16,6 +16,171 @@
     padding: 4px 16px 16px;
 }
 
+.examItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 16px 20px;
+    background: var(--surface-card-light);
+    border: 2px solid var(--boder-soft-light);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.examItem:hover {
+    background: var(--brand-primary-50-light);
+    border-color: var(--brand-primary-light);
+    transform: translateX(4px);
+}
+
+.examItem:active {
+    transform: translateX(2px);
+}
+
+.examItem.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.examMain {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.examHeader {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.examTitle {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary-light);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.difficulty {
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.examDesc {
+    font-size: 13px;
+    color: var(--text-secondary-light);
+    line-height: 1.5;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.examMeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+.metaItem {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-secondary-light);
+}
+
+.metaItem img {
+    width: 14px;
+    height: 14px;
+    opacity: 0.7;
+}
+
+.skillBadge {
+    padding: 3px 8px;
+    background: linear-gradient(
+        115deg,
+        var(--brand-primary-500-light),
+        var(--brand-secondary-500-light)
+    );
+    color: #fff;
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.studentMeta {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    font-size: 13px;
+    padding-top: 8px;
+    border-top: 1px solid var(--boder-soft-light);
+}
+
+.attempts {
+    color: var(--text-secondary-light);
+}
+
+.score {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--status-success-700-light);
+}
+
+.score img {
+    width: 14px;
+    height: 14px;
+}
+
+.studentMeta strong {
+    font-weight: 600;
+    color: var(--text-primary-light);
+}
+
+.examAction {
+    flex-shrink: 0;
+}
+
+.ctaText {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--brand-primary-light);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.arrow {
+    font-size: 16px;
+    transition: transform 0.2s ease;
+}
+
+.examItem:hover .arrow {
+    transform: translateX(4px);
+}
+
+.disabledText {
+    font-size: 13px;
+    color: var(--text-tertiary-light);
+    font-style: italic;
+}
+
 .emptyState {
     flex: 1;
     display: grid;
@@ -26,4 +191,21 @@
     opacity: 0.8;
     font-size: 14px;
     min-height: 200px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .examItem {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .examAction {
+        align-self: flex-end;
+    }
+
+    .examMeta {
+        gap: 8px;
+    }
 }

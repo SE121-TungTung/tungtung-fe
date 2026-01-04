@@ -1,213 +1,199 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
 import s from './Dashboard.module.css'
-import { useNavigate, useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 
-import NavigationMenu from '@/components/common/menu/NavigationMenu'
 import Card from '@/components/common/card/Card'
 import StatCard from '@/components/common/card/StatCard'
 import ScheduleTodayCard from '@/components/common/card/ScheduleToday'
 import TemplateCard from '@/components/common/card/TemplateCard'
+import Skeleton from '@/components/effect/Skeleton'
 
-import AvatarImg from '@/assets/avatar-placeholder.png'
 import ChartBarIcon from '@/assets/Chart Bar.svg'
 import ChatIcon from '@/assets/Chat Square Double Text.svg'
 import YoutubeIcon from '@/assets/Arrow Right.svg'
 import TemplateImg from '@/assets/banner-placeholder.png'
-import RobotIcon from '@/assets/Robot.svg'
-import type { Lesson } from '@/components/common/typography/LessonItem'
-import Chatbot from '@/components/feature/chatbot/Chatbot'
 import { TextHorizontal } from '@/components/common/text/TextHorizontal'
 import TextType from '@/components/common/text/TextType'
-import { getMe } from '@/lib/users'
-import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
-import type { Role } from '@/types/auth'
 
-const stats = [
-    {
-        id: 's1',
-        title: 'Điểm danh',
-        value: '99',
-        unit: '%',
-        subtitle: 'Tỉ lệ tham gia các buổi học hàng tháng',
-        active: true,
-    },
-    {
-        id: 's2',
-        title: 'Điểm hiện tại',
-        value: '4.5',
-        subtitle: 'Điểm đạt được trung bình từ các bài thi',
-    },
-    {
-        id: 's3',
-        title: 'Số bài kiểm tra',
-        value: '124',
-        subtitle: 'Số lần làm bài của bạn trên hệ thống',
-    },
-]
-
-const todaySessions: Lesson[] = [
-    {
-        id: '1',
-        sessionDate: '2025-03-10',
-        startTime: '08:00',
-        endTime: '09:30',
-        className: 'IELTS Intermediate A',
-        courseName: 'IELTS Intermediate A',
-        teacherName: 'Mr. John',
-        roomName: 'A1',
-        status: 'in_progress',
-        attendanceTaken: false,
-    },
-    {
-        id: '2',
-        sessionDate: '2025-03-10',
-        startTime: '10:00',
-        endTime: '11:30',
-        className: 'TOEIC Advanced B',
-        courseName: 'TOEIC Advanced B',
-        teacherName: 'Ms. Jane',
-        roomName: 'B2',
-        status: 'scheduled',
-        attendanceTaken: false,
-    },
-]
+import { getMe, getUserOverview, getMyClasses } from '@/lib/users'
+import type { StudentOverviewStats } from '@/types/user.types'
+import type { Lesson } from '@/components/common/typography/LessonItem'
 
 export default function StudentDashboard() {
-    const navigate = useNavigate()
-    const location = useLocation()
-    const [isChatOpen, setIsChatOpen] = useState(false)
-
-    // Fetch current user
+    // 1. Fetch User Info
     const { data: userData, isLoading: userLoading } = useQuery({
         queryKey: ['me'],
         queryFn: () => getMe(),
     })
 
-    const userRole = 'student' as Role
-    const currentPath = location.pathname
+    // 2. Fetch Overview Stats - Fix bug bằng cách thêm Generic Type <StudentOverviewStats>
+    const { data: overviewData, isLoading: statsLoading } = useQuery({
+        queryKey: ['user-overview'],
+        queryFn: () => getUserOverview<StudentOverviewStats>(),
+    })
 
-    // Get nav items from config
-    const navItems = useMemo(
-        () => getNavItems(userRole, currentPath, navigate),
-        [currentPath, navigate]
-    )
-
-    const userMenuItems = useMemo(
-        () => getUserMenuItems(userRole, navigate),
-        [navigate]
-    )
-
-    // Build greeting text with user's full name
-    const greetingTexts = userData
-        ? [
-              `Xin chào, ${userData.firstName} ${userData.lastName}!`,
-              `Chào mừng trở lại, ${userData.firstName} ${userData.lastName}!`,
-          ]
-        : ['Xin chào!', 'Chào mừng trở lại!']
+    // 3. Fetch Classes/Schedule
+    const { data: myClasses, isLoading: classesLoading } = useQuery({
+        queryKey: ['my-classes'],
+        queryFn: () => getMyClasses(),
+    })
 
     const fullName = userData
         ? `${userData.firstName} ${userData.lastName}`
         : ''
 
+    const greetingTexts = useMemo(() => {
+        if (!userData) return ['Đang tải dữ liệu...']
+        return [
+            `Chào mừng quay trở lại, ${userData.firstName}!`,
+            'Hôm nay bạn muốn học kỹ năng gì?',
+            'Cùng hoàn thành mục tiêu ngày hôm nay nhé!',
+        ]
+    }, [userData])
+
+    const todaySessions = useMemo(() => {
+        if (!myClasses) return []
+        const today = new Date().toISOString().split('T')[0]
+
+        const formattedSessions: Lesson[] = []
+
+        myClasses.forEach((myClass) => {
+            const filtered = (myClass.sessions || []).filter(
+                (s) => s.session_date === today
+            )
+
+            filtered.forEach((session) => {
+                formattedSessions.push({
+                    id: session.id,
+                    className: myClass.name,
+                    sessionDate: session.session_date,
+                    startTime: session.start_time,
+                    endTime: session.end_time,
+                    status: session.status as any,
+                    roomName: myClass.room_name || 'Phòng học',
+                })
+            })
+        })
+
+        return formattedSessions
+    }, [myClasses])
+
     return (
         <div className={s.dashboard}>
-            {/* Navigation */}
-            <header className={s.header}>
-                <NavigationMenu
-                    items={navItems}
-                    rightSlotDropdownItems={userMenuItems}
-                    rightSlot={
-                        <img
-                            src={userData?.avatarUrl || AvatarImg}
-                            style={{
-                                width: '36px',
-                                height: '36px',
-                                borderRadius: '50%',
-                                objectFit: 'cover',
-                                display: 'block',
-                            }}
-                            alt="User Avatar"
-                        />
-                    }
-                />
-            </header>
-
-            {/* Welcome Message */}
-            <h1 className={s.welcomeMessage}>
-                {!userLoading && userData && (
-                    <TextType
-                        text={greetingTexts}
-                        typingSpeed={70}
-                        pauseDuration={5000}
-                        deletingSpeed={50}
-                        renderText={(text) => {
-                            const namePattern = new RegExp(fullName, 'g')
-                            const parts = text.split(namePattern)
-                            const names = text.match(namePattern) || []
-
-                            return (
-                                <>
-                                    {parts.map((part, i) => (
-                                        <React.Fragment key={i}>
-                                            {part}
-                                            {names[i] && (
-                                                <span
-                                                    className={s.gradientText}
-                                                >
-                                                    {names[i]}
-                                                </span>
-                                            )}
-                                        </React.Fragment>
-                                    ))}
-                                </>
-                            )
-                        }}
-                    />
-                )}
-            </h1>
-
-            {/* Main Content */}
             <main className={s.mainContent}>
+                {/* 1. WELCOME MESSAGE WITH SKELETON */}
+                <h1 className={s.welcomeMessage}>
+                    {userLoading ? (
+                        <Skeleton
+                            width="60%"
+                            height="3.5rem"
+                            style={{ margin: '0 auto' }}
+                        />
+                    ) : (
+                        <TextType
+                            text={greetingTexts}
+                            typingSpeed={60}
+                            pauseDuration={3000}
+                            renderText={(text) => (
+                                <>
+                                    {text
+                                        .split(fullName)
+                                        .map((part, i, arr) => (
+                                            <React.Fragment key={i}>
+                                                {part}
+                                                {i < arr.length - 1 && (
+                                                    <span
+                                                        className={
+                                                            s.gradientText
+                                                        }
+                                                    >
+                                                        {fullName}
+                                                    </span>
+                                                )}
+                                            </React.Fragment>
+                                        ))}
+                                </>
+                            )}
+                        />
+                    )}
+                </h1>
+
+                {/* 2. OVERVIEW STATS WITH SKELETON */}
                 <Card
-                    title="Tổng quan"
-                    subtitle="Số liệu phân tích từ các hoạt động gần đây"
+                    title="Tổng quan học tập"
                     direction="horizontal"
+                    className={s.fullRow}
                 >
                     <div className={s.statsGrid}>
-                        {stats.map((stat) => (
-                            <StatCard
-                                key={stat.id}
-                                title={stat.title}
-                                value={stat.value}
-                                unit={stat.unit}
-                                subtitle={stat.subtitle}
-                                active={stat.active}
-                                icon={<img src={ChartBarIcon} />}
-                            />
-                        ))}
+                        {statsLoading ? (
+                            <Skeleton height={140} variant="rect" count={3} />
+                        ) : (
+                            <>
+                                <StatCard
+                                    active
+                                    icon={
+                                        <img src={ChartBarIcon} alt="stats" />
+                                    }
+                                    title="Khóa học"
+                                    subtitle="Số lượng khóa học bạn đang tham gia"
+                                    value={
+                                        overviewData?.active_courses?.toString() ||
+                                        '0'
+                                    }
+                                />
+                                <StatCard
+                                    title="Điểm trung bình"
+                                    subtitle="Kết quả trung bình từ các bài thi"
+                                    value={
+                                        overviewData?.average_test_score?.toString() ||
+                                        '0'
+                                    }
+                                    unit="/10"
+                                />
+                                <StatCard
+                                    title="Bài thi đã làm"
+                                    subtitle="Tổng số bài kiểm tra đã hoàn thành"
+                                    value={
+                                        overviewData?.tests_taken?.toString() ||
+                                        '0'
+                                    }
+                                />
+                            </>
+                        )}
                     </div>
                 </Card>
 
+                {/* 3. LOWER SECTION: SCHEDULE & SUGGESTIONS */}
                 <div className={s.mainRow}>
                     <ScheduleTodayCard
+                        title="Lịch học hôm nay"
                         sessions={todaySessions}
-                        onCheckIn={() => alert('Điểm danh!')}
+                        isLoading={classesLoading}
                     />
 
                     <Card
-                        title="Hôm nay làm gì?"
-                        subtitle="Dựa trên lộ trình học được AI đề xuất"
+                        title="Gợi ý từ AI"
+                        subtitle="Dựa trên tiến độ học tập của bạn"
                     >
                         <div className={s.suggestionBody}>
                             <div className={s.suggestionTip}>
-                                <TextHorizontal
-                                    icon={<img src={ChatIcon} alt="tip icon" />}
-                                    iconStyle="flat"
-                                    title="Tip!"
-                                    description="Trong bài kiểm tra Listening, hãy tập trung nghe vào Keyword để tìm ra đáp án đúng!"
-                                    mode="light"
-                                />
+                                {statsLoading ? (
+                                    <div style={{ width: '100%' }}>
+                                        <Skeleton
+                                            height={20}
+                                            width="50%"
+                                            style={{ marginBottom: '12px' }}
+                                        />
+                                        <Skeleton height={60} variant="rect" />
+                                    </div>
+                                ) : (
+                                    <TextHorizontal
+                                        icon={<img src={ChatIcon} alt="tip" />}
+                                        title="Mẹo học tập"
+                                        description="Bạn đã hoàn thành bài thi gần nhất với điểm số khá cao. Hãy thử sức với các bài tập khó hơn nhé!"
+                                        mode="light"
+                                    />
+                                )}
                             </div>
 
                             <TemplateCard
@@ -217,19 +203,19 @@ export default function StudentDashboard() {
                                         <img
                                             src={ChatIcon}
                                             width={14}
-                                            alt="tag icon"
-                                        />{' '}
+                                            alt="tag"
+                                        />
                                         <span>Speaking</span>
                                     </>
                                 }
-                                title="How to pronounce /ed/ sound?"
-                                excerpt="This is the sample text. Real information will be added later when developing this website."
-                                ctaText="Go to Youtube"
+                                title="Luyện phát âm đuôi /ed/"
+                                excerpt="Bài học ngắn giúp bạn nắm vững quy tắc phát âm đuôi /ed/ trong 5 phút."
+                                ctaText="Xem ngay"
                                 ctaIcon={
                                     <img
                                         src={YoutubeIcon}
                                         width={14}
-                                        alt="cta icon"
+                                        alt="cta"
                                     />
                                 }
                             />
@@ -237,17 +223,6 @@ export default function StudentDashboard() {
                     </Card>
                 </div>
             </main>
-
-            {/* Chatbot FAB */}
-            <button
-                className={s.fab}
-                aria-label="Open chatbot"
-                onClick={() => setIsChatOpen(true)}
-            >
-                <img src={RobotIcon} alt="Chatbot" />
-            </button>
-
-            <Chatbot isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
         </div>
     )
 }

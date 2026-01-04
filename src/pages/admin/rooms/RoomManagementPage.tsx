@@ -1,39 +1,33 @@
-import { useEffect, useMemo, useState } from 'react'
-import {
-    useQuery,
-    useMutation,
-    useQueryClient,
-    keepPreviousData,
-} from '@tanstack/react-query'
+import { useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+
+// Components
 import RoomTable from './RoomTable'
 import { RoomFormModal } from './RoomFormModal'
-import {
-    listRooms,
-    deleteRoom,
-    type Room,
-    type RoomStatus,
-    type RoomType,
-} from '@/lib/rooms'
 import InputField from '@/components/common/input/InputField'
 import { SelectField } from '@/components/common/input/SelectField'
 import { Button } from '@/components/core/Button'
-import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import Card from '@/components/common/card/Card'
+import Pagination from '@/components/common/menu/Pagination'
+
+// Assets & Styles
 import s from './RoomManagementPage.module.css'
 import IconPlus from '@/assets/Plus Thin.svg'
 import IconSearch from '@/assets/Lens.svg'
+
+// Hooks & Types
 import { usePermissions } from '@/hooks/usePermissions'
+import { useTableParams } from '@/hooks/useTableParams'
+import { useRooms, useDeleteRoom } from '@/hooks/domain/useRooms'
+import {
+    type Room,
+    type RoomStatus,
+    type RoomType,
+    type ListRoomsParams,
+} from '@/lib/rooms'
+import { useDialog } from '@/hooks/useDialog'
 
-import { useLocation, useNavigate } from 'react-router-dom'
-import { useSession } from '@/stores/session.store'
-import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
-import NavigationMenu from '@/components/common/menu/NavigationMenu'
-import DefaultAvatar from '@/assets/avatar-placeholder.png'
-import { type Role as UserRole } from '@/types/auth'
-
-type SortBy = 'name' | 'capacity' | 'created_at'
-type SortOrder = 'asc' | 'desc'
-
+// Options Constants
 const ROOM_TYPE_OPTIONS = [
     { label: 'Tất cả loại', value: '' },
     { label: 'Phòng học', value: 'classroom' },
@@ -62,146 +56,58 @@ const SORT_ORDER_OPTIONS = [
     { label: 'Tăng dần', value: 'asc' },
 ]
 
+// Định nghĩa kiểu Filter cho Room
+interface RoomFilters {
+    roomType: RoomType | ''
+    status: RoomStatus | ''
+    capacity: number | ''
+}
+
 export default function RoomManagementPage() {
     const qc = useQueryClient()
     const { can } = usePermissions()
+    const { confirm, alert } = useDialog()
+
     const canCreateRoom = can('room:create')
 
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [editingRoom, setEditingRoom] = useState<Room | null>(null)
 
-    const [searchValue, setSearchValue] = useState('')
-    const [debouncedSearch, setDebouncedSearch] = useState('')
-
-    useEffect(() => {
-        const id = setTimeout(() => setDebouncedSearch(searchValue), 300)
-        return () => clearTimeout(id)
-    }, [searchValue])
-
-    const [roomType, setRoomType] = useState<RoomType | ''>('')
-    const [status, setStatus] = useState<RoomStatus | ''>('')
-    const [page, setPage] = useState(1)
-    const [capacityAtLeast, setCapacityAtLeast] = useState<number | ''>('')
-
-    const [sortBy, setSortBy] = useState<SortBy>('created_at')
-    const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
-    const [includeDeleted] = useState(false)
-
-    const navigate = useNavigate()
-    const session = useSession((state) => state.user)
-    const location = useLocation()
-    const userRole = (session?.role as UserRole) || 'student'
-    const currentPath = location.pathname
-
-    const navItems = useMemo(
-        () => getNavItems(userRole, currentPath, navigate),
-        [userRole, currentPath, navigate]
-    )
-    const userMenuItems = useMemo(
-        () => getUserMenuItems(userRole, navigate),
-        [userRole, navigate]
-    )
-
-    useEffect(() => {
-        setPage(1)
-    }, [debouncedSearch, roomType, status, capacityAtLeast, sortBy, sortOrder])
-
-    const roomsQuery = useQuery({
-        queryKey: [
-            'rooms',
-            {
-                page,
-                limit: 100,
-                sortBy,
-                sortOrder,
-                includeDeleted,
-            },
-        ],
-        queryFn: () =>
-            listRooms({
-                search: '',
-                page: 1,
-                limit: 100,
-                sortBy,
-                sortOrder,
-                includeDeleted,
-            }),
-        placeholderData: keepPreviousData,
+    // 1. Setup Table Logic
+    const {
+        page,
+        search,
+        filters,
+        sort,
+        setPage,
+        setSearch,
+        setFilters,
+        setSort,
+        apiParams,
+    } = useTableParams<RoomFilters>({
+        roomType: '',
+        status: '',
+        capacity: '',
     })
 
-    const rooms = useMemo(() => {
-        let filtered = [...(roomsQuery.data?.items ?? [])]
-
-        if (debouncedSearch) {
-            const searchLower = debouncedSearch.toLowerCase().trim()
-            filtered = filtered.filter((r) => {
-                const nameMatch = r.name.toLowerCase().includes(searchLower)
-                const locationMatch = r.location
-                    ?.toLowerCase()
-                    .includes(searchLower)
-                return nameMatch || locationMatch
-            })
-        }
-
-        if (roomType) {
-            filtered = filtered.filter((r) => r.roomType === roomType)
-        }
-
-        if (status) {
-            filtered = filtered.filter((r) => r.status === status)
-        }
-
-        if (capacityAtLeast !== '' && capacityAtLeast >= 0) {
-            filtered = filtered.filter(
-                (r) => (r.capacity ?? 0) >= capacityAtLeast
-            )
-        }
-
-        const dir = sortOrder === 'asc' ? 1 : -1
-        filtered.sort((a, b) => {
-            let va: any, vb: any
-            switch (sortBy) {
-                case 'name':
-                    va = a.name.toLowerCase()
-                    vb = b.name.toLowerCase()
-                    break
-                case 'capacity':
-                    va = a.capacity
-                    vb = b.capacity
-                    break
-                case 'created_at':
-                default:
-                    va = a.createdAt
-                    vb = b.createdAt
-            }
-            if (va === vb) return 0
-            return va > vb ? dir : -dir
-        })
-
-        return filtered
-    }, [
-        roomsQuery.data?.items,
-        debouncedSearch,
-        roomType,
-        status,
-        capacityAtLeast,
-        sortBy,
-        sortOrder,
-    ])
-
-    const { mutate: doDelete } = useMutation({
-        mutationFn: async (room: Room) => {
-            if (!window.confirm(`Xóa phòng "${room.name}"?`)) return
-            await deleteRoom(room.id)
-        },
-        onSuccess: () => {
-            qc.invalidateQueries({ queryKey: ['rooms'] })
-        },
-        onError: (err: any) => {
-            window.alert(`Không thể xóa phòng: ${err.message}`)
-        },
+    // 2. Data Fetching Hook
+    const {
+        data: roomsData,
+        isLoading,
+        isFetching,
+    } = useRooms({
+        ...apiParams,
+        roomType: (apiParams.roomType as RoomType) || undefined,
+        status: (apiParams.status as RoomStatus) || undefined,
+        capacity:
+            apiParams.capacity === '' ? undefined : Number(apiParams.capacity),
+        sortBy: apiParams.sortBy as ListRoomsParams['sortBy'],
     })
 
+    // 3. Delete Hook
+    const { mutateAsync: deleteRoomMutate } = useDeleteRoom()
+
+    // Handlers
     const handleOpenCreateModal = () => {
         setEditingRoom(null)
         setIsModalOpen(true)
@@ -217,26 +123,19 @@ export default function RoomManagementPage() {
         setEditingRoom(null)
     }
 
-    const data = roomsQuery.data
-    const isLoading = roomsQuery.isLoading
-    const isFetching = roomsQuery.isFetching
+    const handleDeleteRoom = async (room: Room) => {
+        const ok = confirm(`Xóa phòng "${room.name}"?`)
+        if (!ok) return
+
+        try {
+            await deleteRoomMutate(room.id)
+        } catch (err: any) {
+            alert(`Không thể xóa phòng: ${err.message}`)
+        }
+    }
 
     return (
-        <div className={s.pageWrapper}>
-            <header className={s.header}>
-                <NavigationMenu
-                    items={navItems}
-                    rightSlotDropdownItems={userMenuItems}
-                    rightSlot={
-                        <img
-                            src={session?.avatarUrl || DefaultAvatar}
-                            className={s.avatar}
-                            alt="User Avatar"
-                        />
-                    }
-                />
-            </header>
-
+        <div className={s.pageWrapperWithoutHeader}>
             <main className={s.mainContent}>
                 <h1 className={s.pageTitle}>Quản lý phòng học</h1>
 
@@ -246,10 +145,8 @@ export default function RoomManagementPage() {
                             id="search"
                             label=""
                             placeholder="Tìm theo tên hoặc vị trí..."
-                            value={searchValue}
-                            onChange={(e: any) =>
-                                setSearchValue(e.target.value)
-                            }
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
                             leftIcon={<img src={IconSearch} alt="" />}
                         />
                         <InputField
@@ -258,13 +155,17 @@ export default function RoomManagementPage() {
                             type="number"
                             min={0}
                             placeholder="VD: 30"
-                            value={capacityAtLeast}
-                            onChange={(e: any) =>
-                                setCapacityAtLeast(
-                                    e.target.value === ''
-                                        ? ''
-                                        : Math.max(0, Number(e.target.value))
-                                )
+                            value={filters.capacity}
+                            onChange={(e) =>
+                                setFilters({
+                                    capacity:
+                                        e.target.value === ''
+                                            ? ''
+                                            : Math.max(
+                                                  0,
+                                                  Number(e.target.value)
+                                              ),
+                                })
                             }
                         />
                     </div>
@@ -274,30 +175,35 @@ export default function RoomManagementPage() {
                             id="roomTypeFilter"
                             label="Loại phòng"
                             registration={{ name: 'roomTypeFilter' as any }}
-                            value={roomType}
+                            value={filters.roomType}
                             options={ROOM_TYPE_OPTIONS}
-                            onChange={(e: any) => setRoomType(e.target.value)}
+                            onChange={(e) =>
+                                setFilters({
+                                    roomType: e.target.value as RoomType | '',
+                                })
+                            }
                         />
 
                         <SelectField
                             id="statusFilter"
                             label="Trạng thái"
                             registration={{ name: 'statusFilter' as any }}
-                            value={status}
+                            value={filters.status}
                             options={ROOM_STATUS_OPTIONS}
-                            onChange={(e: any) => setStatus(e.target.value)}
+                            onChange={(e) =>
+                                setFilters({
+                                    status: e.target.value as RoomStatus | '',
+                                })
+                            }
                         />
 
                         <SelectField
                             id="sortBy"
                             label="Sắp xếp"
                             registration={{ name: 'sortBy' as any }}
-                            value={sortBy}
+                            value={sort.field}
                             onChange={(e) =>
-                                setSortBy(
-                                    (e.target as HTMLSelectElement)
-                                        .value as SortBy
-                                )
+                                setSort({ ...sort, field: e.target.value })
                             }
                             options={SORT_BY_OPTIONS}
                         />
@@ -306,12 +212,12 @@ export default function RoomManagementPage() {
                             id="sortOrder"
                             label="Thứ tự"
                             registration={{ name: 'sortOrder' as any }}
-                            value={sortOrder}
+                            value={sort.order}
                             onChange={(e) =>
-                                setSortOrder(
-                                    (e.target as HTMLSelectElement)
-                                        .value as SortOrder
-                                )
+                                setSort({
+                                    ...sort,
+                                    order: e.target.value as 'asc' | 'desc',
+                                })
                             }
                             options={SORT_ORDER_OPTIONS}
                         />
@@ -334,57 +240,27 @@ export default function RoomManagementPage() {
 
                 <Card className={s.tableCard} variant="outline">
                     <RoomTable
-                        rooms={rooms}
+                        rooms={roomsData?.items || []}
                         onEditRoom={handleOpenEditModal}
-                        onDeleteRoom={(r) => doDelete(r)}
+                        onDeleteRoom={handleDeleteRoom}
                         isLoading={isLoading || isFetching}
                     />
-                </Card>
 
-                <div className={s.pagination}>
-                    <div className={s.paginationInfo}>
-                        {isFetching ? (
-                            <span>Đang tải...</span>
-                        ) : (
-                            <span>
-                                Hiển thị {rooms.length} / {data?.total ?? 0}{' '}
-                                phòng
-                                {(roomType ||
-                                    status ||
-                                    debouncedSearch ||
-                                    capacityAtLeast !== '') &&
-                                    ' (đã lọc)'}
-                            </span>
+                    <div className={s.pagination}>
+                        <Pagination
+                            currentPage={page}
+                            totalPages={roomsData?.pages || 0}
+                            onPageChange={setPage}
+                        />
+
+                        {!isLoading && roomsData && (
+                            <div className={s.paginationInfo}>
+                                Hiển thị {roomsData.items?.length || 0} /{' '}
+                                {roomsData.total || 0} phòng
+                            </div>
                         )}
                     </div>
-
-                    <div className={s.paginationControls}>
-                        <ButtonPrimary
-                            variant="outline"
-                            size="sm"
-                            disabled={(data?.page ?? 1) <= 1 || isFetching}
-                            onClick={() => setPage((p) => Math.max(1, p - 1))}
-                        >
-                            ← Trước
-                        </ButtonPrimary>
-
-                        <span className={s.pageInfo}>
-                            Trang {data?.page ?? page} / {data?.pages ?? 1}
-                        </span>
-
-                        <ButtonPrimary
-                            variant="outline"
-                            size="sm"
-                            disabled={
-                                (data?.page ?? 1) >= (data?.pages ?? 1) ||
-                                isFetching
-                            }
-                            onClick={() => setPage((p) => p + 1)}
-                        >
-                            Sau →
-                        </ButtonPrimary>
-                    </div>
-                </div>
+                </Card>
             </main>
 
             <RoomFormModal

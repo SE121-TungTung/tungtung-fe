@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { useId } from 'react'
 import { type UseFormRegisterReturn } from 'react-hook-form'
-import styles from './SelectField.module.css'
+import s from './SelectField.module.css'
 import FieldMessage from '@/components/common/typography/FieldMessage'
 import IconCaretDown from '@/assets/Caret Down.svg'
 
@@ -9,12 +9,20 @@ type SelectOption = {
     value: string | number
 }
 
+type Variant = 'glass' | 'neutral' | 'soft'
+type Size = 'sm' | 'md' | 'lg'
+type Mode = 'light' | 'dark'
+
 interface SelectFieldProps
     extends React.SelectHTMLAttributes<HTMLSelectElement> {
-    label: string
+    label?: string
     registration?: Partial<UseFormRegisterReturn>
     error?: string
     options: SelectOption[]
+    variant?: Variant
+    uiSize?: Size
+    mode?: Mode
+    fullWidth?: boolean
 }
 
 export const SelectField: React.FC<SelectFieldProps> = ({
@@ -23,31 +31,54 @@ export const SelectField: React.FC<SelectFieldProps> = ({
     error,
     options,
     id,
+    variant = 'glass',
+    uiSize = 'md',
+    mode = 'light',
+    fullWidth = true,
+    className = '',
     ...props
 }) => {
-    const inputId = id || registration?.name
+    const autoId = useId()
+    const inputId = id || registration?.name || `sel-${autoId}`
+
+    const wrapperClasses = [
+        s.wrapper,
+        s[`variant-${variant}`],
+        s[`size-${uiSize}`],
+        s[mode],
+        fullWidth ? s.fullWidth : '',
+        error ? s.invalid : '',
+        className,
+    ].join(' ')
+
     return (
-        <div className={styles.formGroup}>
-            <label htmlFor={inputId} className={styles.label}>
-                {label}
-            </label>
-            <div className={styles.inputWrapper}>
+        <div className={wrapperClasses}>
+            <div className={s.labelRow}>
+                {label && (
+                    <label htmlFor={inputId} className={s.label}>
+                        {label}
+                    </label>
+                )}
+            </div>
+            <div className={s.inputContainer}>
                 <select
                     id={inputId}
-                    className={`${styles.input} ${styles.select}`}
+                    className={s.select}
                     {...registration}
                     {...props}
                     aria-invalid={!!error}
                 >
-                    <option value="">-- Chọn --</option>
+                    <option value="" disabled>
+                        -- Chọn --
+                    </option>
                     {options.map((option) => (
                         <option key={option.value} value={option.value}>
                             {option.label}
                         </option>
                     ))}
                 </select>
-                <div className={styles.icon}>
-                    <img src={IconCaretDown} alt="Mũi tên xuống" />
+                <div className={s.icon}>
+                    <img src={IconCaretDown} alt="Caret Down" />
                 </div>
             </div>
             {error && (

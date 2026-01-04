@@ -5,7 +5,7 @@
     --pad-y: clamp(6px, 0.9vw, 10px);
     --gap: clamp(10px, 2vw, 24px);
 
-    --fg: var(--text-primary, #0b1520);
+    --fg: var(--text-primary-light);
     --bg: var(--container-border-light, rgba(255, 255, 255, 0.6));
     --bd: var(--border-default, rgba(0, 0, 0, 0.12));
     --hover: var(--state-hover, rgba(0, 0, 0, 0.06));
@@ -26,7 +26,7 @@
     box-shadow:
         0 10px 24px rgba(0, 0, 0, 0.12),
         0 4px 8px rgba(0, 0, 0, 0.08);
-    color: var(--fg);
+    color: var(--text-primary-light);
     overflow: visible;
 }
 
@@ -42,6 +42,7 @@
     font-weight: 800;
     font-size: clamp(16px, 1.6vw, 18px);
     letter-spacing: -0.2px;
+    white-space: nowrap;
 }
 
 .menu {
@@ -50,12 +51,13 @@
     justify-content: space-between;
     gap: 8px;
     list-style: none;
-    margin: 0 100px;
+    margin: 0 clamp(16px, 8vw, 100px);
     padding: 0;
     width: 100%;
     overflow-x: auto;
     overflow-y: visible;
     scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
 }
 .menu::-webkit-scrollbar {
     display: none;
@@ -87,6 +89,8 @@
     white-space: nowrap;
     outline: none;
     overflow: visible;
+    min-height: 44px;
+    touch-action: manipulation;
 }
 .item:hover {
     background: var(--hover);
@@ -112,8 +116,7 @@
     z-index: -1;
     background: #fff;
     border-radius: inherit;
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    box-shadow: 0 5px 5px rgba(0, 0, 0, 0.2);
+    border: 3px solid var(--boder-soft-light);
 }
 
 .icon {
@@ -121,6 +124,14 @@
     height: 16px;
     display: grid;
     place-items: center;
+    flex-shrink: 0;
+}
+
+.rightIcon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 4px;
 }
 
 .right {
@@ -139,6 +150,11 @@
         transform 0.2s ease,
         box-shadow 0.2s ease,
         border-color 0.2s ease;
+    min-height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 .avatarBtn:hover {
     transform: scale(1.05);
@@ -146,7 +162,7 @@
 .avatarBtn[data-active='true'] {
     transform: scale(1.1);
     box-shadow: 0 0 20px rgba(100, 150, 255, 0.5);
-    border-color: #2670e9; /* map to token if available */
+    border-color: #2670e9;
 }
 
 .avatar {
@@ -157,9 +173,8 @@
     display: block;
 }
 
-/* Side Menu */
 .sideMenu {
-    --menu-w: 200px;
+    --menu-w: min(300px, calc(100vw - 32px));
     --radius: 10px;
     --pad: 16px;
     --muted: var(--Text-Muted, rgba(0, 0, 0, 0.7));
@@ -185,6 +200,8 @@
             rgba(255, 255, 255, 0.5)
         ),
         var(--bg);
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
 }
 
 .sideMenuHeader {
@@ -236,6 +253,7 @@
     transition:
         background-color 0.15s ease,
         border-color 0.15s ease;
+    min-height: 44px;
 }
 .sideMenuItem:hover {
     background: linear-gradient(
@@ -269,9 +287,191 @@
     width: 16px;
     height: 16px;
     color: var(--muted);
+    flex-shrink: 0;
 }
 .sideMenuItemLabel {
     line-height: 20px;
     font-weight: 500;
     color: var(--fg);
+}
+
+.hamburgerBtn {
+    display: none;
+}
+
+.mobileMenuOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(16px);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    animation: overlayFadeIn 0.3s ease-out;
+    overflow-y: auto;
+}
+
+.mobileMenuHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    height: var(--nav-h);
+    flex-shrink: 0;
+    color: var(--text-primary-light);
+}
+
+.mobileMenuList {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-bottom: 40px;
+}
+
+.mobileMenuItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary-light);
+    border-radius: 12px;
+    text-decoration: none;
+    background: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    min-height: 52px;
+    position: relative;
+}
+
+.mobileMenuItem:hover,
+.mobileMenuItemActive {
+    background-color: var(--hover);
+}
+
+.mobileMenuItem:active {
+    transform: scale(0.98);
+}
+
+.mobileSubMenu {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-left: 20px;
+    margin-top: 4px;
+    margin-bottom: 8px;
+    border-left: 2px solid rgba(0, 0, 0, 0.06);
+    animation: subMenuSlideIn 0.25s ease-out;
+    transform-origin: top;
+}
+
+.mobileSubMenuItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.75);
+    border-radius: 8px;
+    text-decoration: none;
+    background: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 44px;
+}
+
+.mobileSubMenuItem:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+    color: var(--fg);
+    padding-left: 20px;
+}
+
+.mobileSubMenuItem:active {
+    transform: scale(0.97);
+}
+
+/* Tablet: Hide some items, show hamburger if cramped */
+@media (max-width: 1024px) {
+    .menu {
+        margin: 0 clamp(12px, 4vw, 48px);
+    }
+}
+
+/* Mobile: Full hamburger menu */
+@media (max-width: 768px) {
+    .menu {
+        display: none;
+    }
+    .hamburgerBtn {
+        display: block;
+    }
+    .brand {
+        font-size: 16px;
+    }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+    .root {
+        padding: 6px 12px;
+    }
+    .left {
+        gap: 8px;
+    }
+    .mobileMenuOverlay {
+        padding: 16px;
+    }
+    .mobileMenuItem {
+        font-size: 0.9375rem;
+        padding: 14px 12px;
+    }
+    .mobileSubMenuItem {
+        font-size: 0.875rem;
+        padding: 10px 12px;
+    }
+}
+
+/* Animations */
+@keyframes overlayFadeIn {
+    from {
+        opacity: 0;
+        backdrop-filter: blur(0);
+    }
+    to {
+        opacity: 1;
+        backdrop-filter: blur(16px);
+    }
+}
+
+@keyframes subMenuSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 500px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mobileMenuOverlay,
+    .mobileSubMenu {
+        animation: none;
+    }
+    .mobileMenuItem:active,
+    .mobileSubMenuItem:active {
+        transform: none;
+    }
 }

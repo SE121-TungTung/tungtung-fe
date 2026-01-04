@@ -1,7 +1,6 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import s from './ExamPracticePage.module.css'
 
-import NavigationMenu from '@/components/common/menu/NavigationMenu'
 import TextType from '@/components/common/text/TextType'
 import SegmentedControl, {
     type SegItem,
@@ -9,109 +8,58 @@ import SegmentedControl, {
 import InputField from '@/components/common/input/InputField'
 import SkillCard from '@/components/common/card/SkillCard'
 import ExamListCard from './ExamListCard'
-import type { ExamInfo } from '@/components/common/list/ExamItem'
 
-import AvatarPlaceholder from '@/assets/avatar-placeholder.png'
 import SearchIcon from '@/assets/Action Eye Tracking.svg'
 import ListeningIcon from '@/assets/Action Ear Normal.svg'
 import ReadingIcon from '@/assets/Book Open.svg'
 import WritingIcon from '@/assets/Edit Pen.svg'
 import SpeakingIcon from '@/assets/Microphone.svg'
+import BackIcon from '@/assets/arrow-left.svg'
 
-import { useLocation, useNavigate } from 'react-router-dom'
-import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
 import { useSession } from '@/stores/session.store'
 
-const mockExams: ExamInfo[] = [
-    {
-        id: 'l1',
-        title: 'IELTS Listening Practice Test 1',
-        skill: 'listening',
-        durationMinutes: 30,
-        questionCount: 40,
-    },
-    {
-        id: 'l2',
-        title: 'TOEIC Listening Part 3 Simulation',
-        skill: 'listening',
-        durationMinutes: 25,
-        questionCount: 39,
-    },
-    {
-        id: 'r1',
-        title: 'IELTS Reading Academic Test 1',
-        skill: 'reading',
-        durationMinutes: 60,
-        questionCount: 40,
-    },
-    {
-        id: 'r2',
-        title: 'TOEFL Reading Passage Practice',
-        skill: 'reading',
-        durationMinutes: 20,
-        questionCount: 10,
-    },
-    {
-        id: 'w1',
-        title: 'IELTS Writing Task 1 (Academic)',
-        skill: 'writing',
-        durationMinutes: 20,
-        questionCount: 1,
-    },
-    {
-        id: 'w2',
-        title: 'IELTS Writing Task 2: Opinion Essay',
-        skill: 'writing',
-        durationMinutes: 40,
-        questionCount: 1,
-    },
-    {
-        id: 's1',
-        title: 'IELTS Speaking Part 1 Practice',
-        skill: 'speaking',
-        durationMinutes: 5,
-        questionCount: 10,
-    },
-    {
-        id: 'f1',
-        title: 'Full IELTS Academic Mock Test 1',
-        skill: 'full',
-        durationMinutes: 165,
-        questionCount: 91,
-    },
-    {
-        id: 'f2',
-        title: 'Full Mock Test by British Council',
-        skill: 'full',
-        durationMinutes: 120,
-        questionCount: 200,
-    },
+// API imports
+import {
+    testApi,
+    // , getSkillAreaLabel
+} from '@/lib/test'
+import type { StudentTestListItem, TestListItem } from '@/types/test.types'
+import { SkillArea } from '@/types/test.types'
+import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
+import ExamGrid from '@/components/feature/exams/ExamGrid'
+import ButtonGhost from '@/components/common/button/ButtonGhost'
+import { useNavigate } from 'react-router-dom'
+import { useDialog } from '@/hooks/useDialog'
+
+const contentModeItems: SegItem[] = [
+    { label: 'Theo Kỹ năng', value: 'skill' },
+    { label: 'Tất cả bài thi', value: 'all' },
 ]
 
-const viewModeItems: SegItem[] = [
-    { label: 'Theo Kỹ năng', value: 'skill' },
-    { label: 'Theo Bài thi', value: 'exam' },
+const displayModeItems: SegItem[] = [
+    { label: 'Lưới', value: 'grid' },
+    { label: 'Danh sách', value: 'list' },
 ]
 
 const skills = [
     {
         name: 'Nghe',
-        value: 'listening',
+        value: SkillArea.LISTENING,
         icon: <img src={ListeningIcon} alt="Listening" />,
     },
     {
         name: 'Đọc',
-        value: 'reading',
+        value: SkillArea.READING,
         icon: <img src={ReadingIcon} alt="Reading" />,
     },
     {
         name: 'Viết',
-        value: 'writing',
+        value: SkillArea.WRITING,
         icon: <img src={WritingIcon} alt="Writing" />,
     },
     {
         name: 'Nói',
-        value: 'speaking',
+        value: SkillArea.SPEAKING,
         icon: <img src={SpeakingIcon} alt="Speaking" />,
     },
 ]
@@ -120,85 +68,139 @@ export default function ExamPracticePage() {
     const sessionState = useSession()
     const userRole = sessionState?.user?.role || 'student'
     const navigate = useNavigate()
-    const location = useLocation()
-    const currentPath = location.pathname
+    const { alert } = useDialog()
 
-    const [viewMode, setViewMode] = useState<'skill' | 'exam'>('skill')
-    const [selectedSkill, setSelectedSkill] = useState<string | null>(null)
+    const [contentMode, setContentMode] = useState<'skill' | 'all'>('skill')
+    const [displayMode, setDisplayMode] = useState<'grid' | 'list'>('grid')
+    const [selectedSkill, setSelectedSkill] = useState<SkillArea | null>(null)
+
     const [searchTerm, setSearchTerm] = useState('')
     const [showGradientName, setShowGradientName] = useState(false)
 
-    const navItems = useMemo(
-        () => getNavItems(userRole as any, currentPath, navigate),
-        [userRole, currentPath, navigate]
+    // API state
+    const [tests, setTests] = useState<TestListItem[] | StudentTestListItem[]>(
+        []
     )
-    const userMenuItems = useMemo(
-        () => getUserMenuItems(userRole as any, navigate),
-        [userRole, navigate]
-    )
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+
+    const loadTests = async () => {
+        setLoading(true)
+        setError(null)
+        try {
+            let data: any
+            if (userRole === 'student') {
+                data = await testApi.listStudentTests({
+                    limit: 100,
+                })
+            } else {
+                data = await testApi.listTests({
+                    limit: 100,
+                })
+            }
+            if (Array.isArray(data)) {
+                setTests(data)
+            } else if (data && Array.isArray(data.tests)) {
+                setTests(data.tests)
+            } else if (data && Array.isArray(data.items)) {
+                setTests(data.items)
+            } else {
+                console.warn('Unexpected API response structure:', data)
+                setTests([])
+            }
+        } catch (err: any) {
+            console.error('Failed to load tests:', err)
+            setError(err.message || 'Không thể tải danh sách bài thi')
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        loadTests()
+    }, [])
 
     const handleGreetingComplete = useCallback(() => {
         setShowGradientName(true)
     }, [])
 
-    const handleSelectSkill = (skillValue: string) => {
+    const handleSelectSkill = (skillValue: SkillArea) => {
         setSelectedSkill(skillValue)
-        setSearchTerm('') // Reset search khi chọn kỹ năng mới
+        setSearchTerm('')
     }
 
     const handleBackFromList = () => {
         setSelectedSkill(null)
-        setSearchTerm('') // Reset search khi quay lại
+        setSearchTerm('')
     }
 
-    const handleStartExam = (examId: string) => {
-        console.log(`Starting exam: ${examId}`)
-        // Điều hướng đến trang làm bài thi
-        // Ví dụ: navigate(`/student/exams/${examId}/do`);
-        alert(`Bắt đầu bài thi ID: ${examId}`)
+    const handleExamClick = async (examId: string) => {
+        if (userRole === 'student') {
+            try {
+                const attempt = await testApi.startAttempt(examId)
+                localStorage.setItem(
+                    `attempt_${attempt.attemptId}`,
+                    JSON.stringify(attempt)
+                )
+                navigate(`/student/tests/${examId}/take/${attempt.attemptId}`)
+            } catch (error: any) {
+                console.error('Failed to start exam:', error)
+                alert(error.message || 'Không thể bắt đầu bài thi')
+            }
+        } else {
+            navigate(`/teacher/tests/${examId}/view`)
+        }
     }
 
     const filteredExams = useMemo(() => {
-        let examsToShow = mockExams
+        let examsToShow = tests
 
-        if (viewMode === 'skill' && selectedSkill) {
-            examsToShow = mockExams.filter(
-                (exam) => exam.skill === selectedSkill
-            )
-        } else if (viewMode === 'exam') {
-            // Lấy các bài full test (skill === 'full')
-            // Hoặc tất cả nếu bạn muốn tìm kiếm trên tất cả? Tạm lấy full test.
-            examsToShow = mockExams.filter((exam) => exam.skill === 'full')
-        } else {
-            // Khi ở view chọn kỹ năng, danh sách lọc sẽ áp dụng cho lần xem chi tiết
-            // Hoặc nếu search bar ở ngoài, nó sẽ lọc gì? Tạm thời chỉ lọc khi ở list view.
-            examsToShow = [] // Không hiển thị list khi đang chọn skill
+        // Filter by content mode and skill
+        if (contentMode === 'skill' && selectedSkill) {
+            examsToShow = tests.filter((test) => {
+                if ('skill' in test) {
+                    return test.skill === selectedSkill
+                }
+                return false
+            })
         }
 
-        if (searchTerm) {
-            return examsToShow.filter((exam) =>
-                exam.title.toLowerCase().includes(searchTerm.toLowerCase())
+        // Filter by search term
+        if (searchTerm.trim()) {
+            examsToShow = examsToShow.filter((test) =>
+                test.title.toLowerCase().includes(searchTerm.toLowerCase())
             )
         }
 
         return examsToShow
-    }, [searchTerm, selectedSkill, viewMode])
+    }, [tests, searchTerm, selectedSkill, contentMode])
 
     const renderContent = () => {
-        if (viewMode === 'skill') {
-            if (selectedSkill) {
-                const skillInfo = skills.find((s) => s.value === selectedSkill)
-                return (
-                    <div className={s.examListContainer}>
-                        <ExamListCard
-                            title={`Bài thi kỹ năng: ${skillInfo?.name || ''}`}
-                            exams={filteredExams}
-                            onBackClick={handleBackFromList}
-                            onStartExam={handleStartExam}
-                        />
+        if (loading) {
+            return (
+                <div className={s.examListContainer}>
+                    <div className={s.loadingState}>Đang tải danh sách...</div>
+                </div>
+            )
+        }
+
+        if (error) {
+            return (
+                <div className={s.examListContainer}>
+                    <div className={s.errorState}>
+                        <p>⚠ {error}</p>
+                        <ButtonPrimary onClick={loadTests}>
+                            Thử lại
+                        </ButtonPrimary>
                     </div>
-                )
-            } else {
+                </div>
+            )
+        }
+
+        // Mode 1: Theo Kỹ năng
+        if (contentMode === 'skill') {
+            // Chưa chọn skill → Hiện skill cards
+            if (selectedSkill === null) {
                 return (
                     <div className={s.skillGrid}>
                         {skills.map((skill) => (
@@ -212,35 +214,75 @@ export default function ExamPracticePage() {
                     </div>
                 )
             }
-        } else {
-            return (
-                <div className={s.examListContainer}>
+
+            // Đã chọn skill → Hiện exams theo displayMode
+            const skillInfo = skills.find((s) => s.value === selectedSkill)
+            const title = `Bài thi kỹ năng: ${skillInfo?.name || ''}`
+
+            if (displayMode === 'grid') {
+                return (
+                    <div className={s.examSection}>
+                        <div className={s.sectionHeader}>
+                            <h2 className={s.sectionTitle}>{title}</h2>
+                            <ButtonGhost
+                                size="sm"
+                                mode="light"
+                                leftIcon={<img src={BackIcon} alt="back" />}
+                                onClick={handleBackFromList}
+                            >
+                                Quay lại
+                            </ButtonGhost>
+                        </div>
+                        <ExamGrid
+                            exams={filteredExams}
+                            onExamClick={handleExamClick}
+                            userRole={userRole as any}
+                        />
+                    </div>
+                )
+            } else {
+                return (
                     <ExamListCard
-                        title="Danh sách bài thi đầy đủ"
+                        title={title}
                         exams={filteredExams}
-                        onStartExam={handleStartExam}
+                        onBackClick={handleBackFromList}
+                        onExamClick={handleExamClick}
+                        isLoading={false}
+                        viewMode="list"
+                        userRole={userRole as any}
+                    />
+                )
+            }
+        }
+
+        // Mode 2: Tất cả đề thi
+        if (displayMode === 'grid') {
+            return (
+                <div className={s.examSection}>
+                    <h2 className={s.sectionTitle}>Tất cả bài thi</h2>
+                    <ExamGrid
+                        exams={filteredExams}
+                        onExamClick={handleExamClick}
+                        userRole={userRole as any}
                     />
                 </div>
+            )
+        } else {
+            return (
+                <ExamListCard
+                    title="Tất cả bài thi"
+                    exams={filteredExams}
+                    onExamClick={handleExamClick}
+                    isLoading={false}
+                    viewMode="list"
+                    userRole={userRole as any}
+                />
             )
         }
     }
 
     return (
-        <div className={s.pageWrapper}>
-            <header className={s.header}>
-                <NavigationMenu
-                    items={navItems}
-                    rightSlotDropdownItems={userMenuItems}
-                    rightSlot={
-                        <img
-                            src={AvatarPlaceholder}
-                            className={s.avatar}
-                            alt="User Avatar"
-                        />
-                    }
-                />
-            </header>
-
+        <div className={s.pageWrapperWithoutHeader}>
             <main className={s.mainContent}>
                 <h1 className={s.pageTitle}>
                     <TextType
@@ -262,7 +304,8 @@ export default function ExamPracticePage() {
                 </h1>
 
                 <div className={s.controlsBar}>
-                    {(selectedSkill !== null || viewMode === 'exam') && (
+                    {/* Search - chỉ hiện khi đang xem danh sách đề */}
+                    {(selectedSkill !== null || contentMode === 'all') && (
                         <div className={s.searchWrapper}>
                             <InputField
                                 placeholder="Tìm kiếm bài thi..."
@@ -275,25 +318,31 @@ export default function ExamPracticePage() {
                             />
                         </div>
                     )}
-                    <div
-                        className={s.viewModeControl}
-                        style={{
-                            marginLeft:
-                                selectedSkill === null && viewMode === 'skill'
-                                    ? 'auto'
-                                    : '0',
-                        }}
-                    >
+
+                    <div className={s.viewControls}>
+                        {/* Content Mode: Theo Kỹ năng | Tất cả */}
                         <SegmentedControl
-                            items={viewModeItems}
-                            value={viewMode}
+                            items={contentModeItems}
+                            value={contentMode}
                             onChange={(value) => {
-                                setViewMode(value as 'skill' | 'exam')
+                                setContentMode(value as 'skill' | 'all')
                                 setSelectedSkill(null)
                                 setSearchTerm('')
                             }}
                             size="sm"
                         />
+
+                        {/* Display Mode: Lưới | Danh sách - chỉ hiện khi đang xem list đề */}
+                        {(selectedSkill !== null || contentMode === 'all') && (
+                            <SegmentedControl
+                                items={displayModeItems}
+                                value={displayMode}
+                                onChange={(value) =>
+                                    setDisplayMode(value as 'grid' | 'list')
+                                }
+                                size="sm"
+                            />
+                        )}
                     </div>
                 </div>
 

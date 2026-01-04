@@ -8,6 +8,7 @@ import { usePermissions } from '@/hooks/usePermissions'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import IconEdit from '@/assets/Edit Pen.svg'
 import IconDelete from '@/assets/Trash Bin.svg'
+import Skeleton from '@/components/effect/Skeleton'
 
 const roomTypeDisplayNames: Record<RoomType, string> = {
     classroom: 'Phòng học',
@@ -53,6 +54,54 @@ export default function RoomTable({
         return roomTypeDisplayNames[type] || type
     }
 
+    const RoomRowSkeleton = () => (
+        <tr>
+            <td>
+                <div className={s.userInfo}>
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 4,
+                        }}
+                    >
+                        <Skeleton width={120} height={16} />
+                        <Skeleton width={80} height={12} />
+                    </div>
+                </div>
+            </td>
+            <td>
+                <Skeleton width={40} height={16} />
+            </td>
+            <td>
+                <Skeleton width={100} height={16} />
+            </td>
+            <td>
+                <Skeleton width={90} height={24} style={{ borderRadius: 12 }} />
+            </td>
+            <td>
+                <Skeleton width={30} height={16} />
+            </td>
+            <td>
+                <Skeleton width={80} height={16} />
+            </td>
+            <td>
+                <div className={s.actionsCell}>
+                    <Skeleton
+                        width={36}
+                        height={36}
+                        style={{ borderRadius: 8 }}
+                    />
+                    <Skeleton
+                        width={36}
+                        height={36}
+                        style={{ borderRadius: 8 }}
+                    />
+                </div>
+            </td>
+        </tr>
+    )
+
     return (
         <table className={s.table}>
             <thead>
@@ -68,17 +117,11 @@ export default function RoomTable({
             </thead>
             <tbody>
                 {isLoading ? (
-                    <tr>
-                        <td
-                            colSpan={7}
-                            style={{
-                                textAlign: 'center',
-                                padding: 'var(--space-24)',
-                            }}
-                        >
-                            Đang tải...
-                        </td>
-                    </tr>
+                    <>
+                        {[...Array(5)].map((_, i) => (
+                            <RoomRowSkeleton key={i} />
+                        ))}
+                    </>
                 ) : rooms.length === 0 ? (
                     <tr>
                         <td

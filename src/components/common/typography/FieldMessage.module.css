@@ -62,23 +62,23 @@
     --fg: #ffe9ec;
     --bg: rgba(214, 40, 57, 0.12);
     --bd: rgba(214, 40, 57, 0.35);
-    color: #ffd9de;
+    color: var(--status-danger-500-light);
 }
 .root[data-tone='warning'] {
     --fg: #fff7e6;
     --bg: rgba(255, 184, 0, 0.12);
     --bd: rgba(255, 184, 0, 0.35);
-    color: #fff2cc;
+    color: var(--status-warning-500-light);
 }
 .root[data-tone='success'] {
     --fg: #eafff6;
     --bg: rgba(32, 167, 116, 0.12);
     --bd: rgba(32, 167, 116, 0.35);
-    color: #d6fff0;
+    color: var(--status-success-500-light);
 }
 .root[data-tone='info'] {
     --fg: #e7f5ff;
     --bg: rgba(83, 195, 255, 0.12);
     --bd: rgba(83, 195, 255, 0.35);
-    color: #d5eeff;
+    color: var(--status-info-500-light);
 }

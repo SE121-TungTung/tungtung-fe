@@ -2,7 +2,11 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import styles from './NavigationMenu.module.css'
 import SideMenuSet, { type SideMenuItem } from './SideMenuSet'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import IconHamburger from '@/assets/Menu Hamburger.svg'
+import IconClose from '@/assets/Close X Thin.svg'
+import ButtonGhost from '../button/ButtonGhost'
+import NotificationBell from '@/components/feature/notification/NotificationBell'
 
 export type NavItem = {
     id?: string
@@ -11,6 +15,7 @@ export type NavItem = {
     onClick?: (e: React.MouseEvent) => void
     active?: boolean
     leftIcon?: React.ReactNode
+    rightIcon?: React.ReactNode
     dropdownItems?: SideMenuItem[]
 }
 
@@ -21,6 +26,17 @@ export interface NavigationMenuProps {
     rightSlotDropdownItems?: SideMenuItem[]
     onItemSelect?: (index: number, item: NavItem, e: React.MouseEvent) => void
     className?: string
+}
+
+function debounce<T extends (...args: any[]) => any>(
+    func: T,
+    wait: number
+): (...args: Parameters<T>) => void {
+    let timeout: ReturnType<typeof setTimeout> | null = null
+    return (...args: Parameters<T>) => {
+        if (timeout) clearTimeout(timeout)
+        timeout = setTimeout(() => func(...args), wait)
+    }
 }
 
 export default function NavigationMenu({
@@ -35,23 +51,71 @@ export default function NavigationMenu({
     const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({})
     const triggerRefs = useRef<Record<string, HTMLElement | null>>({})
 
+    const [isMobileOpen, setIsMobileOpen] = useState(false)
+    const [expandedMobileItems, setExpandedMobileItems] = useState<Set<number>>(
+        new Set()
+    )
+    const navigate = useNavigate()
+
     const idFor = (it: NavItem, i: number) => it.id ?? `item-${i}`
+
+    const handleMobileNavigate = (
+        href?: string,
+        onClick?: (e: any) => void,
+        e?: any
+    ) => {
+        setIsMobileOpen(false)
+        setExpandedMobileItems(new Set())
+        if (onClick) onClick(e)
+        if (href) navigate(href)
+    }
+
+    const toggleMobileExpand = (index: number) => {
+        setExpandedMobileItems((prev) => {
+            const next = new Set(prev)
+            if (next.has(index)) {
+                next.delete(index)
+            } else {
+                next.add(index)
+            }
+            return next
+        })
+    }
 
     const updatePosition = useCallback(() => {
         if (!activeDropdown) return
         const el = triggerRefs.current[activeDropdown]
         if (!el) return
         const rect = el.getBoundingClientRect()
+
+        // Check if dropdown would overflow viewport
+        const dropdownHeight = 300 // approximate
+        const isNearBottom = rect.bottom + dropdownHeight > window.innerHeight
+
         if (activeDropdown === 'rightSlot') {
-            setMenuStyle({
-                top: `${rect.bottom + 12}px`,
-                right: `${window.innerWidth - rect.right}px`,
-            })
+            if (isNearBottom) {
+                setMenuStyle({
+                    bottom: `${window.innerHeight - rect.top + 12}px`,
+                    right: `${window.innerWidth - rect.right}px`,
+                })
+            } else {
+                setMenuStyle({
+                    top: `${rect.bottom + 12}px`,
+                    right: `${window.innerWidth - rect.right}px`,
+                })
+            }
         } else {
-            setMenuStyle({
-                top: `${rect.bottom + 12}px`,
-                left: `${rect.left}px`,
-            })
+            if (isNearBottom) {
+                setMenuStyle({
+                    bottom: `${window.innerHeight - rect.top + 12}px`,
+                    left: `${rect.left}px`,
+                })
+            } else {
+                setMenuStyle({
+                    top: `${rect.bottom + 12}px`,
+                    left: `${rect.left}px`,
+                })
+            }
         }
     }, [activeDropdown])
 
@@ -61,15 +125,17 @@ export default function NavigationMenu({
 
     useEffect(() => {
         if (!activeDropdown) return
-        const onWin = () => updatePosition()
-        window.addEventListener('resize', onWin)
-        window.addEventListener('scroll', onWin, {
+        const debouncedUpdate = debounce(updatePosition, 100)
+        window.addEventListener('resize', debouncedUpdate)
+        window.addEventListener('scroll', updatePosition, {
             capture: false,
             passive: true,
         })
         return () => {
-            window.removeEventListener('resize', onWin)
-            window.removeEventListener('scroll', onWin, { capture: false })
+            window.removeEventListener('resize', debouncedUpdate)
+            window.removeEventListener('scroll', updatePosition, {
+                capture: false,
+            })
         }
     }, [activeDropdown, updatePosition])
 
@@ -83,6 +149,29 @@ export default function NavigationMenu({
         document.addEventListener('click', handleClickOutside)
         return () => document.removeEventListener('click', handleClickOutside)
     }, [activeDropdown])
+
+    // Prevent body scroll when mobile menu is open
+    useEffect(() => {
+        if (isMobileOpen) {
+            document.body.style.overflow = 'hidden'
+            return () => {
+                document.body.style.overflow = ''
+            }
+        }
+    }, [isMobileOpen])
+
+    // Keyboard navigation for mobile menu
+    useEffect(() => {
+        if (!isMobileOpen) return
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                setIsMobileOpen(false)
+                setExpandedMobileItems(new Set())
+            }
+        }
+        document.addEventListener('keydown', handleKeyDown)
+        return () => document.removeEventListener('keydown', handleKeyDown)
+    }, [isMobileOpen])
 
     const handleItemClick =
         (item: NavItem, index: number) => (e: React.MouseEvent) => {
@@ -142,6 +231,13 @@ export default function NavigationMenu({
                                                 </span>
                                             )}
                                             <span>{it.label}</span>
+                                            {it.rightIcon && (
+                                                <span
+                                                    className={styles.rightIcon}
+                                                >
+                                                    {it.rightIcon}
+                                                </span>
+                                            )}
                                         </Link>
                                     ) : (
                                         <button
@@ -155,6 +251,13 @@ export default function NavigationMenu({
                                                 </span>
                                             )}
                                             <span>{it.label}</span>
+                                            {it.rightIcon && (
+                                                <span
+                                                    className={styles.rightIcon}
+                                                >
+                                                    {it.rightIcon}
+                                                </span>
+                                            )}
                                         </button>
                                     )}
                                 </li>
@@ -164,32 +267,49 @@ export default function NavigationMenu({
                 </div>
 
                 <div className={styles.right}>
-                    {rightSlotDropdownItems.length > 0 ? (
-                        <button
-                            type="button"
-                            ref={(el) => {
-                                triggerRefs.current['rightSlot'] = el
-                            }}
-                            data-dropdown-trigger
-                            className={styles.avatarBtn}
-                            data-active={activeDropdown === 'rightSlot'}
-                            aria-haspopup="menu"
-                            aria-expanded={
-                                activeDropdown === 'rightSlot' || undefined
+                    <NotificationBell />
+                    <div className={styles.rightSlotContainer}>
+                        {rightSlotDropdownItems.length > 0 ? (
+                            <button
+                                type="button"
+                                ref={(el) => {
+                                    triggerRefs.current['rightSlot'] = el
+                                }}
+                                data-dropdown-trigger
+                                className={styles.avatarBtn}
+                                data-active={activeDropdown === 'rightSlot'}
+                                aria-haspopup="menu"
+                                aria-expanded={
+                                    activeDropdown === 'rightSlot' || undefined
+                                }
+                                onClick={() =>
+                                    setActiveDropdown(
+                                        activeDropdown === 'rightSlot'
+                                            ? null
+                                            : 'rightSlot'
+                                    )
+                                }
+                            >
+                                {rightSlot}
+                            </button>
+                        ) : (
+                            rightSlot
+                        )}
+                    </div>
+
+                    <div className={styles.hamburgerBtn}>
+                        <ButtonGhost
+                            size="sm"
+                            onClick={() => setIsMobileOpen(true)}
+                            leftIcon={
+                                <img
+                                    src={IconHamburger}
+                                    alt="Menu"
+                                    style={{ width: 24, height: 24 }}
+                                />
                             }
-                            onClick={() =>
-                                setActiveDropdown(
-                                    activeDropdown === 'rightSlot'
-                                        ? null
-                                        : 'rightSlot'
-                                )
-                            }
-                        >
-                            {rightSlot}
-                        </button>
-                    ) : (
-                        rightSlot
-                    )}
+                        />
+                    </div>
                 </div>
             </nav>
 
@@ -217,6 +337,117 @@ export default function NavigationMenu({
                                 },
                             }))}
                         />
+                    </div>,
+                    document.body
+                )}
+
+            {isMobileOpen &&
+                createPortal(
+                    <div className={styles.mobileMenuOverlay}>
+                        <div className={styles.mobileMenuHeader}>
+                            {brand}
+                            <ButtonGhost
+                                size="sm"
+                                onClick={() => {
+                                    setIsMobileOpen(false)
+                                    setExpandedMobileItems(new Set())
+                                }}
+                                leftIcon={
+                                    <img
+                                        src={IconClose}
+                                        alt="Close"
+                                        style={{ width: 24, height: 24 }}
+                                    />
+                                }
+                            />
+                        </div>
+
+                        <div className={styles.mobileMenuList}>
+                            {items.map((item, index) => {
+                                const isExpanded =
+                                    expandedMobileItems.has(index)
+                                const hasDropdown =
+                                    item.dropdownItems &&
+                                    item.dropdownItems.length > 0
+
+                                return (
+                                    <React.Fragment key={index}>
+                                        <button
+                                            className={`${styles.mobileMenuItem} ${item.active ? styles.mobileMenuItemActive : ''}`}
+                                            onClick={(e) => {
+                                                if (hasDropdown) {
+                                                    toggleMobileExpand(index)
+                                                } else {
+                                                    handleMobileNavigate(
+                                                        item.href,
+                                                        item.onClick,
+                                                        e
+                                                    )
+                                                }
+                                            }}
+                                            aria-expanded={
+                                                hasDropdown
+                                                    ? isExpanded
+                                                    : undefined
+                                            }
+                                        >
+                                            {item.leftIcon}
+                                            <span style={{ flex: 1 }}>
+                                                {item.label}
+                                            </span>
+                                            {hasDropdown && (
+                                                <svg
+                                                    width="16"
+                                                    height="16"
+                                                    viewBox="0 0 16 16"
+                                                    fill="currentColor"
+                                                    style={{
+                                                        transform: isExpanded
+                                                            ? 'rotate(180deg)'
+                                                            : 'rotate(0deg)',
+                                                        transition:
+                                                            'transform 0.2s ease',
+                                                    }}
+                                                >
+                                                    <path d="M4 6l4 4 4-4" />
+                                                </svg>
+                                            )}
+                                        </button>
+
+                                        {hasDropdown && isExpanded && (
+                                            <div
+                                                className={styles.mobileSubMenu}
+                                            >
+                                                {item.dropdownItems!.map(
+                                                    (subItem, subIndex) => (
+                                                        <button
+                                                            key={`${index}-${subIndex}`}
+                                                            className={
+                                                                styles.mobileSubMenuItem
+                                                            }
+                                                            onClick={(e) =>
+                                                                handleMobileNavigate(
+                                                                    (
+                                                                        subItem as any
+                                                                    ).href,
+                                                                    subItem.onClick,
+                                                                    e
+                                                                )
+                                                            }
+                                                        >
+                                                            {subItem.icon}
+                                                            <span>
+                                                                {subItem.label}
+                                                            </span>
+                                                        </button>
+                                                    )
+                                                )}
+                                            </div>
+                                        )}
+                                    </React.Fragment>
+                                )
+                            })}
+                        </div>
                     </div>,
                     document.body
                 )}

@@ -1,14 +1,9 @@
 import { useState, useCallback, useEffect } from 'react'
 import s from './ProfilePage.module.css'
 import { useSession } from '@/stores/session.store'
-import { useLocation, useNavigate } from 'react-router-dom'
 
-import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
-
-import NavigationMenu from '@/components/common/menu/NavigationMenu'
 import TextType from '@/components/common/text/TextType'
 import TabMenu, { type TabItem } from '@/components/common/menu/TabMenu'
-import DefaultAvatar from '@/assets/avatar-placeholder.png'
 
 import { ProfileOverview } from '@/components/feature/profile/ProfileOverview'
 import { ProfileEditor } from '@/components/feature/profile/ProfileEditor'
@@ -26,11 +21,7 @@ export default function ProfilePage() {
     const setUser = useSession((s) => s.setUser)
     const queryClient = useQueryClient()
 
-    const location = useLocation()
-    const navigate = useNavigate()
-
     const userRole = sessionState?.user?.role || 'student'
-    const currentPath = location.pathname
 
     const [activeTab, setActiveTab] = useState('overview')
     const [showGradientName, setShowGradientName] = useState(false)
@@ -38,9 +29,6 @@ export default function ProfilePage() {
     const handleGreetingComplete = useCallback(() => {
         setShowGradientName(true)
     }, [])
-
-    const navItems = getNavItems(userRole as any, currentPath, navigate)
-    const userMenuItems = getUserMenuItems(userRole as any, navigate)
 
     const { data: meUser } = useQuery({
         queryKey: ['me'],
@@ -82,22 +70,7 @@ export default function ProfilePage() {
     const userData = sessionState?.user
 
     return (
-        <div className={s.pageWrapper}>
-            {/* --- Header --- */}
-            <header className={s.header}>
-                <NavigationMenu
-                    items={navItems}
-                    rightSlotDropdownItems={userMenuItems}
-                    rightSlot={
-                        <img
-                            src={sessionState?.user?.avatarUrl || DefaultAvatar}
-                            className={s.avatar}
-                            alt="User Avatar"
-                        />
-                    }
-                />
-            </header>
-
+        <div className={s.pageWrapperWithoutHeader}>
             {/* --- Main Content --- */}
             <main className={s.mainContent}>
                 {/* Tiêu đề trang */}

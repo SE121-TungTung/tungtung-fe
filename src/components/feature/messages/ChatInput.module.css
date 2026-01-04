@@ -1,8 +1,61 @@
-/* src/components/feature/messages/ChatInput.module.css */
+.container {
+    position: relative;
+    width: 100%;
+}
+
 .inputWrapper {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
+}
+
+.inputFieldContainer {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.emojiBtn {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.emojiBtn:hover {
+    opacity: 1;
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.emojiBtn img {
+    width: 20px;
+    height: 20px;
+}
+
+.iconBtn {
+    padding: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    opacity: 0.6;
+}
+.iconBtn:hover {
+    opacity: 1;
+    background-color: var(--surface-raised-light);
+}
+.iconBtn img {
+    width: 22px;
+    height: 22px;
 }
 
 .sendButton {
@@ -11,24 +64,38 @@
     padding: 0;
     border-radius: 50% !important;
     flex-shrink: 0;
-
     display: grid;
     place-items: center;
     background-color: var(--brand-primary-500-light) !important;
+    transition: all 0.2s;
 }
+
 .sendButton:not(:disabled) {
     background-color: var(--brand-primary-500-light);
     color: #fff;
+    box-shadow: 0 2px 5px rgba(37, 99, 235, 0.3);
 }
-.sendButton:not(:disabled):hover {
-    background-color: var(--brand-primary-500-dark);
+
+.sendButton:disabled {
+    background-color: var(--surface-raised-light) !important;
+    cursor: not-allowed;
 }
 
 .sendButton img {
     width: 20px;
     height: 20px;
-    transform: translateX(1px);
+    transform: translateX(2px) translateY(1px);
 }
+
 .sendButton:not(:disabled) img {
     filter: brightness(0) invert(1);
+}
+
+.emojiPickerContainer {
+    position: absolute;
+    bottom: 60px;
+    right: 0;
+    z-index: 100;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
 }

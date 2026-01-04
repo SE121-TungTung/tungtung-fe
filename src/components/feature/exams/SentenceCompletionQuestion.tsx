@@ -1,45 +1,38 @@
-import type { CompletionQuestion } from '@/types/exam.types'
 import s from './SentenceCompletionQuestion.module.css'
+import type { Question } from '@/types/test.types'
 
-interface SentenceCompletionProps {
-    question: CompletionQuestion
+interface SentenceCompletionQuestionProps {
+    question: Question & { globalNumber: number }
     value: string
     onChange: (value: string) => void
-    placeholder?: string
-    registerRef: (id: string, element: HTMLElement) => void
+    registerRef: (id: string, element: HTMLElement | null) => void
 }
 
 export default function SentenceCompletionQuestion({
     question,
     value,
     onChange,
-    placeholder = 'Your answer...',
     registerRef,
-}: SentenceCompletionProps) {
+}: SentenceCompletionQuestionProps) {
+    // Sentence completion: questionText chứa câu với placeholder (có thể)
+    // Hoặc render đơn giản với input box
+
     return (
         <div
             className={s.questionBlock}
-            ref={(el) => {
-                if (el) registerRef(question.id.toString(), el)
-            }}
+            ref={(el) => registerRef(question.id, el)}
         >
             <label className={s.questionText}>
-                <strong>{question.number}.</strong>
-                {question.parts.map((part, index) =>
-                    part !== null ? (
-                        <span key={index}>{part}</span>
-                    ) : (
-                        <input
-                            key={index}
-                            type="text"
-                            className={s.inputField}
-                            value={value}
-                            onChange={(e) => onChange(e.target.value)}
-                            placeholder={placeholder}
-                        />
-                    )
-                )}
+                <strong>{question.globalNumber}.</strong>{' '}
+                {question.questionText}
             </label>
+            <input
+                type="text"
+                className={s.inputField}
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder="Your answer..."
+            />
         </div>
     )
 }

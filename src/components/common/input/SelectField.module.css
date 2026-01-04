@@ -3,7 +3,7 @@
     --input-bd: var(--boder-soft-light);
     --input-bd-focus: var(--brand-primary-light);
     --input-text: var(--text-primary-light);
-    --input-placeholder: var(--text-secondary-light);
+    --input-placeholder: var(--text-placeholder-light);
     --input-icon: var(--text-secondary-light);
     --input-shadow: var(--shadow-sm-light);
     --label-color: var(--text-primary-light);
@@ -11,10 +11,12 @@
     --pad-y: 10px;
     --pad-x: 16px;
     --radius: var(--radius-md);
-    --gap: 10px;
+    --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
     width: 100%;
     position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 .wrapper.dark {
@@ -28,276 +30,109 @@
     --label-color: var(--text-primary-dark);
 }
 
-.block {
-    display: block;
+.fullWidth {
     width: 100%;
+}
+
+.labelRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 8px;
 }
 
 .label {
     display: inline-block;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
     font-size: 14px;
     font-weight: 500;
-    color: var(--text-primary-light);
-    opacity: 0.9;
+    color: var(--label-color);
+    transition: var(--transition);
 }
 
-.fieldRow {
+.inputContainer {
     position: relative;
     display: flex;
     align-items: center;
+    width: 100%;
 }
 
-.input {
+.select {
     width: 100%;
     padding: var(--pad-y) var(--pad-x);
-    font-size: 14px;
+    padding-right: 44px;
+    font-size: 16px;
+    line-height: 1.5;
     color: var(--input-text);
     background-color: var(--input-bg);
     border: 1px solid var(--input-bd);
     border-radius: var(--radius);
-    transition:
-        border-color 0.2s ease,
-        box-shadow 0.2s ease,
-        padding 0.2s ease;
     box-shadow: var(--input-shadow);
-    background-clip: padding-box;
-}
-
-.input.withPrefix {
-    padding-left: calc(var(--pad-x) * 2 + 18px);
-}
-.input.withSuffix {
-    padding-right: calc(var(--pad-x) * 2 + 18px);
-}
-.input.withPrefix.withSuffix {
-    padding-left: calc(var(--pad-x) * 2 + 18px);
-    padding-right: calc(var(--pad-x) * 2 + 18px);
-}
-
-.input::placeholder {
-    color: var(--input-placeholder);
-    opacity: 0.7;
-}
-
-.input:focus {
+    transition: var(--transition);
     outline: none;
-    border-color: var(--input-bd-focus);
-    box-shadow: 0 0 0 2px
-        color-mix(in srgb, var(--input-bd-focus) 20%, transparent);
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
 }
 
-/* --- Icons --- */
-.fieldRow {
-    position: relative;
-    display: flex;
-    align-items: center;
+.select:hover {
+    border-color: color-mix(in srgb, var(--input-bd), #000 10%);
 }
+
+.select:focus {
+    border-color: var(--input-bd-focus);
+    box-shadow: 0 0 0 4px
+        color-mix(in srgb, var(--input-bd-focus) 15%, transparent);
+}
+
+/* Icon Caret */
 .icon {
     position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    display: inline-flex;
+    right: 14px;
+    display: flex;
     align-items: center;
     justify-content: center;
     color: var(--input-icon);
-    opacity: 0.7;
+    pointer-events: none;
     z-index: 1;
+    opacity: 0.7;
 }
+
 .icon img,
 .icon svg {
     width: 18px;
     height: 18px;
-    display: block;
 }
 
-.prefix {
-    left: var(--pad-x);
-}
-.suffix {
-    right: var(--pad-x);
-}
-.withPrefix .input {
-    --pl: calc(var(--pad-x) * 2 + 18px); /* padding + icon_width + padding */
-}
-.withSuffix .input {
-    --pr: calc(var(--pad-x) * 2 + 18px); /* padding + icon_width + padding */
-}
-
-.size-sm .input.withPrefix {
-    padding-left: calc(var(--pad-x) * 2 + 16px); /* 16px icon size sm */
-}
-.size-sm .input.withSuffix {
-    padding-right: calc(var(--pad-x) * 2 + 16px);
-}
-.size-sm .input.withPrefix.withSuffix {
-    padding-left: calc(var(--pad-x) * 2 + 16px);
-    padding-right: calc(var(--pad-x) * 2 + 16px);
-}
-
-.size-lg .input.withPrefix {
-    padding-left: calc(var(--pad-x) * 2 + 20px); /* 20px icon size lg */
-}
-.size-lg .input.withSuffix {
-    padding-right: calc(var(--pad-x) * 2 + 20px);
-}
-.size-lg .input.withPrefix.withSuffix {
-    padding-left: calc(var(--pad-x) * 2 + 20px);
-    padding-right: calc(var(--pad-x) * 2 + 20px);
-}
-.size-sm {
-    --pad-y: 8px;
-    --pad-x: 12px;
-    --radius: var(--radius-sm);
-}
-.size-sm .input {
-    font-size: 13px;
-}
-.size-sm .icon img,
-.size-sm .icon svg {
-    width: 16px;
-    height: 16px;
-}
-.size-sm.withPrefix .input {
-    --pl: calc(var(--pad-x) * 2 + 16px);
-}
-.size-sm.withSuffix .input {
-    --pr: calc(var(--pad-x) * 2 + 16px);
-}
-
-.size-md {
-    /* default styles */
-}
-
-.size-lg {
-    --pad-y: 12px;
-    --pad-x: 20px;
-    --radius: var(--radius-lg);
-}
-.size-lg .input {
-    font-size: 16px;
-}
-.size-lg .icon img,
-.size-lg .icon svg {
-    width: 20px;
-    height: 20px;
-}
-.size-lg.withPrefix .input {
-    --pl: calc(var(--pad-x) * 2 + 20px);
-}
-.size-lg.withSuffix .input {
-    --pr: calc(var(--pad-x) * 2 + 20px);
-}
-
-/* --- Variants --- */
-.variant-glass .input {
-    --input-bg: color-mix(in srgb, var(--surface-page-light) 50%, transparent);
-    --input-bd: color-mix(in srgb, var(--boder-soft-light) 30%, transparent);
+.variant-glass .select {
+    background-color: color-mix(in srgb, var(--input-bg) 40%, transparent);
     backdrop-filter: blur(8px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-.variant-glass.dark .input {
-    --input-bg: color-mix(in srgb, var(--surface-page-dark) 50%, transparent);
-    --input-bd: color-mix(in srgb, var(--boder-soft-dark) 30%, transparent);
 }
 
-.variant-neutral .input {
-    --input-bg: var(--surface-page-light);
-    --input-bd: var(--boder-hard-light);
-    box-shadow: none;
-}
-.variant-neutral.dark .input {
-    --input-bg: var(--surface-page-dark);
-    --input-bd: var(--boder-hard-dark);
+.variant-neutral .select {
+    background-color: var(--surface-page-light);
 }
 
-.variant-soft .input {
-    --input-bg: var(--surface-raised-light);
-    --input-bd: var(--boder-hard-light);
-    box-shadow: none;
-}
-.variant-soft.dark .input {
-    --input-bg: var(--surface-raised-dark);
-    --input-bd: var(--boder-hard-dark);
+.variant-soft .select {
+    background-color: var(--surface-raised-light);
 }
 
-/* --- States --- */
-.invalid .input {
+.invalid .select {
     border-color: var(--status-danger-light);
     background-color: color-mix(
         in srgb,
-        var(--status-danger-light) 5%,
+        var(--status-danger-light) 4%,
         var(--input-bg)
     );
 }
-.invalid .input:focus {
-    border-color: var(--status-danger-light);
-    box-shadow: 0 0 0 2px
-        color-mix(in srgb, var(--status-danger-light) 20%, transparent);
-}
-.wrapper.dark.invalid .input {
-    border-color: var(--status-danger-dark);
-    background-color: color-mix(
-        in srgb,
-        var(--status-danger-dark) 5%,
-        var(--input-bg)
-    );
-}
-.wrapper.dark.invalid .input:focus {
-    border-color: var(--status-danger-dark);
-    box-shadow: 0 0 0 2px
-        color-mix(in srgb, var(--status-danger-dark) 20%, transparent);
-}
 
-.input:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-    background-color: color-mix(in srgb, var(--input-text) 5%, var(--input-bg));
-}
-
-.select {
-    appearance: none;
-    -webkit-appearance: none;
-    background-color: var(--surface-input-light, #ffffff);
-    background-image: none;
-}
-
-.inputWrapper {
-    color: var(--text-primary-light, rgba(0, 0, 0, 0.7));
-    position: relative;
+.select option {
+    background-color: var(--surface-raised-light);
+    color: var(--text-primary-light);
     padding: 10px;
-    border: 1px solid var(--boder-soft-light, #cccccc);
-    border-radius: 8px;
-    background-color: var(--surface-input-light, #ffffff);
 }
 
-.inputWrapper.dark {
-    color: var(--text-primary-dark, rgba(255, 255, 255, 0.7));
-    background-color: var(--surface-input-dark, #1e1e1e);
-    border: 1px solid var(--boder-soft-dark, #444444);
-}
-
-.inputWrapper .input {
-    width: 100%;
-    border: none;
-    outline: none;
-    font-size: 14px;
-    background-color: transparent;
-    color: inherit;
-}
-
-.inputWrapper .icon {
-    pointer-events: none;
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-primary-light, rgba(0, 0, 0, 0.7));
-    width: 16px;
-    height: 16px;
-}
-
-.inputWrapper .icon img {
-    width: 100%;
-    height: 100%;
+.dark .select option {
+    background-color: var(--surface-raised-dark);
+    color: var(--text-primary-dark);
 }

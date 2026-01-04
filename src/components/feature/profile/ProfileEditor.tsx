@@ -8,6 +8,11 @@ import type { UserFormValues } from '@/forms/user.schema'
 import { useForm } from 'react-hook-form'
 import { changePassword } from '@/lib/users'
 import { useMutation } from '@tanstack/react-query'
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
+import FieldMessage from '@/components/common/typography/FieldMessage'
+
+import DefaultAvatar from '@/assets/avatar-placeholder.png'
 
 interface ProfileEditorProps {
     user?: User | null
@@ -17,10 +22,33 @@ interface ProfileEditorProps {
     ) => Promise<void> | void
 }
 
-type PasswordFormValues = {
-    currentPassword: string
-    newPassword: string
-    confirmPassword: string
+// Password validation schema
+const passwordSchema = z
+    .object({
+        currentPassword: z.string().min(1, 'Bắt buộc'),
+        newPassword: z
+            .string()
+            .min(8, 'Mật khẩu phải có ít nhất 8 ký tự')
+            .regex(/[A-Z]/, 'Phải có ít nhất 1 chữ hoa')
+            .regex(/[a-z]/, 'Phải có ít nhất 1 chữ thường')
+            .regex(/[0-9]/, 'Phải có ít nhất 1 chữ số'),
+        confirmPassword: z.string().min(1, 'Bắt buộc'),
+    })
+    .refine((data) => data.newPassword === data.confirmPassword, {
+        message: 'Mật khẩu xác nhận không khớp',
+        path: ['confirmPassword'],
+    })
+
+type PasswordFormValues = z.infer<typeof passwordSchema>
+
+// Helper: Format date for input type="date" (YYYY-MM-DD)
+const formatDateForInput = (isoString?: string | null) => {
+    if (!isoString) return ''
+    try {
+        return isoString.split('T')[0]
+    } catch {
+        return ''
+    }
 }
 
 export const ProfileEditor: React.FC<ProfileEditorProps> = ({
@@ -35,33 +63,39 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
         text: string
     } | null>(null)
 
+    // Form Profile
     const {
         register,
         handleSubmit,
         reset,
-        formState: { errors },
+        formState: { errors, isDirty },
     } = useForm<UserFormValues>({
         defaultValues: {
             firstName: user?.firstName ?? '',
             lastName: user?.lastName ?? '',
             phone: user?.phone ?? '',
             address: user?.address ?? '',
+            dateOfBirth: formatDateForInput(user?.dateOfBirth), // Set default value formatting
         },
     })
 
+    // Form Password
     const {
         register: registerPassword,
         handleSubmit: handlePasswordSubmit,
         reset: resetPassword,
-        // watch,
-        formState: { errors: passwordErrors },
+        watch: watchPassword,
+        formState: { errors: passwordErrors, isDirty: isPasswordDirty },
     } = useForm<PasswordFormValues>({
+        resolver: zodResolver(passwordSchema),
         defaultValues: {
             currentPassword: '',
             newPassword: '',
             confirmPassword: '',
         },
     })
+
+    const newPassword = watchPassword('newPassword')
 
     const { mutateAsync: changePasswordMutate, isPending: isChangingPassword } =
         useMutation({
@@ -75,23 +109,27 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
                     text: 'Đổi mật khẩu thành công!',
                 })
                 resetPassword()
-                setTimeout(() => setPasswordMessage(null), 3000)
+                setTimeout(() => setPasswordMessage(null), 5000)
             },
-            onError: () => {
+            onError: (error: any) => {
                 setPasswordMessage({
                     type: 'error',
-                    text: 'Đổi mật khẩu thất bại. Vui lòng kiểm tra mật khẩu cũ.',
+                    text:
+                        error?.message ||
+                        'Đổi mật khẩu thất bại. Vui lòng kiểm tra mật khẩu cũ.',
                 })
-                setTimeout(() => setPasswordMessage(null), 3000)
+                setTimeout(() => setPasswordMessage(null), 5000)
             },
         })
 
+    // Reset form when user data loads
     useEffect(() => {
         reset({
             firstName: user?.firstName ?? '',
             lastName: user?.lastName ?? '',
             phone: user?.phone ?? '',
             address: user?.address ?? '',
+            dateOfBirth: formatDateForInput(user?.dateOfBirth),
         })
     }, [user, reset])
 
@@ -127,14 +165,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
     }
 
     const onPasswordSubmit = async (values: PasswordFormValues) => {
-        if (values.newPassword !== values.confirmPassword) {
-            setPasswordMessage({
-                type: 'error',
-                text: 'Mật khẩu xác nhận không khớp.',
-            })
-            return
-        }
-
+        setPasswordMessage(null)
         try {
             await changePasswordMutate({
                 current_password: values.currentPassword,
@@ -144,6 +175,39 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
             console.error('Password change error:', error)
         }
     }
+
+    const getPasswordStrength = (pwd: string) => {
+        if (!pwd) return { label: '', percent: 0, color: '' }
+
+        let strength = 0
+        if (pwd.length >= 8) strength += 25
+        if (/[A-Z]/.test(pwd)) strength += 25
+        if (/[a-z]/.test(pwd)) strength += 25
+        if (/[0-9]/.test(pwd)) strength += 25
+
+        if (strength <= 25)
+            return { label: 'Yếu', percent: 25, color: '#ff4d4f' }
+        if (strength <= 50)
+            return { label: 'Trung bình', percent: 50, color: '#faad14' }
+        if (strength <= 75)
+            return { label: 'Khá', percent: 75, color: '#52c41a' }
+        return { label: 'Mạnh', percent: 100, color: '#52c41a' }
+    }
+
+    const strength = getPasswordStrength(newPassword)
+
+    // Helper for Requirement Item
+    const RequirementItem = ({
+        isValid,
+        text,
+    }: {
+        isValid: boolean
+        text: string
+    }) => (
+        <li className={`${s.reqItem} ${isValid ? s.valid : ''}`}>
+            {isValid ? '✓' : '○'} {text}
+        </li>
+    )
 
     return (
         <div className={s.wrapper}>
@@ -159,29 +223,42 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
                 >
                     <div className={s.fullWidth}>
                         <label className={s.label}>Ảnh đại diện</label>
-                        <div className={s.avatarRow}>
+
+                        <div className={s.avatarSection}>
                             <img
                                 src={
                                     previewUrl ||
                                     user?.avatarUrl ||
-                                    '/avatar-placeholder.png'
+                                    DefaultAvatar
                                 }
-                                className={s.avatarPreview}
+                                className={s.avatar}
                                 alt="Avatar preview"
                             />
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={handleAvatarChange}
-                            />
-                            <button
-                                type="button"
-                                className={s.clearBtn}
-                                onClick={handleClearAvatar}
-                                disabled={!avatarFile && !previewUrl}
-                            >
-                                Xóa avatar
-                            </button>
+
+                            <div className={s.avatarControls}>
+                                <label className={s.uploadLabel}>
+                                    Thay ảnh mới
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleAvatarChange}
+                                        style={{ display: 'none' }}
+                                    />
+                                </label>
+
+                                <ButtonPrimary
+                                    type="button"
+                                    variant="subtle"
+                                    onClick={handleClearAvatar}
+                                    disabled={
+                                        !avatarFile &&
+                                        !previewUrl &&
+                                        !user?.avatarUrl
+                                    }
+                                >
+                                    Gỡ ảnh hiện tại
+                                </ButtonPrimary>
+                            </div>
                         </div>
                     </div>
 
@@ -217,6 +294,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
                         className={s.fullWidth}
                         value={user?.email ?? ''}
                         readOnly
+                        disabled
                     />
 
                     <InputField
@@ -235,12 +313,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
                         variant="soft"
                         mode="light"
                         className={s.fullWidth}
-                        value={
-                            user?.dateOfBirth
-                                ? user.dateOfBirth.split('T')[0]
-                                : ''
-                        }
-                        readOnly
+                        {...register('dateOfBirth')}
                     />
 
                     <InputField
@@ -253,7 +326,10 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
                     />
 
                     <div className={`${s.formActions} ${s.fullWidth}`}>
-                        <ButtonPrimary type="submit" disabled={isSubmitting}>
+                        <ButtonPrimary
+                            type="submit"
+                            disabled={(!isDirty && !avatarFile) || isSubmitting}
+                        >
                             {isSubmitting ? 'Đang lưu...' : 'Lưu thay đổi'}
                         </ButtonPrimary>
                     </div>
@@ -263,19 +339,12 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
             <Card title="Đổi mật khẩu" variant="flat" mode="light">
                 {passwordMessage && (
                     <div
-                        style={{
-                            marginBottom: '1rem',
-                            padding: '0.75rem',
-                            borderRadius: '4px',
-                            backgroundColor:
-                                passwordMessage.type === 'success'
-                                    ? '#d4edda'
-                                    : '#f8d7da',
-                            color:
-                                passwordMessage.type === 'success'
-                                    ? '#155724'
-                                    : '#721c24',
-                        }}
+                        className={`${s.alertMessage} ${
+                            passwordMessage.type === 'success'
+                                ? s.alertSuccess
+                                : s.alertError
+                        }`}
+                        role="alert"
                     >
                         {passwordMessage.text}
                     </div>
@@ -293,11 +362,15 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
                         mode="light"
                         className={s.fullWidth}
                         enablePasswordToggle
-                        {...registerPassword('currentPassword', {
-                            required: 'Bắt buộc',
-                        })}
-                        error={passwordErrors.currentPassword?.message}
+                        {...registerPassword('currentPassword')}
                     />
+                    {passwordErrors.currentPassword && (
+                        <div className={s.fullWidth}>
+                            <FieldMessage tone="error" variant="chip">
+                                {passwordErrors.currentPassword.message}
+                            </FieldMessage>
+                        </div>
+                    )}
 
                     <InputField
                         id="newPassword"
@@ -307,15 +380,44 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
                         mode="light"
                         className={s.fullWidth}
                         enablePasswordToggle
-                        {...registerPassword('newPassword', {
-                            required: 'Bắt buộc',
-                            minLength: {
-                                value: 6,
-                                message: 'Mật khẩu phải có ít nhất 6 ký tự',
-                            },
-                        })}
-                        error={passwordErrors.newPassword?.message}
+                        {...registerPassword('newPassword')}
                     />
+
+                    {/* Updated Password Strength UI */}
+                    {newPassword && (
+                        <div
+                            className={`${s.passwordStrengthContainer} ${s.fullWidth}`}
+                        >
+                            <div className={s.strengthHeader}>
+                                <span className={s.strengthLabel}>
+                                    Độ mạnh mật khẩu:
+                                </span>
+                                <span
+                                    className={s.strengthValue}
+                                    style={{ color: strength.color }}
+                                >
+                                    {strength.label}
+                                </span>
+                            </div>
+                            <div className={s.strengthBarBg}>
+                                <div
+                                    className={s.strengthBarFill}
+                                    style={{
+                                        width: `${strength.percent}%`,
+                                        background: strength.color,
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    {passwordErrors.newPassword && (
+                        <div className={s.fullWidth}>
+                            <FieldMessage tone="error" variant="chip">
+                                {passwordErrors.newPassword.message}
+                            </FieldMessage>
+                        </div>
+                    )}
 
                     <InputField
                         id="confirmPassword"
@@ -325,16 +427,51 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
                         mode="light"
                         className={s.fullWidth}
                         enablePasswordToggle
-                        {...registerPassword('confirmPassword', {
-                            required: 'Bắt buộc',
-                        })}
-                        error={passwordErrors.confirmPassword?.message}
+                        {...registerPassword('confirmPassword')}
                     />
+                    {passwordErrors.confirmPassword && (
+                        <div className={s.fullWidth}>
+                            <FieldMessage tone="error" variant="chip">
+                                {passwordErrors.confirmPassword.message}
+                            </FieldMessage>
+                        </div>
+                    )}
+
+                    {/* Updated Password Requirements UI */}
+                    <div className={`${s.passwordRequirements} ${s.fullWidth}`}>
+                        <div className={s.reqTitle}>Yêu cầu mật khẩu:</div>
+                        <ul className={s.reqList}>
+                            <RequirementItem
+                                isValid={Boolean(
+                                    newPassword && newPassword.length >= 8
+                                )}
+                                text="Tối thiểu 8 ký tự"
+                            />
+                            <RequirementItem
+                                isValid={Boolean(
+                                    newPassword && /[A-Z]/.test(newPassword)
+                                )}
+                                text="Ít nhất 1 chữ hoa (A-Z)"
+                            />
+                            <RequirementItem
+                                isValid={Boolean(
+                                    newPassword && /[a-z]/.test(newPassword)
+                                )}
+                                text="Ít nhất 1 chữ thường (a-z)"
+                            />
+                            <RequirementItem
+                                isValid={Boolean(
+                                    newPassword && /[0-9]/.test(newPassword)
+                                )}
+                                text="Ít nhất 1 chữ số (0-9)"
+                            />
+                        </ul>
+                    </div>
 
                     <div className={`${s.formActions} ${s.fullWidth}`}>
                         <ButtonPrimary
                             type="submit"
-                            disabled={isChangingPassword}
+                            disabled={!isPasswordDirty || isChangingPassword}
                         >
                             {isChangingPassword
                                 ? 'Đang đổi...'

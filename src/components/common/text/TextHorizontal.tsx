@@ -10,7 +10,7 @@ interface Props {
     title?: React.ReactNode
     description?: React.ReactNode
     ctaText?: string
-    onCtaClick?: () => void
+    onClick?: () => void
     mode?: 'light' | 'dark'
 }
 
@@ -21,13 +21,19 @@ export const TextHorizontal = ({
     title,
     description,
     ctaText,
-    onCtaClick,
+    onClick,
     mode = 'dark',
 }: Props): JSX.Element => {
+    const isClickable = !!onClick
+    const clickableClass = isClickable ? s.clickable : ''
+
     return (
         <div
-            className={`${s.textHorizontal} ${s[mode]} ${className}`}
+            className={`${s.textHorizontal} ${s[mode]} ${clickableClass} ${className}`}
             data-colors-mode="dark"
+            onClick={onClick}
+            role={isClickable ? 'button' : undefined}
+            tabIndex={isClickable ? 0 : undefined}
         >
             {icon && (
                 <ButtonLogo
@@ -45,14 +51,22 @@ export const TextHorizontal = ({
             </div>
 
             {ctaText && (
-                <button className={s.ctaButton} onClick={onCtaClick}>
+                <div className={s.ctaButton}>
                     <span className={s.ctaText}>{ctaText}</span>
                     <img
                         src={ArrowRight}
                         className={s.arrowRight}
                         alt="arrow"
                     />
-                </button>
+                </div>
+            )}
+
+            {!ctaText && onClick && (
+                <img
+                    src={ArrowRight}
+                    className={s.arrowRightBase}
+                    alt="arrow"
+                />
             )}
         </div>
     )
