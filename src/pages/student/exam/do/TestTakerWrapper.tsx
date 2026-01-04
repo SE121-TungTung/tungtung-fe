@@ -3,13 +3,18 @@ import { useParams, useNavigate } from 'react-router-dom'
 import s from './TestTakerWrapper.module.css'
 
 import { testApi } from '@/lib/test'
-import { type Test, SkillArea } from '@/types/test.types'
+import {
+    type BatchSubmitSpeakingResponse,
+    type Test,
+    SkillArea,
+} from '@/types/test.types'
 import { enhanceTestWithQuestionNumbers } from '@/utils/examHelpers'
 
 // Hooks
 import { useTestTimer } from '@/hooks/useTestTimer'
 import { useAnswerManager } from '@/hooks/useAnswerManager'
 import { useTestSubmit } from '@/hooks/useTestSubmit'
+import { useDialog } from '@/hooks/useDialog'
 
 // Shared Components
 import { TestHeader } from '@/components/feature/exams/shared/TextHeader'
@@ -21,9 +26,11 @@ import ReadingSectionView from './views/ReadingSectionView'
 import WritingSectionView from './views/WritingSectionView'
 import SpeakingSectionView from './views/SpeakingSectionView'
 
+// Confirmation Dialog
+import { SubmitConfirmationDialog } from './SubmitConfirmationDialog'
+
 // Types
 import type { EnhancedSection } from '../QuestionGroupRenderer'
-import { useDialog } from '@/hooks/useDialog'
 
 // ============================================
 // MAIN WRAPPER COMPONENT
@@ -48,6 +55,8 @@ export default function TestTakerWrapper() {
     )
     const [testFinished, setTestFinished] = useState(false)
     const [startTime, setStartTime] = useState('')
+    const [speakingResults, setSpeakingResults] =
+        useState<BatchSubmitSpeakingResponse | null>(null)
 
     // Refs for question navigation & highlights
     const questionElementRefs = useRef<Map<string, HTMLElement | null>>(
@@ -135,7 +144,6 @@ export default function TestTakerWrapper() {
         (qNum: number) => {
             setCurrentQuestionNumber(qNum)
 
-            // Tìm section, part và question ID
             let targetId: string | undefined
             let foundSectionIdx = -1
             let foundPartIdx = -1
@@ -159,7 +167,6 @@ export default function TestTakerWrapper() {
                 setCurrentPartIndex(foundPartIdx)
             }
 
-            // Scroll to question
             setTimeout(() => {
                 const el = targetId
                     ? questionElementRefs.current.get(targetId)
@@ -171,10 +178,33 @@ export default function TestTakerWrapper() {
     )
 
     const handleFinalSubmit = useCallback(async () => {
-        if (await showConfirm('Are you sure you want to submit your test?')) {
-            await submit(answers)
+        const hasSpeaking = sections.some(
+            (s) => s.skillArea === SkillArea.SPEAKING
+        )
+
+        // Validate Speaking is saved
+        if (hasSpeaking && !speakingResults) {
+            await showConfirm(
+                'You have not saved your Speaking recordings. Please save them before submitting the test.'
+            )
+            return
         }
-    }, [answers, submit])
+
+        const confirmed = await showConfirm({
+            message: '',
+            renderConfirm: () => (
+                <SubmitConfirmationDialog
+                    answers={answers}
+                    sections={sections}
+                    speakingResults={speakingResults}
+                />
+            ),
+        })
+
+        if (!confirmed) return
+
+        await submit(answers)
+    }, [answers, sections, speakingResults, submit, showConfirm])
 
     const handleToggleReview = useCallback((num: number) => {
         setReviewedQuestions((prev) => {
@@ -191,9 +221,8 @@ export default function TestTakerWrapper() {
     const handleSectionChange = useCallback(
         (index: number) => {
             setCurrentSectionIndex(index)
-            setCurrentPartIndex(0) // ✅ Reset về Part đầu tiên khi đổi Section
+            setCurrentPartIndex(0)
 
-            // Reset question number về câu đầu tiên của section mới
             const firstQuestion =
                 sections[index]?.parts[0]?.questionGroups[0]?.questions[0]
             if (firstQuestion) {
@@ -203,12 +232,10 @@ export default function TestTakerWrapper() {
         [sections]
     )
 
-    // ✅ Handler chuyển Part
     const handlePartChange = useCallback(
         (index: number) => {
             setCurrentPartIndex(index)
 
-            // Reset question number về câu đầu tiên của part mới
             const currentSection = sections[currentSectionIndex]
             const firstQuestion =
                 currentSection?.parts[index]?.questionGroups[0]?.questions[0]
@@ -219,16 +246,21 @@ export default function TestTakerWrapper() {
         [sections, currentSectionIndex]
     )
 
+    const handleSpeakingProgress = useCallback(
+        (results: BatchSubmitSpeakingResponse) => {
+            setSpeakingResults(results)
+        },
+        []
+    )
+
     // --- RENDER SECTION VIEW ---
     const renderSectionView = () => {
         const currentSection = sections[currentSectionIndex]
         if (!currentSection) return null
 
-        // ✅ Truyền currentPart thay vì toàn bộ section
         const currentPart = currentSection.parts[currentPartIndex]
         if (!currentPart) return null
 
-        // Tạo section tạm chỉ chứa part hiện tại
         const sectionWithCurrentPart: EnhancedSection = {
             ...currentSection,
             parts: [currentPart],
@@ -271,6 +303,7 @@ export default function TestTakerWrapper() {
                     <SpeakingSectionView
                         {...commonProps}
                         partIndex={currentPartIndex}
+                        onSpeakingProgress={handleSpeakingProgress}
                     />
                 )
 
@@ -307,11 +340,10 @@ export default function TestTakerWrapper() {
     const currentSection = sections[currentSectionIndex]
     const skillName = currentSection?.skillArea || test.title
 
-    // Skill icons
     const skillIcons: Record<SkillArea, string> = {
         [SkillArea.LISTENING]: '🎧',
         [SkillArea.READING]: '📖',
-        [SkillArea.WRITING]: '✍️',
+        [SkillArea.WRITING]: '✏️',
         [SkillArea.SPEAKING]: '🎤',
         [SkillArea.GRAMMAR]: '',
         [SkillArea.VOCABULARY]: '',
@@ -321,7 +353,6 @@ export default function TestTakerWrapper() {
     // --- MAIN RENDER ---
     return (
         <div className={`${s.pageWrapper} lightMode`}>
-            {/* Header */}
             <TestHeader
                 skillName={`IELTS ${skillName}`}
                 icon={
@@ -332,10 +363,8 @@ export default function TestTakerWrapper() {
                 isLowTime={isLowTime}
             />
 
-            {/* Main Content */}
             <div className={s.contentWrapper}>{renderSectionView()}</div>
 
-            {/* Footer */}
             <TestFooter
                 sections={sections}
                 currentIndex={currentSectionIndex}

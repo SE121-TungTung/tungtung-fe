@@ -1,13 +1,33 @@
-import { useState, useEffect } from 'react'
+// src/pages/student/exam/TestResultPage.tsx
+import { useState, useEffect, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { testApi, getAttemptStatusInfo } from '@/lib/test'
-import type { AttemptDetail } from '@/types/test.types'
-import { AttemptStatus } from '@/types/test.types'
+import type { AttemptDetail, QuestionResultDetail } from '@/types/test.types'
+import { AttemptStatus, QuestionType, SkillArea } from '@/types/test.types'
 
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import ButtonGhost from '@/components/common/button/ButtonGhost'
 
 import s from './TestResultPage.module.css'
+
+// Helper to determine skill from question type
+const getSkillFromQuestionType = (questionType: QuestionType): SkillArea => {
+    const speakingTypes = [
+        QuestionType.SPEAKING_PART_1,
+        QuestionType.SPEAKING_PART_2,
+        QuestionType.SPEAKING_PART_3,
+    ]
+    const writingTypes = [
+        QuestionType.WRITING_TASK_1,
+        QuestionType.WRITING_TASK_2,
+    ]
+
+    if (speakingTypes.includes(questionType)) return SkillArea.SPEAKING
+    if (writingTypes.includes(questionType)) return SkillArea.WRITING
+
+    // Default to Reading for MCQ types
+    return SkillArea.READING
+}
 
 export default function TestResultPage() {
     const { attemptId } = useParams<{ attemptId: string }>()
@@ -16,6 +36,27 @@ export default function TestResultPage() {
     const [result, setResult] = useState<AttemptDetail | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+
+    const resultsBySection = useMemo(() => {
+        if (!result) return []
+
+        const grouped = new Map<SkillArea, QuestionResultDetail[]>()
+
+        result.details.forEach((detail) => {
+            const skill = getSkillFromQuestionType(detail.questionType)
+            if (!grouped.has(skill)) {
+                grouped.set(skill, [])
+            }
+            grouped.get(skill)!.push(detail)
+        })
+
+        return Array.from(grouped.entries()).map(([skill, questions]) => ({
+            skill,
+            questions,
+            score: questions.reduce((sum, q) => sum + q.pointsEarned, 0),
+            maxScore: questions.reduce((sum, q) => sum + q.maxPoints, 0),
+        }))
+    }, [result])
 
     useEffect(() => {
         if (!attemptId) {
@@ -55,7 +96,7 @@ export default function TestResultPage() {
         return (
             <div className={s.container}>
                 <div className={s.errorBox}>
-                    <h2>❌ Lỗi</h2>
+                    <h2>✖ Lỗi</h2>
                     <p>{error}</p>
                     <ButtonPrimary onClick={() => navigate('/student/tests')}>
                         Quay lại danh sách bài thi
@@ -88,9 +129,10 @@ export default function TestResultPage() {
                     <h2 className={s.testTitle}>{result.testTitle}</h2>
                 </div>
 
+                {/* Pending Notice */}
                 {isPending && !isAutoGraded && (
                     <div className={s.pendingNotice}>
-                        <p>Bài thi của bạn đang chờ giáo viên chấm điểm.</p>
+                        <p>⏳ Bài thi của bạn đang chờ giáo viên chấm điểm.</p>
                     </div>
                 )}
 
@@ -132,20 +174,10 @@ export default function TestResultPage() {
                     <div className={s.statCard}>
                         <div className={s.statLabel}>Thời gian</div>
                         <div className={s.statValue}>
-                            {result.timeTakenSeconds}
+                            {result.timeTakenSeconds}s
                         </div>
                     </div>
                 </div>
-
-                {/* Pending Message */}
-                {isPending && (
-                    <div className={s.pendingNotice}>
-                        <p>
-                            ⏳ Bài thi của bạn đang chờ giáo viên chấm điểm. Vui
-                            lòng quay lại sau.
-                        </p>
-                    </div>
-                )}
 
                 {/* Question Details */}
                 <div className={s.questionsSection}>
@@ -163,9 +195,8 @@ export default function TestResultPage() {
                                         {detail.maxPoints}
                                     </span>
                                 )}
-
                                 {detail.bandScore !== null && (
-                                    <span className={s.bandScore}>
+                                    <span className={s.questionScore}>
                                         Band: {detail.bandScore.toFixed(1)}
                                     </span>
                                 )}
@@ -201,13 +232,6 @@ export default function TestResultPage() {
                     <ButtonGhost onClick={() => navigate('/student/tests')}>
                         Quay lại danh sách
                     </ButtonGhost>
-                    {/* <ButtonPrimary
-                        onClick={() =>
-                            navigate(`/student/exams/${result.testId}/take`)
-                        }
-                    >
-                        Làm lại bài thi
-                    </ButtonPrimary> */}
                 </div>
             </div>
         </div>

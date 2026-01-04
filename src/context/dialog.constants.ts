@@ -6,6 +6,7 @@ export interface DialogOptions {
     confirmText?: string
     cancelText?: string
     type?: 'info' | 'danger' | 'confirm'
+    renderConfirm?: () => React.ReactNode
 }
 
 export interface DialogContextType {

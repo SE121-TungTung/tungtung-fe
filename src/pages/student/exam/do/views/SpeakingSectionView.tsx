@@ -5,16 +5,15 @@ import { CueCardViewer } from '@/components/feature/exams/MediaViewers/CueCardVi
 import { SpeakingQuestion } from '@/components/feature/exams/SpeakingQuestion'
 import { useSpeakingUpload } from '@/hooks/useSpeakingUpload'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
-import { SpeakingResultsModal } from './SpeakingResultModal'
 import type { EnhancedSection } from '../../QuestionGroupRenderer'
-import type { BatchSubmitSpeakingResponse } from '@/types/test.types'
-import type { Question } from '@/types/test.types'
+import type { BatchSubmitSpeakingResponse, Question } from '@/types/test.types'
 
 interface SpeakingSectionViewProps {
     section: EnhancedSection
     registerRef: (id: string, el: HTMLElement | null) => void
     attemptId: string
     partIndex: number
+    onSpeakingProgress: (results: BatchSubmitSpeakingResponse) => void
 }
 
 const SpeakingSectionView: React.FC<SpeakingSectionViewProps> = ({
@@ -22,6 +21,7 @@ const SpeakingSectionView: React.FC<SpeakingSectionViewProps> = ({
     registerRef,
     attemptId,
     partIndex,
+    onSpeakingProgress,
 }) => {
     const currentPart = section.parts[0]
     const currentQuestions = currentPart?.questionGroups[0]?.questions || []
@@ -31,17 +31,13 @@ const SpeakingSectionView: React.FC<SpeakingSectionViewProps> = ({
     const {
         uploadState,
         isSubmitting,
-        submitError,
         uploadAudio,
         batchSubmit,
         getProgress,
         isReadyToSubmit,
     } = useSpeakingUpload(attemptId)
 
-    // Results modal
-    const [showResults, setShowResults] = useState(false)
-    const [submitResults, setSubmitResults] =
-        useState<BatchSubmitSpeakingResponse | null>(null)
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false)
 
     // ============================================
     // HANDLE UPLOAD (Step 1)
@@ -58,22 +54,23 @@ const SpeakingSectionView: React.FC<SpeakingSectionViewProps> = ({
     )
 
     // ============================================
-    // HANDLE BATCH SUBMIT (Step 2)
+    // HANDLE SAVE RECORDINGS (Step 2)
     // ============================================
-    const handleBatchSubmit = useCallback(async () => {
-        if (!window.confirm('Submit all speaking responses for grading?')) {
-            return
-        }
-
+    const handleSaveRecordings = async () => {
         try {
             const results = await batchSubmit()
-            setSubmitResults(results)
-            setShowResults(true)
+
+            // Pass results to parent
+            onSpeakingProgress(results)
+
+            // Show success message
+            setShowSuccessMessage(true)
+            setTimeout(() => setShowSuccessMessage(false), 3000)
         } catch (error) {
-            console.error('Batch submit error:', error)
-            alert('Failed to submit: ' + (error as Error).message)
+            console.error('Save error:', error)
+            alert('Failed to save recordings: ' + (error as Error).message)
         }
-    }, [batchSubmit])
+    }
 
     // ============================================
     // PROGRESS
@@ -87,97 +84,85 @@ const SpeakingSectionView: React.FC<SpeakingSectionViewProps> = ({
     const speakTime = partNumber === 2 ? 120 : 180
 
     return (
-        <>
-            <main className={s.sectionMain}>
-                {/* Left: Cue Card */}
-                <CueCardViewer
-                    partNumber={partNumber}
-                    title={section.name || `Part ${partNumber}`}
-                    instructions={currentPart?.instructions || ''}
-                    questions={currentQuestions.map(
-                        (q: any) => q.questionText || ''
-                    )}
-                    imageUrl={currentPart?.imageUrl}
-                    prepTime={prepTime}
-                    speakTime={speakTime}
-                />
+        <main className={s.sectionMain}>
+            {/* Left: Cue Card */}
+            <CueCardViewer
+                partNumber={partNumber}
+                title={section.name || `Part ${partNumber}`}
+                instructions={currentPart?.instructions || ''}
+                questions={currentQuestions.map(
+                    (q: any) => q.questionText || ''
+                )}
+                imageUrl={currentPart?.imageUrl}
+                prepTime={prepTime}
+                speakTime={speakTime}
+            />
 
-                {/* Right: Recording Controls */}
-                <div className={s.recordingContainer}>
-                    {/* Progress Bar */}
-                    <div className={s.progressSection}>
-                        <div className={s.progressHeader}>
-                            <span>
-                                Progress: {progress.uploaded} / {progress.total}
-                            </span>
-                            <span>{progress.percentage}%</span>
-                        </div>
-                        <div className={s.progressBar}>
-                            <div
-                                className={s.progressFill}
-                                style={{ width: `${progress.percentage}%` }}
-                            />
-                        </div>
+            {/* Right: Recording Controls */}
+            <div className={s.recordingContainer}>
+                {/* Progress Bar */}
+                <div className={s.progressSection}>
+                    <div className={s.progressHeader}>
+                        <span>
+                            Progress: {progress.uploaded} / {progress.total}
+                        </span>
+                        <span>{progress.percentage}%</span>
                     </div>
-
-                    {/* Questions */}
-                    {currentQuestions.map((q: any) => {
-                        const state = uploadState[q.id]
-
-                        return (
-                            <SpeakingQuestion
-                                key={q.id}
-                                questionId={q.id}
-                                globalNumber={q.globalNumber}
-                                questionText={q.questionText || ''}
-                                audioUrl={q.audioUrl}
-                                onUpload={handleUpload}
-                                uploadStatus={state?.status || 'idle'}
-                                uploadError={state?.error}
-                                uploadedAudioUrl={state?.file?.audioUrl}
-                                registerRef={registerRef}
-                            />
-                        )
-                    })}
-
-                    {/* Submit Button */}
-                    <div className={s.submitSection}>
-                        <ButtonPrimary
-                            onClick={handleBatchSubmit}
-                            loading={isSubmitting}
-                            disabled={!canSubmit}
-                            size="lg"
-                        >
-                            {isSubmitting
-                                ? 'Submitting & Grading...'
-                                : `Submit ${progress.uploaded} Responses`}
-                        </ButtonPrimary>
-
-                        {submitError && (
-                            <div className={s.errorMessage}>
-                                ❌ {submitError}
-                            </div>
-                        )}
-
-                        {!canSubmit && progress.uploaded > 0 && (
-                            <div className={s.warningMessage}>
-                                ⚠️ Please record all questions before submitting
-                            </div>
-                        )}
+                    <div className={s.progressBar}>
+                        <div
+                            className={s.progressFill}
+                            style={{ width: `${progress.percentage}%` }}
+                        />
                     </div>
                 </div>
-            </main>
 
-            {/* Results Modal */}
-            {showResults && submitResults && (
-                <SpeakingResultsModal
-                    results={submitResults}
-                    onClose={() => {
-                        setShowResults(false)
-                    }}
-                />
-            )}
-        </>
+                {/* Questions */}
+                {currentQuestions.map((q: any) => {
+                    const state = uploadState[q.id]
+
+                    return (
+                        <SpeakingQuestion
+                            key={q.id}
+                            questionId={q.id}
+                            globalNumber={q.globalNumber}
+                            questionText={q.questionText || ''}
+                            audioUrl={q.audioUrl}
+                            onUpload={handleUpload}
+                            uploadStatus={state?.status || 'idle'}
+                            uploadError={state?.error}
+                            uploadedAudioUrl={state?.file?.audioUrl}
+                            registerRef={registerRef}
+                        />
+                    )
+                })}
+
+                {/* Save Section */}
+                <div className={s.saveSection}>
+                    <ButtonPrimary
+                        onClick={handleSaveRecordings}
+                        loading={isSubmitting}
+                        disabled={!canSubmit}
+                        size="lg"
+                    >
+                        💾 Save All Recordings
+                    </ButtonPrimary>
+
+                    {showSuccessMessage && (
+                        <div className={s.successMessage}>
+                            ✓ All recordings saved! You can now submit your
+                            test.
+                        </div>
+                    )}
+
+                    {!showSuccessMessage && (
+                        <p className={s.hint}>
+                            💡 Your recordings are saved. You can re-record
+                            before final submission.
+                        </p>
+                    )}
+                </div>
+            </div>
+        </main>
     )
 }
 
