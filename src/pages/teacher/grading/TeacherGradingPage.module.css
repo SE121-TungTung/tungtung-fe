@@ -1,199 +1,238 @@
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 24px;
+    padding: var(--space-24);
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: var(--space-24);
+    background-color: var(--surface-page-light);
+    min-height: 100vh;
 }
 
 .header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 16px;
+    gap: var(--space-16);
 }
 
 .title {
     font-size: 28px;
     font-weight: 700;
-    color: #222;
-    margin: 0 0 8px 0;
+    color: var(--text-primary-light);
+    margin: 0 0 var(--space-8) 0;
 }
 
 .subtitle {
     font-size: 14px;
-    color: #666;
+    color: var(--text-secondary-light);
     margin: 0;
 }
 
 .statsGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--space-20);
+}
+
+.statCardWrapper {
+    background-color: var(--surface-card-light);
+    border: 1px solid var(--boder-soft-light);
 }
 
 .statCard {
     text-align: center;
-    padding: 8px;
+    padding: var(--space-8);
 }
 
 .statValue {
     font-size: 36px;
-    font-weight: 700;
-    color: #0066ff;
-    margin-bottom: 8px;
+    font-weight: 800;
+    margin-bottom: var(--space-8);
+}
+
+.textPrimary {
+    color: var(--brand-primary-500-light);
+}
+.textWarning {
+    color: var(--status-warning-500-dark);
+}
+.textSuccess {
+    color: var(--status-success-500-dark);
 }
 
 .statLabel {
     font-size: 14px;
-    color: #666;
+    font-weight: 500;
+    color: var(--text-secondary-light);
+}
+
+.filterCard {
+    padding: var(--space-4) var(--space-16);
 }
 
 .filterBar {
     display: flex;
-    gap: 8px;
-    padding: 8px 0;
+    gap: var(--space-12);
 }
 
 .filterButton {
-    padding: 8px 16px;
-    border: 1px solid #d9d9d9;
-    background: #fff;
-    border-radius: 6px;
+    padding: var(--space-8) var(--space-20);
+    border: 1px solid var(--boder-strong-light);
+    background: var(--palette-white);
+    border-radius: var(--radius-md);
     font-size: 14px;
-    font-weight: 500;
-    color: #595959;
+    font-weight: 600;
+    color: var(--text-secondary-light);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .filterButton:hover {
-    background: #f5f5f5;
-    border-color: #bfbfbf;
+    background: var(--surface-raised-light);
+    border-color: var(--brand-primary-500-light);
 }
 
 .filterButton.active {
-    background: #0066ff;
-    color: #fff;
-    border-color: #0066ff;
+    background: var(--brand-primary-500-light);
+    color: var(--palette-white);
+    border-color: var(--brand-primary-500-light);
+    box-shadow: var(--shadow-blur-sm);
 }
 
 .attemptsList {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: var(--space-16);
 }
 
 .attemptCard {
-    transition: box-shadow 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+    border-color: var(--boder-soft-light);
+    background-color: var(--palette-white);
 }
 
 .attemptCard:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-blur-sm);
+    border-color: var(--brand-primary-600-light);
 }
 
 .attemptHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid #eee;
+    margin-bottom: var(--space-16);
+    padding-bottom: var(--space-16);
+    border-bottom: 1px solid var(--boder-soft-light);
 }
 
 .studentInfo {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: var(--space-12);
 }
 
 .studentAvatar {
     width: 48px;
     height: 48px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #fff;
+    border-radius: var(--radius-full);
+    background: linear-gradient(
+        135deg,
+        var(--brand-primary-500-light) 0%,
+        var(--brand-accent1-500-light) 100%
+    );
+    color: var(--palette-white);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
-    font-weight: 600;
+    font-size: 18px;
+    font-weight: 700;
 }
 
 .studentName {
     font-size: 16px;
-    font-weight: 600;
-    color: #222;
+    font-weight: 700;
+    color: var(--text-primary-light);
 }
 
 .attemptMeta {
     font-size: 13px;
-    color: #999;
-    margin-top: 4px;
+    color: var(--text-muted-light);
+    margin-top: var(--space-2);
 }
 
 .statusBadge {
-    padding: 6px 12px;
-    border-radius: 12px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #fff;
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--palette-white);
+    text-transform: uppercase;
+}
+
+.statusPending {
+    background-color: var(--status-warning-500-dark);
+}
+.statusGraded {
+    background-color: var(--status-success-500-dark);
+}
+.statusProgress {
+    background-color: var(--brand-accent1-500-light);
+}
+.statusDefault {
+    background-color: var(--status-neutral-500-light);
+}
+
+.attemptBody {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .attemptStats {
     display: flex;
-    gap: 24px;
-    margin-bottom: 16px;
+    gap: var(--space-24);
 }
 
 .statItem {
     display: flex;
-    gap: 8px;
+    gap: var(--space-8);
     align-items: center;
 }
 
-.statItem .statLabel {
-    font-size: 14px;
-    color: #666;
-}
-
-.statItem .statValue {
-    font-size: 14px;
-    font-weight: 600;
-    color: #222;
+.statValueSmall {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary-light);
 }
 
 .attemptActions {
     display: flex;
-    gap: 12px;
-    justify-content: flex-end;
+    gap: var(--space-12);
 }
 
 .loadingBox,
 .errorBox,
 .emptyState {
     text-align: center;
-    padding: 60px 20px;
+    padding: var(--space-80) var(--space-20);
 }
 
 .spinner {
-    width: 48px;
-    height: 48px;
-    border: 4px solid #e0e0e0;
-    border-top-color: #0066ff;
-    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--surface-raised-light);
+    border-top-color: var(--brand-primary-500-light);
+    border-radius: var(--radius-full);
     animation: spin 0.8s linear infinite;
-    margin: 0 auto 16px;
+    margin: 0 auto var(--space-16);
 }
 
 @keyframes spin {
     to {
         transform: rotate(360deg);
     }
-}
-
-.emptyState p {
-    font-size: 16px;
-    color: #999;
 }

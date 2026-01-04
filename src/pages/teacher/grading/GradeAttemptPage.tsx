@@ -9,6 +9,7 @@ import { useDialog } from '@/hooks/useDialog'
 import GradingQuestionCard from '@/components/feature/exams/grading/GradingQuestionCard'
 import GradingSummaryPanel from '@/components/feature/exams/grading/GradingSummaryPanel'
 import s from './GradeAttemptPage.module.css'
+import InputField from '@/components/common/input/InputField'
 
 interface GradeData {
     [questionId: string]: {
@@ -111,7 +112,7 @@ export default function GradeAttemptPage() {
             }
 
             await testApi.gradeAttempt(attemptId!, payload)
-            await alert('✅ Đã chấm điểm thành công!')
+            await alert('Đã chấm điểm thành công!')
             navigate(`/teacher/grading/${testId}`)
         } catch (err: any) {
             await alert(
@@ -138,7 +139,7 @@ export default function GradeAttemptPage() {
             <div className={s.container}>
                 <Card>
                     <div className={s.errorBox}>
-                        <h2>❌ Không tìm thấy bài làm</h2>
+                        <h2>Không tìm thấy bài làm</h2>
                         <ButtonPrimary onClick={() => navigate(-1)}>
                             Quay lại
                         </ButtonPrimary>
@@ -169,8 +170,8 @@ export default function GradeAttemptPage() {
                             <div>
                                 <h1 className={s.title}>
                                     {isReadOnly
-                                        ? '📊 Xem kết quả chấm điểm'
-                                        : '✏️ Chấm điểm bài thi'}
+                                        ? 'Xem kết quả chấm điểm'
+                                        : 'Chấm điểm bài thi'}
                                 </h1>
                                 <p className={s.subtitle}>
                                     Học sinh:{' '}
@@ -211,8 +212,9 @@ export default function GradeAttemptPage() {
                     </div>
 
                     {/* Overall Feedback */}
-                    <Card title="📝 Nhận xét chung">
-                        <textarea
+                    <Card title="Nhận xét chung">
+                        <InputField
+                            multiline
                             className={s.feedbackTextarea}
                             value={overallFeedback}
                             onChange={(e) => setOverallFeedback(e.target.value)}
@@ -232,8 +234,9 @@ export default function GradeAttemptPage() {
                                 onClick={handleSubmitGrading}
                                 loading={submitting}
                                 size="lg"
+                                variant="glass"
                             >
-                                ✅ Hoàn tất chấm điểm
+                                Hoàn tất chấm điểm
                             </ButtonPrimary>
                         </div>
                     )}

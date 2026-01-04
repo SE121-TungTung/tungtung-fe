@@ -87,7 +87,7 @@ export default function TeacherGradingPage() {
             <div className={s.container}>
                 <Card>
                     <div className={s.errorBox}>
-                        <h2>❌ Lỗi</h2>
+                        <h2>Lỗi</h2>
                         <p>{error}</p>
                         <ButtonPrimary
                             onClick={() => navigate('/teacher/tests')}
@@ -178,7 +178,7 @@ export default function TeacherGradingPage() {
                 {filteredAttempts.length === 0 ? (
                     <Card>
                         <div className={s.emptyState}>
-                            <p>📭 Chưa có bài làm nào</p>
+                            <p>Chưa có bài làm nào</p>
                         </div>
                     </Card>
                 ) : (
@@ -239,7 +239,7 @@ export default function TeacherGradingPage() {
                                         }
                                         size="sm"
                                     >
-                                        ✏️ Chấm điểm
+                                        Chấm điểm
                                     </ButtonPrimary>
                                 ) : (
                                     <ButtonGhost
@@ -250,7 +250,7 @@ export default function TeacherGradingPage() {
                                         }
                                         size="sm"
                                     >
-                                        👁️ Xem chi tiết
+                                        Xem chi tiết
                                     </ButtonGhost>
                                 )}
                             </div>
