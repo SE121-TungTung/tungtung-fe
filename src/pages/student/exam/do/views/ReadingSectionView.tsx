@@ -14,7 +14,7 @@ interface ReadingSectionViewProps {
     registerRef: (id: string, el: HTMLElement | null) => void
     attemptId: string
     testId: string
-    clearHighlightsRef?: React.MutableRefObject<(() => void) | null>
+    clearHighlightsRef?: React.RefObject<(() => void) | null>
 }
 
 const ReadingSectionView: React.FC<ReadingSectionViewProps> = ({
