@@ -1,7 +1,5 @@
-import ReactMarkdown from 'react-markdown'
 import s from './SummaryCompletionGroup.module.css'
 import type { QuestionGroup, Question } from '@/types/test.types'
-import remarkGfm from 'remark-gfm'
 
 type AnswerMap = { [questionId: string]: string }
 
