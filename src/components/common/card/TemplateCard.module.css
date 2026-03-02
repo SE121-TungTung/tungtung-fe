@@ -5,9 +5,9 @@
     --progress-bar-bg: #000;
     --card-bg: rgba(255, 255, 255, 1);
 
-    --radius: var(--radius-md, 12px);
+    --radius: var(--primitive-radius-md, 12px);
     --grad-red: var(--brand-secondary-500-light);
-    --grad-blue: var(--brand-primary-600-light);
+    --grad-blue: var(--color-brand-primary-hover);
     --border-width: 2px;
 
     position: relative;
@@ -32,7 +32,7 @@
         111deg,
         var(--brand-secondary-500-light) 0%,
         #ef325f 49.15%,
-        var(--brand-primary-500-light) 100%
+        var(--color-brand-primary) 100%
     );
 }
 
@@ -105,17 +105,17 @@
 
 /* --- Light & Dark Modes --- */
 .light {
-    --bg: var(--surface-card-light);
+    --bg: var(--color-surface-card);
     --divider-color: rgba(0, 0, 0, 0.1);
-    --text-primary: var(--text-primary-light);
-    --text-secondary: var(--text-secondary-light);
+    --text-primary: var(--color-text-primary);
+    --text-secondary: var(--color-text-secondary);
 }
 
 .dark {
-    --bg: var(--surface-card-dark);
+    --bg: var(--color-surface-card);
     --divider-color: rgba(255, 255, 255, 0.15);
-    --text-primary: var(--text-primary-dark);
-    --text-secondary: var(--text-secondary-dark);
+    --text-primary: var(--color-text-primary);
+    --text-secondary: var(--color-text-secondary);
 }
 
 @media (max-width: 640px) {

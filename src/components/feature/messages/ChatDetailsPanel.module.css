@@ -2,8 +2,8 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    background-color: var(--surface-card-light);
-    border-left: 1px solid var(--boder-soft-light);
+    background-color: var(--color-surface-card);
+    border-left: 1px solid var(--border-soft-light);
 }
 
 .header {
@@ -11,7 +11,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 0 12px 0 20px;
-    border-bottom: 1px solid var(--boder-soft-light);
+    border-bottom: 1px solid var(--border-soft-light);
     flex-shrink: 0;
 
     height: var(--chat-header-height);
@@ -21,7 +21,7 @@
 .title {
     font-size: 18px;
     font-weight: 600;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     margin: 0;
 }
 
@@ -31,7 +31,7 @@
     align-items: center;
     padding: 24px;
     gap: 8px;
-    border-bottom: 1px solid var(--boder-soft-light);
+    border-bottom: 1px solid var(--border-soft-light);
 }
 
 .avatarWrapper {
@@ -48,13 +48,13 @@
 .displayName {
     font-size: 18px;
     font-weight: 700;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     margin: 8px 0 0 0;
 }
 
 .displayStatus {
     font-size: 14px;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     margin: 0;
 }
 
@@ -73,10 +73,10 @@
     align-items: center;
     gap: 12px;
     padding: 10px 12px;
-    border-radius: var(--radius-md);
+    border-radius: var(--primitive-radius-md);
     font-size: 14px;
     font-weight: 500;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     cursor: pointer;
     transition: background-color 0.15s ease;
 }
@@ -111,6 +111,6 @@
 
 .divider {
     height: 1px;
-    background-color: var(--boder-soft-light);
+    background-color: var(--border-soft-light);
     margin: 6px 4px;
 }

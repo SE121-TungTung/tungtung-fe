@@ -3,9 +3,9 @@
     align-items: center;
     gap: 16px;
     padding: 16px;
-    border-radius: var(--radius-md);
-    background: var(--surface-raised-light);
-    border: 1px solid var(--boder-soft-light);
+    border-radius: var(--primitive-radius-md);
+    background: var(--color-surface-raised);
+    border: 1px solid var(--border-soft-light);
     transition: all 0.2s ease;
 }
 
@@ -20,8 +20,8 @@
     flex-shrink: 0;
     display: grid;
     place-items: center;
-    border-radius: var(--radius-sm);
-    background: var(--surface-page-light);
+    border-radius: var(--primitive-radius-sm);
+    background: var(--color-surface-page);
     border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
@@ -40,7 +40,7 @@
 .title {
     font-weight: 600;
     font-size: 15px;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     margin: 0 0 4px;
     white-space: nowrap;
     overflow: hidden;
@@ -52,7 +52,7 @@
     align-items: center;
     gap: 12px;
     font-size: 13px;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     margin: 0;
 }
 

@@ -1,13 +1,13 @@
 .root {
-    --bg: var(--surface-card-light);
-    --bd: var(--boder-soft-light);
+    --bg: var(--color-surface-card);
+    --bd: var(--border-soft-light);
 
     display: grid;
     grid-template-columns: 250px 1fr; /* Chia 2 cột: header và content */
     gap: 32px;
 
     position: relative;
-    border-radius: var(--radius-xl);
+    border-radius: var(--primitive-radius-xl);
     padding: 32px;
     border: 1px solid var(--bd);
     background: var(--bg);
@@ -60,10 +60,10 @@
 
 /* --- Dark Mode --- */
 .dark {
-    --bg: var(--surface-card-dark);
-    --bd: var(--boder-soft-dark);
-    --text-primary: var(--text-primary-dark);
-    --text-secondary: var(--text-secondary-dark);
+    --bg: var(--color-surface-card);
+    --bd: var(--border-soft-dark);
+    --text-primary: var(--color-text-primary);
+    --text-secondary: var(--color-text-secondary);
 }
 
 /* --- Responsive --- */

@@ -12,7 +12,7 @@
     left: 17px;
     bottom: -18px;
     width: 2px;
-    background-color: var(--boder-soft-light);
+    background-color: var(--border-soft-light);
 }
 .item:last-child::before {
     display: none;
@@ -25,7 +25,7 @@
     display: grid;
     place-items: center;
     border-radius: 50%;
-    border: 1px solid var(--boder-soft-light);
+    border: 1px solid var(--border-soft-light);
     z-index: 1;
     transition: all 0.3s ease;
 }
@@ -43,7 +43,7 @@
 .order {
     font-size: 12px;
     font-weight: 500;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     margin-bottom: 4px;
     display: block;
 }
@@ -51,13 +51,13 @@
 .title {
     font-size: 18px;
     font-weight: 600;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     margin: 0 0 8px;
 }
 
 .description {
     font-size: 14px;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     line-height: 1.6;
     margin: 0 0 16px;
 }
@@ -72,9 +72,9 @@
     font-size: 12px;
     font-weight: 500;
     padding: 4px 10px;
-    border-radius: var(--radius-full);
-    background-color: var(--surface-raised-light);
-    border: 1px solid var(--boder-soft-light);
+    border-radius: var(--primitive-radius-full);
+    background-color: var(--color-surface-raised);
+    border: 1px solid var(--border-soft-light);
     text-transform: capitalize;
 }
 
@@ -82,7 +82,7 @@
     /* (Mặc định) */
 }
 .pending .iconWrapper {
-    background-color: var(--surface-raised-light);
+    background-color: var(--color-surface-raised);
 }
 
 .inProgress .iconWrapper {
@@ -103,7 +103,7 @@
 }
 .completed .title {
     text-decoration: line-through;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
 }
 .completed .iconWrapper {
     background-color: var(--status-success-light-accent);

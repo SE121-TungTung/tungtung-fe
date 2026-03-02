@@ -1,5 +1,5 @@
 .root {
-    --radius: var(--radius-pill, 999px);
+    --radius: var(--primitive-radius-full, 999px);
     --h: 32px;
     --px: 10px;
     --fs: 13px;

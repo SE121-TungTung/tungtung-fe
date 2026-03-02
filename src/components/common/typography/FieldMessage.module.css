@@ -58,27 +58,28 @@
 }
 
 /* tones */
+
 .root[data-tone='error'] {
     --fg: #ffe9ec;
     --bg: rgba(214, 40, 57, 0.12);
     --bd: rgba(214, 40, 57, 0.35);
-    color: #ffd9de;
+    color: var(--color-status-danger);
 }
 .root[data-tone='warning'] {
     --fg: #fff7e6;
     --bg: rgba(255, 184, 0, 0.12);
     --bd: rgba(255, 184, 0, 0.35);
-    color: #fff2cc;
+    color: var(--color-status-warning);
 }
 .root[data-tone='success'] {
     --fg: #eafff6;
     --bg: rgba(32, 167, 116, 0.12);
     --bd: rgba(32, 167, 116, 0.35);
-    color: #d6fff0;
+    color: var(--color-status-success);
 }
 .root[data-tone='info'] {
     --fg: #e7f5ff;
     --bg: rgba(83, 195, 255, 0.12);
     --bd: rgba(83, 195, 255, 0.35);
-    color: #d5eeff;
+    color: var(--color-status-info);
 }

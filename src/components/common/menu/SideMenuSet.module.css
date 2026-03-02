@@ -1,7 +1,7 @@
 .root {
     /* tokens + fallback */
     --menu-w: 200px;
-    --radius: var(--radius-md, 10px);
+    --radius: var(--primitive-radius-md, 10px);
     --pad: 16px;
     --bg: var(--Container-background, rgba(255, 255, 255, 0.6));
     --bd: var(--Border-glass, rgba(255, 255, 255, 0.1));

@@ -9,7 +9,7 @@
     gap: 8px;
     margin-bottom: 32px;
     padding-bottom: 32px;
-    border-bottom: 1px solid var(--boder-soft-light);
+    border-bottom: 1px solid var(--border-soft-light);
 }
 
 .avatar {
@@ -24,13 +24,13 @@
 .name {
     font-size: 24px;
     font-weight: 700;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     margin: 8px 0 0 0;
 }
 
 .email {
     font-size: 14px;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     margin: 0;
 }
 
@@ -48,7 +48,7 @@
     align-items: center;
     gap: 12px;
     font-size: 14px;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
 }
 
 .infoItem img,
@@ -61,7 +61,7 @@
 
 .infoItem strong {
     font-weight: 600;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
 }
 
 @media (max-width: 600px) {

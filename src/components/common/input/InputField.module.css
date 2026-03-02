@@ -1,16 +1,16 @@
 .wrapper {
-    --input-bg: var(--surface-raised-light);
-    --input-bd: var(--boder-soft-light);
+    --input-bg: var(--color-surface-raised);
+    --input-bd: var(--border-soft-light);
     --input-bd-focus: var(--brand-primary-light);
-    --input-text: var(--text-primary-light);
-    --input-placeholder: var(--text-placeholder-light);
-    --input-icon: var(--text-secondary-light);
+    --input-text: var(--color-text-primary);
+    --input-placeholder: var(--color-text-placeholder);
+    --input-icon: var(--color-text-secondary);
     --input-shadow: var(--shadow-sm-light);
-    --label-color: var(--text-primary-light);
+    --label-color: var(--color-text-primary);
 
     --pad-y: 10px;
     --pad-x: 16px;
-    --radius: var(--radius-md);
+    --radius: var(--primitive-radius-md);
     --gap: 10px;
 
     width: 100%;
@@ -18,14 +18,14 @@
 }
 
 .wrapper.dark {
-    --input-bg: var(--surface-raised-dark);
-    --input-bd: var(--boder-soft-dark);
+    --input-bg: var(--color-surface-raised);
+    --input-bd: var(--border-soft-dark);
     --input-bd-focus: var(--brand-primary-dark);
-    --input-text: var(--text-primary-dark);
+    --input-text: var(--color-text-primary);
     --input-placeholder: var(--text-placeholder-dark);
-    --input-icon: var(--text-secondary-dark);
+    --input-icon: var(--color-text-secondary);
     --input-shadow: var(--shadow-sm-dark);
-    --label-color: var(--text-primary-dark);
+    --label-color: var(--color-text-primary);
 }
 
 .block {
@@ -165,7 +165,7 @@
 .size-sm {
     --pad-y: 8px;
     --pad-x: 12px;
-    --radius: var(--radius-sm);
+    --radius: var(--primitive-radius-sm);
 }
 .size-sm .input {
     font-size: 13px;
@@ -189,7 +189,7 @@
 .size-lg {
     --pad-y: 12px;
     --pad-x: 20px;
-    --radius: var(--radius-lg);
+    --radius: var(--primitive-radius-lg);
 }
 .size-lg .input {
     font-size: 16px;
@@ -208,34 +208,34 @@
 
 /* --- Variants --- */
 .variant-glass .input {
-    --input-bg: color-mix(in srgb, var(--surface-page-light) 50%, transparent);
-    --input-bd: color-mix(in srgb, var(--boder-soft-light) 30%, transparent);
+    --input-bg: color-mix(in srgb, var(--color-surface-page) 50%, transparent);
+    --input-bd: color-mix(in srgb, var(--border-soft-light) 30%, transparent);
     backdrop-filter: blur(8px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 .variant-glass.dark .input {
-    --input-bg: color-mix(in srgb, var(--surface-page-dark) 50%, transparent);
-    --input-bd: color-mix(in srgb, var(--boder-soft-dark) 30%, transparent);
+    --input-bg: color-mix(in srgb, var(--color-surface-page) 50%, transparent);
+    --input-bd: color-mix(in srgb, var(--border-soft-dark) 30%, transparent);
 }
 
 .variant-neutral .input {
-    --input-bg: var(--surface-page-light);
-    --input-bd: var(--boder-hard-light);
+    --input-bg: var(--color-surface-page);
+    --input-bd: var(--border-hard-light);
     box-shadow: none;
 }
 .variant-neutral.dark .input {
-    --input-bg: var(--surface-page-dark);
-    --input-bd: var(--boder-hard-dark);
+    --input-bg: var(--color-surface-page);
+    --input-bd: var(--border-hard-dark);
 }
 
 .variant-soft .input {
-    --input-bg: var(--surface-raised-light);
-    --input-bd: var(--boder-hard-light);
+    --input-bg: var(--color-surface-raised);
+    --input-bd: var(--border-hard-light);
     box-shadow: none;
 }
 .variant-soft.dark .input {
-    --input-bg: var(--surface-raised-dark);
-    --input-bd: var(--boder-hard-dark);
+    --input-bg: var(--color-surface-raised);
+    --input-bd: var(--border-hard-dark);
 }
 
 /* --- States --- */

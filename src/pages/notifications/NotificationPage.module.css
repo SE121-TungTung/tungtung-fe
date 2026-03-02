@@ -34,7 +34,7 @@
     font-size: clamp(2rem, 4vw, 3rem);
     font-weight: 700;
     text-align: center;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     letter-spacing: -0.04em;
     line-height: 1.15;
     min-height: 1.15em;
@@ -47,8 +47,8 @@
         linear-gradient(
             135deg,
             var(--brand-secondary-500-light) 0%,
-            var(--brand-accent2-500-light) 69.5%,
-            var(--brand-primary-500-light) 141.42%
+            var(--color-brand-secondary) 69.5%,
+            var(--color-brand-primary) 141.42%
         )
     );
     background-clip: text;
@@ -68,7 +68,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid var(--boder-soft-light);
+    border-bottom: 1px solid var(--border-soft-light);
     flex-shrink: 0;
 }
 
@@ -86,7 +86,7 @@
     place-items: center;
     height: 100%;
     min-height: 200px;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     font-size: 14px;
     flex: 1;
 }

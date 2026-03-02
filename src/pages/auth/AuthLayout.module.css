@@ -1,0 +1,251 @@
+/* ============================================================================
+   AUTH LAYOUT - Reusable template for auth pages
+   ============================================================================ */
+
+.container {
+    position: relative;
+    min-height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+}
+
+/* Animated Background Layer */
+.background {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    touch-action: none;
+    pointer-events: auto;
+}
+
+/* Main Content Wrapper */
+.wrapper {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: clamp(40px, 8vw, 120px);
+    min-height: 100vh;
+    width: 100%;
+    padding: var(--primitive-space-12) clamp(24px, 6vw, 80px);
+    pointer-events: none;
+}
+
+.wrapper > * {
+    pointer-events: auto;
+}
+
+/* ============================================================================
+   INFO SECTION (Left side)
+   ============================================================================ */
+
+.infoSection {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: var(--primitive-space-20);
+    max-width: 540px;
+}
+
+.headingContainer {
+    width: 100%;
+    max-width: 480px;
+}
+
+.heading {
+    font-family: var(--primitive-font-sans);
+    font-size: clamp(36px, 5vw, 60px);
+    font-weight: var(--primitive-font-bold);
+    line-height: var(--primitive-leading-tight);
+    letter-spacing: -0.04em;
+    margin: 0;
+
+    /* Gradient text effect */
+    background: linear-gradient(
+        120deg,
+        var(--color-brand-secondary) 0%,
+        #ef325f 45%,
+        var(--color-brand-primary) 100%
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.headingSecondary {
+    /* Reset gradient for secondary text - use solid color */
+    background: none;
+    -webkit-background-clip: initial;
+    background-clip: initial;
+    -webkit-text-fill-color: var(--color-text-on-primary);
+    color: var(--color-text-on-primary);
+}
+
+.infoCard {
+    width: 100%;
+    max-width: 480px;
+}
+
+.infoIcon {
+    width: 24px;
+    height: 24px;
+    display: block;
+}
+
+/* ============================================================================
+   FORM SECTION (Right side)
+   ============================================================================ */
+
+.formSection {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 520px;
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
+
+/* Tablet (landscape & portrait) */
+@media (max-width: 1024px) {
+    .wrapper {
+        gap: var(--primitive-space-16);
+        padding: var(--primitive-space-12) var(--primitive-space-8);
+    }
+
+    .infoSection {
+        gap: var(--primitive-space-12);
+        max-width: 460px;
+    }
+
+    .heading {
+        font-size: clamp(32px, 6vw, 48px);
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .wrapper {
+        flex-direction: column;
+        gap: var(--primitive-space-12);
+        padding: var(--primitive-space-8) var(--primitive-space-6);
+        justify-content: flex-start;
+        padding-top: var(--primitive-space-16);
+    }
+
+    .infoSection {
+        width: 100%;
+        max-width: 100%;
+        align-items: center;
+        text-align: center;
+        order: 2;
+        gap: var(--primitive-space-8);
+    }
+
+    .headingContainer {
+        max-width: 100%;
+    }
+
+    .heading {
+        font-size: clamp(28px, 7vw, 42px);
+        letter-spacing: -0.02em;
+    }
+
+    .infoCard {
+        max-width: 100%;
+    }
+
+    .formSection {
+        width: 100%;
+        max-width: 100%;
+        order: 1;
+    }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+    .wrapper {
+        gap: var(--primitive-space-8);
+        padding: var(--primitive-space-6) var(--primitive-space-4);
+        padding-top: var(--primitive-space-12);
+    }
+
+    .infoSection {
+        gap: var(--primitive-space-6);
+    }
+
+    .heading {
+        font-size: clamp(24px, 8vw, 32px);
+    }
+}
+
+/* Hide info section on mobile (optional) */
+.hideOnMobile {
+    @media (max-width: 768px) {
+        display: none;
+    }
+}
+
+/* ============================================================================
+   DARK MODE ADJUSTMENTS
+   ============================================================================ */
+
+[data-theme='dark'] .heading {
+    background: linear-gradient(
+        120deg,
+        var(--color-brand-secondary) 0%,
+        #ff6b8a 45%,
+        var(--color-brand-primary) 100%
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+[data-theme='dark'] .headingSecondary {
+    -webkit-text-fill-color: rgba(255, 255, 255, 0.95);
+    color: rgba(255, 255, 255, 0.95);
+}
+
+/* ============================================================================
+   ACCESSIBILITY
+   ============================================================================ */
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .wrapper {
+        animation: none;
+    }
+
+    .background * {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .heading {
+        background: none;
+        -webkit-background-clip: initial;
+        background-clip: initial;
+        -webkit-text-fill-color: initial;
+        color: var(--color-text-primary);
+    }
+
+    .headingSecondary {
+        font-weight: var(--primitive-font-bold);
+    }
+}
+
+/* Focus visible for keyboard navigation */
+.wrapper:focus-within {
+    outline: none;
+}

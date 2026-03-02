@@ -3,15 +3,15 @@
     flex-direction: column;
     height: 100%;
     overflow: hidden;
-    background-color: var(--surface-page-light);
+    background-color: var(--color-surface-page);
 }
 
 .header {
     display: flex;
     align-items: center;
     padding: 0 20px;
-    border-bottom: 1px solid var(--boder-soft-light);
-    background-color: var(--surface-card-light);
+    border-bottom: 1px solid var(--border-soft-light);
+    background-color: var(--color-surface-card);
     flex-shrink: 0;
     gap: 12px;
 
@@ -46,7 +46,7 @@
     right: 1px;
     width: 14px;
     height: 14px;
-    background-color: var(--status-success-500-light, #22c55e);
+    background-color: var(--color-status-success, #22c55e);
     border: 3px solid #fff;
     border-radius: 50%;
 }
@@ -57,7 +57,7 @@
 .name {
     font-weight: 600;
     font-size: 16px;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -65,7 +65,7 @@
 
 .status {
     font-size: 13px;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
 }
 
 .menuButton {
@@ -97,7 +97,7 @@
 
 .footer {
     padding: 16px 20px;
-    border-top: 1px solid var(--boder-soft-light);
-    background-color: var(--surface-card-light);
+    border-top: 1px solid var(--border-soft-light);
+    background-color: var(--color-surface-card);
     flex-shrink: 0;
 }

@@ -1,0 +1,306 @@
+/* ============================================================================
+   EDUCATIONAL BACKGROUND - Monochromatic Abstract
+   ============================================================================ */
+
+.edu-bg-container {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+
+    /* Thiết lập các sắc độ dựa trên --theme-hue truyền từ TSX */
+    --c-main: hsl(var(--theme-hue), 85%, 60%);
+    --c-dark: hsl(var(--theme-hue), 85%, 45%);
+    --c-light: hsl(var(--theme-hue), 85%, 75%);
+    --c-bg: hsl(var(--theme-hue), 85%, 92%);
+    --c-pale: hsl(var(--theme-hue), 85%, 98%);
+
+    background: linear-gradient(135deg, #ffffff 0%, var(--c-pale) 100%);
+    /* Chuyển màu mượt mà khi state hue thay đổi */
+    transition:
+        background 2s ease-in-out,
+        --c-main 2s ease-in-out,
+        --c-dark 2s ease-in-out;
+}
+
+/* Kích hoạt chuyển mượt màu cho mọi svg path */
+.edu-svg-icon path,
+.edu-svg-icon circle,
+.edu-abs-shape path,
+.edu-abs-shape circle,
+.edu-abs-shape rect,
+.edu-abs-shape polygon,
+.edu-abs-shape line {
+    transition:
+        fill 2s ease-in-out,
+        stroke 2s ease-in-out;
+}
+
+/* ============================================================================
+   GRADIENT MESH
+   ============================================================================ */
+
+.edu-gradient-mesh {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    filter: blur(80px);
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.edu-gradient-orb {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--c-light) 0%, transparent 70%);
+    transition: background 2s ease-in-out;
+}
+
+.edu-orb-1 {
+    width: 60vw;
+    height: 60vw;
+    top: -10%;
+    left: -10%;
+    animation: float-orb 20s ease-in-out infinite alternate;
+}
+
+.edu-orb-2 {
+    width: 70vw;
+    height: 70vw;
+    bottom: -15%;
+    right: -10%;
+    animation: float-orb 25s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes float-orb {
+    0% {
+        transform: translate(0, 0) scale(1);
+    }
+    100% {
+        transform: translate(100px, 50px) scale(1.1);
+    }
+}
+
+/* ============================================================================
+   ABSTRACT GEOMETRIC SHAPES
+   ============================================================================ */
+
+.edu-abstract-container {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.edu-abs-shape {
+    position: absolute;
+}
+
+/* 1. Animation Tam giác tách rời */
+.abs-triangles {
+    width: 180px;
+    height: 180px;
+    top: 70%;
+    left: 80%;
+}
+
+.tri-1 {
+    animation: split-tri-1 6s ease-in-out infinite alternate;
+}
+.tri-2 {
+    animation: split-tri-2 6s ease-in-out infinite alternate;
+}
+
+@keyframes split-tri-1 {
+    0%,
+    10% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+    100% {
+        transform: translate(-40px, 20px) rotate(-30deg);
+    }
+}
+
+@keyframes split-tri-2 {
+    0%,
+    10% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+    100% {
+        transform: translate(40px, -20px) rotate(30deg);
+    }
+}
+
+/* 2. Vòng tròn lớn */
+.abs-ring-1 {
+    width: 350px;
+    height: 350px;
+    top: -5%;
+    left: 5%;
+    animation: spin-scale 30s ease-in-out infinite alternate;
+}
+
+/* 3. Dấu thập mờ ảo */
+.abs-cross-cluster {
+    width: 250px;
+    height: 250px;
+    bottom: 5%;
+    left: 10%;
+    animation: float-abstract 15s ease-in-out infinite alternate;
+}
+
+/* 4. Hình sọc chéo */
+.abs-striped-circle {
+    width: 200px;
+    height: 200px;
+    top: 15%;
+    right: 8%;
+    animation: spin-slow 40s linear infinite reverse;
+}
+
+@keyframes spin-slow {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes spin-scale {
+    0% {
+        transform: rotate(0deg) scale(1);
+    }
+    100% {
+        transform: rotate(180deg) scale(1.2);
+    }
+}
+
+@keyframes float-abstract {
+    0% {
+        transform: translate(0, 0) rotate(0deg) scale(1);
+    }
+    100% {
+        transform: translate(40px, -30px) rotate(15deg) scale(1.1);
+    }
+}
+
+/* ============================================================================
+   DOTTED GRID OVERLAY
+   ============================================================================ */
+
+.edu-grid-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px);
+    background-size: 50px 50px;
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* ============================================================================
+   FLOATING 2.5D ICONS (Lơ lửng ngẫu nhiên, dừng khi hover)
+   ============================================================================ */
+
+.edu-icons-container {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 3;
+}
+
+.edu-static-wrapper {
+    position: absolute;
+}
+
+.edu-icon-floater {
+    width: 100%;
+    height: 100%;
+    /* Chuyển động lơ lửng phức tạp hơn */
+    animation: complex-float ease-in-out infinite;
+    pointer-events: auto; /* Cho phép tương tác hover */
+    cursor: pointer;
+    filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.05));
+    transition:
+        filter 0.3s ease,
+        scale 0.3s ease;
+}
+
+/* Ngừng animation hoàn toàn khi chuột chạm vào icon */
+.edu-icon-floater:hover {
+    animation-play-state: paused;
+    scale: 1.15;
+    filter: drop-shadow(0 25px 35px rgba(0, 0, 0, 0.12));
+}
+
+.edu-svg-icon {
+    width: 100%;
+    height: 100%;
+    stroke: none;
+}
+
+/* Quỹ đạo bay đa dạng thay vì chỉ lên/xuống */
+@keyframes complex-float {
+    0% {
+        translate: 0px 0px;
+    }
+    33% {
+        translate: 20px -30px;
+    }
+    66% {
+        translate: -15px -15px;
+    }
+    100% {
+        translate: 0px 0px;
+    }
+}
+
+/* ============================================================================
+   MOUSE PARTICLES
+   ============================================================================ */
+
+.edu-particle {
+    position: fixed;
+    pointer-events: none;
+    z-index: 10;
+    animation: particle-fall 10s linear forwards;
+}
+
+.edu-particle-circle {
+    border-radius: 50%;
+}
+
+.edu-particle-square {
+    border-radius: 4px;
+}
+
+.edu-particle-triangle {
+    width: 0;
+    height: 0;
+    background-color: transparent !important;
+}
+
+@keyframes particle-fall {
+    0% {
+        transform: translate(-50%, -50%) scale(0.3) rotate(0deg);
+        opacity: var(--start-opacity);
+    }
+    100% {
+        transform: translate(
+                calc(-50% + var(--drift-x, 0px)),
+                calc(-50% + 400px)
+            )
+            scale(0) rotate(360deg);
+        opacity: 0;
+    }
+}

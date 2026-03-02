@@ -1,16 +1,450 @@
-@import "./reset.css";
-@import "./tokens.css";
+/* ============================================================================
+   GLOBAL STYLES - REFACTORED
+   ============================================================================
+   
+   This file contains global resets and base styles that apply to all elements.
+   It uses the refactored token system for consistency.
+   
+   ============================================================================ */
+
+@import './reset.css';
+@import './tokens.css';
+
+/* ============================================================================
+      ROOT CONFIGURATION
+      ============================================================================ */
 
 :root {
-  color-scheme: dark;
+    /* Set default theme */
+    color-scheme: light dark;
 }
 
+/* ============================================================================
+      BASE STYLES
+      ============================================================================ */
+
 body {
-  background: var(--bg);
-  color: var(--text);
+    /* Surface */
+    background: var(--color-surface-page);
+    color: var(--color-text-primary);
+
+    /* Typography */
+    font-family: var(--primitive-font-sans);
+    font-size: var(--primitive-text-base);
+    font-weight: var(--primitive-font-normal);
+    line-height: var(--primitive-leading-normal);
+
+    /* Smooth font rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================================================
+      TYPOGRAPHY ELEMENTS
+      ============================================================================ */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--color-text-primary);
+    font-weight: var(--primitive-font-bold);
+    line-height: var(--primitive-leading-tight);
+    margin: 0;
+}
+
+h1 {
+    font-size: var(--primitive-text-4xl);
+    letter-spacing: var(--primitive-tracking-tight);
+}
+
+h2 {
+    font-size: var(--primitive-text-3xl);
+    letter-spacing: var(--primitive-tracking-tight);
+}
+
+h3 {
+    font-size: var(--primitive-text-2xl);
+}
+
+h4 {
+    font-size: var(--primitive-text-xl);
+}
+
+h5 {
+    font-size: var(--primitive-text-lg);
+}
+
+h6 {
+    font-size: var(--primitive-text-base);
+}
+
+p {
+    margin: 0;
+    line-height: var(--primitive-leading-normal);
 }
 
 a {
-  color: inherit;
-  text-decoration: none;
+    color: var(--color-brand-primary);
+    text-decoration: none;
+    transition: var(--transition-colors);
+}
+
+a:hover {
+    color: var(--color-brand-primary-hover);
+    text-decoration: underline;
+}
+
+a:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+    border-radius: var(--primitive-radius-xs);
+}
+
+strong,
+b {
+    font-weight: var(--primitive-font-bold);
+}
+
+em,
+i {
+    font-style: italic;
+}
+
+small {
+    font-size: var(--primitive-text-sm);
+}
+
+code {
+    font-family: var(--primitive-font-mono);
+    font-size: 0.9em;
+    background: var(--color-surface-raised);
+    padding: 0.2em 0.4em;
+    border-radius: var(--primitive-radius-xs);
+    border: 1px solid var(--color-border-soft);
+}
+
+pre {
+    font-family: var(--primitive-font-mono);
+    font-size: var(--primitive-text-sm);
+    background: var(--color-surface-raised);
+    padding: var(--primitive-space-6);
+    border-radius: var(--primitive-radius-md);
+    border: 1px solid var(--color-border-soft);
+    overflow-x: auto;
+}
+
+pre code {
+    background: none;
+    padding: 0;
+    border: none;
+}
+
+/* ============================================================================
+      FORM ELEMENTS
+      ============================================================================ */
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+    color: inherit;
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: 0;
+    margin: 0;
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+input,
+select,
+textarea {
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: var(--input-radius);
+    padding: var(--input-padding-y) var(--input-padding-x);
+    color: var(--input-text);
+    transition: var(--transition-colors), var(--transition-shadow);
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+    border-color: var(--input-border-hover);
+    background: var(--input-bg-hover);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--input-border-focus);
+    background: var(--input-bg-focus);
+    box-shadow: 0 0 0 3px rgba(75, 163, 195, 0.1);
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: var(--input-placeholder);
+}
+
+input:disabled,
+select:disabled,
+textarea:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+    background: var(--color-surface-raised);
+}
+
+/* ============================================================================
+      LISTS
+      ============================================================================ */
+
+ul,
+ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* ============================================================================
+      TABLES
+      ============================================================================ */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    text-align: left;
+    font-weight: var(--primitive-font-semibold);
+    color: var(--color-text-primary);
+    background: var(--color-surface-raised);
+    padding: var(--primitive-space-4) var(--primitive-space-6);
+    border-bottom: 2px solid var(--color-border-medium);
+}
+
+td {
+    padding: var(--primitive-space-4) var(--primitive-space-6);
+    border-bottom: 1px solid var(--color-border-soft);
+}
+
+tr:hover {
+    background: var(--color-surface-raised);
+}
+
+/* ============================================================================
+      MEDIA (Images, Video, etc.)
+      ============================================================================ */
+
+img,
+svg,
+video,
+canvas {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+/* ============================================================================
+      UTILITY CLASSES - Skeleton Loader
+      ============================================================================ */
+
+.skeleton-loader {
+    background-color: var(--skeleton-base);
+    background-image: linear-gradient(
+        90deg,
+        var(--skeleton-base) 0%,
+        var(--skeleton-highlight) 40px,
+        var(--skeleton-base) 80px
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+    border-radius: var(--skeleton-radius);
+    display: inline-block;
+    line-height: 1;
+    width: 100%;
+}
+
+.skeleton-circle {
+    border-radius: 50% !important;
+}
+
+.skeleton-text {
+    height: 1em;
+    border-radius: var(--primitive-radius-xs);
+    margin-bottom: 0.5em;
+}
+
+.skeleton-button {
+    height: var(--button-height-md);
+    width: 120px;
+}
+
+.skeleton-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+/* ============================================================================
+      UTILITY CLASSES - Focus Visible
+      ============================================================================ */
+
+.focus-visible:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+}
+
+/* ============================================================================
+      UTILITY CLASSES - Screen Reader Only
+      ============================================================================ */
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* ============================================================================
+      UTILITY CLASSES - Truncate Text
+      ============================================================================ */
+
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* ============================================================================
+      SCROLLBAR STYLING (Optional)
+      ============================================================================ */
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-surface-page);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-border-medium);
+    border-radius: var(--primitive-radius-full);
+    border: 3px solid var(--color-surface-page);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-border-strong);
+}
+
+/* Firefox scrollbar */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border-medium) var(--color-surface-page);
+}
+
+/* ============================================================================
+      SELECTION STYLING
+      ============================================================================ */
+
+::selection {
+    background: var(--color-brand-primary);
+    color: var(--color-text-on-primary);
+}
+
+::-moz-selection {
+    background: var(--color-brand-primary);
+    color: var(--color-text-on-primary);
+}
+
+/* ============================================================================
+      PRINT STYLES
+      ============================================================================ */
+
+@media print {
+    *,
+    *::before,
+    *::after {
+        background: transparent !important;
+        color: #000 !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+
+    a,
+    a:visited {
+        text-decoration: underline;
+    }
+
+    a[href]::after {
+        content: ' (' attr(href) ')';
+    }
+
+    pre,
+    blockquote {
+        border: 1px solid #999;
+        page-break-inside: avoid;
+    }
+
+    thead {
+        display: table-header-group;
+    }
+
+    tr,
+    img {
+        page-break-inside: avoid;
+    }
+
+    img {
+        max-width: 100% !important;
+    }
+
+    p,
+    h2,
+    h3 {
+        orphans: 3;
+        widows: 3;
+    }
+
+    h2,
+    h3 {
+        page-break-after: avoid;
+    }
 }

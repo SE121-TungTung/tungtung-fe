@@ -5,10 +5,10 @@
 }
 
 .headingsListCard {
-    border: 1px solid var(--boder-soft-light);
-    border-radius: var(--radius-md);
+    border: 1px solid var(--border-soft-light);
+    border-radius: var(--primitive-radius-md);
     padding: 16px;
-    background-color: var(--surface-raised-light);
+    background-color: var(--color-surface-raised);
 }
 
 .headingsListTitle {
@@ -17,7 +17,7 @@
     margin: 0 0 12px;
     padding-bottom: 8px;
     border-bottom: 1px solid #eee;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
 }
 
 .headingsList {
@@ -38,12 +38,12 @@
 .headingLabel {
     /* i, ii, iii */
     font-weight: 600;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     min-width: 25px;
 }
 
 .headingText {
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
 }
 
 .paragraphMatching {
@@ -67,7 +67,7 @@
 .selectHeading {
     padding: 6px 10px;
     border: 1px solid #ccc;
-    border-radius: var(--radius-sm);
+    border-radius: var(--primitive-radius-sm);
     font-size: 14px;
     min-width: 150px;
     background-color: #fff;

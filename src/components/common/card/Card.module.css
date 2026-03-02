@@ -1,11 +1,11 @@
 .root {
-    --radius: var(--radius-xl);
+    --radius: var(--primitive-radius-xl);
     --pad-x: 24px;
     --pad-y: 20px;
-    --bg: var(--surface-card-light);
+    --bg: var(--color-surface-card);
     --bd: rgba(0, 0, 0, 0.08);
-    --text-primary: var(--text-primary-light);
-    --text-secondary: var(--text-secondary-light);
+    --text-primary: var(--color-text-primary);
+    --text-secondary: var(--color-text-secondary);
 
     position: relative;
     display: flex;
@@ -96,17 +96,17 @@
 }
 
 .light {
-    --text-primary: var(--text-primary-light);
-    --text-secondary: var(--text-secondary-light);
+    --text-primary: var(--color-text-primary);
+    --text-secondary: var(--color-text-secondary);
 }
 .dark {
-    --text-primary: var(--text-primary-dark);
-    --text-secondary: var(--text-secondary-dark);
-    --bg: var(--surface-card-dark);
-    --bd: var(--boder-soft-dark);
+    --text-primary: var(--color-text-primary);
+    --text-secondary: var(--color-text-secondary);
+    --bg: var(--color-surface-card);
+    --bd: var(--border-soft-dark);
 }
 .dark.flat {
-    background: var(--surface-raised-dark);
+    background: var(--color-surface-raised);
 }
 
 @media (max-width: 640px) {

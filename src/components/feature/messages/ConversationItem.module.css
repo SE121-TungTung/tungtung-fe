@@ -3,7 +3,7 @@
     align-items: center;
     gap: 12px;
     padding: 12px;
-    border-radius: var(--radius-md);
+    border-radius: var(--primitive-radius-md);
     cursor: pointer;
     transition: background-color 0.2s ease;
     user-select: none;
@@ -39,7 +39,7 @@
     right: 1px;
     width: 14px; /* To hơn 1 chút */
     height: 14px;
-    background-color: var(--status-success-500-light, #22c55e);
+    background-color: var(--color-status-success, #22c55e);
     border: 3px solid #fff; /* Border dày */
     border-radius: 50%;
 }
@@ -62,7 +62,7 @@
 .name {
     font-weight: 600;
     font-size: 15px;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -70,20 +70,20 @@
 
 .timestamp {
     font-size: 12px;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     flex-shrink: 0;
     margin-left: 8px;
 }
 
 .lastMessage {
     font-size: 14px;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     margin: 0;
 }
 .item.active .lastMessage {
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     font-weight: 500;
 }

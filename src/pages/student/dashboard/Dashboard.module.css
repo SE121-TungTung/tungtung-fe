@@ -39,7 +39,7 @@
 .avatarButton[data-active='true'] {
     transform: scale(1.1);
     box-shadow: 0 0 20px rgba(100, 150, 255, 0.5);
-    border-color: var(--brand-primary-600-light);
+    border-color: var(--color-brand-primary-hover);
 }
 .avatarButton[data-active='true']::before {
     content: '';
@@ -49,7 +49,7 @@
     background: linear-gradient(
         45deg,
         var(--brand-secondary-500-light),
-        var(--brand-primary-500-light)
+        var(--color-brand-primary)
     );
     z-index: -1;
 }
@@ -98,7 +98,7 @@
     font-size: clamp(2.2rem, 5vw, 3rem);
     font-weight: 700;
     text-align: center;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     letter-spacing: -0.04em;
     margin: 0 auto 40px;
     overflow: visible;
@@ -112,7 +112,7 @@
         111deg,
         var(--brand-secondary-500-light) 0%,
         #ef325f 49.15%,
-        var(--brand-primary-500-light) 100%
+        var(--color-brand-primary) 100%
     );
     background-clip: text;
     -webkit-background-clip: text;
@@ -172,7 +172,7 @@
         111deg,
         var(--brand-secondary-500-light),
         #ef325f 49.15%,
-        var(--brand-primary-500-light)
+        var(--color-brand-primary)
     );
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     transition: transform 0.2s ease;

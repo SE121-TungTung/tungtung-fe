@@ -26,7 +26,7 @@
     display: none;
 }
 .sent .bubble {
-    background-color: var(--brand-primary-500-light, #0066ff);
+    background-color: var(--color-brand-primary, #0066ff);
     color: #fff;
     border-radius: 18px 18px 4px 18px;
 }
@@ -39,8 +39,8 @@
     align-self: flex-start;
 }
 .received .bubble {
-    background-color: var(--surface-raised-light, #f0f2f5);
-    color: var(--text-primary-light);
+    background-color: var(--color-surface-raised, #f0f2f5);
+    color: var(--color-text-primary);
     border-radius: 4px 18px 18px 18px;
 }
 .received .bubbleGroup {
@@ -72,7 +72,7 @@
 
 .senderName {
     font-size: 12px;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     margin-bottom: 4px;
     margin-left: 4px;
 }

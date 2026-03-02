@@ -9,25 +9,25 @@
 
 :root {
     /* defaults = light theme */
-    --btn-bg: var(--button-primary-bg-light);
-    --btn-bg-hover: var(--button-primary-bg-hover-light);
+    --btn-bg: var(--button-primary-bg);
+    --btn-bg-hover: var(--button-primary-bg-hover);
     --btn-bg-pressed: var(--button-primary-bg-pressed-light);
-    --btn-fg: var(--button-primary-fg-light);
-    --btn-border: var(--boder-soft-light, rgba(0, 0, 0, 0.08));
-    --btn-focus: var(--focus-ring-light, rgb(75, 163, 195));
+    --btn-fg: var(--button-primary-text);
+    --btn-border: var(--border-soft-light, rgba(0, 0, 0, 0.08));
+    --btn-focus: var(--color-focus-ring, rgb(75, 163, 195));
 
     /* neutrals */
     --btn-neutral-bg: var(--palette-columbia-blue-700);
-    --btn-neutral-fg: var(--text-primary-light, #0b1520);
-    --btn-neutral-border: var(--boder-strong-light, rgba(0, 0, 0, 0.12));
+    --btn-neutral-fg: var(--color-text-primary, #0b1520);
+    --btn-neutral-border: var(--border-strong-light, rgba(0, 0, 0, 0.12));
 
     /* success / danger */
     --btn-success-bg: var(--color-green-500);
     --btn-success-bg-hover: var(--color-green-600);
     --btn-success-fg: #fff;
 
-    --btn-danger-bg: var(--status-danger-500-light);
-    --btn-danger-bg-hover: var(--status-danger-600-light);
+    --btn-danger-bg: var(--color-status-danger);
+    --btn-danger-bg-hover: var(--color-status-danger-hover);
     --btn-danger-fg: #fff;
 
     /* glass & subtle */
@@ -38,32 +38,32 @@
     );
 
     --btn-subtle-bg: var(--palette-lapis-lazuli-900);
-    --btn-subtle-fg: var(--brand-primary-600-light, #1e6ea3);
+    --btn-subtle-fg: var(--color-brand-primary-hover, #1e6ea3);
 
     /* outline/ghost */
-    --btn-outline-border: var(--brand-primary-600-light, #2484b5);
+    --btn-outline-border: var(--color-brand-primary-hover, #2484b5);
     --btn-ghost-hover: var(--palette-lapis-lazuli-900);
 }
 
 [data-theme='dark'] {
-    --btn-bg: var(--button-primary-bg-dark);
-    --btn-bg-hover: var(--button-primary-bg-hover-dark);
+    --btn-bg: var(--button-primary-bg);
+    --btn-bg-hover: var(--button-primary-bg-hover);
     --btn-bg-pressed: var(--button-primary-bg-pressed-dark);
-    --btn-fg: var(--button-primary-fg-dark);
-    --btn-border: var(--boder-soft-dark, rgba(255, 255, 255, 0.14));
-    --btn-focus: var(--focus-ring-dark, rgb(111, 181, 207));
+    --btn-fg: var(--button-primary-text);
+    --btn-border: var(--border-soft-dark, rgba(255, 255, 255, 0.14));
+    --btn-focus: var(--color-focus-ring, rgb(111, 181, 207));
 
-    --btn-neutral-bg: var(--surface-raised-dark);
-    --btn-neutral-fg: var(--text-primary-dark, #f5fafd);
-    --btn-neutral-border: var(--boder-strong-dark, rgba(255, 255, 255, 0.16));
+    --btn-neutral-bg: var(--color-surface-raised);
+    --btn-neutral-fg: var(--color-text-primary, #f5fafd);
+    --btn-neutral-border: var(--border-strong-dark, rgba(255, 255, 255, 0.16));
 
     --btn-glass-bg: rgba(0, 0, 0, 0.26);
     --btn-glass-border: var(--container-border-dark, rgba(255, 255, 255, 0.12));
 
-    --btn-subtle-bg: var(--surface-card-dark);
-    --btn-subtle-fg: var(--brand-primary-600-dark, #2484b5);
+    --btn-subtle-bg: var(--color-surface-card);
+    --btn-subtle-fg: var(--color-brand-primary-hover, #2484b5);
 
-    --btn-outline-border: var(--brand-primary-600-dark, #2484b5);
+    --btn-outline-border: var(--color-brand-primary-hover, #2484b5);
     --btn-ghost-hover: rgba(255, 255, 255, 0.08);
 }
 
@@ -171,15 +171,15 @@
     --pad-y: var(--button-vertical-padding-extra-large, 10px);
     --pad-x: var(--button-horizontal-padding-extra-large, 20px);
     --icon: var(--button-icon-size-extra-large, 24px);
-    --radius: var(--radius-xl, 24px);
+    --radius: var(--primitive-radius-xl, 24px);
 }
 
 /* Shapes */
 .rounded {
-    border-radius: var(--radius-lg, 200px);
+    border-radius: var(--primitive-radius-lg, 200px);
 }
 .pill {
-    border-radius: var(--radius-full, 9999px);
+    border-radius: var(--primitive-radius-full, 9999px);
 }
 
 /* Full width */
@@ -273,8 +273,8 @@
         linear-gradient(
             120deg,
             var(--brand-secondary-600-light) 0%,
-            var(--brand-accent1-600-light) 45%,
-            var(--brand-primary-700-light) 100%
+            var(--color-brand-accent-hover) 45%,
+            var(--color-brand-primary-active) 100%
         );
     box-shadow:
         0 10px 24px rgba(0, 0, 0, 0.18),
@@ -290,8 +290,8 @@
         linear-gradient(
             120deg,
             var(--brand-secondary-600-dark) 0%,
-            var(--brand-accent1-600-dark) 45%,
-            var(--brand-primary-700-dark) 100%
+            var(--color-brand-accent-hover) 45%,
+            var(--color-brand-primary-active) 100%
         );
 }
 .gradient:hover:not(:disabled, [aria-busy='true']) {

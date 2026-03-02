@@ -10,7 +10,7 @@
     /* Biến cục bộ để quản lý màu sắc */
     --btn-bg: transparent;
     --btn-bd: transparent;
-    --btn-fg: var(--text-primary-light);
+    --btn-fg: var(--color-text-primary);
 
     position: relative;
     display: inline-flex;
@@ -60,7 +60,7 @@
     transform: translateY(1px);
 }
 .root:focus-visible {
-    outline: 2px solid var(--focus-ring-light);
+    outline: 2px solid var(--color-focus-ring);
     outline-offset: 2px;
 }
 .root:disabled {
@@ -75,11 +75,11 @@
     border-radius: calc(var(--radius) + 10px);
     background: conic-gradient(
         from 227.49deg at 50% 50%,
-        var(--brand-accent2-500-light) 0deg,
+        var(--color-brand-secondary) 0deg,
         rgba(66, 232, 255, 0) 95.01deg,
         rgba(255, 126, 171, 0.5) 185.59deg,
-        var(--brand-primary-500-light) 274.88deg,
-        var(--brand-accent2-500-light) 360deg
+        var(--color-brand-primary) 274.88deg,
+        var(--color-brand-secondary) 360deg
     );
     filter: blur(20px);
     opacity: 0.2;
@@ -110,8 +110,8 @@
 }
 
 .solid {
-    --btn-bg: var(--surface-raised-light);
-    --btn-bd: var(--boder-soft-light);
+    --btn-bg: var(--color-surface-raised);
+    --btn-bd: var(--border-soft-light);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
 .solid:hover {
@@ -144,8 +144,8 @@
     background: linear-gradient(
         135deg,
         var(--brand-secondary-500-light),
-        var(--brand-accent2-600-light),
-        var(--brand-primary-600-light)
+        var(--color-brand-secondary-hover),
+        var(--color-brand-primary-hover)
     );
 }
 
@@ -168,26 +168,26 @@
 
 /* --- Modes --- */
 .light {
-    --btn-fg: var(--text-primary-light);
+    --btn-fg: var(--color-text-primary);
 }
 
 .dark {
-    --btn-fg: var(--text-primary-dark);
+    --btn-fg: var(--color-text-primary);
 }
 .dark.glass {
     --btn-bg: linear-gradient(180deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.2));
     --btn-bd: var(--container-border-dark);
 }
 .dark.solid {
-    --btn-bg: var(--surface-raised-dark);
-    --btn-bd: var(--boder-soft-dark);
+    --btn-bg: var(--color-surface-raised);
+    --btn-bd: var(--border-soft-dark);
 }
 .dark .aura {
     opacity: 0.3;
 }
 /* Style riêng cho outline dark mode */
 .dark.outline::after {
-    background: var(--surface-page-dark);
+    background: var(--color-surface-page);
 }
 
 /* --- Sizes --- */

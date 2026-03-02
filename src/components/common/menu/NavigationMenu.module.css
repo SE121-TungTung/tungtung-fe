@@ -1,6 +1,6 @@
 .root {
     --nav-h: clamp(44px, 6vw, 56px);
-    --radius: var(--radius-pill, 9999px);
+    --radius: var(--primitive-radius-full, 9999px);
     --pad-x: clamp(8px, 1.2vw, 14px);
     --pad-y: clamp(6px, 0.9vw, 10px);
     --gap: clamp(10px, 2vw, 24px);

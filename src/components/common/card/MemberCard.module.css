@@ -3,9 +3,9 @@
     align-items: center;
     gap: 16px;
     padding: 16px;
-    border-radius: var(--radius-md);
-    background: var(--surface-raised-light);
-    border: 1px solid var(--boder-soft-light);
+    border-radius: var(--primitive-radius-md);
+    background: var(--color-surface-raised);
+    border: 1px solid var(--border-soft-light);
     transition: all 0.2s ease;
 }
 
@@ -39,7 +39,7 @@
 .name {
     font-weight: 600;
     font-size: 15px;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     margin: 0;
     white-space: nowrap;
     overflow: hidden;
@@ -55,9 +55,9 @@
 }
 
 .statusIndicator.online {
-    background-color: var(--status-success-500-light);
+    background-color: var(--color-status-success);
     box-shadow: 0 0 3px 1px
-        color-mix(in srgb, var(--status-success-500-light) 50%, transparent);
+        color-mix(in srgb, var(--color-status-success) 50%, transparent);
 }
 
 .statusIndicator.offline {
@@ -66,7 +66,7 @@
 
 .role {
     font-size: 13px;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     margin: 0;
 }
 

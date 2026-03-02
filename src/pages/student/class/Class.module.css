@@ -34,7 +34,7 @@
     font-size: clamp(2rem, 4vw, 3rem);
     font-weight: 700;
     text-align: center;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     letter-spacing: -0.04em;
     line-height: 1.15;
     min-height: 1.15em;
@@ -47,8 +47,8 @@
         linear-gradient(
             135deg,
             var(--brand-secondary-500-light) 0%,
-            var(--brand-accent2-500-light) 69.5%,
-            var(--brand-primary-500-light) 141.42%
+            var(--color-brand-secondary) 69.5%,
+            var(--color-brand-primary) 141.42%
         )
     );
     background-clip: text;
@@ -113,13 +113,13 @@
 .placeholderBox h2 {
     font-size: 24px;
     font-weight: 700;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     margin: 0 0 12px 0;
 }
 
 .placeholderBox p {
     font-size: 14px;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     margin: 0;
 }
 
@@ -132,10 +132,10 @@
 /* Style cho select filter trong Class.tsx */
 .memberFilterSelect {
     padding: 8px 12px; /* Đồng bộ với input size sm */
-    border-radius: var(--radius-md);
-    border: 1px solid var(--boder-hard-light);
-    background-color: var(--surface-raised-light);
-    color: var(--text-primary-light);
+    border-radius: var(--primitive-radius-md);
+    border: 1px solid var(--border-hard-light);
+    background-color: var(--color-surface-raised);
+    color: var(--color-text-primary);
     font-size: 13px; /* Đồng bộ với input size sm */
     min-width: 130px;
     cursor: pointer;

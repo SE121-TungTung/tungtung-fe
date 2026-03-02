@@ -1,227 +1,60 @@
-.wrap {
-    position: relative;
-    z-index: 2;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: clamp(40px, 8vw, 190px);
-    min-height: 100vh;
-    width: 100vw;
-    padding: 0 clamp(24px, 8vw, 151px);
-    flex-direction: row;
-    background: transparent;
-    pointer-events: none;
-}
+/* ============================================================================
+   LOGIN PAGE - Specific styles
+   Most layout is handled by AuthLayout
+   ============================================================================ */
 
-.wrap > * {
-    pointer-events: auto;
-}
-
-.bg {
-    z-index: 1;
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    touch-action: none;
-    pointer-events: auto;
-}
-
-@media (max-width: 768px) {
-    .wrap {
-        flex-direction: column;
-        gap: 20px;
-        padding: 20px;
-    }
-}
-
-.info {
-    flex: 1;
-    position: relative;
-    display: flex;
-    width: 500px;
-    max-width: 50%;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 37px;
-}
-
-@media (max-width: 50%) {
-    .info {
-        width: 100%;
-        order: 2;
-        gap: 20px;
-    }
-}
-
-.card {
-    flex: 1;
-    background: var(--card);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 20px;
-    padding: 40px;
-    min-width: 300px;
-    max-width: 400px;
-}
-
-@media (max-width: 50%) {
-    .card {
-        margin: 0;
-        width: 100%;
-        max-width: 100%;
-        min-width: unset;
-        order: 1;
-        flex: none;
-    }
-}
-
-.input {
-    width: 100%;
-    padding: 12px 14px;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    background: rgba(255, 255, 255, 0.06);
-    color: var(--text);
-    box-sizing: border-box;
-}
-
-.error {
-    color: #ff9aa2;
-    font-size: 12px;
-    margin-top: 6px;
-}
-
-.h1 {
-    font-family: Inter;
-    font-size: 60px;
-    font-style: normal;
-    font-weight: 600;
-    line-height: normal;
-    letter-spacing: -3px;
-    background: var(
-        --Gradients-Red,
-        linear-gradient(
-            111deg,
-            var(--brand-secondary-500, #d62839) 0%,
-            #ef325f 49.15%,
-            var(--brand-primary-500, #175676) 100%
-        )
-    );
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-@media (max-width: 768px) {
-    .h1 {
-        font-size: clamp(32px, 8vw, 60px);
-        letter-spacing: -1.5px;
-        text-align: center;
-    }
-}
-
-.h1_inside {
-    color: #fff;
-    font-family: Inter;
-    font-size: 60px;
-    font-style: normal;
-    font-weight: 600;
-    line-height: normal;
-    letter-spacing: -3px;
-    background: none;
-    background-clip: text;
-    -webkit-background-clip: initial;
-    -webkit-text-fill-color: #fff;
-}
-
-@media (max-width: 768px) {
-    .h1_inside {
-        font-size: clamp(32px, 8vw, 60px);
-        letter-spacing: -1.5px;
-    }
-}
-
-.lead {
-    opacity: 0.8;
-    max-width: 460px;
-}
-
-@media (max-width: 768px) {
-    .lead {
-        text-align: center;
-        font-size: 14px;
-        max-width: 100%;
-    }
-}
-
-.row {
+/* Remember & Forgot Password Row */
+.rememberRow {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin: 10px 0 16px;
+    gap: var(--primitive-space-6);
+    margin: var(--primitive-space-3) 0;
 }
 
+.rememberCheck {
+    font-size: var(--primitive-text-sm);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.forgotLink {
+    font-size: var(--primitive-text-sm);
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    transition: var(--transition-colors);
+    white-space: nowrap;
+}
+
+.forgotLink:hover {
+    color: rgba(255, 255, 255, 1);
+    text-decoration: underline;
+}
+
+.forgotLink:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+    border-radius: var(--primitive-radius-xs);
+}
+
+/* Mobile adjustments */
 @media (max-width: 480px) {
-    .row {
+    .rememberRow {
         flex-direction: column;
         align-items: flex-start;
-        gap: 10px;
+        gap: var(--primitive-space-4);
+    }
+
+    .forgotLink {
+        margin-left: 0;
     }
 }
 
-.rowCompact {
-    margin: 6px 0 12px;
-    align-items: center;
-    gap: 10px;
-    line-height: 1.1;
+/* Dark theme adjustments */
+[data-theme='dark'] .rememberCheck,
+[data-theme='dark'] .forgotLink {
+    color: rgba(255, 255, 255, 0.9);
 }
 
-.remember {
-    font-size: 14px;
-}
-
-.forgot {
-    margin-left: auto;
-    font-size: 13.5px;
-    color: rgba(255, 255, 255, 0.92);
-    text-decoration: underline transparent;
-    transition:
-        text-decoration-color 0.15s ease,
-        opacity 0.15s ease;
-}
-.forgot:hover {
-    text-decoration-color: currentColor;
-    opacity: 1;
-}
-
-@media (max-width: 480px) {
-    .rowCompact {
-        gap: 8px;
-    }
-}
-
-.frame {
-    align-items: center;
-    display: flex;
-    flex-direction: column;
-    gap: 37px;
-    justify-content: center;
-    position: relative;
-    width: 100%;
-}
-
-@media (max-width: 768px) {
-    .frame {
-        gap: 20px;
-        align-items: flex-start;
-    }
-}
-
-@media (max-width: 768px) {
-    .info .text-horizontal-instance {
-        width: 100%;
-        align-self: stretch;
-    }
+[data-theme='dark'] .forgotLink:hover {
+    color: rgba(255, 255, 255, 1);
 }

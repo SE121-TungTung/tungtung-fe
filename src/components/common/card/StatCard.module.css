@@ -12,7 +12,7 @@
 
     width: 100%;
     position: relative;
-    border-radius: var(--radius-sm);
+    border-radius: var(--primitive-radius-sm);
     border: 2px solid transparent;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
@@ -81,7 +81,7 @@
 }
 
 .light {
-    --text-color: var(--text-primary-light);
+    --text-color: var(--color-text-primary);
     --subtext-color: rgba(0, 0, 0, 0.7);
     --divider-color: rgba(0, 0, 0, 0.1);
     --progress-bar-bg: #000;
@@ -89,7 +89,7 @@
 }
 
 .dark {
-    --text-color: var(--text-primary-dark);
+    --text-color: var(--color-text-primary);
     --subtext-color: rgba(255, 255, 255, 0.7);
     --divider-color: rgba(255, 255, 255, 0.15);
     --progress-bar-bg: #fff;
@@ -118,7 +118,7 @@
         111deg,
         var(--brand-secondary-500-light) 0%,
         #ef325f 49.15%,
-        var(--brand-primary-500-light) 100%
+        var(--color-brand-primary) 100%
     );
 }
 

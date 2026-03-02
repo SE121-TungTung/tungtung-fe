@@ -2,14 +2,14 @@
     display: flex;
     gap: 16px;
     padding: 16px 20px;
-    border-bottom: 1px solid var(--boder-soft-light);
+    border-bottom: 1px solid var(--border-soft-light);
     cursor: pointer;
     transition: background-color 0.2s ease;
     position: relative;
 }
 
 .item:first-child {
-    border-top: 1px solid var(--boder-soft-light);
+    border-top: 1px solid var(--border-soft-light);
 }
 
 .item:hover {
@@ -17,7 +17,7 @@
 }
 
 .item.read {
-    background-color: var(--surface-raised-light);
+    background-color: var(--color-surface-raised);
 }
 
 .item.unread {
@@ -31,7 +31,7 @@
     display: grid;
     place-items: center;
     border-radius: 50%;
-    background: var(--surface-page-light);
+    background: var(--color-surface-page);
     border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
@@ -50,13 +50,13 @@
 .title {
     font-weight: 600;
     font-size: 15px;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     margin: 0 0 4px;
 }
 
 .content {
     font-size: 14px;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     margin: 0 0 8px;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -68,13 +68,13 @@
 
 .item.unread .title,
 .item.unread .content {
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
 }
 
 .timestamp {
     font-size: 12px;
     font-weight: 500;
-    color: var(--brand-primary-500-light);
+    color: var(--color-brand-primary);
 }
 .item.read .timestamp {
     color: var(--text-tertiary-light);
@@ -84,7 +84,7 @@
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background-color: var(--brand-primary-500-light);
+    background-color: var(--color-brand-primary);
     flex-shrink: 0;
     margin-left: 16px;
     align-self: center;

@@ -5,7 +5,7 @@
     --bg-active: rgba(255, 255, 255, 0.05);
     --stroke: rgba(255, 255, 255, 0.22);
     --inner-hi: rgba(255, 255, 255, 0.18);
-    --icon: #fff;
+    --icon: var(--color-brand-primary);
 
     position: relative;
     display: grid;
@@ -160,10 +160,10 @@
     --bg-active: rgba(18, 18, 22, 0.5);
     --stroke: rgba(255, 255, 255, 0.22);
     --inner-hi: rgba(255, 255, 255, 0.18);
-    --icon: #fff;
+    --icon: var(--color-brand-primary);
 }
 .light {
-    --icon: #fff;
+    --icon: var(--color-brand-primary);
 }
 
 /* checked state */

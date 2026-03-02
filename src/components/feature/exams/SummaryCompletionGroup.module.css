@@ -1,7 +1,7 @@
 .summaryText {
     font-size: 14px;
     line-height: 2; /* Tăng dãn dòng để dễ đọc và điền */
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
 }
 
 .summaryText strong {
@@ -14,7 +14,7 @@
 .inputField {
     padding: 4px 8px;
     border: 1px solid #ccc;
-    border-radius: var(--radius-sm);
+    border-radius: var(--primitive-radius-sm);
     font-size: 14px;
     min-width: 140px;
     margin: 0 4px; /* Khoảng cách với text */

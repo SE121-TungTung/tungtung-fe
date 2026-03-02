@@ -45,7 +45,6 @@ export default function TextCheck({
             data-size={size}
             aria-disabled={disabled || undefined}
         >
-            {/* native checkbox để form submit/rhf đọc được */}
             <input
                 type="checkbox"
                 className={s.native}

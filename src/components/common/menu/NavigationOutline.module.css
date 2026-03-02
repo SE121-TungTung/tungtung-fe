@@ -1,6 +1,6 @@
 .root {
     /* tokens + fallback */
-    --radius: var(--radius-pill, 999px);
+    --radius: var(--primitive-radius-full, 999px);
     --h: 28px; /* overridden by size */
     --px: 12px;
     --fg: var(--Text-primary, #0b1520);

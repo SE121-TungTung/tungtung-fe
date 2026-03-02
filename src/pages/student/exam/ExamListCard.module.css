@@ -22,7 +22,7 @@
     place-items: center;
     text-align: center;
     padding: 60px 20px;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     opacity: 0.8;
     font-size: 14px;
     min-height: 200px;

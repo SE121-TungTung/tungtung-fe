@@ -2,6 +2,7 @@ import React, { type JSX } from 'react'
 import ArrowRight from '@/assets/Arrow Right.svg'
 import { ButtonLogo } from '@/components/common/button/ButtonLogo'
 import s from './TextHorizontal.module.css'
+import Button from '../button/Button'
 
 interface Props {
     className?: string
@@ -45,14 +46,17 @@ export const TextHorizontal = ({
             </div>
 
             {ctaText && (
-                <button className={s.ctaButton} onClick={onCtaClick}>
+                <Button
+                    className={s.ctaButton}
+                    onClick={onCtaClick}
+                    variant="glass"
+                    size="md"
+                    glow
+                    tone="brand"
+                    rightIcon={<img src={ArrowRight} alt="arrow" />}
+                >
                     <span className={s.ctaText}>{ctaText}</span>
-                    <img
-                        src={ArrowRight}
-                        className={s.arrowRight}
-                        alt="arrow"
-                    />
-                </button>
+                </Button>
             )}
         </div>
     )

@@ -5,9 +5,9 @@
     justify-content: center;
     padding: 24px;
     gap: 16px;
-    border-radius: var(--radius-lg);
+    border-radius: var(--primitive-radius-lg);
     background: linear-gradient(145deg, #ffffff, #f0f4f9);
-    border: 1px solid var(--boder-soft-light);
+    border: 1px solid var(--border-soft-light);
     box-shadow: var(--shadow-md-light);
     text-align: center;
     cursor: pointer;
@@ -46,6 +46,6 @@
 .skillName {
     font-size: 16px;
     font-weight: 600;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     margin: 0;
 }

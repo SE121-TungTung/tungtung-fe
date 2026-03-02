@@ -4,7 +4,7 @@
     display: flex;
     gap: 16px;
     padding: 16px;
-    border-radius: var(--radius-sm);
+    border-radius: var(--primitive-radius-sm);
     border: 1px solid transparent;
     transition: all 0.2s ease-out;
 }
@@ -12,8 +12,8 @@
 .light {
     --bg: var(--background-primary-light);
     --bd: rgba(0, 0, 0, 0.08);
-    --text-primary: var(--text-primary-light);
-    --text-secondary: var(--text-secondary-light);
+    --text-primary: var(--color-text-primary);
+    --text-secondary: var(--color-text-secondary);
     background: var(--bg);
     border-color: var(--bd);
 }
@@ -21,8 +21,8 @@
 .dark {
     --bg: var(--background-primary-dark);
     --bd: rgba(255, 255, 255, 0.15);
-    --text-primary: var(--text-primary-dark);
-    --text-secondary: var(--text-secondary-dark);
+    --text-primary: var(--color-text-primary);
+    --text-secondary: var(--color-text-secondary);
     background: var(--bg);
     border-color: var(--bd);
 }
