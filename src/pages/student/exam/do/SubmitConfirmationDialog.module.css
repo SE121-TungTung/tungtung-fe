@@ -1,0 +1,103 @@
+.confirmDialog {
+    padding: 24px;
+    max-width: 500px;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #222;
+    margin: 0 0 16px 0;
+    text-align: center;
+}
+
+.warning {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-bottom: 24px;
+    font-size: 14px;
+    color: #856404;
+    text-align: center;
+    font-weight: 500;
+}
+
+.sectionSummary {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.statRow {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.sectionName {
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+}
+
+.progressContainer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.progressText {
+    font-size: 14px;
+    color: #666;
+    min-width: 60px;
+}
+
+.progressBar {
+    flex: 1;
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    background: linear-gradient(90deg, #4caf50 0%, #8bc34a 100%);
+    transition: width 0.3s ease;
+}
+
+.speakingNotice {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #155724;
+}
+
+.checkmark {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.aiBand {
+    color: #fd0d21;
+    font-weight: 600;
+}
+
+.confirmText {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    text-align: center;
+    margin: 0;
+}

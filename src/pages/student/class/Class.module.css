@@ -1,7 +1,8 @@
-.pageWrapper {
-    background: linear-gradient(115deg, #e4ecf7, #fff);
-    min-height: 100vh;
-    padding: 24px clamp(24px, 5vw, 80px);
+.pageWrapperWithoutHeader {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .header {

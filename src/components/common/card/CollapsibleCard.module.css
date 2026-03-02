@@ -1,0 +1,90 @@
+.container {
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.section {
+    border: 1px solid #d9d9d9;
+    background: #fff;
+    margin-bottom: 16px;
+}
+
+.part {
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    margin: 12px 0;
+}
+
+.group {
+    background: #f2f8ff;
+    border: 1px solid #dee2e6;
+    margin: 8px 0;
+}
+
+.header {
+    padding: 12px 16px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.15s ease;
+    user-select: none;
+}
+
+.header:hover {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.titleRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.chevron {
+    font-size: 12px;
+    color: #666;
+    transition: transform 0.2s ease;
+}
+
+.title {
+    font-weight: 600;
+    color: #333;
+}
+
+.section .title {
+    font-size: 18px;
+}
+
+.part .title {
+    font-size: 16px;
+    color: #555;
+}
+
+.group .title {
+    font-size: 14px;
+    color: #495057;
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+}
+
+.content {
+    padding: 16px;
+    animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        max-height: 5000px;
+    }
+}

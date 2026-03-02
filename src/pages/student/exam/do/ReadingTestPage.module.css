@@ -308,3 +308,51 @@ span[data-highlight-id][data-color='blue'] {
         transform: translateY(0);
     }
 }
+
+/* ===== SUMMARY / NOTE COMPLETION INSTRUCTION ===== */
+
+.summaryInstruction {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #222;
+    margin-bottom: 20px;
+}
+
+.summaryInstruction h1 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.summaryInstruction h2 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 16px;
+    margin-bottom: 6px;
+}
+
+.summaryInstruction h3 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 12px;
+    margin-bottom: 4px;
+}
+
+.summaryInstruction ul {
+    padding-left: 18px;
+    margin: 6px 0 10px;
+}
+
+.summaryInstruction li {
+    margin: 4px 0;
+}
+
+.summaryInstruction strong {
+    font-weight: 600;
+}
+
+.summaryInstruction hr {
+    margin: 12px 0;
+    border: none;
+    border-top: 1px solid #eee;
+}

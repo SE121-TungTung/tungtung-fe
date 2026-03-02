@@ -1,39 +1,35 @@
 import s from './SentenceCompletionQuestion.module.css'
+import type { Question } from '@/types/test.types'
 
-interface ShortAnswerProps {
-    questionNumber: number
-    questionText: string
+interface ShortAnswerQuestionProps {
+    question: Question & { globalNumber: number }
     value: string
     onChange: (value: string) => void
-    placeholder?: string
-    registerRef: (id: string, element: HTMLElement) => void
+    registerRef: (id: string, element: HTMLElement | null) => void
 }
 
 export default function ShortAnswerQuestion({
-    questionNumber,
-    questionText,
+    question,
     value,
     onChange,
-    placeholder = 'Your answer...',
     registerRef,
-}: ShortAnswerProps) {
+}: ShortAnswerQuestionProps) {
     return (
         <div
             className={s.questionBlock}
-            ref={(el) => {
-                if (el) registerRef(questionNumber.toString(), el)
-            }}
+            ref={(el) => registerRef(question.id, el)}
         >
-            <label htmlFor={`saq-${questionNumber}`} className={s.questionText}>
-                <strong>{questionNumber}.</strong> {questionText}
+            <label htmlFor={`saq-${question.id}`} className={s.questionText}>
+                <strong>{question.globalNumber}.</strong>{' '}
+                {question.questionText}
             </label>
             <input
-                id={`saq-${questionNumber}`}
+                id={`saq-${question.id}`}
                 type="text"
                 className={s.inputField}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
-                placeholder={placeholder}
+                placeholder="Your answer..."
                 style={{ width: '100%', maxWidth: '400px' }}
             />
         </div>

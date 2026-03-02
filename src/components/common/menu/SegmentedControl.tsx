@@ -1,4 +1,11 @@
-import React, { useCallback, useId, useMemo, useState } from 'react'
+import React, {
+    useCallback,
+    useId,
+    useLayoutEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react'
 import s from './SegmentedControl.module.css'
 
 export type Mode = 'light' | 'dark'
@@ -43,16 +50,14 @@ export default function SegmentedControl({
         () => items.find((x) => !x.disabled)?.value ?? items[0]?.value,
         [items]
     )
+
     const [internal, setInternal] = useState<string>(
         defaultValue ?? firstEnabled ?? ''
     )
     const active = value ?? internal
 
-    const index = Math.max(
-        0,
-        items.findIndex((x) => x.value === active && !x.disabled)
-    )
-    const count = Math.max(items.length, 1)
+    const containerRef = useRef<HTMLDivElement>(null)
+    const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 })
 
     const setActive = useCallback(
         (val: string) => {
@@ -62,6 +67,22 @@ export default function SegmentedControl({
         },
         [value, items, onChange]
     )
+
+    useLayoutEffect(() => {
+        const container = containerRef.current
+        if (!container) return
+
+        const activeTab = container.querySelector(
+            `button[data-value="${active}"]`
+        ) as HTMLElement
+
+        if (activeTab) {
+            setIndicatorStyle({
+                left: activeTab.offsetLeft,
+                width: activeTab.offsetWidth,
+            })
+        }
+    }, [active, items, size, fullWidth])
 
     const onKey = (e: React.KeyboardEvent<HTMLDivElement>) => {
         if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return
@@ -80,7 +101,7 @@ export default function SegmentedControl({
         s[mode],
         s[variant],
         s[size],
-        fullWidth ? s.block : '',
+        fullWidth ? s.fullWidth : s.autoWidth,
         disabled ? s.isDisabled : '',
         className,
     ]
@@ -104,20 +125,22 @@ export default function SegmentedControl({
             aria-disabled={disabled || undefined}
             onKeyDown={onKey}
         >
-            <div className={s.row}>
+            <div className={s.row} ref={containerRef}>
                 <span
                     className={s.indicator}
                     style={{
-                        width: `${100 / count}%`,
-                        transform: `translateX(${index * 100}%)`,
+                        width: `${indicatorStyle.width}px`,
+                        transform: `translateX(${indicatorStyle.left}px)`,
                     }}
                     aria-hidden="true"
                 />
+
                 {items.map((it) => {
                     const isActive = it.value === active
                     return (
                         <button
                             key={it.value}
+                            data-value={it.value} // Thêm data attribute để querySelector tìm được
                             role="tab"
                             type="button"
                             className={[
@@ -136,7 +159,6 @@ export default function SegmentedControl({
                     )
                 })}
             </div>
-            {/* <div className={s.divider} /> */}
         </div>
     )
 }

@@ -1,0 +1,47 @@
+.portalTooltip {
+    position: fixed; /* Dùng fixed thay vì absolute để neo theo màn hình */
+    z-index: 99999;
+    background: white;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--boder-soft-light);
+    width: max-content;
+    max-width: 300px;
+    min-width: 200px;
+    pointer-events: none;
+
+    animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Style mũi tên (Optional) */
+.portalTooltip::before {
+    content: '';
+    position: absolute;
+    top: 15px; /* Canh chỉnh theo chiều dọc thẻ cha */
+    border-width: 6px;
+    border-style: solid;
+}
+
+/* Mũi tên khi tooltip nằm bên phải */
+.placeRight::before {
+    right: 100%;
+    border-color: transparent white transparent transparent;
+}
+
+/* Mũi tên khi tooltip nằm bên trái */
+.placeLeft::before {
+    left: 100%;
+    border-color: transparent transparent transparent white;
+}

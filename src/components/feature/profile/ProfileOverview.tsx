@@ -5,6 +5,7 @@ import type { Role } from '@/types/auth'
 import Card from '@/components/common/card/Card'
 import { TestHistoryItem, type TestAttempt } from './TestHistoryItem'
 import StatCard from '@/components/common/card/StatCard'
+import { useDialog } from '@/hooks/useDialog'
 
 const mockProgress = {
     current_band: 7.0,
@@ -40,6 +41,7 @@ const mockTestHistory: TestAttempt[] = [
 ]
 
 const StudentStats: React.FC = () => {
+    const { alert } = useDialog()
     // Tính toán tiến độ
     const progressPercent =
         (mockProgress.completed_lessons / mockProgress.total_lessons) * 100

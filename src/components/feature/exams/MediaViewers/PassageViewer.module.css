@@ -1,0 +1,105 @@
+.container {
+    flex: 1;
+    min-width: 400px;
+    background-color: #fff;
+    border: 1px solid #d9d9d9;
+    border-radius: var(--radius-md);
+    padding: 20px;
+    overflow-y: auto;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.title {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eee;
+    color: var(--text-primary-light);
+}
+
+.content {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text-primary-light);
+    white-space: pre-wrap;
+}
+
+.content p {
+    margin-bottom: 1em;
+}
+
+.content ::selection {
+    background-color: color-mix(
+        in srgb,
+        var(--brand-primary-light, #0066ff) 30%,
+        transparent
+    );
+}
+
+.emptyState {
+    text-align: center;
+    color: #999;
+    padding: 40px 20px;
+}
+
+.content :global(.highlight) {
+    padding: 2px 0;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    position: relative;
+}
+
+.content :global(.highlight):hover {
+    filter: brightness(0.92);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+/* Specific colors based on data-color attribute */
+.content :global(.highlight[data-color='#fef08a']) {
+    background-color: #fef08a;
+}
+
+.content :global(.highlight[data-color='#fbcfe8']) {
+    background-color: #fbcfe8;
+}
+
+.content :global(.highlight[data-color='#bfdbfe']) {
+    background-color: #bfdbfe;
+}
+
+/* Additional highlight colors (nếu có thêm) */
+.content :global(.highlight[data-color='#bbf7d0']) {
+    background-color: #bbf7d0;
+}
+
+.content :global(.highlight[data-color='#e9d5ff']) {
+    background-color: #e9d5ff;
+}
+
+/* Fallback for any other colors */
+.content :global(.highlight:not([data-color])) {
+    background-color: #fef08a;
+}
+
+/* Selection styling when highlighting */
+.content :global(.highlight)::selection {
+    background-color: rgba(99, 102, 241, 0.2);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .container {
+        min-width: 100%;
+        padding: 16px;
+    }
+
+    .content {
+        font-size: 14px;
+    }
+}

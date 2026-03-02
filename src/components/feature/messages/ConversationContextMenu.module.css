@@ -1,0 +1,67 @@
+.menu {
+    position: fixed;
+    min-width: 200px;
+    background: var(--surface-card-light);
+    border: 1px solid var(--boder-soft-light);
+    border-radius: var(--radius-md);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    padding: var(--space-8);
+    z-index: 2000;
+    animation: menuFadeIn 0.15s ease-out;
+}
+
+@keyframes menuFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.menuItem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-12);
+    width: 100%;
+    padding: var(--space-10) var(--space-12);
+    border: none;
+    background: transparent;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary-light);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    text-align: left;
+}
+
+.menuItem:hover {
+    background-color: var(--surface-raised-light);
+}
+
+.menuItem img {
+    width: 16px;
+    height: 16px;
+    opacity: 0.7;
+}
+
+.menuItem.danger {
+    color: var(--status-danger-500-light);
+}
+
+.menuItem.danger:hover {
+    background-color: color-mix(
+        in srgb,
+        var(--status-danger-500-light) 10%,
+        transparent
+    );
+}
+
+.divider {
+    height: 1px;
+    background-color: var(--boder-soft-light);
+    margin: var(--space-4) 0;
+}

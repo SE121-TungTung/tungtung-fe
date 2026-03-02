@@ -1,0 +1,88 @@
+.pageWrapperWithoutHeader {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.mainContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.pageTitle {
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    font-weight: 700;
+    color: var(--text-primary-light);
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    text-align: center;
+    width: 100%;
+    margin-bottom: var(--space-8);
+}
+
+.filterCard {
+    width: 100%;
+    padding: var(--space-20);
+    background: var(--surface-page-light);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--color-border-default);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-16);
+    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Row chứa search và filter */
+.filterRow {
+    display: flex;
+    gap: var(--space-16);
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.searchWrapper {
+    flex: 2; /* Search chiếm phần lớn */
+    min-width: 300px;
+}
+
+.filterControls {
+    flex: 1;
+    display: flex;
+    gap: var(--space-16);
+    min-width: 200px;
+}
+
+.tableCard {
+    width: 100%;
+    padding: 10px;
+    overflow: hidden;
+    border-radius: var(--radius-xl);
+    background: var(--surface-page-light);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--color-border-default);
+    animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .filterRow {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

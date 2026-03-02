@@ -1,7 +1,7 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import s from './RoadmapPage.module.css'
 import { useSession } from '@/stores/session.store'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
 
@@ -51,18 +51,25 @@ const mockRoadmap: RoadmapStage[] = [
 
 export default function RoadmapPage() {
     const sessionState = useSession()
-    const location = useLocation()
     const userRole = sessionState?.user?.role || 'student'
+    const navigate = useNavigate()
+    const location = useLocation()
     const currentPath = location.pathname
+
+    const navItems = useMemo(
+        () => getNavItems(userRole as any, currentPath, navigate),
+        [userRole, currentPath, navigate]
+    )
+    const userMenuItems = useMemo(
+        () => getUserMenuItems(userRole as any, navigate),
+        [userRole, navigate]
+    )
 
     const [showGradientName, setShowGradientName] = useState(false)
 
     const handleGreetingComplete = useCallback(() => {
         setShowGradientName(true)
     }, [])
-
-    const navItems = getNavItems(userRole as any, currentPath)
-    const userMenuItems = getUserMenuItems(userRole as any)
 
     return (
         <div className={s.pageWrapper}>

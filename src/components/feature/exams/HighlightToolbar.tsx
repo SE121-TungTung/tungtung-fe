@@ -19,7 +19,11 @@ interface ToolbarProps {
     onRemove: (id: string) => void
 }
 
-const colors = ['yellow', 'pink', 'blue']
+const HIGHLIGHT_COLORS = [
+    { name: 'yellow', hex: '#fef08a', className: s.yellow },
+    { name: 'pink', hex: '#fbcfe8', className: s.pink },
+    { name: 'blue', hex: '#bfdbfe', className: s.blue },
+]
 
 export default function HighlightToolbar({
     state,
@@ -29,13 +33,13 @@ export default function HighlightToolbar({
     return (
         <div className={s.toolbar} style={{ top: state.top, left: state.left }}>
             {state.mode === 'add' ? (
-                colors.map((color) => (
+                HIGHLIGHT_COLORS.map((color) => (
                     <button
-                        key={color}
-                        className={`${s.colorButton} ${s[color]}`}
-                        onClick={() => onAdd(color)}
-                        aria-label={`Highlight ${color}`}
-                        title={`Highlight ${color}`}
+                        key={color.name}
+                        className={`${s.colorButton} ${color.className}`}
+                        onClick={() => onAdd(color.hex)}
+                        aria-label={`Highlight ${color.name}`}
+                        title={`Highlight ${color.name}`}
                     />
                 ))
             ) : (

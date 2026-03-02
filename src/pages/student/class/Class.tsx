@@ -1,7 +1,9 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
+
 import s from './Class.module.css'
 
-import NavigationMenu from '@/components/common/menu/NavigationMenu'
+// Components
 import TabMenu, { type TabItem } from '@/components/common/menu/TabMenu'
 import SegmentedControl, {
     type SegItem,
@@ -9,21 +11,25 @@ import SegmentedControl, {
 import ScheduleTodayCard from '@/components/common/card/ScheduleToday'
 import SessionList from './SessionList'
 import TextType from '@/components/common/text/TextType'
-import type { Lesson } from '@/components/common/typography/LessonItem'
-
-import AvatarImg from '@/assets/avatar-placeholder.png'
-import SearchIcon from '@/assets/Book Search.svg'
-
-import type { Assignment } from '@/components/common/card/AssignmentCard'
-import type { Activity } from '@/components/common/card/RecentActivityCard'
-import RecentActivityCard from '@/components/common/card/RecentActivityCard'
-import AssignmentCard from '@/components/common/card/AssignmentCard'
+import RecentActivityCard, {
+    type Activity,
+} from '@/components/common/card/RecentActivityCard'
+import AssignmentCard, {
+    type Assignment,
+} from '@/components/common/card/AssignmentCard'
 import MemberList from './MemberList'
-import type { ClassMember } from '@/components/common/card/MemberCard'
 import Card from '@/components/common/card/Card'
 import InputField from '@/components/common/input/InputField'
-import { useSession } from '@/stores/session.store'
-import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
+
+// Assets
+import SearchIcon from '@/assets/Book Search.svg'
+
+// API & Types
+import { getMyClasses } from '@/lib/users' // Đảm bảo hàm này đã được export từ file users.ts
+import type { MyClass, ClassSession, MyClassUser } from '@/types/user.types'
+import type { ClassMember } from '@/components/common/card/MemberCard'
+import type { Lesson } from '@/components/common/typography/LessonItem'
+import { useDialog } from '@/hooks/useDialog'
 
 const tabItems: TabItem[] = [
     { label: 'Lịch học', value: 'schedule' },
@@ -36,96 +42,13 @@ const viewModeItems: SegItem[] = [
     { label: 'Tháng', value: 'month' },
 ]
 
-const todaySessions: Lesson[] = [
-    {
-        id: '1',
-        sessionDate: '2025-10-27',
-        startTime: '08:00',
-        endTime: '09:30',
-        className: 'IELTS Intermediate A',
-        courseName: 'IELTS Intermediate A',
-        teacherName: 'Mr. John',
-        roomName: 'A1',
-        status: 'in_progress',
-        attendanceTaken: false,
-    },
-    {
-        id: '2',
-        sessionDate: '2025-10-27',
-        startTime: '10:00',
-        endTime: '11:30',
-        className: 'TOEIC Advanced B',
-        courseName: 'TOEIC Advanced B',
-        teacherName: 'Ms. Jane',
-        roomName: 'B2',
-        status: 'scheduled',
-        attendanceTaken: false,
-    },
-]
-
-const allSessions: Lesson[] = [
-    {
-        id: '3',
-        sessionDate: '2025-10-27',
-        startTime: '08:00',
-        endTime: '09:30',
-        className: 'Buổi 1: Introduction',
-        status: 'completed',
-    },
-    {
-        id: '4',
-        sessionDate: '2025-10-29',
-        startTime: '08:00',
-        endTime: '09:30',
-        className: 'Buổi 2: Listening Skills',
-        status: 'completed',
-    },
-    {
-        id: '5',
-        sessionDate: '2025-11-03',
-        startTime: '08:00',
-        endTime: '09:30',
-        className: 'Buổi 3: Reading Comprehension',
-        status: 'scheduled',
-    },
-    {
-        id: '6',
-        sessionDate: '2025-11-05',
-        startTime: '08:00',
-        endTime: '09:30',
-        className: 'Buổi 4: Writing Task 1',
-        status: 'scheduled',
-    },
-    {
-        id: '7',
-        sessionDate: '2025-11-10',
-        startTime: '08:00',
-        endTime: '09:30',
-        className: 'Buổi 5: Speaking Part 1',
-        status: 'scheduled',
-    },
-    {
-        id: '8',
-        sessionDate: '2025-11-12',
-        startTime: '08:00',
-        endTime: '09:30',
-        className: 'Buổi 6: Mid-term Test',
-        status: 'scheduled',
-    },
-]
-
+// Mock data cho News và Assignments (Vì API classes thường chưa bao gồm cái này)
 const recentActivities: Activity[] = [
     {
         id: 'a1',
         title: 'Giáo viên đã đăng tài liệu "Unit 5 Grammar"',
         timestamp: '2 giờ trước',
         type: 'material',
-    },
-    {
-        id: 'a2',
-        title: 'Bài tập "Writing Task 1" sắp hết hạn',
-        timestamp: 'Hôm qua lúc 18:00',
-        type: 'assignment',
     },
     {
         id: 'a3',
@@ -142,149 +65,126 @@ const upcomingAssignments: Assignment[] = [
         dueDate: 'Hết hạn: Thứ Sáu, 23:59',
         type: 'essay',
     },
-    {
-        id: 'b2',
-        title: 'Quiz "Vocabulary Unit 4-5"',
-        dueDate: 'Hết hạn: Chủ Nhật, 23:59',
-        type: 'quiz',
-    },
-]
-
-const mockClassMembers: ClassMember[] = [
-    {
-        id: 'uuid-teacher-1',
-        firstName: 'John',
-        lastName: 'Doe',
-        role: 'teacher',
-        isOnline: true,
-        avatarUrl: null,
-    },
-    {
-        id: 'uuid-student-1',
-        firstName: 'Alice',
-        lastName: 'Smith',
-        role: 'student',
-        isOnline: true,
-        avatarUrl: 'https://randomuser.me/api/portraits/women/1.jpg',
-    },
-    {
-        id: 'uuid-student-2',
-        firstName: 'Bob',
-        lastName: 'Johnson',
-        role: 'student',
-        isOnline: false,
-        avatarUrl: 'https://randomuser.me/api/portraits/men/2.jpg',
-    },
-    {
-        id: 'uuid-student-3',
-        firstName: 'Charlie',
-        lastName: 'Brown',
-        role: 'student',
-        isOnline: true,
-        avatarUrl: 'https://randomuser.me/api/portraits/men/3.jpg',
-    },
-    {
-        id: 'uuid-student-4',
-        firstName: 'Diana',
-        lastName: 'Davis',
-        role: 'student',
-        isOnline: false,
-        avatarUrl: 'https://randomuser.me/api/portraits/women/4.jpg',
-    },
-    {
-        id: 'uuid-student-5',
-        firstName: 'Ethan',
-        lastName: 'Garcia',
-        role: 'student',
-        isOnline: true,
-        avatarUrl: null,
-    },
-    {
-        id: 'uuid-student-6',
-        firstName: 'Fiona',
-        lastName: 'Miller',
-        role: 'student',
-        isOnline: false,
-        avatarUrl: 'https://randomuser.me/api/portraits/women/6.jpg',
-    },
-    {
-        id: 'uuid-student-7',
-        firstName: 'George',
-        lastName: 'Rodriguez',
-        role: 'student',
-        isOnline: true,
-        avatarUrl: 'https://randomuser.me/api/portraits/men/7.jpg',
-    },
-    {
-        id: 'uuid-student-8',
-        firstName: 'Hannah',
-        lastName: 'Wilson',
-        role: 'student',
-        isOnline: true,
-        avatarUrl: 'https://randomuser.me/api/portraits/women/8.jpg',
-    },
-    {
-        id: 'uuid-student-9',
-        firstName: 'Ian',
-        lastName: 'Martinez',
-        role: 'student',
-        isOnline: false,
-        avatarUrl: null,
-    },
-    {
-        id: 'uuid-student-10',
-        firstName: 'Julia',
-        lastName: 'Anderson',
-        role: 'student',
-        isOnline: true,
-        avatarUrl: 'https://randomuser.me/api/portraits/women/10.jpg',
-    },
-    {
-        id: 'uuid-student-11',
-        firstName: 'Kevin',
-        lastName: 'Taylor',
-        role: 'student',
-        isOnline: false,
-        avatarUrl: 'https://randomuser.me/api/portraits/men/11.jpg',
-    },
 ]
 
 export default function ClassPage() {
-    const sessionState = useSession()
-    const userRole = sessionState?.user?.role || 'student'
-
     const [activeTab, setActiveTab] = useState('schedule')
     const [viewMode, setViewMode] = useState('week')
     const [showGradientName, setShowGradientName] = useState(false)
+    const { alert } = useDialog()
 
-    // State cho search và filter của MemberList
     const [memberSearchTerm, setMemberSearchTerm] = useState('')
     const [memberFilterRole, setMemberFilterRole] = useState<
         'all' | 'student' | 'teacher'
     >('all')
-    // State để reset trang của MemberList khi filter/search thay đổi
-    const [, setMemberListPage] = useState(0)
+
+    // 1. Fetch data từ API
+    const { data: myClasses, isLoading: classesLoading } = useQuery({
+        queryKey: ['my-classes'],
+        queryFn: getMyClasses,
+    })
+
+    // Hiện tại lấy lớp đầu tiên (Logic có thể mở rộng để chọn lớp nếu học viên học nhiều lớp)
+    const currentClass = useMemo(() => {
+        if (Array.isArray(myClasses)) return myClasses[0] as MyClass
+        // @ts-expect-error to ignore
+        if (myClasses?.classes) return myClasses.classes[0] as MyClass
+        return undefined
+    }, [myClasses])
 
     const handleGreetingComplete = useCallback(() => {
         setShowGradientName(true)
     }, [])
 
-    const navItems = getNavItems(userRole as any, '/student/classes')
-    const userMenuItems = getUserMenuItems(userRole as any)
+    // 2. Map dữ liệu Members từ API sang UI
+    const classMembers: ClassMember[] = useMemo(() => {
+        if (!currentClass) return []
+        const members: ClassMember[] = []
 
-    useEffect(() => {
-        setMemberListPage(0)
-    }, [memberSearchTerm, memberFilterRole])
+        // Teacher
+        if (currentClass.teacher) {
+            members.push({
+                id: currentClass.teacher.id,
+                firstName: currentClass.teacher.full_name
+                    .split(' ')
+                    .slice(-1)
+                    .join(' '),
+                lastName: currentClass.teacher.full_name
+                    .split(' ')
+                    .slice(0, -1)
+                    .join(' '),
+                role: 'teacher',
+                isOnline: true,
+                avatarUrl: currentClass.teacher.avatar_url || null,
+                email: currentClass.teacher.email,
+            })
+        }
 
+        // Students
+        if (currentClass.students && Array.isArray(currentClass.students)) {
+            currentClass.students.forEach((student: MyClassUser) => {
+                members.push({
+                    id: student.id,
+                    firstName: student.full_name.split(' ').slice(-1).join(' '),
+                    lastName: student.full_name
+                        .split(' ')
+                        .slice(0, -1)
+                        .join(' '),
+                    role: 'student',
+                    isOnline: false,
+                    avatarUrl: student.avatar_url || null,
+                    email: student.email,
+                })
+            })
+        }
+        return members
+    }, [currentClass])
+
+    // 3. Map dữ liệu Sessions (Lịch học) từ API sang UI
+    const allSessions: Lesson[] = useMemo(() => {
+        if (!currentClass || !currentClass.sessions) return []
+
+        return currentClass.sessions
+            .map((session: ClassSession) => ({
+                id: session.id,
+                sessionDate: session.session_date,
+                startTime: session.start_time.slice(0, 5), // Cắt giây (08:00:00 -> 08:00)
+                endTime: session.end_time.slice(0, 5),
+                className:
+                    session.title || `Buổi học ngày ${session.session_date}`,
+                courseName: currentClass.course_name || currentClass.name,
+                roomName: currentClass.room_name || 'Đang cập nhật',
+                teacherName: currentClass.teacher?.full_name || 'Giáo viên',
+                status: session.status as
+                    | 'scheduled'
+                    | 'completed'
+                    | 'cancelled',
+            }))
+            .sort(
+                (a: Lesson, b: Lesson) =>
+                    new Date(a.sessionDate).getTime() -
+                    new Date(b.sessionDate).getTime()
+            ) // Sắp xếp tăng dần theo ngày
+    }, [currentClass])
+
+    // Lọc ra buổi học hôm nay (nếu có)
+    const todaySessions: Lesson[] = useMemo(() => {
+        const today = new Date().toISOString().split('T')[0]
+        return allSessions.filter((s) => s.sessionDate === today)
+    }, [allSessions])
+
+    // Render Content
     const renderTabContent = () => {
         switch (activeTab) {
             case 'schedule':
                 return (
                     <div className={s.grid}>
                         <ScheduleTodayCard
-                            title="Lịch học"
+                            title="Lịch học hôm nay"
                             sessions={todaySessions}
-                            onCheckIn={() => alert('Check-in!')}
+                            onCheckIn={() =>
+                                alert('Chức năng điểm danh đang phát triển!')
+                            }
                             controls={
                                 <SegmentedControl
                                     items={viewModeItems}
@@ -308,7 +208,7 @@ export default function ClassPage() {
                         />
                         <AssignmentCard
                             assignments={upcomingAssignments}
-                            onShowOld={() => alert('Xem bài tập cũ')}
+                            onShowOld={() => {}}
                         />
                     </div>
                 )
@@ -316,14 +216,11 @@ export default function ClassPage() {
                 return (
                     <div className={s.card}>
                         <Card
-                            title="Thành viên lớp"
+                            title={`Thành viên lớp (${classMembers.length})`}
                             variant="outline"
                             mode="light"
-                            // Đưa search và filter vào controls của Card
                             controls={
                                 <div className={s.memberControls}>
-                                    {' '}
-                                    {/* Thêm class để style nếu cần */}
                                     <InputField
                                         placeholder="Tìm kiếm thành viên..."
                                         value={memberSearchTerm}
@@ -338,10 +235,10 @@ export default function ClassPage() {
                                         }
                                         variant="glass"
                                         mode="light"
-                                        uiSize="sm" // Chỉnh size nhỏ hơn
+                                        uiSize="sm"
                                     />
                                     <select
-                                        className={s.memberFilterSelect} // Thêm class để style nếu cần
+                                        className={s.memberFilterSelect}
                                         value={memberFilterRole}
                                         onChange={(e) =>
                                             setMemberFilterRole(
@@ -352,9 +249,7 @@ export default function ClassPage() {
                                             )
                                         }
                                     >
-                                        <option value="all">
-                                            Tất cả vai trò
-                                        </option>
+                                        <option value="all">Tất cả</option>
                                         <option value="student">
                                             Học viên
                                         </option>
@@ -366,14 +261,11 @@ export default function ClassPage() {
                             }
                         >
                             <MemberList
-                                key={`${memberSearchTerm}-${memberFilterRole}`} // Thêm key để reset state nội bộ của MemberList khi filter/search
-                                members={mockClassMembers}
-                                itemsPerPage={6}
-                                searchTerm={memberSearchTerm} // Truyền state xuống
-                                filterRole={memberFilterRole} // Truyền state xuống
-                                // Nếu muốn kiểm soát page từ Class.tsx:
-                                // currentPage={memberListPage}
-                                // onPageChange={setMemberListPage}
+                                key={`${memberSearchTerm}-${memberFilterRole}`}
+                                members={classMembers}
+                                itemsPerPage={8}
+                                searchTerm={memberSearchTerm}
+                                filterRole={memberFilterRole}
                             />
                         </Card>
                     </div>
@@ -383,65 +275,74 @@ export default function ClassPage() {
         }
     }
 
-    return (
-        <div className={s.pageWrapper}>
-            {/* Navigation với integrated menus */}
-            <header className={s.header}>
-                <NavigationMenu
-                    items={navItems}
-                    rightSlotDropdownItems={userMenuItems}
-                    rightSlot={
-                        <img
-                            src={AvatarImg}
-                            style={{
-                                width: '36px',
-                                height: '36px',
-                                borderRadius: '50%',
-                                objectFit: 'cover',
-                                display: 'block',
-                            }}
-                            alt="User Avatar"
-                        />
-                    }
-                />
-            </header>
+    const className = currentClass?.name || 'Lớp học của tôi'
 
+    return (
+        <div className={s.pageWrapperWithoutHeader}>
             {/* Main Content */}
             <main className={s.mainContent}>
-                {/* Tiêu đề trang */}
                 <h1 className={s.pageTitle}>
-                    <TextType
-                        text="Đây là lớp "
-                        typingSpeed={50}
-                        loop={false}
-                        showCursor={!showGradientName}
-                        onSentenceComplete={handleGreetingComplete}
-                    />
-                    {showGradientName && (
-                        <TextType
-                            as="span"
-                            className={s.gradientText}
-                            text="IELTS 6.5"
-                            typingSpeed={70}
-                            loop={false}
-                        />
+                    {!classesLoading && currentClass ? (
+                        <>
+                            <TextType
+                                text="Xin chào, đây là "
+                                typingSpeed={50}
+                                loop={false}
+                                showCursor={!showGradientName}
+                                onSentenceComplete={handleGreetingComplete}
+                            />
+                            {showGradientName && (
+                                <TextType
+                                    as="span"
+                                    className={s.gradientText}
+                                    text={className}
+                                    typingSpeed={70}
+                                    loop={false}
+                                />
+                            )}
+                        </>
+                    ) : classesLoading ? (
+                        <span>Đang tải dữ liệu...</span>
+                    ) : (
+                        <span>Bạn chưa tham gia lớp học nào</span>
                     )}
                 </h1>
 
                 {/* Tabs */}
-                <div className={s.tabs}>
-                    <TabMenu
-                        items={tabItems}
-                        value={activeTab}
-                        onChange={(val) => setActiveTab(val)}
-                        variant="flat"
-                        activeStyle="underline"
-                        fullWidth
-                    />
-                </div>
+                {currentClass && (
+                    <div className={s.tabs}>
+                        <TabMenu
+                            items={tabItems}
+                            value={activeTab}
+                            onChange={(val) => setActiveTab(val)}
+                            variant="flat"
+                            activeStyle="underline"
+                            fullWidth
+                        />
+                    </div>
+                )}
 
-                {/* Nội dung thay đổi theo Tab */}
-                {renderTabContent()}
+                {/* Tab Content */}
+                {classesLoading ? (
+                    <div className={s.placeholderContent}>
+                        <div className={s.placeholderBox}>
+                            <div className="spinner"></div>
+                            <p>Đang tải thông tin lớp học...</p>
+                        </div>
+                    </div>
+                ) : currentClass ? (
+                    renderTabContent()
+                ) : (
+                    <div className={s.placeholderContent}>
+                        <div className={s.placeholderBox}>
+                            <h2>Chưa có lớp học</h2>
+                            <p>
+                                Hiện tại bạn chưa được thêm vào lớp học nào
+                                trong hệ thống.
+                            </p>
+                        </div>
+                    </div>
+                )}
             </main>
         </div>
     )

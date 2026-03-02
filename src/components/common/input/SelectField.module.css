@@ -1,0 +1,138 @@
+.wrapper {
+    --input-bg: var(--surface-raised-light);
+    --input-bd: var(--boder-soft-light);
+    --input-bd-focus: var(--brand-primary-light);
+    --input-text: var(--text-primary-light);
+    --input-placeholder: var(--text-placeholder-light);
+    --input-icon: var(--text-secondary-light);
+    --input-shadow: var(--shadow-sm-light);
+    --label-color: var(--text-primary-light);
+
+    --pad-y: 10px;
+    --pad-x: 16px;
+    --radius: var(--radius-md);
+    --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    width: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.wrapper.dark {
+    --input-bg: var(--surface-raised-dark);
+    --input-bd: var(--boder-soft-dark);
+    --input-bd-focus: var(--brand-primary-dark);
+    --input-text: var(--text-primary-dark);
+    --input-placeholder: var(--text-placeholder-dark);
+    --input-icon: var(--text-secondary-dark);
+    --input-shadow: var(--shadow-sm-dark);
+    --label-color: var(--text-primary-dark);
+}
+
+.fullWidth {
+    width: 100%;
+}
+
+.labelRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 8px;
+}
+
+.label {
+    display: inline-block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--label-color);
+    transition: var(--transition);
+}
+
+.inputContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.select {
+    width: 100%;
+    padding: var(--pad-y) var(--pad-x);
+    padding-right: 44px;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--input-text);
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-bd);
+    border-radius: var(--radius);
+    box-shadow: var(--input-shadow);
+    transition: var(--transition);
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.select:hover {
+    border-color: color-mix(in srgb, var(--input-bd), #000 10%);
+}
+
+.select:focus {
+    border-color: var(--input-bd-focus);
+    box-shadow: 0 0 0 4px
+        color-mix(in srgb, var(--input-bd-focus) 15%, transparent);
+}
+
+/* Icon Caret */
+.icon {
+    position: absolute;
+    right: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--input-icon);
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.7;
+}
+
+.icon img,
+.icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.variant-glass .select {
+    background-color: color-mix(in srgb, var(--input-bg) 40%, transparent);
+    backdrop-filter: blur(8px);
+}
+
+.variant-neutral .select {
+    background-color: var(--surface-page-light);
+}
+
+.variant-soft .select {
+    background-color: var(--surface-raised-light);
+}
+
+.invalid .select {
+    border-color: var(--status-danger-light);
+    background-color: color-mix(
+        in srgb,
+        var(--status-danger-light) 4%,
+        var(--input-bg)
+    );
+}
+
+.select option {
+    background-color: var(--surface-raised-light);
+    color: var(--text-primary-light);
+    padding: 10px;
+}
+
+.dark .select option {
+    background-color: var(--surface-raised-dark);
+    color: var(--text-primary-dark);
+}

@@ -1,0 +1,321 @@
+/* Container */
+.container {
+    width: 100%;
+    background: var(--surface-card-light);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--boder-soft-light);
+    padding: var(--space-24);
+    backdrop-filter: blur(20px);
+}
+
+/* Header */
+.header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-16);
+    margin-bottom: var(--space-24);
+    padding-bottom: var(--space-16);
+    border-bottom: 1px solid var(--boder-soft-light);
+}
+
+.titleRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-24);
+}
+
+.title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary-light);
+    margin: 0;
+}
+
+/* Week Navigation */
+.weekNav {
+    display: flex;
+    align-items: center;
+    gap: var(--space-12);
+    padding: var(--space-8) var(--space-16);
+    background: var(--surface-raised-light);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--boder-soft-light);
+}
+
+.weekIndicator {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary-light);
+    min-width: 100px;
+    text-align: center;
+}
+
+/* Legend */
+.legend {
+    display: flex;
+    gap: var(--space-24);
+    align-items: center;
+}
+
+.legendItem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+    font-size: 13px;
+    color: var(--text-primary-light);
+}
+
+.dotNormal,
+.dotConflict,
+.dotHover {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.dotNormal {
+    background: var(--brand-primary-500-light);
+}
+
+.dotConflict {
+    background: var(--status-danger-500-light);
+}
+
+.dotHover {
+    background: var(--brand-accent1-500-light);
+}
+
+/* Schedule Grid */
+.scheduleGrid {
+    display: grid;
+    grid-template-columns: 100px repeat(7, 1fr);
+    gap: 1px;
+    background: var(--boder-soft-light);
+    border: 1px solid var(--boder-soft-light);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.cornerCell {
+    background: var(--surface-raised-light);
+    padding: var(--space-12);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary-light);
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dayHeader {
+    background: var(--surface-raised-light);
+    padding: var(--space-12);
+    text-align: center;
+}
+
+.dayName {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary-light);
+    text-transform: capitalize;
+}
+
+.dayDate {
+    font-size: 11px;
+    color: var(--text-secondary-light);
+    margin-top: var(--space-4);
+}
+
+.rowGroup {
+    display: contents;
+}
+
+.slotLabel {
+    background: var(--surface-raised-light);
+    padding: var(--space-8);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--space-4);
+}
+
+.slotName {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary-light);
+}
+
+.slotTime {
+    font-size: 10px;
+    color: var(--text-secondary-light);
+}
+
+/* Cells */
+.cell {
+    background: white;
+    min-height: 80px;
+    padding: var(--space-4);
+    position: relative;
+    transition: all 0.2s;
+}
+
+.cellHover {
+    background: rgba(75, 163, 195, 0.1);
+    outline: 2px dashed var(--brand-accent1-500-light);
+    outline-offset: -2px;
+}
+
+.cellConflict {
+    background: rgba(214, 40, 57, 0.05);
+}
+
+.cellOccupied {
+    background: transparent;
+    pointer-events: none;
+}
+
+.emptySlot {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 11px;
+    color: var(--text-muted-light);
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+/* Session Card */
+.sessionCard {
+    background: var(--surface-card-light);
+    border: 1px solid var(--brand-primary-500-light);
+    border-left: 4px solid var(--brand-primary-500-light);
+    border-radius: var(--radius-sm);
+    padding: var(--space-8);
+    cursor: grab;
+    transition: all 0.2s;
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.sessionCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+
+.sessionCard:active {
+    cursor: grabbing;
+}
+
+.sessionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-8);
+    margin-bottom: var(--space-8);
+    padding-bottom: var(--space-8);
+    border-bottom: 1px solid var(--boder-soft-light);
+}
+
+.sessionClass {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary-light);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sessionActions {
+    display: flex;
+    gap: var(--space-4);
+}
+
+.btnEdit,
+.btnDelete {
+    background: transparent;
+    border: none;
+    padding: var(--space-4);
+    cursor: pointer;
+    font-size: 14px;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.btnEdit:hover,
+.btnDelete:hover {
+    opacity: 1;
+}
+
+.sessionInfo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    flex: 1;
+}
+
+.infoRow {
+    font-size: 11px;
+    color: var(--text-secondary-light);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Edit Form */
+.sessionEditForm {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+    flex: 1;
+}
+
+.selectField,
+.inputField {
+    width: 100%;
+    padding: var(--space-4) var(--space-8);
+    border: 1px solid var(--boder-soft-light);
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    background: white;
+    color: var(--text-primary-light);
+}
+
+.selectField:focus,
+.inputField:focus {
+    outline: none;
+    border-color: var(--brand-primary-500-light);
+    box-shadow: 0 0 0 2px rgba(23, 86, 118, 0.1);
+}
+
+.slotInfo {
+    font-size: 10px;
+    color: var(--text-muted-light);
+    text-align: center;
+    padding: var(--space-4);
+    background: var(--surface-raised-light);
+    border-radius: var(--radius-sm);
+}
+
+/* Instructions */
+.instructions {
+    margin-top: var(--space-24);
+    padding: var(--space-16);
+    background: var(--surface-raised-light);
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    color: var(--text-secondary-light);
+    line-height: 1.6;
+}
+
+.instructions strong {
+    color: var(--text-primary-light);
+    font-weight: 600;
+}

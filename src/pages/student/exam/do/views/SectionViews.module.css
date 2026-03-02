@@ -1,0 +1,188 @@
+/* ============================================
+   SECTION VIEWS - LAYOUT CHÍNH
+   ============================================ */
+
+.sectionMain {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    height: 100%;
+    background-color: #f8f9fa;
+}
+
+/* ============================================
+   MEDIA CONTAINER (Audio/Passage/Prompt)
+   ============================================ */
+
+.mediaContainer {
+    flex: 0 0 45%;
+    max-width: 45%;
+    padding: 20px;
+    background-color: #ffffff;
+    border-right: 1px solid #e0e0e0;
+    overflow-y: auto;
+}
+
+/* ============================================
+   EDITOR CONTAINER (Writing)
+   ============================================ */
+
+.editorContainer {
+    flex: 1;
+    padding: 20px;
+    background-color: #ffffff;
+    overflow-y: auto;
+}
+
+/* ============================================
+   RECORDING CONTAINER (Speaking)
+   ============================================ */
+
+.recordingContainer {
+    flex: 1;
+    padding: 20px;
+    background-color: #ffffff;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.hint {
+    margin: 10px 0px;
+    color: var(--text-primary-light);
+    font-size: small;
+    font-style: italic;
+}
+
+/* ============================================
+   TRANSCRIPT SECTION (Listening)
+   ============================================ */
+.transcriptToggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 16px;
+    padding: 10px;
+
+    background-color: transparent;
+    border: 1px solid #d9d9d9;
+    border-radius: 6px;
+
+    color: #595959;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.transcriptToggle:hover {
+    background-color: #f5f5f5;
+    border-color: #bfbfbf;
+    color: #262626;
+}
+
+.transcriptToggle.active {
+    background-color: #555;
+    border-color: #555;
+    color: #fff;
+}
+
+.toggleIcon {
+    font-size: 10px;
+    transition: transform 0.3s ease;
+}
+
+.transcriptToggle.active .toggleIcon {
+    transform: rotate(180deg);
+}
+
+.transcriptWrapper {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition:
+        grid-template-rows 0.4s ease-out,
+        opacity 0.4s ease-out;
+}
+
+.transcriptWrapper.expanded {
+    grid-template-rows: 1fr;
+    opacity: 1;
+}
+
+.transcriptInner {
+    overflow: hidden;
+}
+
+.transcriptSection {
+    padding-top: 20px;
+    border-top: 1px dashed #e0e0e0;
+    margin-top: 16px;
+}
+
+.transcriptTitle {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 12px;
+}
+
+/* ============================================
+   ERROR STATES
+   ============================================ */
+
+.errorMessage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    font-size: 16px;
+    color: #d32f2f;
+    padding: 20px;
+    text-align: center;
+}
+
+.warningMessage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    font-size: 16px;
+    color: #c8aa14;
+    padding: 20px;
+    text-align: center;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 1024px) {
+    .sectionMain {
+        flex-direction: column;
+    }
+
+    .mediaContainer {
+        flex: 0 0 auto;
+        max-width: 100%;
+        max-height: 40%;
+        border-right: none;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .editorContainer,
+    .recordingContainer {
+        flex: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .mediaContainer,
+    .editorContainer,
+    .recordingContainer {
+        padding: 12px;
+    }
+}

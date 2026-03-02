@@ -1,0 +1,169 @@
+.root {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+}
+
+.content {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 600px;
+    padding: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.card {
+    width: 100%;
+    padding: clamp(32px, 6vw, 64px);
+    border-radius: 24px;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.95) 0%,
+        rgba(255, 255, 255, 0.85) 100%
+    );
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow:
+        0 8px 32px rgba(82, 39, 255, 0.15),
+        0 2px 8px rgba(0, 0, 0, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 24px;
+    animation: cardFadeIn 0.6s ease-out;
+}
+
+@keyframes cardFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.iconWrapper {
+    width: 120px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(
+        135deg,
+        rgba(82, 39, 255, 0.1),
+        rgba(255, 159, 252, 0.1)
+    );
+    border-radius: 50%;
+    border: 2px solid rgba(82, 39, 255, 0.2);
+    position: relative;
+    animation: pulse 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%,
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(82, 39, 255, 0.4);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 20px rgba(82, 39, 255, 0);
+    }
+}
+
+.icon {
+    width: 64px;
+    height: 64px;
+    color: #5227ff;
+    animation: iconRotate 20s linear infinite;
+}
+
+@keyframes iconRotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.title {
+    font-size: clamp(24px, 5vw, 32px);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: #0b1520;
+    margin: 0;
+    background: linear-gradient(135deg, #5227ff 0%, #ff9ffc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.description {
+    font-size: clamp(14px, 2.5vw, 16px);
+    line-height: 1.6;
+    color: rgba(11, 21, 32, 0.75);
+    margin: 0;
+    max-width: 420px;
+}
+
+.actions {
+    margin-top: 8px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .content {
+        padding: 16px;
+    }
+
+    .card {
+        padding: 32px 24px;
+        gap: 20px;
+    }
+
+    .iconWrapper {
+        width: 100px;
+        height: 100px;
+    }
+
+    .icon {
+        width: 56px;
+        height: 56px;
+    }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .card,
+    .iconWrapper,
+    .icon {
+        animation: none;
+    }
+
+    .card {
+        opacity: 1;
+        transform: none;
+    }
+}

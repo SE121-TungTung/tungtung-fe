@@ -448,3 +448,45 @@ canvas {
         page-break-after: avoid;
     }
 }
+
+[data-color-semantic-mode='dark'] :root,
+:root[data-color-semantic-mode='dark'] {
+    --skeleton-base: var(--surface-secondary-dark, #1f1f1f);
+    --skeleton-highlight: var(--surface-raised-dark, #2a2a2a);
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.skeleton-loader {
+    background-color: var(--skeleton-base);
+    background-image: linear-gradient(
+        90deg,
+        var(--skeleton-base) 0px,
+        var(--skeleton-highlight) 40px,
+        var(--skeleton-base) 80px
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+
+    border-radius: var(--radius-sm, 4px);
+    display: inline-block;
+    line-height: 1;
+    width: 100%;
+}
+
+.skeleton-circle {
+    border-radius: 50% !important;
+}
+
+.skeleton-text {
+    height: 1em;
+    border-radius: var(--radius-xs, 2px);
+    margin-bottom: 0.5em;
+}

@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { loginSchema, type LoginValues } from '@/forms/login.schema'
 import { useMutation } from '@tanstack/react-query'
-import { login, me } from '@/lib/auth'
+import { login } from '@/lib/auth'
 import { useSession } from '@/stores/session.store'
 import { Link, useNavigate } from 'react-router-dom'
 import { homePathByRole } from '@/utils/role'
@@ -14,11 +14,13 @@ import FieldMessage from '@/components/common/typography/FieldMessage'
 import FormCard from '@/components/common/form/FormCard'
 import AuthLayout from './AuthLayout'
 import s from './Login.module.css'
+import { getMe } from '@/lib/users'
 
 const emailMsgId = 'email-msg'
 const passMsgId = 'pass-msg'
 
 export function LoginPage() {
+    const loginStore = useSession((st) => st.login)
     const setUser = useSession((st) => st.setUser)
     const navigate = useNavigate()
     const [apiError, setApiError] = useState<string | undefined>()
@@ -26,35 +28,89 @@ export function LoginPage() {
     const {
         register,
         handleSubmit,
-        formState: { errors, isSubmitting },
+        formState: { errors },
     } = useForm<LoginValues>({
         resolver: zodResolver(loginSchema),
         defaultValues: { remember: true },
     })
 
-    const mut = useMutation({
+    const mutation = useMutation({
         mutationFn: login,
-        onSuccess: async ({ access_token }, variables) => {
-            const storage = variables?.remember ? localStorage : sessionStorage
-            storage.setItem('token', access_token)
+        onSuccess: async (data) => {
+            // Clear any previous errors
+            setApiError(undefined)
+
+            // Save tokens
+            loginStore(data.access_token, data.refresh_token)
+
+            if (data.is_first_login) {
+                localStorage.setItem('is_first_login', 'true')
+            } else {
+                localStorage.removeItem('is_first_login')
+            }
+
             try {
-                const user = await me()
-                setUser(user)
-                if (user.isFirstLogin)
-                    return navigate('/forgot-password', { replace: true })
-                navigate(homePathByRole(user.role), { replace: true })
-            } catch (error) {
-                console.log(error)
+                // Fetch full user info
+                const me = await getMe()
+
+                // Update user in store
+                setUser(me)
+
+                // Navigate to dashboard
+                // FirstLoginGuard will handle first login modal
+                const redirectPath = homePathByRole(me.role)
+                navigate(redirectPath, { replace: true })
+            } catch (e: any) {
+                console.error('Failed to fetch user info', e)
+                setApiError(
+                    'Không thể tải thông tin người dùng. Vui lòng thử lại.'
+                )
             }
         },
-        onError: () => {
-            setApiError(
-                'Thông tin đăng nhập không chính xác hoặc tài khoản bị khóa.'
-            )
+        onError: (error: any) => {
+            console.error('Login error:', error)
+
+            // Parse error message
+            let errorMessage = 'Đăng nhập thất bại'
+
+            if (error?.status === 401) {
+                // Unauthorized - wrong credentials
+                errorMessage = 'Email hoặc mật khẩu không chính xác'
+            } else if (error?.status === 403) {
+                // Forbidden - account not active
+                errorMessage = 'Tài khoản chưa được kích hoạt hoặc đã bị khóa'
+            } else if (error?.message) {
+                // Use backend error message if available
+                const msg = error.message.toLowerCase()
+
+                if (
+                    msg.includes('email') ||
+                    msg.includes('password') ||
+                    msg.includes('incorrect')
+                ) {
+                    errorMessage = 'Email hoặc mật khẩu không chính xác'
+                } else if (msg.includes('account') || msg.includes('active')) {
+                    errorMessage = 'Tài khoản chưa được kích hoạt'
+                } else if (msg.includes('network') || msg.includes('fetch')) {
+                    errorMessage =
+                        'Lỗi kết nối. Vui lòng kiểm tra internet và thử lại.'
+                } else {
+                    errorMessage = error.message
+                }
+            } else if (!navigator.onLine) {
+                errorMessage =
+                    'Không có kết nối internet. Vui lòng kiểm tra và thử lại.'
+            }
+
+            setApiError(errorMessage)
         },
     })
 
-    const onSubmit = (v: LoginValues) => mut.mutate(v)
+    const onSubmit = (v: LoginValues) => {
+        // Clear previous errors before submitting
+        setApiError(undefined)
+        mutation.mutate(v)
+    }
 
     return (
         <AuthLayout
