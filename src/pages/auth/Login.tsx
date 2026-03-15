@@ -28,7 +28,7 @@ export function LoginPage() {
     const {
         register,
         handleSubmit,
-        formState: { errors },
+        formState: { errors, isSubmitting },
     } = useForm<LoginValues>({
         resolver: zodResolver(loginSchema),
         defaultValues: { remember: true },
@@ -129,8 +129,8 @@ export function LoginPage() {
                         size="lg"
                         shape="rounded"
                         glow
-                        loading={isSubmitting || mut.isPending}
-                        disabled={isSubmitting || mut.isPending}
+                        loading={isSubmitting || mutation.isPending}
+                        disabled={isSubmitting || mutation.isPending}
                     >
                         Đăng nhập
                     </Button>
