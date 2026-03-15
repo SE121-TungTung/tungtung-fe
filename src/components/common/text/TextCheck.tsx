@@ -12,7 +12,6 @@ export interface TextCheckProps
     variant?: TextCheckVariant
     size?: TextCheckSize
     checked?: boolean
-    defaultChecked?: boolean
     onCheckedChange?: (checked: boolean) => void
     inputProps?: React.InputHTMLAttributes<HTMLInputElement>
     disabled?: boolean
@@ -24,7 +23,6 @@ export default function TextCheck({
     variant = 'glass',
     size = 'md',
     checked,
-    defaultChecked,
     onCheckedChange,
     inputProps,
     disabled,
@@ -50,7 +48,6 @@ export default function TextCheck({
                 className={s.native}
                 disabled={disabled}
                 checked={checked}
-                defaultChecked={defaultChecked}
                 onChange={(e) => onCheckedChange?.(e.target.checked)}
                 {...inputProps}
             />
@@ -60,12 +57,10 @@ export default function TextCheck({
                 variant={variant}
                 size={btnSize as 'small' | 'medium' | 'large'}
                 checked={checked}
-                defaultChecked={defaultChecked}
                 onChange={onCheckedChange}
                 disabled={disabled}
                 icon={icon}
                 className={s.control}
-                aria-hidden="true"
                 tabIndex={-1}
             />
 

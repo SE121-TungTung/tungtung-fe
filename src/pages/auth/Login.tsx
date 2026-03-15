@@ -28,6 +28,8 @@ export function LoginPage() {
     const {
         register,
         handleSubmit,
+        watch,
+        setValue,
         formState: { errors, isSubmitting },
     } = useForm<LoginValues>({
         resolver: zodResolver(loginSchema),
@@ -36,12 +38,17 @@ export function LoginPage() {
 
     const mutation = useMutation({
         mutationFn: login,
-        onSuccess: async (data) => {
+        onSuccess: async (data, variables) => {
             // Clear any previous errors
             setApiError(undefined)
 
             // Save tokens
-            loginStore(data.access_token, data.refresh_token)
+            const isRemember = !!variables.remember
+            console.log(
+                'Login successful, tokens received. Remember:',
+                isRemember
+            )
+            loginStore(data.access_token, data.refresh_token, isRemember)
 
             if (data.is_first_login) {
                 localStorage.setItem('is_first_login', 'true')
@@ -193,8 +200,10 @@ export function LoginPage() {
                         className={s.rememberCheck}
                         variant="glass"
                         size="sm"
-                        inputProps={register('remember')}
-                        defaultChecked
+                        checked={watch('remember')}
+                        onCheckedChange={(val) =>
+                            setValue('remember', val, { shouldDirty: true })
+                        }
                     >
                         Ghi nhớ đăng nhập
                     </TextCheck>

@@ -1,5 +1,7 @@
 import { api } from '@/lib/api'
 
+const CLASSES_API_URL = '/api/v1/classes'
+
 export type ClassStatus =
     | 'scheduled'
     | 'active'
@@ -70,8 +72,6 @@ const mapClass = (c: BackendClass): Class => ({
     createdAt: c.created_at,
     updatedAt: c.updated_at,
 })
-
-const CLASSES_API_URL = '/api/v1/classes'
 
 export interface ListClassesParams {
     page?: number

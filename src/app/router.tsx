@@ -34,6 +34,7 @@ import TeacherClassDetailPage from '@/pages/teacher/classes/TeacherClassDetailPa
 import EditTestPage from '@/pages/student/exam/EditTestPage'
 import TeacherGradingPage from '@/pages/teacher/grading/TeacherGradingPage'
 import GradeAttemptPage from '@/pages/teacher/grading/GradeAttemptPage'
+import { useSession } from '@/stores/session.store'
 
 export const router = createBrowserRouter([
     {
@@ -44,7 +45,18 @@ export const router = createBrowserRouter([
             </>
         ),
         children: [
-            { path: '/', element: <Navigate to="/login" replace /> },
+            {
+                path: '/',
+                element: (() => {
+                    const isAuthenticated =
+                        useSession.getState().isAuthenticated
+                    return isAuthenticated ? (
+                        <Navigate to="/dashboard" replace />
+                    ) : (
+                        <Navigate to="/login" replace />
+                    )
+                })(),
+            },
             { path: '/login', element: <LoginPage /> },
             { path: '/forgot-password', element: <ForgotPasswordPage /> },
             { path: '/otp', element: <OtpPage /> },

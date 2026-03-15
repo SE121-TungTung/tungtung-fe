@@ -1,11 +1,18 @@
+import { useSession } from '@/stores/session.store'
 import { refreshAccessToken } from './auth'
 
 const API =
     import.meta.env.VITE_API_URL ||
     'https://tungtung-be-production.up.railway.app'
 
+const getStorage = () => {
+    if (sessionStorage.getItem('access_token')) return sessionStorage
+    return localStorage
+}
+
 const getAccessToken = () => {
-    const token = localStorage.getItem('access_token')
+    const storage = getStorage()
+    const token = storage.getItem('access_token')
     if (!token) return null
 
     try {
@@ -14,7 +21,8 @@ const getAccessToken = () => {
 
         if (Date.now() >= exp) {
             console.warn('⚠️ Token expired, clearing...')
-            localStorage.removeItem('access_token')
+            storage.removeItem('access_token')
+            storage.removeItem('refresh_token')
             return null
         }
 
@@ -24,7 +32,7 @@ const getAccessToken = () => {
         return null
     }
 }
-const getRefreshToken = () => localStorage.getItem('refresh_token')
+const getRefreshToken = () => getStorage().getItem('refresh_token')
 
 let isRefreshing = false
 let refreshSubscribers: ((token: string) => void)[] = []
@@ -151,10 +159,11 @@ export async function api<T>(
                 if (!refreshToken) throw new Error('No refresh token')
 
                 const data = await refreshAccessToken(refreshToken)
+                const storage = getStorage()
 
-                localStorage.setItem('access_token', data.access_token)
+                storage.setItem('access_token', data.access_token)
                 if (data.refresh_token) {
-                    localStorage.setItem('refresh_token', data.refresh_token)
+                    storage.setItem('refresh_token', data.refresh_token)
                 }
 
                 onRefreshed(data.access_token)
@@ -164,11 +173,7 @@ export async function api<T>(
                 return api<T>(path, { ...init, headers: newHeaders })
             } catch (error) {
                 console.error('Refresh token failed', error)
-                localStorage.removeItem('token')
-                localStorage.removeItem('access_token')
-                localStorage.removeItem('refresh_token')
-
-                // Only redirect if not already on login page
+                useSession.getState().clear()
                 if (!window.location.pathname.includes('/login')) {
                     window.location.href = '/login'
                 }

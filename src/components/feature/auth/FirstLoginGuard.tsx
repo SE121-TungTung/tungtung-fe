@@ -15,8 +15,7 @@ export default function FirstLoginGuard() {
 
     const getToken = () =>
         localStorage.getItem('access_token') ??
-        localStorage.getItem('token') ??
-        sessionStorage.getItem('token')
+        sessionStorage.getItem('access_token')
 
     useEffect(() => {
         const token = getToken()

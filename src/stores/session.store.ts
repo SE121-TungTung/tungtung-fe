@@ -6,21 +6,31 @@ type SessionState = {
     isAuthenticated: boolean
     setUser: (u: User | null) => void
     clear: () => void
-    login: (accessToken: string, refreshToken: string) => void
+    login: (
+        accessToken: string,
+        refreshToken: string,
+        remember: boolean
+    ) => void
 }
 
 export const useSession = create<SessionState>((set) => ({
     user: undefined,
-    isAuthenticated: false,
+    isAuthenticated:
+        !!localStorage.getItem('access_token') ||
+        !!sessionStorage.getItem('access_token'),
     setUser: (u) => set({ user: u }),
     clear: () => {
         localStorage.removeItem('access_token')
         localStorage.removeItem('refresh_token')
+        sessionStorage.removeItem('access_token')
+        sessionStorage.removeItem('refresh_token')
+        localStorage.removeItem('is_first_login')
         set({ user: null, isAuthenticated: false })
     },
-    login: (accessToken: string, refreshToken: string) => {
-        localStorage.setItem('access_token', accessToken)
-        localStorage.setItem('refresh_token', refreshToken)
+    login: (accessToken: string, refreshToken: string, remember: boolean) => {
+        const storage = remember ? localStorage : sessionStorage
+        storage.setItem('access_token', accessToken)
+        storage.setItem('refresh_token', refreshToken)
         set({ isAuthenticated: true })
     },
 }))

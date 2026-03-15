@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import s from './UserManagementPage.module.css'
 import Card from '@/components/common/card/Card'
-import { Button } from '@/components/core/Button'
+import { Button } from '@/components/common/button/Button'
 import IconPlus from '@/assets/Plus Thin.svg'
 import IconSearch from '@/assets/Lens.svg'
 import InputField from '@/components/common/input/InputField'
@@ -184,10 +184,7 @@ export const UserManagementPage: React.FC = () => {
                     </div>
 
                     {canCreateUser && (
-                        <Button
-                            variant="primary"
-                            onClick={handleOpenCreateModal}
-                        >
+                        <Button variant="glass" onClick={handleOpenCreateModal}>
                             <img
                                 src={IconPlus}
                                 alt=""

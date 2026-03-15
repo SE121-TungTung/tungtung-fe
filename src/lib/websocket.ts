@@ -19,7 +19,10 @@ export interface WebSocketMessage {
 }
 
 const getAuthToken = (): string | null => {
-    return localStorage.getItem('access_token') || localStorage.getItem('token')
+    return (
+        localStorage.getItem('access_token') ??
+        sessionStorage.getItem('access_token')
+    )
 }
 
 export class WebSocketManager {

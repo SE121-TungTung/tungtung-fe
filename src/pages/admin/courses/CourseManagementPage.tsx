@@ -5,7 +5,7 @@ import CourseTable from './CourseTable'
 import { CourseFormModal } from './CourseFormModal'
 import InputField from '@/components/common/input/InputField'
 import { SelectField } from '@/components/common/input/SelectField'
-import { Button } from '@/components/core/Button'
+import { Button } from '@/components/common/button/Button'
 import Card from '@/components/common/card/Card'
 import Pagination from '@/components/common/menu/Pagination'
 
@@ -194,10 +194,7 @@ export default function CourseManagementPage() {
                     </div>
 
                     {canCreateCourse && (
-                        <Button
-                            variant="primary"
-                            onClick={handleOpenCreateModal}
-                        >
+                        <Button variant="glass" onClick={handleOpenCreateModal}>
                             <img
                                 src={IconPlus}
                                 alt=""

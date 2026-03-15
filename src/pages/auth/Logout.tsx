@@ -4,14 +4,9 @@ import { useSession } from '@/stores/session.store'
 import { logout } from '@/lib/auth'
 import LoadingScreen from '@/components/core/LoadingPage'
 
-const clearTokens = () => {
-    localStorage.removeItem('token')
-    sessionStorage.removeItem('token')
-}
-
 export default function LogoutPage() {
     const navigate = useNavigate()
-    const setUser = useSession((s) => s.setUser)
+    const clearSession = useSession((s) => s.clear)
 
     useEffect(() => {
         ;(async () => {
@@ -20,11 +15,11 @@ export default function LogoutPage() {
             } catch {
                 /* ignore */
             }
-            clearTokens()
-            setUser(null)
+
+            clearSession()
             navigate('/login', { replace: true })
         })()
-    }, [navigate, setUser])
+    }, [navigate, clearSession])
 
     return <LoadingScreen title="Đang đăng xuất..." />
 }
