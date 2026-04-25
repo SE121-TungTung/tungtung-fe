@@ -1,53 +1,25 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import s from './AdminKpiOverviewPage.module.css'
 import sharedS from '../users/UserManagementPage.module.css'
 import Card from '@/components/common/card/Card'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
-import { PeriodSelector } from '@/components/common/input/PeriodSelector'
 import { useNavigate } from 'react-router-dom'
 import { EmptyState } from '@/components/common/state/EmptyState'
-import { useKpiSummary } from '@/hooks/domain/useKpi'
+import { useKpiRecords, useKpiDashboard } from '@/hooks/domain/useKpi'
 import StatCard from '@/components/common/card/StatCard'
-import type { KpiSummaryItem } from '@/types/kpi.types'
+import { KpiPeriodSelector } from '@/components/common/input/KpiPeriodSelector'
+import type { KPIRecordListItem, ApprovalStatus } from '@/types/kpi.types'
 
 function getScoreColor(score: number): string {
-    if (score >= 85) return '#22c55e'
-    if (score >= 70) return '#3b82f6'
-    if (score >= 50) return '#f59e0b'
+    if (score >= 0.85) return '#22c55e'
+    if (score >= 0.7) return '#3b82f6'
+    if (score >= 0.5) return '#f59e0b'
     return '#ef4444'
 }
 
-function getTierBadge(tier: string) {
-    const colors: Record<string, { bg: string; fg: string }> = {
-        S: { bg: '#7c3aed20', fg: '#7c3aed' },
-        A: { bg: '#22c55e20', fg: '#16a34a' },
-        B: { bg: '#3b82f620', fg: '#2563eb' },
-        C: { bg: '#f59e0b20', fg: '#d97706' },
-        D: { bg: '#ef444420', fg: '#dc2626' },
-    }
-    const c = colors[tier.toUpperCase()] ?? { bg: '#64748b20', fg: '#64748b' }
-    return (
-        <span
-            style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                minWidth: 36,
-                padding: '2px 10px',
-                borderRadius: 6,
-                fontSize: 13,
-                fontWeight: 800,
-                background: c.bg,
-                color: c.fg,
-                letterSpacing: '0.04em',
-            }}
-        >
-            {tier}
-        </span>
-    )
-}
-
-function ScoreBadge({ score }: { score: number }) {
+function ScoreBadge({ score }: { score: number | null | undefined }) {
+    if (score == null) return <span style={{ color: '#94a3b8' }}>—</span>
+    const pct = score <= 1 ? (score * 100).toFixed(1) : score.toFixed(1)
     const color = getScoreColor(score)
     return (
         <span
@@ -65,36 +37,62 @@ function ScoreBadge({ score }: { score: number }) {
                 border: `1.5px solid ${color}40`,
             }}
         >
-            {score.toFixed(1)}
+            {pct}%
         </span>
     )
 }
 
+function ApprovalBadge({ status }: { status: ApprovalStatus }) {
+    const map: Record<
+        ApprovalStatus,
+        { bg: string; fg: string; label: string }
+    > = {
+        DRAFT: { bg: '#64748b18', fg: '#64748b', label: 'Nháp' },
+        SUBMITTED: { bg: '#3b82f618', fg: '#2563eb', label: 'Chờ duyệt' },
+        APPROVED: { bg: '#22c55e18', fg: '#16a34a', label: 'Đã duyệt' },
+        REJECTED: { bg: '#ef444418', fg: '#dc2626', label: 'Từ chối' },
+    }
+    const c = map[status] ?? map.DRAFT
+    return (
+        <span
+            className={s.statusChip}
+            style={{ background: c.bg, color: c.fg }}
+        >
+            {c.label}
+        </span>
+    )
+}
+
+function formatCurrency(v: number | null | undefined): string {
+    if (v == null) return '—'
+    return new Intl.NumberFormat('vi-VN', {
+        style: 'currency',
+        currency: 'VND',
+        maximumFractionDigits: 0,
+    }).format(v)
+}
+
 export default function AdminKpiOverviewPage() {
     const navigate = useNavigate()
-    const [period, setPeriod] = useState(() => {
-        const d = new Date()
-        return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}`
-    })
+    const [periodId, setPeriodId] = useState('')
     const [page, setPage] = useState(1)
     const limit = 15
 
+    const handlePeriodChange = useCallback((id: string) => {
+        setPeriodId(id)
+        setPage(1)
+    }, [])
+
     const {
-        data: summary,
+        data: recordsResult,
         isLoading,
         isError,
-    } = useKpiSummary({ period, page, limit })
+    } = useKpiRecords({ period_id: periodId, page, limit })
 
-    const items: KpiSummaryItem[] = summary?.data ?? []
-    const meta = summary?.meta
+    const { data: dashboard } = useKpiDashboard(periodId || undefined)
 
-    // Aggregate stats from current page data
-    const avgScore = items.length
-        ? items.reduce((acc, i) => acc + i.total_kpi_score, 0) / items.length
-        : 0
-    const tierACount = items.filter(
-        (i) => i.tier.toUpperCase() === 'A' || i.tier.toUpperCase() === 'S'
-    ).length
+    const items: KPIRecordListItem[] = recordsResult?.data ?? []
+    const meta = recordsResult?.meta
 
     return (
         <div className={sharedS.pageWrapperWithoutHeader}>
@@ -114,49 +112,59 @@ export default function AdminKpiOverviewPage() {
                         flexWrap: 'wrap',
                     }}
                 >
-                    <div style={{ flex: '0 0 220px' }}>
-                        <PeriodSelector
-                            value={period}
-                            onChange={(p) => {
-                                setPeriod(p)
-                                setPage(1)
-                            }}
-                            label="Chọn kỳ đánh giá"
-                        />
-                    </div>
+                    <KpiPeriodSelector
+                        value={periodId}
+                        onChange={handlePeriodChange}
+                        label="Chọn kỳ đánh giá"
+                    />
                     <ButtonPrimary
                         onClick={() =>
-                            navigate(`/admin/kpi/calculation?period=${period}`)
+                            navigate(
+                                `/admin/kpi/calculation${periodId ? `?periodId=${periodId}` : ''}`
+                            )
                         }
                     >
                         Chạy tính KPI
                     </ButtonPrimary>
+                    <ButtonPrimary
+                        onClick={() => navigate('/admin/kpi/templates')}
+                        style={{
+                            background: 'transparent',
+                            color: 'var(--color-brand-primary)',
+                            border: '1.5px solid var(--color-border-soft)',
+                        }}
+                    >
+                        Quản lý Template
+                    </ButtonPrimary>
                 </div>
 
-                {/* Stat Cards */}
-                {!isLoading && items.length > 0 && (
+                {/* Stat Cards from Dashboard API */}
+                {!isLoading && dashboard && (
                     <div className={s.statsRow}>
                         <StatCard
-                            title="Tổng giáo viên"
-                            value={meta?.total ?? items.length}
+                            title="Tổng nhân sự"
+                            value={dashboard.total_staff}
                             unit="người"
                             mode="light"
                         />
                         <StatCard
-                            title="Điểm KPI TB"
-                            value={avgScore.toFixed(1)}
-                            unit="/ 100"
+                            title="Điểm TB"
+                            value={
+                                dashboard.avg_score != null
+                                    ? `${(dashboard.avg_score * 100).toFixed(1)}%`
+                                    : '—'
+                            }
                             mode="light"
                         />
                         <StatCard
-                            title="Xuất sắc (A/S)"
-                            value={tierACount}
-                            unit="người"
+                            title="Đã duyệt"
+                            value={dashboard.approved_count}
+                            unit={`/ ${dashboard.total_staff}`}
                             mode="light"
                         />
                         <StatCard
-                            title="Trạng thái kỳ"
-                            value={meta?.period_status ?? '—'}
+                            title="Tổng thưởng"
+                            value={formatCurrency(dashboard.total_bonus_amount)}
                             mode="light"
                         />
                     </div>
@@ -182,7 +190,7 @@ export default function AdminKpiOverviewPage() {
                     ) : items.length === 0 ? (
                         <EmptyState
                             title="Chưa có dữ liệu KPI"
-                            description={`Kỳ ${period} chưa được tính KPI. Bấm "Chạy tính KPI" để bắt đầu.`}
+                            description="Kỳ này chưa có bản ghi KPI. Hãy tạo kỳ KPI mới hoặc chọn kỳ khác."
                         />
                     ) : (
                         <>
@@ -191,13 +199,11 @@ export default function AdminKpiOverviewPage() {
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Giáo viên</th>
-                                            <th>Điểm KPI</th>
-                                            <th>Bậc</th>
-                                            <th>Điểm danh</th>
-                                            <th>Phản hồi</th>
-                                            <th>Kết quả HT</th>
-                                            <th>Kiểm định</th>
+                                            <th>Nhân viên</th>
+                                            <th>Loại HĐ</th>
+                                            <th>Tổng điểm</th>
+                                            <th>Thưởng</th>
+                                            <th>Giờ dạy</th>
                                             <th>Trạng thái</th>
                                             <th>Hành động</th>
                                         </tr>
@@ -205,7 +211,7 @@ export default function AdminKpiOverviewPage() {
                                     <tbody>
                                         {items.map((item, idx) => (
                                             <tr
-                                                key={item.teacher_id}
+                                                key={item.id}
                                                 className={s.tableRow}
                                             >
                                                 <td className={s.tdIndex}>
@@ -214,57 +220,39 @@ export default function AdminKpiOverviewPage() {
                                                         1}
                                                 </td>
                                                 <td className={s.tdName}>
-                                                    {item.teacher_name}
+                                                    {item.staff_name ?? '—'}
+                                                </td>
+                                                <td className={s.tdNum}>
+                                                    {item.staff_contract ?? '—'}
                                                 </td>
                                                 <td>
                                                     <ScoreBadge
-                                                        score={
-                                                            item.total_kpi_score
-                                                        }
+                                                        score={item.total_score}
                                                     />
                                                 </td>
-                                                <td>
-                                                    {getTierBadge(item.tier)}
-                                                </td>
-                                                <td className={s.tdNum}>
-                                                    {item.metrics.attendance.toFixed(
-                                                        0
+                                                <td className={s.tdBonus}>
+                                                    {formatCurrency(
+                                                        item.bonus_amount
                                                     )}
                                                 </td>
                                                 <td className={s.tdNum}>
-                                                    {item.metrics.feedback.toFixed(
-                                                        0
-                                                    )}
-                                                </td>
-                                                <td className={s.tdNum}>
-                                                    {item.metrics.learning_outcome.toFixed(
-                                                        0
-                                                    )}
-                                                </td>
-                                                <td className={s.tdNum}>
-                                                    {item.metrics.academic_audit.toFixed(
-                                                        0
-                                                    )}
+                                                    {item.teaching_hours != null
+                                                        ? `${item.teaching_hours}h`
+                                                        : '—'}
                                                 </td>
                                                 <td>
-                                                    <span
-                                                        className={`${s.statusChip} ${s[`status_${item.status}`] ?? ''}`}
-                                                    >
-                                                        {item.status ===
-                                                        'calculated'
-                                                            ? 'Đã tính'
-                                                            : item.status ===
-                                                                'approved'
-                                                              ? 'Đã duyệt'
-                                                              : item.status}
-                                                    </span>
+                                                    <ApprovalBadge
+                                                        status={
+                                                            item.approval_status
+                                                        }
+                                                    />
                                                 </td>
                                                 <td>
                                                     <button
                                                         className={s.detailBtn}
                                                         onClick={() =>
                                                             navigate(
-                                                                `/admin/kpi/teacher/${item.teacher_id}?period=${period}`
+                                                                `/admin/kpi/records/${item.id}`
                                                             )
                                                         }
                                                     >
@@ -289,7 +277,7 @@ export default function AdminKpiOverviewPage() {
                                     </button>
                                     <span className={s.pageInfo}>
                                         Trang {page} / {meta.total_pages} —{' '}
-                                        {meta.total} giáo viên
+                                        {meta.total} bản ghi
                                     </span>
                                     <button
                                         className={s.pageBtn}

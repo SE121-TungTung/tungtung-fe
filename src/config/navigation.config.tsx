@@ -150,6 +150,16 @@ const adminNavItems: AppNavItem[] = [
                 href: '/admin/kpi',
             },
             {
+                id: 'kpi-templates',
+                label: 'Template KPI',
+                href: '/admin/kpi/templates',
+            },
+            {
+                id: 'kpi-support-calc',
+                label: 'Hỗ trợ tính A1/A2',
+                href: '/admin/kpi/support-calc',
+            },
+            {
                 id: 'salary',
                 label: 'Quản lý Lương',
                 href: '/admin/payroll',

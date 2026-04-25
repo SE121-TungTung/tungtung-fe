@@ -1,4 +1,3 @@
-import React from 'react'
 import s from '../../admin/users/UserManagementPage.module.css'
 import { useParams } from 'react-router-dom'
 import { SalaryBreakdownPanel } from '@/components/common/card/SalaryBreakdownPanel'

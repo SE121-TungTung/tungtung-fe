@@ -11,75 +11,325 @@ import type {
     KpiDisputeCreate,
     KpiDisputeResolveRequest,
     SalaryAdjustmentCreate,
+    KPITemplateCreate,
+    KPITemplateUpdate,
+    KPIPeriodCreate,
+    UpdateMetricsRequest,
+    SupportCalcRequest,
+    SupportCalcSaveRequest,
 } from '@/types/kpi.types'
 
-// -- TIERS --
-export const useKpiTiers = () => {
-    return useQuery({
-        queryKey: ['kpi-tiers'],
-        queryFn: api.getKpiTiers,
-    })
-}
+// ============================================================================
+// KPI Templates
+// ============================================================================
 
-export const useUpdateKpiTiers = () => {
+export const useKpiTemplates = () =>
+    useQuery({
+        queryKey: ['kpi-templates'],
+        queryFn: api.getKpiTemplates,
+    })
+
+export const useKpiTemplate = (id: string | undefined) =>
+    useQuery({
+        queryKey: ['kpi-template', id],
+        queryFn: () => api.getKpiTemplate(id!),
+        enabled: !!id,
+    })
+
+export const useCreateKpiTemplate = () => {
     const qc = useQueryClient()
     return useMutation({
-        mutationFn: (payload: KpiTierUpdate[]) => api.updateKpiTiers(payload),
+        mutationFn: (payload: KPITemplateCreate) =>
+            api.createKpiTemplate(payload),
         onSuccess: () => {
-            qc.invalidateQueries({ queryKey: ['kpi-tiers'] })
+            qc.invalidateQueries({ queryKey: ['kpi-templates'] })
         },
     })
 }
 
-// -- CALCULATION JOB --
-export const useCreateKpiJob = () => {
+export const useUpdateKpiTemplate = () => {
+    const qc = useQueryClient()
     return useMutation({
-        mutationFn: ({ period, force }: { period: string; force?: boolean }) =>
-            api.createKpiCalculationJob(period, force),
-    })
-}
-
-// useAsyncJob is an abstraction that acts generically. I provide a specific hook just for polling if needed, but typically useAsyncJob will handle polling internally based on jobId.
-export const useKpiJobStatus = (jobId: string | null) => {
-    return useQuery({
-        queryKey: ['kpi-job-status', jobId],
-        queryFn: () => api.getKpiCalculationJob(jobId!),
-        enabled: !!jobId,
-        refetchInterval: (query) => {
-            const status = query.state.data?.status
-            return status === 'PENDING' || status === 'PROCESSING'
-                ? 2000
-                : false
+        mutationFn: ({
+            id,
+            payload,
+        }: {
+            id: string
+            payload: KPITemplateUpdate
+        }) => api.updateKpiTemplate(id, payload),
+        onSuccess: (_, { id }) => {
+            qc.invalidateQueries({ queryKey: ['kpi-templates'] })
+            qc.invalidateQueries({ queryKey: ['kpi-template', id] })
         },
     })
 }
 
-// -- TEACHER KPI --
-export const useTeacherMonthlyKpi = (teacherId: string, period: string) => {
-    return useQuery({
-        queryKey: ['teacher-kpi', teacherId, period],
-        queryFn: () => api.getTeacherMonthlyKpi(teacherId, period),
-        enabled: !!teacherId && !!period,
+// ============================================================================
+// KPI Periods
+// ============================================================================
+
+export const useKpiPeriods = () =>
+    useQuery({
+        queryKey: ['kpi-periods'],
+        queryFn: api.getKpiPeriods,
+    })
+
+export const useKpiPeriodDetail = (periodId: string | undefined) =>
+    useQuery({
+        queryKey: ['kpi-period-detail', periodId],
+        queryFn: () => api.getKpiPeriodDetail(periodId!),
+        enabled: !!periodId,
+    })
+
+export const useCreateKpiPeriod = () => {
+    const qc = useQueryClient()
+    return useMutation({
+        mutationFn: (payload: KPIPeriodCreate) => api.createKpiPeriod(payload),
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ['kpi-periods'] })
+        },
     })
 }
 
-export const useMyKpi = (period: string) => {
-    return useQuery({
-        queryKey: ['my-kpi', period],
-        queryFn: () => api.getMyKpi(period),
-        enabled: !!period,
+export const useCloseKpiPeriod = () => {
+    const qc = useQueryClient()
+    return useMutation({
+        mutationFn: (periodId: string) => api.closeKpiPeriod(periodId),
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ['kpi-periods'] })
+        },
     })
 }
 
-// -- DISPUTE --
+// ============================================================================
+// KPI Records
+// ============================================================================
+
+export const useKpiRecords = (params: {
+    period_id?: string
+    staff_id?: string
+    status?: string
+    contract_type?: string
+    page?: number
+    limit?: number
+}) =>
+    useQuery({
+        queryKey: ['kpi-records', params],
+        queryFn: () => api.getKpiRecords(params),
+        enabled: !!params.period_id,
+        placeholderData: keepPreviousData,
+    })
+
+export const useKpiRecordDetail = (recordId: string | undefined) =>
+    useQuery({
+        queryKey: ['kpi-record-detail', recordId],
+        queryFn: () => api.getKpiRecordDetail(recordId!),
+        enabled: !!recordId,
+    })
+
+export const useMyKpiRecord = (periodId: string | undefined) =>
+    useQuery({
+        queryKey: ['my-kpi-record', periodId],
+        queryFn: () => api.getMyKpiRecord(periodId!),
+        enabled: !!periodId,
+    })
+
+export const useUpdateRecordMetrics = () => {
+    const qc = useQueryClient()
+    return useMutation({
+        mutationFn: ({
+            recordId,
+            payload,
+        }: {
+            recordId: string
+            payload: UpdateMetricsRequest
+        }) => api.updateRecordMetrics(recordId, payload),
+        onSuccess: (_, { recordId }) => {
+            qc.invalidateQueries({
+                queryKey: ['kpi-record-detail', recordId],
+            })
+            qc.invalidateQueries({ queryKey: ['kpi-records'] })
+        },
+    })
+}
+
+export const useUpdateTeachingHours = () => {
+    const qc = useQueryClient()
+    return useMutation({
+        mutationFn: ({
+            recordId,
+            hours,
+        }: {
+            recordId: string
+            hours: number
+        }) => api.updateTeachingHours(recordId, hours),
+        onSuccess: (_, { recordId }) => {
+            qc.invalidateQueries({
+                queryKey: ['kpi-record-detail', recordId],
+            })
+        },
+    })
+}
+
+export const useCalculateRecord = () => {
+    const qc = useQueryClient()
+    return useMutation({
+        mutationFn: (recordId: string) => api.calculateRecord(recordId),
+        onSuccess: (_, recordId) => {
+            qc.invalidateQueries({
+                queryKey: ['kpi-record-detail', recordId],
+            })
+            qc.invalidateQueries({ queryKey: ['kpi-records'] })
+        },
+    })
+}
+
+export const useSubmitRecord = () => {
+    const qc = useQueryClient()
+    return useMutation({
+        mutationFn: (recordId: string) => api.submitRecord(recordId),
+        onSuccess: (_, recordId) => {
+            qc.invalidateQueries({
+                queryKey: ['kpi-record-detail', recordId],
+            })
+            qc.invalidateQueries({ queryKey: ['kpi-records'] })
+        },
+    })
+}
+
+export const useApproveRecord = () => {
+    const qc = useQueryClient()
+    return useMutation({
+        mutationFn: (recordId: string) => api.approveRecord(recordId),
+        onSuccess: (_, recordId) => {
+            qc.invalidateQueries({
+                queryKey: ['kpi-record-detail', recordId],
+            })
+            qc.invalidateQueries({ queryKey: ['kpi-records'] })
+            qc.invalidateQueries({ queryKey: ['kpi-dashboard'] })
+        },
+    })
+}
+
+export const useRejectRecord = () => {
+    const qc = useQueryClient()
+    return useMutation({
+        mutationFn: ({
+            recordId,
+            comment,
+        }: {
+            recordId: string
+            comment: string
+        }) => api.rejectRecord(recordId, comment),
+        onSuccess: (_, { recordId }) => {
+            qc.invalidateQueries({
+                queryKey: ['kpi-record-detail', recordId],
+            })
+            qc.invalidateQueries({ queryKey: ['kpi-records'] })
+        },
+    })
+}
+
+export const useApprovalLog = (recordId: string | undefined) =>
+    useQuery({
+        queryKey: ['kpi-approval-log', recordId],
+        queryFn: () => api.getApprovalLog(recordId!),
+        enabled: !!recordId,
+    })
+
+// ============================================================================
+// Bulk Calculation
+// ============================================================================
+
+export const useBulkCalculatePeriod = () => {
+    const qc = useQueryClient()
+    return useMutation({
+        mutationFn: (periodId: string) => api.bulkCalculatePeriod(periodId),
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ['kpi-records'] })
+            qc.invalidateQueries({ queryKey: ['kpi-dashboard'] })
+        },
+    })
+}
+
+// ============================================================================
+// Support Calculator
+// ============================================================================
+
+export const useCalculateSupportScore = () =>
+    useMutation({
+        mutationFn: (payload: SupportCalcRequest) =>
+            api.calculateSupportScore(payload),
+    })
+
+export const useSaveAndApplySupportCalc = () => {
+    const qc = useQueryClient()
+    return useMutation({
+        mutationFn: ({
+            recordId,
+            payload,
+        }: {
+            recordId: string
+            payload: SupportCalcSaveRequest
+        }) => api.saveAndApplySupportCalc(recordId, payload),
+        onSuccess: (_, { recordId }) => {
+            qc.invalidateQueries({
+                queryKey: ['kpi-record-detail', recordId],
+            })
+            qc.invalidateQueries({
+                queryKey: ['kpi-support-calcs', recordId],
+            })
+        },
+    })
+}
+
+export const useSupportCalcEntries = (recordId: string | undefined) =>
+    useQuery({
+        queryKey: ['kpi-support-calcs', recordId],
+        queryFn: () => api.getSupportCalcEntries(recordId!),
+        enabled: !!recordId,
+    })
+
+// ============================================================================
+// Dashboard & Reports
+// ============================================================================
+
+export const useKpiDashboard = (periodId: string | undefined) =>
+    useQuery({
+        queryKey: ['kpi-dashboard', periodId],
+        queryFn: () => api.getKpiDashboard(periodId!),
+        enabled: !!periodId,
+    })
+
+export const useKpiRanking = (
+    periodId: string | undefined,
+    contractType?: string
+) =>
+    useQuery({
+        queryKey: ['kpi-ranking', periodId, contractType],
+        queryFn: () => api.getKpiRanking(periodId!, contractType),
+        enabled: !!periodId,
+    })
+
+export const useStaffKpiHistory = (staffId: string | undefined) =>
+    useQuery({
+        queryKey: ['staff-kpi-history', staffId],
+        queryFn: () => api.getStaffKpiHistory(staffId!),
+        enabled: !!staffId,
+    })
+
+// ============================================================================
+// Disputes
+// ============================================================================
+
 export const useCreateKpiDispute = () => {
     const qc = useQueryClient()
     return useMutation({
         mutationFn: (payload: KpiDisputeCreate) =>
             api.createKpiDispute(payload),
         onSuccess: () => {
-            qc.invalidateQueries({ queryKey: ['my-kpi'] })
-            qc.invalidateQueries({ queryKey: ['teacher-kpi'] })
+            qc.invalidateQueries({ queryKey: ['my-kpi-record'] })
+            qc.invalidateQueries({ queryKey: ['kpi-record-detail'] })
         },
     })
 }
@@ -95,12 +345,35 @@ export const useResolveKpiDispute = () => {
             payload: KpiDisputeResolveRequest
         }) => api.resolveKpiDispute(id, payload),
         onSuccess: () => {
-            qc.invalidateQueries({ queryKey: ['teacher-kpi'] })
+            qc.invalidateQueries({ queryKey: ['kpi-record-detail'] })
         },
     })
 }
 
-// -- PAYROLL CONFIG --
+// ============================================================================
+// KPI Tiers (deprecated — kept for backward compat)
+// ============================================================================
+
+export const useKpiTiers = () =>
+    useQuery({
+        queryKey: ['kpi-tiers'],
+        queryFn: api.getKpiTiers,
+    })
+
+export const useUpdateKpiTiers = () => {
+    const qc = useQueryClient()
+    return useMutation({
+        mutationFn: (payload: KpiTierUpdate[]) => api.updateKpiTiers(payload),
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ['kpi-tiers'] })
+        },
+    })
+}
+
+// ============================================================================
+// Payroll Config
+// ============================================================================
+
 export const useUpdateTeacherPayrollConfig = () => {
     const qc = useQueryClient()
     return useMutation({
@@ -120,40 +393,39 @@ export const useUpdateTeacherPayrollConfig = () => {
     })
 }
 
-// -- SALARY LIST --
+// ============================================================================
+// Salaries
+// ============================================================================
+
 export const useSalaries = (params: {
     period?: string
     page?: number
     limit?: number
-}) => {
-    return useQuery({
+}) =>
+    useQuery({
         queryKey: ['salaries', params],
         queryFn: () => api.getSalaries(params),
         placeholderData: keepPreviousData,
     })
-}
 
 export const useMySalaryHistory = (params: {
     period?: string
     page?: number
     limit?: number
-}) => {
-    return useQuery({
+}) =>
+    useQuery({
         queryKey: ['my-salary-history', params],
         queryFn: () => api.getMySalaryHistory(params),
         placeholderData: keepPreviousData,
     })
-}
 
-export const useSalaryDetail = (id: string | undefined) => {
-    return useQuery({
+export const useSalaryDetail = (id: string | undefined) =>
+    useQuery({
         queryKey: ['salary-detail', id],
         queryFn: () => api.getSalaryDetail(id!),
         enabled: !!id,
     })
-}
 
-// -- SALARY ACTIONS --
 export const useApproveSalary = () => {
     const qc = useQueryClient()
     return useMutation({
@@ -182,23 +454,7 @@ export const useAddSalaryAdjustment = () => {
     })
 }
 
-// -- PAYROLL RUN --
-export const useCreatePayrollRun = () => {
-    return useMutation({
+export const useCreatePayrollRun = () =>
+    useMutation({
         mutationFn: (period: string) => api.createPayrollRun(period),
     })
-}
-
-// -- KPI SUMMARY (Admin overview) --
-export const useKpiSummary = (params: {
-    period: string
-    page?: number
-    limit?: number
-}) => {
-    return useQuery({
-        queryKey: ['kpi-summary', params],
-        queryFn: () => api.getKpiSummary(params),
-        enabled: !!params.period,
-        placeholderData: keepPreviousData,
-    })
-}

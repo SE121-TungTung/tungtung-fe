@@ -1,114 +1,146 @@
 import { useState } from 'react'
 import s from '../users/UserManagementPage.module.css'
-import { AsyncJobCard } from '@/components/common/async/AsyncJobCard'
-import { PeriodSelector } from '@/components/common/input/PeriodSelector'
+import Card from '@/components/common/card/Card'
+import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
+import { KpiPeriodSelector } from '@/components/common/input/KpiPeriodSelector'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { api } from '@/lib/api'
-import type { KpiCalculationJob } from '@/types/kpi.types'
+import { useBulkCalculatePeriod } from '@/hooks/domain/useKpi'
+import ButtonGhost from '@/components/common/button/ButtonGhost'
 
 export default function AdminKpiCalculationPage() {
     const navigate = useNavigate()
     const [searchParams] = useSearchParams()
-    const [period, setPeriod] = useState(() => {
-        const p = searchParams.get('period')
-        if (p) return p
-        const d = new Date()
-        return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}`
-    })
+    const [periodId, setPeriodId] = useState(
+        () => searchParams.get('periodId') ?? ''
+    )
 
-    const handleStartJob = async () => {
-        const res = await api<KpiCalculationJob>(
-            '/api/v1/kpi/calculation-jobs',
-            {
-                method: 'POST',
-                body: JSON.stringify({ period, force: false }),
-            }
-        )
-        return res.job_id
-    }
+    const bulkCalc = useBulkCalculatePeriod()
+    const [result, setResult] = useState<{
+        total: number
+        processed: number
+        errors: string[]
+    } | null>(null)
 
-    const handlePollJob = async (jobId: string) => {
-        const res = await api<KpiCalculationJob>(
-            `/api/v1/kpi/calculation-jobs/${jobId}`
-        )
-        return {
-            status: res.status,
-            processed: res.processed_count,
-            total: res.total_teachers,
-            error: res.error_log,
-        }
+    const handleCalculate = () => {
+        if (!periodId) return
+        setResult(null)
+        bulkCalc.mutate(periodId, {
+            onSuccess: (data) => setResult(data),
+        })
     }
 
     return (
         <div className={s.pageWrapperWithoutHeader}>
             <main className={s.mainContent}>
-                <h1 className={s.pageTitle}>Tiến trình tính KPI</h1>
+                <h1 className={s.pageTitle}>Tính toán KPI hàng loạt</h1>
 
                 <div style={{ marginBottom: '16px' }}>
-                    <button
-                        onClick={() => navigate('/admin/kpi')}
-                        style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: '#666',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            fontSize: '14px',
-                            padding: 0,
-                        }}
-                    >
-                        <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                        >
-                            <path
-                                d="M15 18L9 12L15 6"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            />
-                        </svg>
-                        Quay lại
-                    </button>
+                    <ButtonGhost onClick={() => navigate('/admin/kpi')}>
+                        ← Quay lại
+                    </ButtonGhost>
                 </div>
 
-                <div
-                    style={{
-                        marginTop: '32px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                    }}
+                <Card
+                    variant="glass"
+                    style={{ padding: '32px', maxWidth: 600 }}
                 >
-                    <div
+                    <p
                         style={{
-                            marginBottom: '32px',
-                            width: '100%',
-                            maxWidth: '300px',
+                            margin: '0 0 24px',
+                            color: 'var(--color-text-secondary)',
+                            fontSize: 14,
+                            lineHeight: 1.6,
                         }}
                     >
-                        <PeriodSelector
-                            value={period}
-                            onChange={setPeriod}
+                        Hệ thống sẽ tính toán điểm KPI cho{' '}
+                        <strong>tất cả bản ghi</strong> ở trạng thái Nháp và Chờ
+                        duyệt trong kỳ được chọn. Các bản ghi đã duyệt sẽ không
+                        bị ảnh hưởng.
+                    </p>
+
+                    <div style={{ marginBottom: 24 }}>
+                        <KpiPeriodSelector
+                            value={periodId}
+                            onChange={setPeriodId}
                             label="Chọn kỳ cần tính"
                         />
                     </div>
 
-                    <div style={{ width: '100%' }}>
-                        <AsyncJobCard
-                            title={`Tính điểm KPI cho tháng ${period}`}
-                            description="Hệ thống sẽ tổng hợp điểm danh, đánh giá, điểm số để chấm KPI cho toàn bộ giáo viên."
-                            onStart={handleStartJob}
-                            pollJob={handlePollJob}
-                            onSuccess={() => navigate('/admin/kpi')}
-                        />
-                    </div>
-                </div>
+                    <ButtonPrimary
+                        onClick={handleCalculate}
+                        disabled={!periodId || bulkCalc.isPending}
+                        style={{ minWidth: 200 }}
+                    >
+                        {bulkCalc.isPending
+                            ? 'Đang tính toán...'
+                            : 'Tính toán KPI'}
+                    </ButtonPrimary>
+
+                    {/* Result */}
+                    {result && (
+                        <div
+                            style={{
+                                marginTop: 24,
+                                padding: 16,
+                                borderRadius: 8,
+                                background:
+                                    result.errors.length > 0
+                                        ? '#fef2f2'
+                                        : '#f0fdf4',
+                                border: `1px solid ${result.errors.length > 0 ? '#fecaca' : '#bbf7d0'}`,
+                            }}
+                        >
+                            <p style={{ margin: 0, fontWeight: 600 }}>
+                                ✅ Đã xử lý {result.processed}/{result.total}{' '}
+                                bản ghi
+                            </p>
+                            {result.errors.length > 0 && (
+                                <div style={{ marginTop: 8 }}>
+                                    <p
+                                        style={{
+                                            margin: '0 0 4px',
+                                            fontSize: 13,
+                                            color: '#991b1b',
+                                            fontWeight: 600,
+                                        }}
+                                    >
+                                        Lỗi ({result.errors.length}):
+                                    </p>
+                                    <ul
+                                        style={{
+                                            margin: 0,
+                                            padding: '0 0 0 16px',
+                                            fontSize: 12,
+                                            color: '#991b1b',
+                                        }}
+                                    >
+                                        {result.errors.map((e, i) => (
+                                            <li key={i}>{e}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Error */}
+                    {bulkCalc.isError && (
+                        <div
+                            style={{
+                                marginTop: 16,
+                                padding: 12,
+                                borderRadius: 8,
+                                background: '#fef2f2',
+                                border: '1px solid #fecaca',
+                                fontSize: 14,
+                                color: '#991b1b',
+                            }}
+                        >
+                            {(bulkCalc.error as Error)?.message ??
+                                'Đã xảy ra lỗi khi tính toán.'}
+                        </div>
+                    )}
+                </Card>
             </main>
         </div>
     )

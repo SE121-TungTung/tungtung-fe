@@ -1,127 +1,342 @@
 import { api } from './api'
 import type {
-    KpiTier,
-    KpiTierUpdate,
-    TeacherPayrollConfig,
-    TeacherPayrollConfigUpdate,
-    KpiCalculationJob,
-    TeacherMonthlyKpi,
+    // Templates
+    KPITemplate,
+    KPITemplateListItem,
+    KPITemplateCreate,
+    KPITemplateUpdate,
+    KPITemplateMetric,
+    // Periods
+    KPIPeriod,
+    KPIPeriodDetail,
+    KPIPeriodCreate,
+    // Records
+    KPIRecordListItem,
+    KPIRecordDetail,
+    UpdateMetricsRequest,
+    // Dashboard
+    KPIDashboardSummary,
+    KPIRankingItem,
+    StaffKPIHistoryItem,
+    // Support Calculator
+    SupportCalcRequest,
+    SupportCalcResponse,
+    SupportCalcSaveRequest,
+    SupportCalcEntryResponse,
+    // Approval
+    KPIApprovalLog,
+    // Dispute
     KpiDispute,
     KpiDisputeCreate,
     KpiDisputeResolveRequest,
+    // Tiers (deprecated)
+    KpiTier,
+    KpiTierUpdate,
+    // Payroll
+    TeacherPayrollConfig,
+    TeacherPayrollConfigUpdate,
     Salary,
     SalaryAdjustmentCreate,
     SalaryAdjustment,
     PayrollRun,
     PaginatedResponse,
-    KpiSummaryResponse,
 } from '@/types/kpi.types'
 
 const API_V1 = '/api/v1'
 
-// Tiers
-export const getKpiTiers = async (): Promise<KpiTier[]> => {
-    const res = await api<KpiTier[]>(`${API_V1}/settings/kpi-tiers`)
-    return res
-}
+// ============================================================================
+// 1. KPI Templates
+// ============================================================================
 
-export const updateKpiTiers = async (
-    payload: KpiTierUpdate[]
-): Promise<KpiTier[]> => {
-    const res = await api<KpiTier[]>(`${API_V1}/settings/kpi-tiers`, {
+export const getKpiTemplates = async (): Promise<KPITemplateListItem[]> =>
+    api<KPITemplateListItem[]>(`${API_V1}/kpi/templates`)
+
+export const getKpiTemplate = async (id: string): Promise<KPITemplate> =>
+    api<KPITemplate>(`${API_V1}/kpi/templates/${id}`)
+
+export const createKpiTemplate = async (
+    payload: KPITemplateCreate
+): Promise<KPITemplate> =>
+    api<KPITemplate>(`${API_V1}/kpi/templates`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+    })
+
+export const updateKpiTemplate = async (
+    id: string,
+    payload: KPITemplateUpdate
+): Promise<KPITemplate> =>
+    api<KPITemplate>(`${API_V1}/kpi/templates/${id}`, {
         method: 'PUT',
         body: JSON.stringify(payload),
     })
-    return res
-}
 
-// KPI Job
-export const createKpiCalculationJob = async (
-    period: string,
-    force = false
-): Promise<KpiCalculationJob> => {
-    const res = await api<KpiCalculationJob>(`${API_V1}/kpi/calculation-jobs`, {
+export const getKpiTemplateMetrics = async (
+    templateId: string
+): Promise<KPITemplateMetric[]> =>
+    api<KPITemplateMetric[]>(`${API_V1}/kpi/templates/${templateId}/metrics`)
+
+// ============================================================================
+// 2. KPI Periods
+// ============================================================================
+
+export const getKpiPeriods = async (): Promise<KPIPeriod[]> =>
+    api<KPIPeriod[]>(`${API_V1}/kpi/periods`)
+
+export const createKpiPeriod = async (
+    payload: KPIPeriodCreate
+): Promise<{
+    period: KPIPeriod
+    records_created: number
+    skipped: string[]
+}> =>
+    api(`${API_V1}/kpi/periods`, {
         method: 'POST',
-        body: JSON.stringify({ period, force }),
+        body: JSON.stringify(payload),
     })
-    return res
+
+export const getKpiPeriodDetail = async (
+    periodId: string
+): Promise<KPIPeriodDetail> =>
+    api<KPIPeriodDetail>(`${API_V1}/kpi/periods/${periodId}`)
+
+export const closeKpiPeriod = async (periodId: string): Promise<KPIPeriod> =>
+    api<KPIPeriod>(`${API_V1}/kpi/periods/${periodId}/close`, {
+        method: 'PUT',
+    })
+
+// ============================================================================
+// 3. KPI Records
+// ============================================================================
+
+export const getKpiRecords = async (params: {
+    period_id?: string
+    staff_id?: string
+    status?: string
+    contract_type?: string
+    page?: number
+    limit?: number
+}): Promise<PaginatedResponse<KPIRecordListItem>> => {
+    const query = new URLSearchParams()
+    if (params.period_id) query.append('period_id', params.period_id)
+    if (params.staff_id) query.append('staff_id', params.staff_id)
+    if (params.status) query.append('status', params.status)
+    if (params.contract_type)
+        query.append('contract_type', params.contract_type)
+    if (params.page) query.append('page', params.page.toString())
+    if (params.limit) query.append('limit', params.limit.toString())
+
+    // Use raw fetch to preserve meta (api() auto-unwraps data)
+    const API_BASE = (
+        import.meta.env.VITE_API_URL ||
+        'https://tungtung-be-production.up.railway.app'
+    ).replace(/\/$/, '')
+    const url = `${API_BASE}${API_V1}/kpi/records?${query.toString()}`
+
+    const token =
+        sessionStorage.getItem('access_token') ||
+        localStorage.getItem('access_token')
+    const headers: HeadersInit = { Accept: 'application/json' }
+    if (token) headers['Authorization'] = `Bearer ${token}`
+
+    const res = await fetch(url, { headers })
+    if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}))
+        throw new Error(
+            errBody?.message || errBody?.detail || `HTTP ${res.status}`
+        )
+    }
+    return res.json() as Promise<PaginatedResponse<KPIRecordListItem>>
 }
 
-export const getKpiCalculationJob = async (
-    jobId: string
-): Promise<KpiCalculationJob> => {
-    const res = await api<KpiCalculationJob>(
-        `${API_V1}/kpi/calculation-jobs/${jobId}`
+export const getKpiRecordDetail = async (
+    recordId: string
+): Promise<KPIRecordDetail> =>
+    api<KPIRecordDetail>(`${API_V1}/kpi/records/${recordId}`)
+
+export const getMyKpiRecord = async (
+    periodId: string
+): Promise<KPIRecordDetail> =>
+    api<KPIRecordDetail>(`${API_V1}/kpi/records/me?period_id=${periodId}`)
+
+export const updateRecordMetrics = async (
+    recordId: string,
+    payload: UpdateMetricsRequest
+): Promise<KPIRecordDetail> =>
+    api<KPIRecordDetail>(`${API_V1}/kpi/records/${recordId}/metrics`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+    })
+
+export const updateTeachingHours = async (
+    recordId: string,
+    teachingHours: number
+): Promise<KPIRecordDetail> =>
+    api<KPIRecordDetail>(`${API_V1}/kpi/records/${recordId}/teaching-hours`, {
+        method: 'PUT',
+        body: JSON.stringify({ teaching_hours: teachingHours }),
+    })
+
+export const calculateRecord = async (
+    recordId: string
+): Promise<KPIRecordDetail> =>
+    api<KPIRecordDetail>(`${API_V1}/kpi/records/${recordId}/calculate`, {
+        method: 'POST',
+    })
+
+export const submitRecord = async (
+    recordId: string
+): Promise<KPIRecordDetail> =>
+    api<KPIRecordDetail>(`${API_V1}/kpi/records/${recordId}/submit`, {
+        method: 'POST',
+    })
+
+export const approveRecord = async (
+    recordId: string
+): Promise<KPIRecordDetail> =>
+    api<KPIRecordDetail>(`${API_V1}/kpi/records/${recordId}/approve`, {
+        method: 'POST',
+    })
+
+export const rejectRecord = async (
+    recordId: string,
+    comment: string
+): Promise<KPIRecordDetail> =>
+    api<KPIRecordDetail>(`${API_V1}/kpi/records/${recordId}/reject`, {
+        method: 'POST',
+        body: JSON.stringify({ comment }),
+    })
+
+export const getApprovalLog = async (
+    recordId: string
+): Promise<KPIApprovalLog[]> =>
+    api<KPIApprovalLog[]>(`${API_V1}/kpi/records/${recordId}/approval-log`)
+
+// ============================================================================
+// 4. Bulk Calculation
+// ============================================================================
+
+export const bulkCalculatePeriod = async (
+    periodId: string
+): Promise<{ total: number; processed: number; errors: string[] }> =>
+    api(`${API_V1}/kpi/periods/${periodId}/calculate-all`, {
+        method: 'POST',
+    })
+
+// ============================================================================
+// 5. Support Calculator
+// ============================================================================
+
+export const calculateSupportScore = async (
+    payload: SupportCalcRequest
+): Promise<SupportCalcResponse> =>
+    api<SupportCalcResponse>(`${API_V1}/kpi/support/score-calculator`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+    })
+
+export const saveAndApplySupportCalc = async (
+    recordId: string,
+    payload: SupportCalcSaveRequest
+): Promise<unknown> =>
+    api(`${API_V1}/kpi/records/${recordId}/support-calc`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+    })
+
+export const getSupportCalcEntries = async (
+    recordId: string
+): Promise<SupportCalcEntryResponse[]> =>
+    api<SupportCalcEntryResponse[]>(
+        `${API_V1}/kpi/records/${recordId}/support-calcs`
     )
-    return res
+
+// ============================================================================
+// 6. Dashboard & Reports
+// ============================================================================
+
+export const getKpiDashboard = async (
+    periodId: string
+): Promise<KPIDashboardSummary> =>
+    api<KPIDashboardSummary>(`${API_V1}/kpi/dashboard?period_id=${periodId}`)
+
+export const getKpiRanking = async (
+    periodId: string,
+    contractType?: string
+): Promise<KPIRankingItem[]> => {
+    const query = new URLSearchParams()
+    if (contractType) query.append('contract_type', contractType)
+    return api<KPIRankingItem[]>(
+        `${API_V1}/kpi/reports/period/${periodId}/ranking?${query.toString()}`
+    )
 }
 
-// Teacher KPI
-export const getMyKpi = async (
-    period: string
-): Promise<TeacherMonthlyKpi | null> => {
-    try {
-        const res = await api<TeacherMonthlyKpi>(
-            `${API_V1}/teachers/me/kpi?period=${period}`
-        )
-        return res
-    } catch {
-        return null // 404 or empty
-    }
-}
+export const getStaffKpiHistory = async (
+    staffId: string
+): Promise<StaffKPIHistoryItem[]> =>
+    api<StaffKPIHistoryItem[]>(`${API_V1}/kpi/reports/staff/${staffId}/history`)
 
-export const getTeacherMonthlyKpi = async (
-    teacherId: string,
-    period: string
-): Promise<TeacherMonthlyKpi | null> => {
-    try {
-        const res = await api<TeacherMonthlyKpi>(
-            `${API_V1}/teachers/${teacherId}/kpi?period=${period}`
-        )
-        return res
-    } catch {
-        return null
-    }
-}
+export const getTeacherKpiHistory = async (
+    teacherId: string
+): Promise<StaffKPIHistoryItem[]> =>
+    api<StaffKPIHistoryItem[]>(`${API_V1}/teachers/${teacherId}/kpi-history`)
 
-// Payroll config
+// ============================================================================
+// 7. Disputes
+// ============================================================================
+
+export const createKpiDispute = async (
+    payload: KpiDisputeCreate
+): Promise<KpiDispute> =>
+    api<KpiDispute>(`${API_V1}/kpi/dispute`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+    })
+
+export const resolveKpiDispute = async (
+    id: string,
+    payload: KpiDisputeResolveRequest
+): Promise<KpiDispute> =>
+    api<KpiDispute>(`${API_V1}/kpi/dispute/${id}/resolve`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+    })
+
+// ============================================================================
+// 8. KPI Tiers (deprecated — kept for backward compat)
+// ============================================================================
+
+export const getKpiTiers = async (): Promise<KpiTier[]> =>
+    api<KpiTier[]>(`${API_V1}/settings/kpi-tiers`)
+
+export const updateKpiTiers = async (
+    payload: KpiTierUpdate[]
+): Promise<KpiTier[]> =>
+    api<KpiTier[]>(`${API_V1}/settings/kpi-tiers`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+    })
+
+// ============================================================================
+// 9. Payroll Config
+// ============================================================================
+
 export const updateTeacherPayrollConfig = async (
     teacherId: string,
     payload: TeacherPayrollConfigUpdate
-): Promise<TeacherPayrollConfig> => {
-    const res = await api<TeacherPayrollConfig>(
+): Promise<TeacherPayrollConfig> =>
+    api<TeacherPayrollConfig>(
         `${API_V1}/teachers/${teacherId}/payroll-config`,
         {
             method: 'PUT',
             body: JSON.stringify(payload),
         }
     )
-    return res
-}
 
-// Dispute
-export const createKpiDispute = async (
-    payload: KpiDisputeCreate
-): Promise<KpiDispute> => {
-    const res = await api<KpiDispute>(`${API_V1}/kpi/dispute`, {
-        method: 'POST',
-        body: JSON.stringify(payload),
-    })
-    return res
-}
+// ============================================================================
+// 10. Salaries
+// ============================================================================
 
-export const resolveKpiDispute = async (
-    id: string,
-    payload: KpiDisputeResolveRequest
-): Promise<KpiDispute> => {
-    const res = await api<KpiDispute>(`${API_V1}/kpi/dispute/${id}/resolve`, {
-        method: 'PUT',
-        body: JSON.stringify(payload),
-    })
-    return res
-}
-
-// Salaries
 export const getSalaries = async (params: {
     period?: string
     page?: number
@@ -169,71 +384,27 @@ export const getMySalaryHistory = async (params: {
     )
 }
 
-export const getSalaryDetail = async (id: string): Promise<Salary> => {
-    const res = await api<Salary>(`${API_V1}/salaries/${id}`)
-    return res
-}
+export const getSalaryDetail = async (id: string): Promise<Salary> =>
+    api<Salary>(`${API_V1}/salaries/${id}`)
 
-export const approveSalary = async (id: string): Promise<Salary> => {
-    const res = await api<Salary>(`${API_V1}/salaries/${id}/approve`, {
-        method: 'POST',
-    })
-    return res
-}
+export const approveSalary = async (id: string): Promise<Salary> =>
+    api<Salary>(`${API_V1}/salaries/${id}/approve`, { method: 'POST' })
 
 export const addSalaryAdjustment = async (
     salaryId: string,
     payload: SalaryAdjustmentCreate
-): Promise<SalaryAdjustment> => {
-    const res = await api<SalaryAdjustment>(
-        `${API_V1}/salaries/${salaryId}/adjustments`,
-        {
-            method: 'PATCH',
-            body: JSON.stringify(payload),
-        }
-    )
-    return res
-}
+): Promise<SalaryAdjustment> =>
+    api<SalaryAdjustment>(`${API_V1}/salaries/${salaryId}/adjustments`, {
+        method: 'PATCH',
+        body: JSON.stringify(payload),
+    })
 
-// Payroll run job
-export const createPayrollRun = async (period: string): Promise<PayrollRun> => {
-    const res = await api<PayrollRun>(`${API_V1}/payroll-runs`, {
+// ============================================================================
+// 11. Payroll Runs
+// ============================================================================
+
+export const createPayrollRun = async (period: string): Promise<PayrollRun> =>
+    api<PayrollRun>(`${API_V1}/payroll-runs`, {
         method: 'POST',
         body: JSON.stringify({ period }),
     })
-    return res
-}
-
-// KPI Summary (Admin: all teachers overview for a period)
-// NOTE: Uses raw fetch instead of api() wrapper because api() auto-unwraps
-// json.data, stripping out the `meta` field needed for pagination.
-export const getKpiSummary = async (params: {
-    period: string
-    page?: number
-    limit?: number
-}): Promise<KpiSummaryResponse> => {
-    const query = new URLSearchParams({ period: params.period })
-    if (params.page) query.append('page', params.page.toString())
-    if (params.limit) query.append('limit', params.limit.toString())
-
-    const API_BASE = (
-        import.meta.env.VITE_API_URL ||
-        'https://tungtung-be-production.up.railway.app'
-    ).replace(/\/$/, '')
-    const url = `${API_BASE}${API_V1}/kpi/summary?${query.toString()}`
-
-    const token =
-        sessionStorage.getItem('access_token') ||
-        localStorage.getItem('access_token')
-    const headers: HeadersInit = { Accept: 'application/json' }
-    if (token) headers['Authorization'] = `Bearer ${token}`
-
-    const res = await fetch(url, { headers })
-    if (!res.ok) {
-        const errBody = await res.json().catch(() => ({}))
-        throw new Error(
-            errBody?.message || errBody?.detail || `HTTP ${res.status}`
-        )
-    }
-    return res.json() as Promise<KpiSummaryResponse>
-}

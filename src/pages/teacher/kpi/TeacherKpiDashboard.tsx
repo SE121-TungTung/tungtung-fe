@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import s from '../../admin/users/UserManagementPage.module.css'
-import { PeriodSelector } from '@/components/common/input/PeriodSelector'
+import { KpiPeriodSelector } from '@/components/common/input/KpiPeriodSelector'
 import { KpiBreakdownCard } from '@/components/common/card/KpiBreakdownCard'
-import { useMyKpi, useCreateKpiDispute } from '@/hooks/domain/useKpi'
+import { useMyKpiRecord, useCreateKpiDispute } from '@/hooks/domain/useKpi'
 import { EmptyState } from '@/components/common/state/EmptyState'
 import { Modal } from '@/components/core/Modal'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
@@ -14,24 +14,34 @@ import { useDialog } from '@/hooks/useDialog'
 
 export default function TeacherKpiDashboard() {
     const { alert } = useDialog()
-    const [period, setPeriod] = useState(() => {
-        const d = new Date()
-        return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}`
-    })
+    const [periodId, setPeriodId] = useState('')
 
-    const { data: myKpi, isLoading } = useMyKpi(period)
+    const { data: myKpi, isLoading } = useMyKpiRecord(periodId || undefined)
 
     // Dispute state
     const [isDisputeOpen, setIsDisputeOpen] = useState(false)
     const { register, handleSubmit, reset } = useForm({
-        defaultValues: { reason: '', sub_reason: 'C_ATTENDANCE' },
+        defaultValues: { reason: '', sub_reason: '' },
     })
     const disputeMutation = useCreateKpiDispute()
 
-    const onDispute = (form: any) => {
+    // Build dynamic criteria options from KPI record metrics
+    const criteriaOptions = myKpi
+        ? myKpi.metrics
+              .filter((m) => !m.is_group_header)
+              .map((m) => ({
+                  label: `${m.metric_code} — ${m.metric_name}`,
+                  value: m.metric_code,
+              }))
+        : []
+
+    const onDispute = (form: { reason: string; sub_reason: string }) => {
         if (!myKpi) return
         disputeMutation.mutate(
-            { kpi_id: myKpi.id, reason: `[${form.sub_reason}] ${form.reason}` },
+            {
+                kpi_record_id: myKpi.id,
+                reason: `[${form.sub_reason}] ${form.reason}`,
+            },
             {
                 onSuccess: () => {
                     alert(
@@ -40,7 +50,7 @@ export default function TeacherKpiDashboard() {
                     setIsDisputeOpen(false)
                     reset()
                 },
-                onError: (e: any) => alert(e.message || 'Lỗi gửi khiếu nại.'),
+                onError: (e: Error) => alert(e.message || 'Lỗi gửi khiếu nại.'),
             }
         )
     }
@@ -62,9 +72,9 @@ export default function TeacherKpiDashboard() {
                     <h1 className={s.pageTitle} style={{ marginBottom: 0 }}>
                         KPI của tôi
                     </h1>
-                    <PeriodSelector
-                        value={period}
-                        onChange={setPeriod}
+                    <KpiPeriodSelector
+                        value={periodId}
+                        onChange={setPeriodId}
                         label="Chọn kỳ xem dữ liệu"
                     />
                 </div>
@@ -82,27 +92,35 @@ export default function TeacherKpiDashboard() {
                         <KpiBreakdownCard data={myKpi} readOnly={true} />
 
                         {/* Feature to dispute */}
-                        <div
-                            style={{
-                                display: 'flex',
-                                justifyContent: 'flex-end',
-                            }}
-                        >
-                            <ButtonGhost onClick={() => setIsDisputeOpen(true)}>
-                                Gửi khiếu nại điểm KPI
-                            </ButtonGhost>
-                        </div>
+                        {myKpi.approval_status !== 'DRAFT' && (
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    justifyContent: 'flex-end',
+                                }}
+                            >
+                                <ButtonGhost
+                                    onClick={() => setIsDisputeOpen(true)}
+                                >
+                                    Gửi khiếu nại điểm KPI
+                                </ButtonGhost>
+                            </div>
+                        )}
 
-                        {/* Chart History would go here */}
+                        {/* Chart History placeholder */}
                         <EmptyState
                             title="Biểu đồ lịch sử"
-                            description="Lịch sử điểm sẽ được hiển thị khi bạn có đủ dữ liệu >= 3 tháng."
+                            description="Lịch sử điểm sẽ được hiển thị khi bạn có đủ dữ liệu >= 2 kỳ."
                         />
                     </div>
                 ) : (
                     <EmptyState
                         title="Không có dữ liệu"
-                        description={`Hệ thống chưa ghi nhận điểm KPI tháng ${period} của bạn.`}
+                        description={
+                            periodId
+                                ? 'Hệ thống chưa ghi nhận điểm KPI của bạn trong kỳ này.'
+                                : 'Vui lòng chọn kỳ đánh giá.'
+                        }
                     />
                 )}
             </main>
@@ -152,21 +170,16 @@ export default function TeacherKpiDashboard() {
                     <SelectField
                         label="Tiêu chí cần xem lại"
                         registration={register('sub_reason')}
-                        options={[
-                            { label: 'Chuyên cần', value: 'C_ATTENDANCE' },
-                            {
-                                label: 'Đánh giá từ học viên',
-                                value: 'C_REVIEWS',
-                            },
-                            {
-                                label: 'Điểm số của học viên',
-                                value: 'C_TEST_SCORES',
-                            },
-                            {
-                                label: 'Tỉ lệ tái đăng ký',
-                                value: 'C_RETENTION',
-                            },
-                        ]}
+                        options={
+                            criteriaOptions.length > 0
+                                ? criteriaOptions
+                                : [
+                                      {
+                                          label: 'Không có tiêu chí',
+                                          value: 'N/A',
+                                      },
+                                  ]
+                        }
                     />
                     <InputField
                         label="Giải trình chi tiết"

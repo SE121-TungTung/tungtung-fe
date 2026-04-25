@@ -1,10 +1,55 @@
 import React from 'react'
 import Card from '@/components/common/card/Card'
-import type { TeacherMonthlyKpi } from '@/types/kpi.types'
+import type { KPIRecordDetail, ApprovalStatus } from '@/types/kpi.types'
 
 interface KpiBreakdownCardProps {
-    data?: TeacherMonthlyKpi
+    data?: KPIRecordDetail | null
     readOnly?: boolean
+}
+
+function getApprovalBadge(status: ApprovalStatus) {
+    const map: Record<
+        ApprovalStatus,
+        { bg: string; fg: string; label: string }
+    > = {
+        DRAFT: { bg: '#64748b18', fg: '#64748b', label: 'Nháp' },
+        SUBMITTED: { bg: '#3b82f618', fg: '#2563eb', label: 'Chờ duyệt' },
+        APPROVED: { bg: '#22c55e18', fg: '#16a34a', label: 'Đã duyệt' },
+        REJECTED: { bg: '#ef444418', fg: '#dc2626', label: 'Từ chối' },
+    }
+    const c = map[status] ?? map.DRAFT
+    return (
+        <span
+            style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                padding: '3px 12px',
+                borderRadius: 20,
+                fontSize: 12,
+                fontWeight: 700,
+                background: c.bg,
+                color: c.fg,
+            }}
+        >
+            {c.label}
+        </span>
+    )
+}
+
+function formatScore(v: number | null | undefined): string {
+    if (v == null) return '—'
+    // If score is between 0 and 1 (weight-based), show as percentage
+    if (v <= 1) return (v * 100).toFixed(1) + '%'
+    return v.toFixed(2)
+}
+
+function formatCurrency(v: number | null | undefined): string {
+    if (v == null) return '—'
+    return new Intl.NumberFormat('vi-VN', {
+        style: 'currency',
+        currency: 'VND',
+        maximumFractionDigits: 0,
+    }).format(v)
 }
 
 export const KpiBreakdownCard: React.FC<KpiBreakdownCardProps> = ({
@@ -13,130 +58,239 @@ export const KpiBreakdownCard: React.FC<KpiBreakdownCardProps> = ({
 }) => {
     if (!data) return null
 
-    const criteriaNames: Record<string, string> = {
-        C_ATTENDANCE: 'Chuyên cần',
-        C_REVIEWS: 'Đánh giá học viên',
-        C_TEST_SCORES: 'Điểm số học viên',
-        C_RETENTION: 'Tỉ lệ tái đăng ký',
-    }
-
     return (
         <Card variant="glass" style={{ padding: '24px' }}>
-            <h3>Chi tiết điểm KPI ({data.period})</h3>
+            {/* Header */}
+            <div
+                style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '8px',
+                }}
+            >
+                <h3 style={{ margin: 0 }}>
+                    Chi tiết KPI — {data.period?.name ?? ''}
+                </h3>
+                {getApprovalBadge(data.approval_status)}
+            </div>
 
-            <div style={{ marginTop: '24px' }}>
+            {data.staff_name && (
+                <p
+                    style={{
+                        margin: '0 0 4px',
+                        fontSize: 14,
+                        color: 'var(--color-text-secondary)',
+                    }}
+                >
+                    Nhân viên: <strong>{data.staff_name}</strong>
+                    {data.staff_contract && (
+                        <span style={{ marginLeft: 8, opacity: 0.7 }}>
+                            ({data.staff_contract})
+                        </span>
+                    )}
+                </p>
+            )}
+            {data.template && (
+                <p
+                    style={{
+                        margin: '0 0 16px',
+                        fontSize: 13,
+                        color: 'var(--color-text-secondary)',
+                        opacity: 0.7,
+                    }}
+                >
+                    Template: {data.template.name} (v{data.template.version})
+                </p>
+            )}
+
+            {/* Metric Table */}
+            <div style={{ marginTop: '16px' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                         <tr>
-                            <th
-                                style={{
-                                    textAlign: 'left',
-                                    padding: '12px',
-                                    borderBottom:
-                                        '1px solid var(--color-border-soft)',
-                                }}
-                            >
+                            <th style={thStyle}>Mã</th>
+                            <th style={{ ...thStyle, textAlign: 'left' }}>
                                 Tiêu chí
                             </th>
-                            <th
-                                style={{
-                                    textAlign: 'right',
-                                    padding: '12px',
-                                    borderBottom:
-                                        '1px solid var(--color-border-soft)',
-                                }}
-                            >
-                                Điểm đạt
-                            </th>
-                            <th
-                                style={{
-                                    textAlign: 'right',
-                                    padding: '12px',
-                                    borderBottom:
-                                        '1px solid var(--color-border-soft)',
-                                }}
-                            >
-                                Tối đa
-                            </th>
+                            <th style={thStyle}>Trọng số</th>
+                            <th style={thStyle}>Giá trị thực</th>
+                            <th style={thStyle}>Điểm quy đổi</th>
+                            <th style={thStyle}>Ghi chú</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {data.kpi_details.criteria_scores.map((item) => (
-                            <tr key={item.code}>
-                                <td
+                        {data.metrics.map((m) => {
+                            const isGroup = m.is_group_header
+                            return (
+                                <tr
+                                    key={m.id}
                                     style={{
-                                        padding: '12px',
-                                        borderBottom:
-                                            '1px solid var(--color-border-soft)',
+                                        background: isGroup
+                                            ? 'var(--color-surface-raised)'
+                                            : undefined,
+                                        fontWeight: isGroup ? 700 : 400,
                                     }}
                                 >
-                                    {criteriaNames[item.code] || item.code}
-                                </td>
-                                <td
-                                    style={{
-                                        textAlign: 'right',
-                                        padding: '12px',
-                                        borderBottom:
-                                            '1px solid var(--color-border-soft)',
-                                    }}
-                                >
-                                    <strong>{item.score}</strong>
-                                </td>
-                                <td
-                                    style={{
-                                        textAlign: 'right',
-                                        padding: '12px',
-                                        borderBottom:
-                                            '1px solid var(--color-border-soft)',
-                                        color: 'var(--color-text-secondary)',
-                                    }}
-                                >
-                                    {item.max_score}
-                                </td>
-                            </tr>
-                        ))}
+                                    <td style={tdStyle}>
+                                        <code
+                                            style={{
+                                                fontSize: 12,
+                                                fontWeight: 700,
+                                                color: isGroup
+                                                    ? 'var(--color-brand-primary)'
+                                                    : 'var(--color-text-secondary)',
+                                            }}
+                                        >
+                                            {m.metric_code}
+                                        </code>
+                                    </td>
+                                    <td
+                                        style={{
+                                            ...tdStyle,
+                                            textAlign: 'left',
+                                            paddingLeft: isGroup ? 12 : 24,
+                                        }}
+                                    >
+                                        {m.metric_name}
+                                    </td>
+                                    <td style={tdStyle}>
+                                        {isGroup
+                                            ? m.group_weight != null
+                                                ? `${(m.group_weight * 100).toFixed(0)}%`
+                                                : '—'
+                                            : m.weight != null
+                                              ? `${(m.weight * 100).toFixed(0)}%`
+                                              : '—'}
+                                    </td>
+                                    <td style={tdStyle}>
+                                        {isGroup
+                                            ? ''
+                                            : m.actual_value != null
+                                              ? m.unit === '%'
+                                                  ? `${(m.actual_value * 100).toFixed(1)}%`
+                                                  : m.actual_value.toFixed(2)
+                                              : '—'}
+                                    </td>
+                                    <td
+                                        style={{
+                                            ...tdStyle,
+                                            fontWeight: isGroup ? 700 : 600,
+                                            color: isGroup
+                                                ? 'var(--color-brand-primary)'
+                                                : undefined,
+                                        }}
+                                    >
+                                        {m.converted_score != null
+                                            ? formatScore(m.converted_score)
+                                            : '—'}
+                                    </td>
+                                    <td
+                                        style={{
+                                            ...tdStyle,
+                                            fontSize: 12,
+                                            color: m.note
+                                                ? '#ef4444'
+                                                : 'var(--color-text-secondary)',
+                                        }}
+                                    >
+                                        {m.note ?? ''}
+                                    </td>
+                                </tr>
+                            )
+                        })}
                     </tbody>
                 </table>
             </div>
 
+            {/* Summary Footer */}
             <div
                 style={{
                     marginTop: '24px',
                     padding: '16px',
                     backgroundColor: 'var(--color-surface-raised)',
                     borderRadius: '8px',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+                    gap: '16px',
                 }}
             >
                 <div>
-                    <h4 style={{ margin: 0 }}>Tổng điểm KPI</h4>
-                    <p
+                    <div
                         style={{
-                            margin: 0,
-                            fontSize: '14px',
+                            fontSize: 12,
                             color: 'var(--color-text-secondary)',
+                            marginBottom: 4,
                         }}
                     >
-                        Phân loại bậc hiện tại:{' '}
-                        <strong>
-                            {data.kpi_tier_id
-                                ? `Bậc ${data.kpi_tier_id}`
-                                : 'Chưa đạt'}
-                        </strong>
-                    </p>
+                        Tổng điểm
+                    </div>
+                    <div
+                        style={{
+                            fontSize: 28,
+                            fontWeight: 800,
+                            color: 'var(--color-brand-primary)',
+                        }}
+                    >
+                        {data.total_score != null
+                            ? formatScore(data.total_score)
+                            : '—'}
+                    </div>
                 </div>
+                <div>
+                    <div
+                        style={{
+                            fontSize: 12,
+                            color: 'var(--color-text-secondary)',
+                            marginBottom: 4,
+                        }}
+                    >
+                        Thưởng KPI
+                    </div>
+                    <div
+                        style={{
+                            fontSize: 22,
+                            fontWeight: 700,
+                            color: '#16a34a',
+                        }}
+                    >
+                        {formatCurrency(data.bonus_amount)}
+                    </div>
+                </div>
+                {data.teaching_hours != null && (
+                    <div>
+                        <div
+                            style={{
+                                fontSize: 12,
+                                color: 'var(--color-text-secondary)',
+                                marginBottom: 4,
+                            }}
+                        >
+                            Số giờ dạy
+                        </div>
+                        <div style={{ fontSize: 22, fontWeight: 700 }}>
+                            {data.teaching_hours}h
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {data.rejection_note && (
                 <div
                     style={{
-                        fontSize: '32px',
-                        fontWeight: 'bold',
-                        color: 'var(--color-brand-primary)',
+                        marginTop: '16px',
+                        padding: '12px 16px',
+                        background: '#fef2f2',
+                        borderRadius: 8,
+                        border: '1px solid #fecaca',
+                        fontSize: 14,
+                        color: '#991b1b',
                     }}
                 >
-                    {data.total_score}
+                    <strong>Lý do từ chối:</strong> {data.rejection_note}
                 </div>
-            </div>
+            )}
+
             {!readOnly && (
                 <p
                     style={{
@@ -145,11 +299,30 @@ export const KpiBreakdownCard: React.FC<KpiBreakdownCardProps> = ({
                         color: 'var(--color-text-secondary)',
                     }}
                 >
-                    * Việc sửa đổi điểm thành phần hiện chưa được hỗ trợ trên
-                    giao diện. Quản trị viên vui lòng xử lý ngoại lệ theo form
-                    điều chỉnh lương.
+                    * Quản trị viên có thể chỉnh sửa giá trị thực và tính lại
+                    điểm từ trang chi tiết bản ghi KPI.
                 </p>
             )}
         </Card>
     )
+}
+
+const thStyle: React.CSSProperties = {
+    textAlign: 'right',
+    padding: '10px 12px',
+    borderBottom: '2px solid var(--color-border-soft)',
+    fontSize: 12,
+    fontWeight: 700,
+    textTransform: 'uppercase',
+    letterSpacing: '0.04em',
+    color: 'var(--color-text-secondary)',
+    whiteSpace: 'nowrap',
+}
+
+const tdStyle: React.CSSProperties = {
+    textAlign: 'right',
+    padding: '10px 12px',
+    borderBottom: '1px solid var(--color-border-soft)',
+    fontSize: 14,
+    verticalAlign: 'middle',
 }

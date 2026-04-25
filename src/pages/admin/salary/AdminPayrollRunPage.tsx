@@ -1,10 +1,10 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import s from '../users/UserManagementPage.module.css'
 import { AsyncJobCard } from '@/components/common/async/AsyncJobCard'
 import { PeriodSelector } from '@/components/common/input/PeriodSelector'
 import { useNavigate } from 'react-router-dom'
 import { api } from '@/lib/api'
-import type { ApiResponse, PayrollRun } from '@/types/kpi.types'
+import type { PayrollRun } from '@/types/kpi.types'
 
 export default function AdminPayrollRunPage() {
     const navigate = useNavigate()

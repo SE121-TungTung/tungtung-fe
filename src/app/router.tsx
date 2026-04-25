@@ -41,7 +41,9 @@ import { useSession } from '@/stores/session.store'
 import KpiTiersSettingsPage from '@/pages/admin/kpi/KpiTiersSettingsPage'
 import AdminKpiOverviewPage from '@/pages/admin/kpi/AdminKpiOverviewPage'
 import AdminKpiCalculationPage from '@/pages/admin/kpi/AdminKpiCalculationPage'
-import AdminTeacherKpiPage from '@/pages/admin/kpi/AdminTeacherKpiPage'
+import AdminKpiRecordDetailPage from '@/pages/admin/kpi/AdminKpiRecordDetailPage'
+import AdminKpiTemplatePage from '@/pages/admin/kpi/AdminKpiTemplatePage'
+import AdminSupportCalcPage from '@/pages/admin/kpi/AdminSupportCalcPage'
 import AdminPayrollListPage from '@/pages/admin/salary/AdminPayrollListPage'
 import AdminPayrollRunPage from '@/pages/admin/salary/AdminPayrollRunPage'
 import AdminSalaryDetailPage from '@/pages/admin/salary/AdminSalaryDetailPage'
@@ -428,7 +430,7 @@ export const router = createBrowserRouter([
                         ),
                     },
                     {
-                        path: '/admin/kpi/teacher/:teacherId',
+                        path: '/admin/kpi/records/:recordId',
                         element: (
                             <ProtectedRoute
                                 allowedRoles={[
@@ -437,7 +439,31 @@ export const router = createBrowserRouter([
                                     'office_admin',
                                 ]}
                             >
-                                <AdminTeacherKpiPage />
+                                <AdminKpiRecordDetailPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/admin/kpi/templates',
+                        element: (
+                            <ProtectedRoute
+                                allowedRoles={['system_admin', 'center_admin']}
+                            >
+                                <AdminKpiTemplatePage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/admin/kpi/support-calc',
+                        element: (
+                            <ProtectedRoute
+                                allowedRoles={[
+                                    'system_admin',
+                                    'center_admin',
+                                    'office_admin',
+                                ]}
+                            >
+                                <AdminSupportCalcPage />
                             </ProtectedRoute>
                         ),
                     },
