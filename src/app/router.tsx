@@ -28,6 +28,10 @@ import SettingsPage from '@/pages/settings/SettingsPage'
 import TestDetailPage from '@/pages/student/exam/TestDetailPage'
 import ChatbotUploadPage from '@/pages/admin/system/ChatbotUploadPage'
 import { MainLayout } from './layouts/MainLayout'
+import AdminInvoicePage from '@/pages/admin/finance/AdminInvoicePage'
+import AdminFinanceReportPage from '@/pages/admin/finance/AdminFinanceReportPage'
+import StudentInvoicePage from '@/pages/student/finance/StudentInvoicePage'
+import PaymentCallbackPage from '@/pages/student/finance/PaymentCallbackPage'
 import TeacherClassPage from '@/pages/teacher/classes/TeacherClassPage'
 import TestTakerWrapper from '@/pages/student/exam/do/TestTakerWrapper'
 import AuditLogPage from '@/pages/admin/audit/AuditLogPage'
@@ -179,6 +183,22 @@ export const router = createBrowserRouter([
                         element: (
                             <ProtectedRoute allowedRoles={['student']}>
                                 <RoadmapPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/student/finance/invoices',
+                        element: (
+                            <ProtectedRoute allowedRoles={['student']}>
+                                <StudentInvoicePage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/student/finance/callback',
+                        element: (
+                            <ProtectedRoute allowedRoles={['student']}>
+                                <PaymentCallbackPage />
                             </ProtectedRoute>
                         ),
                     },
@@ -450,6 +470,30 @@ export const router = createBrowserRouter([
                                 allowedRoles={['system_admin', 'center_admin']}
                             >
                                 <AdminKpiTemplatePage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/admin/finance/invoices',
+                        element: (
+                            <ProtectedRoute
+                                allowedRoles={[
+                                    'system_admin',
+                                    'center_admin',
+                                    'office_admin',
+                                ]}
+                            >
+                                <AdminInvoicePage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/admin/finance/reports',
+                        element: (
+                            <ProtectedRoute
+                                allowedRoles={['system_admin', 'center_admin']}
+                            >
+                                <AdminFinanceReportPage />
                             </ProtectedRoute>
                         ),
                     },

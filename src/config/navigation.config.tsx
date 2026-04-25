@@ -55,6 +55,11 @@ const studentNavItems: AppNavItem[] = [
         label: 'Tin nhắn',
         href: '/messages',
     },
+    {
+        id: 'finance',
+        label: 'Tài chính / Hóa đơn',
+        href: '/student/finance/invoices',
+    },
 ]
 
 const teacherNavItems: AppNavItem[] = [
@@ -168,6 +173,16 @@ const adminNavItems: AppNavItem[] = [
                 id: 'kpi-tiers',
                 label: 'Cấu hình hạng KPI',
                 href: '/admin/settings/kpi-tiers',
+            },
+            {
+                id: 'invoices',
+                label: 'Quản lý Tài chính',
+                href: '/admin/finance/invoices',
+            },
+            {
+                id: 'finance-reports',
+                label: 'Báo cáo Tài chính',
+                href: '/admin/finance/reports',
             },
         ],
     },
