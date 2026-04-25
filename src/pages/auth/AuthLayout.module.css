@@ -66,12 +66,7 @@
     margin: 0;
 
     /* Gradient text effect */
-    background: linear-gradient(
-        120deg,
-        var(--color-brand-secondary) 0%,
-        #ef325f 45%,
-        var(--color-brand-primary) 100%
-    );
+    background: var(--bg-brand-gradient);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -198,12 +193,7 @@
    ============================================================================ */
 
 [data-theme='dark'] .heading {
-    background: linear-gradient(
-        120deg,
-        var(--color-brand-secondary) 0%,
-        #ff6b8a 45%,
-        var(--color-brand-primary) 100%
-    );
+    background: var(--bg-brand-gradient);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;

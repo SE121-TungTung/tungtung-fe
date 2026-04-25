@@ -4,6 +4,7 @@ import type { Role } from '@/types/auth.ts'
 import type { NavigateFunction } from 'react-router-dom'
 import IconLogout from '@/assets/Action Dislike.svg'
 import { UnreadBadge } from '@/components/feature/messages/UnreadBadge'
+import { ThemeSwitcher } from '@/components/common/theme/ThemeSwitcher'
 
 type ExtendedSideMenuItem = SideMenuItem & {
     allowedRoles?: Role[]
@@ -88,6 +89,22 @@ const teacherNavItems: AppNavItem[] = [
         label: 'Tin nhắn',
         href: '/messages',
     },
+    {
+        id: 'personal',
+        label: 'Cá nhân',
+        dropdownItems: [
+            {
+                id: 'kpi',
+                label: 'KPI của tôi',
+                href: '/teacher/kpi',
+            },
+            {
+                id: 'salary',
+                label: 'Lịch sử lương',
+                href: '/teacher/salary',
+            },
+        ],
+    },
 ]
 
 const adminNavItems: AppNavItem[] = [
@@ -130,12 +147,17 @@ const adminNavItems: AppNavItem[] = [
             {
                 id: 'kpi',
                 label: 'Quản lý KPI',
-                href: '/coming-soon',
+                href: '/admin/kpi',
             },
             {
                 id: 'salary',
                 label: 'Quản lý Lương',
-                href: '/coming-soon',
+                href: '/admin/payroll',
+            },
+            {
+                id: 'kpi-tiers',
+                label: 'Cấu hình hạng KPI',
+                href: '/admin/settings/kpi-tiers',
             },
         ],
     },
@@ -169,6 +191,11 @@ const adminNavItems: AppNavItem[] = [
 
 const commonUserMenu: ExtendedSideMenuItem[] = [
     {
+        id: 'theme-switcher',
+        label: <ThemeSwitcher />,
+        onClick: (e) => e?.stopPropagation(), // Prevent close popup
+    },
+    {
         id: 'profile',
         label: 'Hồ sơ',
         href: '/profile',
@@ -176,7 +203,7 @@ const commonUserMenu: ExtendedSideMenuItem[] = [
     {
         id: 'settings',
         label: 'Cài đặt',
-        href: '/coming-soon',
+        href: '/settings',
     },
     {
         id: 'help',

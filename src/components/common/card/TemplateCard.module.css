@@ -118,6 +118,14 @@
     --text-secondary: var(--color-text-secondary);
 }
 
+/* Dark theme: light template cards flip to dark appearance */
+:global([data-theme='dark']) .templateCard.light {
+    --card-bg: rgba(15, 30, 50, 0.95);
+    --text-primary: var(--primitive-blue-900);
+    --text-secondary: var(--primitive-blue-800);
+    --divider-color: rgba(255, 255, 255, 0.12);
+}
+
 @media (max-width: 640px) {
     .content {
         padding: 12px;

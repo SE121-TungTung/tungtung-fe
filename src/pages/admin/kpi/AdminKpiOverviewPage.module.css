@@ -1,0 +1,209 @@
+.statsRow {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    width: 100%;
+}
+
+@media (max-width: 1024px) {
+    .statsRow {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .statsRow {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ---- Table ---- */
+.tableWrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.table thead tr {
+    background: var(--color-surface-raised);
+    border-bottom: 2px solid var(--color-border-soft);
+}
+
+.table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.table th:first-child {
+    border-radius: 8px 0 0 0;
+}
+
+.table th:last-child {
+    border-radius: 0 8px 0 0;
+}
+
+.tableRow {
+    border-bottom: 1px solid var(--color-border-soft);
+    transition: background 0.15s ease;
+}
+
+.tableRow:last-child {
+    border-bottom: none;
+}
+
+.tableRow:hover {
+    background: var(--color-surface-raised);
+}
+
+.table td {
+    padding: 12px 16px;
+    color: var(--color-text-primary);
+    vertical-align: middle;
+}
+
+.tdIndex {
+    color: var(--color-text-secondary) !important;
+    font-size: 12px;
+    width: 40px;
+}
+
+.tdName {
+    font-weight: 600;
+    min-width: 160px;
+}
+
+.tdTier {
+    font-size: 13px;
+    color: var(--color-text-secondary) !important;
+}
+
+.tdNum {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-secondary) !important;
+}
+
+.tdBonus {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-brand-primary) !important;
+    white-space: nowrap;
+}
+
+/* ---- Detail button ---- */
+.detailBtn {
+    padding: 5px 12px;
+    border-radius: 8px;
+    border: 1.5px solid var(--color-border-soft);
+    background: transparent;
+    color: var(--color-brand-primary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.detailBtn:hover {
+    background: var(--color-brand-primary);
+    color: #fff;
+    border-color: var(--color-brand-primary);
+}
+
+/* ---- Pagination ---- */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    border-top: 1px solid var(--color-border-soft);
+}
+
+.pageBtn {
+    padding: 6px 16px;
+    border-radius: 8px;
+    border: 1.5px solid var(--color-border-soft);
+    background: transparent;
+    color: var(--color-text-primary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.pageBtn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.pageBtn:not(:disabled):hover {
+    background: var(--color-surface-raised);
+    border-color: var(--color-brand-primary);
+    color: var(--color-brand-primary);
+}
+
+.pageInfo {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---- Status chip ---- */
+.statusChip {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #64748b18;
+    color: #64748b;
+    white-space: nowrap;
+}
+
+.status_calculated {
+    background: #22c55e18;
+    color: #16a34a;
+}
+
+/* ---- Loading skeleton ---- */
+.loadingWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 24px;
+}
+
+.skeletonRow {
+    height: 44px;
+    border-radius: 8px;
+    background: linear-gradient(
+        90deg,
+        var(--color-surface-raised) 25%,
+        var(--color-border-soft) 50%,
+        var(--color-surface-raised) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}

@@ -109,6 +109,19 @@
     background: var(--color-surface-raised);
 }
 
+/* Dark theme: glass cards become dark-tinted */
+:global([data-theme='dark']) .glass {
+    --bg: rgba(12, 28, 44, 0.85);
+    --bd: rgba(255, 255, 255, 0.08);
+    background:
+        linear-gradient(
+            180deg,
+            rgba(15, 30, 50, 0.75) 0%,
+            rgba(10, 22, 38, 0.85) 100%
+        ),
+        var(--bg);
+}
+
 @media (max-width: 640px) {
     .header {
         flex-direction: column;

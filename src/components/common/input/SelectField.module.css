@@ -1,7 +1,7 @@
 .wrapper {
     --input-bg: var(--surface-raised-light);
-    --input-bd: var(--boder-soft-light);
-    --input-bd-focus: var(--brand-primary-light);
+    --input-bd: var(--input-border);
+    --input-bd-focus: var(--input-border-focus);
     --input-text: var(--text-primary-light);
     --input-placeholder: var(--text-placeholder-light);
     --input-icon: var(--text-secondary-light);
@@ -21,8 +21,8 @@
 
 .wrapper.dark {
     --input-bg: var(--surface-raised-dark);
-    --input-bd: var(--boder-soft-dark);
-    --input-bd-focus: var(--brand-primary-dark);
+    --input-bd: var(--input-border);
+    --input-bd-focus: var(--input-border-focus);
     --input-text: var(--text-primary-dark);
     --input-placeholder: var(--text-placeholder-dark);
     --input-icon: var(--text-secondary-dark);

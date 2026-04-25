@@ -24,6 +24,7 @@ import TestResultPage from '@/pages/student/exam/TestResultPage'
 import CreateTestPage from '@/pages/student/exam/CreateTestPage'
 import FirstLoginGuard from '@/components/feature/auth/FirstLoginGuard'
 import GeneralDashboard from '@/pages/Dashboard'
+import SettingsPage from '@/pages/settings/SettingsPage'
 import TestDetailPage from '@/pages/student/exam/TestDetailPage'
 import ChatbotUploadPage from '@/pages/admin/system/ChatbotUploadPage'
 import { MainLayout } from './layouts/MainLayout'
@@ -35,6 +36,19 @@ import EditTestPage from '@/pages/student/exam/EditTestPage'
 import TeacherGradingPage from '@/pages/teacher/grading/TeacherGradingPage'
 import GradeAttemptPage from '@/pages/teacher/grading/GradeAttemptPage'
 import { useSession } from '@/stores/session.store'
+
+// KPI & Salary
+import KpiTiersSettingsPage from '@/pages/admin/kpi/KpiTiersSettingsPage'
+import AdminKpiOverviewPage from '@/pages/admin/kpi/AdminKpiOverviewPage'
+import AdminKpiCalculationPage from '@/pages/admin/kpi/AdminKpiCalculationPage'
+import AdminTeacherKpiPage from '@/pages/admin/kpi/AdminTeacherKpiPage'
+import AdminPayrollListPage from '@/pages/admin/salary/AdminPayrollListPage'
+import AdminPayrollRunPage from '@/pages/admin/salary/AdminPayrollRunPage'
+import AdminSalaryDetailPage from '@/pages/admin/salary/AdminSalaryDetailPage'
+
+import TeacherKpiDashboard from '@/pages/teacher/kpi/TeacherKpiDashboard'
+import TeacherSalaryHistoryPage from '@/pages/teacher/salary/TeacherSalaryHistoryPage'
+import TeacherSalaryDetailPage from '@/pages/teacher/salary/TeacherSalaryDetailPage'
 
 export const router = createBrowserRouter([
     {
@@ -96,6 +110,10 @@ export const router = createBrowserRouter([
                     {
                         path: '/profile',
                         element: <ProfilePage />,
+                    },
+                    {
+                        path: '/settings',
+                        element: <SettingsPage />,
                     },
                     {
                         path: '/messages',
@@ -232,6 +250,30 @@ export const router = createBrowserRouter([
                             </ProtectedRoute>
                         ),
                     },
+                    {
+                        path: '/teacher/kpi',
+                        element: (
+                            <ProtectedRoute allowedRoles={['teacher']}>
+                                <TeacherKpiDashboard />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/teacher/salary',
+                        element: (
+                            <ProtectedRoute allowedRoles={['teacher']}>
+                                <TeacherSalaryHistoryPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/teacher/salary/:salaryId',
+                        element: (
+                            <ProtectedRoute allowedRoles={['teacher']}>
+                                <TeacherSalaryDetailPage />
+                            </ProtectedRoute>
+                        ),
+                    },
                     // Admin routes
                     {
                         path: '/admin',
@@ -348,6 +390,92 @@ export const router = createBrowserRouter([
                                 allowedRoles={['system_admin', 'center_admin']}
                             >
                                 <ChatbotUploadPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/admin/settings/kpi-tiers',
+                        element: (
+                            <ProtectedRoute
+                                allowedRoles={['system_admin', 'center_admin']}
+                            >
+                                <KpiTiersSettingsPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/admin/kpi',
+                        element: (
+                            <ProtectedRoute
+                                allowedRoles={[
+                                    'system_admin',
+                                    'center_admin',
+                                    'office_admin',
+                                ]}
+                            >
+                                <AdminKpiOverviewPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/admin/kpi/calculation',
+                        element: (
+                            <ProtectedRoute
+                                allowedRoles={['system_admin', 'center_admin']}
+                            >
+                                <AdminKpiCalculationPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/admin/kpi/teacher/:teacherId',
+                        element: (
+                            <ProtectedRoute
+                                allowedRoles={[
+                                    'system_admin',
+                                    'center_admin',
+                                    'office_admin',
+                                ]}
+                            >
+                                <AdminTeacherKpiPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/admin/payroll',
+                        element: (
+                            <ProtectedRoute
+                                allowedRoles={[
+                                    'system_admin',
+                                    'center_admin',
+                                    'office_admin',
+                                ]}
+                            >
+                                <AdminPayrollListPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/admin/payroll/run',
+                        element: (
+                            <ProtectedRoute
+                                allowedRoles={['system_admin', 'center_admin']}
+                            >
+                                <AdminPayrollRunPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/admin/payroll/:salaryId',
+                        element: (
+                            <ProtectedRoute
+                                allowedRoles={[
+                                    'system_admin',
+                                    'center_admin',
+                                    'office_admin',
+                                ]}
+                            >
+                                <AdminSalaryDetailPage />
                             </ProtectedRoute>
                         ),
                     },

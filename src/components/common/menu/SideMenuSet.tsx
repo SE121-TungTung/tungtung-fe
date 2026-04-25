@@ -55,16 +55,25 @@ export default function SideMenu({
             <ul className={s.list}>
                 {items.map((it, i) => {
                     const key = it.id ?? i
-                    const Cmp = 'button'
                     return (
                         <li key={key} className={s.li}>
-                            <Cmp
-                                type="button"
+                            <div
+                                role={it.onClick ? 'button' : undefined}
+                                tabIndex={it.onClick ? 0 : undefined}
                                 className={[
                                     s.item,
                                     it.active ? s.active : '',
                                 ].join(' ')}
                                 onClick={it.onClick}
+                                onKeyDown={(e) => {
+                                    if (
+                                        it.onClick &&
+                                        (e.key === 'Enter' || e.key === ' ')
+                                    ) {
+                                        e.preventDefault()
+                                        it.onClick(e as any)
+                                    }
+                                }}
                             >
                                 <span className={s.left}>
                                     {it.icon && (
@@ -74,7 +83,7 @@ export default function SideMenu({
                                     )}
                                     <span className={s.label}>{it.label}</span>
                                 </span>
-                            </Cmp>
+                            </div>
                             {i !== items.length - 1 && (
                                 <div className={s.rowDivider} />
                             )}

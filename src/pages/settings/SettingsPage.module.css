@@ -1,0 +1,97 @@
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: var(--primitive-space-6) 0;
+}
+
+.header {
+    margin-bottom: var(--primitive-space-10);
+}
+
+.title {
+    font-size: var(--primitive-text-3xl);
+    font-weight: var(--primitive-font-bold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--primitive-space-2);
+}
+
+.subtitle {
+    font-size: var(--primitive-text-base);
+    color: var(--color-text-secondary);
+}
+
+.section {
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-border-soft);
+    border-radius: var(--primitive-radius-md);
+    padding: var(--primitive-space-8);
+    box-shadow: var(--card-shadow);
+    margin-bottom: var(--primitive-space-8);
+}
+
+.sectionTitle {
+    font-size: var(--primitive-text-xl);
+    font-weight: var(--primitive-font-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--primitive-space-6);
+    padding-bottom: var(--primitive-space-4);
+    border-bottom: 1px solid var(--color-border-soft);
+}
+
+.themeGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--primitive-space-6);
+}
+
+.themeCard {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--primitive-space-4);
+    padding: var(--primitive-space-6);
+    border: 2px solid var(--color-border-soft);
+    border-radius: var(--primitive-radius-md);
+    background: var(--color-surface-raised);
+    cursor: pointer;
+    transition: var(--transition-all);
+}
+
+.themeCard:hover {
+    border-color: var(--color-border-medium);
+    transform: translateY(-2px);
+    box-shadow: var(--card-shadow-hover);
+}
+
+.themeCardActive {
+    border-color: var(--color-brand-primary);
+    background: var(--color-device-surface, var(--color-surface-card));
+    box-shadow: 0 0 0 1px var(--color-brand-primary);
+}
+
+.themeCardIcon {
+    font-size: var(--primitive-text-2xl);
+    line-height: 1;
+}
+
+.themeCardContent h3 {
+    font-size: var(--primitive-text-base);
+    font-weight: var(--primitive-font-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--primitive-space-2);
+}
+
+.themeCardContent p {
+    font-size: var(--primitive-text-sm);
+    color: var(--color-text-secondary);
+    line-height: var(--primitive-leading-relaxed);
+}
+
+.checkIcon {
+    position: absolute;
+    top: var(--primitive-space-4);
+    right: var(--primitive-space-4);
+    color: var(--color-brand-primary);
+    font-weight: bold;
+    font-size: var(--primitive-text-lg);
+}

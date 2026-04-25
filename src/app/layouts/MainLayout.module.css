@@ -1,5 +1,5 @@
 .pageWrapper {
-    background: linear-gradient(115deg, #e4ecf7, #fff);
+    background: var(--bg-page-gradient);
     min-height: 100vh;
     padding: 24px clamp(24px, 5vw, 80px);
 }
@@ -46,7 +46,7 @@
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background: var(--brand-primary-500-light); /* Hoặc màu chủ đạo của bạn */
+    background: var(--color-brand-primary); /* Hoặc màu chủ đạo của bạn */
     box-shadow: 0 4px 15px rgba(23, 86, 118, 0.3);
     border: none;
     cursor: pointer;

@@ -12,8 +12,10 @@ export type LoginResponse = {
     is_first_login?: boolean
 }
 
-export const login = (body: LoginPayload) =>
-    api<LoginResponse>('/api/v1/auth/login-json', {
+export const login = async (body: LoginPayload) => {
+    const res = await api<
+        { success: boolean; data: LoginResponse } | LoginResponse
+    >('/api/v1/auth/login-json', {
         method: 'POST',
         body: JSON.stringify({
             email: body.email,
@@ -21,6 +23,8 @@ export const login = (body: LoginPayload) =>
             remember_me: body.remember ?? false,
         }),
     })
+    return ('data' in res && 'success' in res ? res.data : res) as LoginResponse
+}
 
 export const logout = () => api<void>('/api/v1/auth/logout', { method: 'POST' })
 
@@ -61,7 +65,10 @@ export const refreshAccessToken = async (refreshToken: string) => {
         throw new Error('Refresh token expired')
     }
 
-    return (await response.json()) as LoginResponse
+    const result = await response.json()
+    return (
+        'data' in result && 'success' in result ? result.data : result
+    ) as LoginResponse
 }
 
 export type PasswordResetConfirmPayload = {

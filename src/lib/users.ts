@@ -50,7 +50,14 @@ export const mapUser = (u: BackendUser): User => ({
 
 // 1. Get Me
 export async function getMe(): Promise<User> {
-    const data = await api<BackendUser>('/api/v1/users/me', { method: 'GET' })
+    const data = await api<BackendUser | null>('/api/v1/users/me', {
+        method: 'GET',
+    })
+    if (!data) {
+        throw new Error(
+            'User not found in the database. Please try another account or check backend data.'
+        )
+    }
     return mapUser(data)
 }
 

@@ -1,8 +1,8 @@
 .item {
     display: flex;
     align-items: center;
-    gap: var(--space-12);
-    padding: var(--space-12);
+    gap: var(--primitive-space-6);
+    padding: var(--primitive-space-6);
     border-radius: var(--primitive-radius-md);
     cursor: pointer;
     transition: all 0.2s ease;
@@ -22,7 +22,7 @@
         rgba(23, 86, 118, 0.08) 0%,
         rgba(23, 86, 118, 0.03) 100%
     );
-    border-color: var(--brand-primary-500-light);
+    border-color: var(--color-brand-primary);
 }
 
 .item.active::before {
@@ -35,10 +35,10 @@
     height: 60%;
     background: linear-gradient(
         180deg,
-        var(--brand-primary-500-light) 0%,
-        var(--brand-primary-600-light) 100%
+        var(--color-brand-primary) 0%,
+        var(--color-brand-primary-hover) 100%
     );
-    border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
+    border-radius: 0 var(--primitive-radius-xs) var(--primitive-radius-xs) 0;
 }
 
 .item.active:hover {
@@ -56,11 +56,11 @@
 
 .avatarImg,
 .headerAvatar {
-    width: var(--space-40);
-    height: var(--space-40);
-    border-radius: var(--radius-full);
+    width: var(--primitive-space-20);
+    height: var(--primitive-space-20);
+    border-radius: var(--primitive-radius-full);
     object-fit: cover;
-    border: 2px solid var(--boder-soft-light);
+    border: 2px solid var(--color-border-soft);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
     transition: all 0.2s ease;
 }
@@ -73,18 +73,18 @@
 
 .item.active .avatarImg,
 .item.active .headerAvatar {
-    border-color: var(--brand-primary-500-light);
+    border-color: var(--color-brand-primary);
 }
 
 .onlineBadge {
     position: absolute;
     bottom: 0;
     right: 0;
-    width: var(--space-12);
-    height: var(--space-12);
+    width: var(--primitive-space-6);
+    height: var(--primitive-space-6);
     background-color: var(--color-status-success);
-    border: 2.5px solid var(--palette-white);
-    border-radius: var(--radius-full);
+    border: 2.5px solid var(--primitive-white);
+    border-radius: var(--primitive-radius-full);
     box-shadow: 0 0 0 1px rgba(89, 255, 125, 0.3);
     animation: onlinePulse 2s ease-in-out infinite;
 }
@@ -108,14 +108,14 @@
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
+    gap: var(--primitive-space-2);
 }
 
 .header {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    gap: var(--space-8);
+    gap: var(--primitive-space-4);
 }
 
 .name {
@@ -130,11 +130,11 @@
 }
 
 .item:hover .name {
-    color: var(--brand-primary-600-light);
+    color: var(--color-brand-primary-hover);
 }
 
 .item.active .name {
-    color: var(--brand-primary-600-light);
+    color: var(--color-brand-primary-hover);
     font-weight: 700;
 }
 
@@ -147,19 +147,19 @@
 }
 
 .item.active .timestamp {
-    color: var(--brand-primary-600-light);
+    color: var(--color-brand-primary-hover);
 }
 
 .lastMessage {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-8);
+    gap: var(--primitive-space-4);
 }
 
 .preview {
     font-size: 13px;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     opacity: 0.6;
     white-space: nowrap;
     overflow: hidden;
@@ -176,34 +176,34 @@
 }
 
 .item.active .preview {
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     opacity: 0.7;
 }
 
 .badge {
-    min-width: var(--space-20);
-    height: var(--space-20);
-    padding: 0 var(--space-8);
+    min-width: var(--primitive-space-10);
+    height: var(--primitive-space-10);
+    padding: 0 var(--primitive-space-4);
     display: flex;
     align-items: center;
     justify-content: center;
     background: linear-gradient(
         135deg,
-        var(--brand-primary-500-light) 0%,
-        var(--brand-primary-600-light) 100%
+        var(--color-brand-primary) 0%,
+        var(--color-brand-primary-hover) 100%
     );
-    color: var(--text-on-primary-light);
+    color: var(--color-text-on-primary);
     font-size: 11px;
     font-weight: 700;
-    border-radius: var(--radius-full);
+    border-radius: var(--primitive-radius-full);
     flex-shrink: 0;
     box-shadow: 0 2px 4px rgba(23, 86, 118, 0.3);
 }
 
 .groupAvatarPlaceholder {
-    width: var(--space-40);
-    height: var(--space-40);
-    border-radius: var(--radius-full);
+    width: var(--primitive-space-20);
+    height: var(--primitive-space-20);
+    border-radius: var(--primitive-radius-full);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -212,7 +212,7 @@
         rgba(75, 163, 195, 0.1),
         rgba(186, 50, 79, 0.1)
     );
-    border: 2px solid var(--brand-accent1-500-light);
+    border: 2px solid var(--color-brand-accent);
     font-size: 18px;
     transition: all 0.2s ease;
 }
@@ -228,7 +228,7 @@
 
 .moreButton {
     position: absolute;
-    right: var(--space-8);
+    right: var(--primitive-space-4);
     top: 50%;
     transform: translateY(-50%);
     width: 24px;
@@ -260,8 +260,8 @@
 /* Responsive */
 @media (max-width: 768px) {
     .item {
-        padding: var(--space-12) var(--space-8);
-        gap: var(--space-12);
+        padding: var(--primitive-space-6) var(--primitive-space-4);
+        gap: var(--primitive-space-6);
     }
 
     .avatarImg,
@@ -290,8 +290,8 @@
     .avatarImg,
     .headerAvatar,
     .groupAvatarPlaceholder {
-        width: var(--space-32);
-        height: var(--space-32);
+        width: var(--primitive-space-16);
+        height: var(--primitive-space-16);
     }
 
     .groupAvatarPlaceholder {

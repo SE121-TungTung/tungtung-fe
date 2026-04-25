@@ -124,7 +124,7 @@ function mapHistoryMessage(msg: BackendChatHistoryMessage): Message {
 
 function mapConversation(dto: BackendConversationResponse): Conversation {
     return {
-        id: dto.room_id,
+        id: dto.room_id || (dto as any).id,
         name: dto.title,
         type: dto.room_type,
         isGroup: dto.room_type === 'group' || dto.room_type === 'class',

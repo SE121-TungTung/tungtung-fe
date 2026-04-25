@@ -503,6 +503,66 @@
 }
 
 /* ============================================================================
+   LAYER 2: SEMANTIC TOKENS (Monochrome Theme)
+   ============================================================================ */
+
+[data-theme='monochrome'] {
+    /* Brand colors remain mostly flat */
+    --color-brand-primary: var(--primitive-lapis-500);
+    --color-brand-primary-hover: var(--primitive-lapis-600);
+    --color-brand-primary-active: var(--primitive-lapis-700);
+
+    /* Surface colors very clean, no transparency */
+    --color-surface-page: #ffffff;
+    --color-surface-card: #f9f9f9;
+    --color-surface-raised: #f1f1f1;
+    --color-surface-overlay: var(--primitive-black-a65);
+
+    /* Text colors standard */
+    --color-text-primary: var(--primitive-gray-100);
+    --color-text-secondary: var(--primitive-gray-300);
+    --color-text-muted: var(--primitive-gray-500);
+    --color-text-placeholder: var(--primitive-gray-600);
+
+    /* Border colors simpler */
+    --color-border-soft: #e0e0e0;
+    --color-border-medium: #cccccc;
+    --color-border-strong: #aaaaaa;
+
+    --card-shadow: none;
+    --card-shadow-hover: none;
+}
+
+/* Base gradients */
+:root {
+    --bg-page-gradient: linear-gradient(115deg, #e4ecf7, #fff);
+
+    --bg-brand-gradient: linear-gradient(
+        111deg,
+        var(--brand-secondary-500-light, #f06292),
+        #ef325f 49.15%,
+        var(--color-brand-primary) 100%
+    );
+
+    --bg-avatar-gradient: linear-gradient(
+        45deg,
+        var(--brand-secondary-500-light, #f06292),
+        var(--color-brand-primary)
+    );
+}
+
+[data-theme='dark'] {
+    --bg-page-gradient: var(--color-surface-page);
+}
+
+[data-theme='monochrome'] {
+    --bg-page-gradient: var(--color-surface-page);
+    /* In monochrome, gradients become solid colors */
+    --bg-brand-gradient: var(--color-brand-primary);
+    --bg-avatar-gradient: var(--color-brand-primary);
+}
+
+/* ============================================================================
    UTILITY: Common Transitions
    Ready-to-use transition values
    ============================================================================ */

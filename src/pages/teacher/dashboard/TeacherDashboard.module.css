@@ -1,5 +1,5 @@
 .dashboard {
-    background: linear-gradient(115deg, #e4ecf7, #fff);
+    background: var(--bg-page-gradient);
     padding: 24px clamp(24px, 5vw, 80px);
     min-height: 100vh;
     position: relative;
@@ -37,12 +37,7 @@
 }
 
 .gradientText {
-    background: linear-gradient(
-        111deg,
-        var(--brand-secondary-500-light) 0%,
-        #ef325f 49.15%,
-        var(--brand-primary-500-light) 100%
-    );
+    background: var(--bg-brand-gradient);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -96,12 +91,7 @@
     cursor: pointer;
     display: grid;
     place-items: center;
-    background: linear-gradient(
-        111deg,
-        var(--brand-secondary-500-light),
-        #ef325f 49.15%,
-        var(--brand-primary-500-light)
-    );
+    background: var(--bg-brand-gradient);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     transition: transform 0.2s ease;
     z-index: 40;

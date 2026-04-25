@@ -82,18 +82,27 @@
 
 .light {
     --text-color: var(--color-text-primary);
-    --subtext-color: rgba(0, 0, 0, 0.7);
-    --divider-color: rgba(0, 0, 0, 0.1);
-    --progress-bar-bg: #000;
-    background: rgba(255, 255, 255, 0.75);
+    --subtext-color: var(--color-text-secondary);
+    --divider-color: var(--color-border-soft);
+    --progress-bar-bg: var(--color-brand-primary);
+    --card-bg: var(--color-surface-card);
 }
 
 .dark {
+    --text-color: #fff;
+    --subtext-color: rgba(255, 255, 255, 0.72);
+    --divider-color: rgba(255, 255, 255, 0.12);
+    --progress-bar-bg: var(--primitive-lapis-600);
+    --card-bg: var(--primitive-lapis-200);
+}
+
+/* Dark theme: light stat cards auto-flip using semantic tokens */
+:global([data-theme='dark']) .stat.light {
     --text-color: var(--color-text-primary);
-    --subtext-color: rgba(255, 255, 255, 0.7);
-    --divider-color: rgba(255, 255, 255, 0.15);
-    --progress-bar-bg: #fff;
-    background: rgba(0, 0, 0, 0.55);
+    --subtext-color: var(--color-text-secondary);
+    --divider-color: var(--color-border-soft);
+    --progress-bar-bg: var(--color-brand-primary);
+    --card-bg: var(--color-surface-card);
 }
 
 .divider {

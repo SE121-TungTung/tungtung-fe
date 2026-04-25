@@ -65,6 +65,10 @@
         border-color 0.15s;
 }
 
+.clickable {
+    cursor: pointer;
+}
+
 .clickable:hover .ctaButton {
     background: rgba(0, 0, 0, 0.05);
     border-color: rgba(0, 0, 0, 0.2);

@@ -6,7 +6,7 @@ import Chatbot from '@/components/feature/chatbot/Chatbot'
 import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
 import DefaultAvatar from '@/assets/avatar-placeholder.png'
 import type { Role } from '@/types/auth'
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import s from './MainLayout.module.css'
 import RobotIcon from '@/assets/Robot.svg'
 import { useWebSocketConnection } from '@/hooks/useWebSocketConnection'
@@ -18,7 +18,11 @@ export const MainLayout = () => {
     const sessionState = useSession()
     const currentUserId = sessionState?.user?.id
 
-    const { isChatOpen, setChatOpen } = useUIStore()
+    const { isChatOpen, setChatOpen, theme } = useUIStore()
+
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', theme)
+    }, [theme])
 
     const userRole = (session?.role as Role) || 'student'
     const currentPath = location.pathname

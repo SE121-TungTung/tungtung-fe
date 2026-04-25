@@ -12,6 +12,7 @@ interface Props {
     description?: React.ReactNode
     ctaText?: string
     onCtaClick?: () => void
+    onClick?: () => void | Promise<void>
     mode?: 'light' | 'dark'
 }
 
@@ -23,12 +24,14 @@ export const TextHorizontal = ({
     description,
     ctaText,
     onCtaClick,
+    onClick,
     mode = 'dark',
 }: Props): JSX.Element => {
     return (
         <div
-            className={`${s.textHorizontal} ${s[mode]} ${className}`}
+            className={`${s.textHorizontal} ${s[mode]} ${className} ${onClick ? s.clickable : ''}`}
             data-colors-mode="dark"
+            onClick={onClick}
         >
             {icon && (
                 <ButtonLogo

@@ -1,0 +1,36 @@
+.switcher {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--color-surface-raised);
+    padding: 4px;
+    border-radius: var(--primitive-radius-md);
+    margin: 8px 16px;
+}
+
+.button {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    border: none;
+    background: transparent;
+    border-radius: var(--primitive-radius-sm);
+    cursor: pointer;
+    font-size: 16px;
+    transition: var(--transition-all);
+}
+
+.button:hover {
+    background: var(--primitive-black-a10);
+}
+
+.active {
+    background: var(--color-surface-card);
+    box-shadow: var(--primitive-shadow-sm);
+}
+
+[data-theme='dark'] .button:hover {
+    background: var(--primitive-white-a10);
+}

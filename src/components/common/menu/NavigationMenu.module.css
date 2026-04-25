@@ -399,15 +399,21 @@
     transform: scale(0.97);
 }
 
-/* Tablet: Hide some items, show hamburger if cramped */
-@media (max-width: 1024px) {
+/* Tablet & Laptop: Make items more compact to fit without overflow */
+@media (max-width: 1200px) {
     .menu {
-        margin: 0 clamp(12px, 4vw, 48px);
+        margin: 0 clamp(8px, 2vw, 24px);
+        gap: 4px;
+    }
+    .item {
+        --px: clamp(8px, 1vw, 12px);
+        font-size: 13px;
+        gap: 6px;
     }
 }
 
-/* Mobile: Full hamburger menu */
-@media (max-width: 768px) {
+/* Tablet smaller & Mobile: Full hamburger menu */
+@media (max-width: 992px) {
     .menu {
         display: none;
     }

@@ -17,7 +17,7 @@ export default function GeneralDashboard() {
 
     if (!userData) return null
 
-    switch (userData.role) {
+    switch (userData.role?.toLowerCase()) {
         case 'student':
             return <StudentDashboard />
 

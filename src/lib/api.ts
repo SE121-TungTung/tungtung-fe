@@ -45,10 +45,30 @@ const onRefreshed = (token: string) => {
 async function parseBody<T>(res: Response): Promise<T> {
     if (res.status === 204) return undefined as T
     const ct = res.headers.get('content-type') || ''
-    if (ct.includes('application/json')) return (await res.json()) as T
+    if (ct.includes('application/json')) {
+        const json = await res.json()
+        if (
+            json &&
+            typeof json === 'object' &&
+            'data' in json &&
+            'success' in json
+        ) {
+            return json.data as T
+        }
+        return json as T
+    }
     const text = await res.text()
     try {
-        return JSON.parse(text) as T
+        const json = JSON.parse(text)
+        if (
+            json &&
+            typeof json === 'object' &&
+            'data' in json &&
+            'success' in json
+        ) {
+            return json.data as T
+        }
+        return json as T
     } catch {
         return text as unknown as T
     }

@@ -326,7 +326,10 @@ export class WebSocketManager {
     }
 }
 
+const API_URL =
+    import.meta.env.VITE_API_URL ||
+    'https://tungtung-be-production.up.railway.app'
 const WS_BASE_URL =
     import.meta.env.VITE_WS_URL ||
-    'wss://tungtung-be-production.up.railway.app/api/v1/messaging/ws'
+    `${API_URL.replace(/^http/, 'ws')}/api/v1/messaging/ws`
 export const wsManager = new WebSocketManager(WS_BASE_URL)
