@@ -18,6 +18,7 @@ import MessagesPage from '@/pages/messages/MessagesPage'
 import ExamPracticePage from '@/pages/student/exam/ExamPracticePage'
 import ScheduleManagementPage from '@/pages/admin/schedule/ScheduleManagementPage'
 import ScheduleGeneratorPage from '@/pages/admin/schedule/ScheduleGeneratorPage'
+import GASchedulePage from '@/pages/admin/schedule/GASchedulePage'
 import ComingSoon from '@/components/core/ComingSoon'
 import { ResetPasswordPage } from '@/pages/auth/ResetPassword'
 import TestResultPage from '@/pages/student/exam/TestResultPage'
@@ -392,6 +393,20 @@ export const router = createBrowserRouter([
                                 ]}
                             >
                                 <ScheduleGeneratorPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/admin/schedule/ga',
+                        element: (
+                            <ProtectedRoute
+                                allowedRoles={[
+                                    'office_admin',
+                                    'center_admin',
+                                    'system_admin',
+                                ]}
+                            >
+                                <GASchedulePage />
                             </ProtectedRoute>
                         ),
                     },

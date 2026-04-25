@@ -150,6 +150,11 @@ const adminNavItems: AppNavItem[] = [
                 href: '/admin/schedule',
             },
             {
+                id: 'schedule-ga',
+                label: 'Xếp TKB (GA)',
+                href: '/admin/schedule/ga',
+            },
+            {
                 id: 'kpi',
                 label: 'Quản lý KPI',
                 href: '/admin/kpi',
