@@ -50,7 +50,7 @@
 
 .hint {
     margin: 10px 0px;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     font-size: small;
     font-style: italic;
 }

@@ -219,17 +219,17 @@
 
 /* --- States --- */
 .invalid .input {
-    border-color: var(--status-danger-light);
+    border-color: var(--color-status-danger);
     background-color: color-mix(
         in srgb,
-        var(--status-danger-light) 4%,
+        var(--color-status-danger) 4%,
         var(--input-bg)
     );
 }
 
 .invalid .input:focus {
     box-shadow: 0 0 0 4px
-        color-mix(in srgb, var(--status-danger-light) 20%, transparent);
+        color-mix(in srgb, var(--color-status-danger) 20%, transparent);
 }
 
 .input::placeholder {
@@ -256,8 +256,8 @@
 
 .input::file-selector-button {
     border: none;
-    background: var(--brand-primary-light);
-    color: var(--text-primary-light);
+    background: var(--color-brand-primary);
+    color: var(--color-text-primary);
     padding: 6px 12px;
     border-radius: var(--radius-sm);
     margin-right: 12px;
@@ -272,7 +272,7 @@
 }
 
 .dark .input::file-selector-button {
-    background: var(--brand-primary-dark);
+    background: var(--color-brand-primary);
 }
 
 .isFile .input::before {
@@ -308,14 +308,14 @@
 
 .mdTabs button.activeTab {
     background: #fff;
-    color: var(--brand-primary-500-light);
+    color: var(--color-brand-primary-500);
     box-shadow: var(--input-shadow);
     font-weight: bolder;
 }
 
 .dark .mdTabs button.activeTab {
-    background: var(--surface-raised-dark);
-    color: var(--brand-primary-500-dark);
+    background: var(--color-surface-raised);
+    color: var(--color-brand-primary-500);
 }
 
 /* --- Preview Area Content --- */

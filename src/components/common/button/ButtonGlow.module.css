@@ -94,7 +94,7 @@
         rgba(255, 255, 255, 0.6),
         rgba(255, 255, 255, 0.5)
     );
-    --btn-bd: var(--container-border-light);
+    --btn-bd: var(--color-container-border);
     backdrop-filter: blur(20px);
     box-shadow:
         0 1px 0 #0001,
@@ -111,7 +111,7 @@
 
 .solid {
     --btn-bg: var(--color-surface-raised);
-    --btn-bd: var(--border-soft-light);
+    --btn-bd: var(--color-border-soft);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
 .solid:hover {
@@ -143,7 +143,7 @@
     border-radius: inherit;
     background: linear-gradient(
         135deg,
-        var(--brand-secondary-500-light),
+        var(--color-brand-secondary-500),
         var(--color-brand-secondary-hover),
         var(--color-brand-primary-hover)
     );
@@ -155,7 +155,7 @@
     inset: 1px;
     z-index: -1;
     border-radius: calc(var(--radius) - 1px);
-    background: var(--surface-page-light);
+    background: var(--color-surface-page);
     transition: background-color 0.15s ease;
 }
 
@@ -176,11 +176,11 @@
 }
 .dark.glass {
     --btn-bg: linear-gradient(180deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.2));
-    --btn-bd: var(--container-border-dark);
+    --btn-bd: var(--color-container-border);
 }
 .dark.solid {
     --btn-bg: var(--color-surface-raised);
-    --btn-bd: var(--border-soft-dark);
+    --btn-bd: var(--color-border-soft);
 }
 .dark .aura {
     opacity: 0.3;

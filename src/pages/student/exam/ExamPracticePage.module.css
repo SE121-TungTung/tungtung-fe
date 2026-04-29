@@ -48,7 +48,7 @@
         --gradient-text,
         linear-gradient(
             135deg,
-            var(--brand-secondary-500-light) 0%,
+            var(--color-brand-secondary-500) 0%,
             var(--color-brand-secondary) 69.5%,
             var(--color-brand-primary) 141.42%
         )
@@ -68,7 +68,7 @@
     padding: 16px;
     background: var(--color-surface-card);
     border-radius: var(--primitive-radius-lg);
-    border: 1px solid var(--border-soft-light);
+    border: 1px solid var(--color-border-soft);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     flex-wrap: wrap; /* Cho phép xuống dòng */
 }
@@ -129,7 +129,7 @@
 .sectionTitle {
     font-size: 20px;
     font-weight: 600;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     margin: 0;
 }
 

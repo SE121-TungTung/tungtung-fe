@@ -5,12 +5,12 @@
     padding: 16px;
     border-radius: var(--primitive-radius-md);
     background: var(--color-surface-raised);
-    border: 1px solid var(--border-soft-light);
+    border: 1px solid var(--color-border-soft);
     transition: all 0.2s ease;
 }
 
 .item:hover {
-    background: var(--surface-hover-light);
+    background: var(--color-surface-hover);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 

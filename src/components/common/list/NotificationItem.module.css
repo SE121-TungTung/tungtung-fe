@@ -2,18 +2,18 @@
     display: flex;
     gap: 16px;
     padding: 16px 20px;
-    border-bottom: 1px solid var(--border-soft-light);
+    border-bottom: 1px solid var(--color-border-soft);
     cursor: pointer;
     transition: background-color 0.2s ease;
     position: relative;
 }
 
 .item:first-child {
-    border-top: 1px solid var(--border-soft-light);
+    border-top: 1px solid var(--color-border-soft);
 }
 
 .item:hover {
-    background-color: var(--surface-hover-light);
+    background-color: var(--color-surface-hover);
 }
 
 .item.read {
@@ -77,7 +77,7 @@
     color: var(--color-brand-primary);
 }
 .item.read .timestamp {
-    color: var(--text-tertiary-light);
+    color: var(--color-text-tertiary);
 }
 
 .unreadDot {

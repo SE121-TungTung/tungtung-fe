@@ -12,7 +12,7 @@
     left: 17px;
     bottom: -18px;
     width: 2px;
-    background-color: var(--border-soft-light);
+    background-color: var(--color-border-soft);
 }
 .item:last-child::before {
     display: none;
@@ -25,7 +25,7 @@
     display: grid;
     place-items: center;
     border-radius: 50%;
-    border: 1px solid var(--border-soft-light);
+    border: 1px solid var(--color-border-soft);
     z-index: 1;
     transition: all 0.3s ease;
 }
@@ -74,7 +74,7 @@
     padding: 4px 10px;
     border-radius: var(--primitive-radius-full);
     background-color: var(--color-surface-raised);
-    border: 1px solid var(--border-soft-light);
+    border: 1px solid var(--color-border-soft);
     text-transform: capitalize;
 }
 
@@ -87,7 +87,7 @@
 
 .inProgress .iconWrapper {
     background-color: var(--brand-primary-light-accent);
-    border-color: var(--brand-primary-light);
+    border-color: var(--color-brand-primary);
 }
 .inProgress .iconWrapper img {
     opacity: 1;
@@ -95,7 +95,7 @@
         brightness(100%) contrast(104%);
 }
 .inProgress .title {
-    color: var(--brand-primary-light);
+    color: var(--color-brand-primary);
 }
 
 .completed {
@@ -107,7 +107,7 @@
 }
 .completed .iconWrapper {
     background-color: var(--status-success-light-accent);
-    border-color: var(--status-success-light);
+    border-color: var(--color-status-success);
 }
 .completed .iconWrapper img {
     opacity: 1;

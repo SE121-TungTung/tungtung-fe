@@ -9,7 +9,7 @@
     gap: 8px;
     margin-bottom: 32px;
     padding-bottom: 32px;
-    border-bottom: 1px solid var(--border-soft-light);
+    border-bottom: 1px solid var(--color-border-soft);
 }
 
 .avatar {

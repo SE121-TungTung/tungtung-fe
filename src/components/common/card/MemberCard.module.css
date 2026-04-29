@@ -5,7 +5,7 @@
     padding: 16px;
     border-radius: var(--primitive-radius-md);
     background: var(--color-surface-raised);
-    border: 1px solid var(--border-soft-light);
+    border: 1px solid var(--color-border-soft);
     transition: all 0.2s ease;
 }
 

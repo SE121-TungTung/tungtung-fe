@@ -28,14 +28,14 @@
     justify-content: center;
     gap: 20px;
     min-height: 400px;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
 }
 
 .spinner {
     width: 48px;
     height: 48px;
-    border: 4px solid var(--border-soft-light);
-    border-top-color: var(--brand-primary-500-light);
+    border: 4px solid var(--color-border-soft);
+    border-top-color: var(--color-brand-primary-500);
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -48,7 +48,7 @@
 
 .errorMessage {
     font-size: 1.125rem;
-    color: var(--status-danger-500-light);
+    color: var(--color-status-danger-500);
 }
 
 /* ============================================ */
@@ -71,7 +71,7 @@
 .pageTitle {
     font-size: clamp(1.75rem, 3vw, 2.5rem);
     font-weight: 700;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     letter-spacing: -0.02em;
     line-height: 1.2;
     margin: 0;
@@ -79,7 +79,7 @@
 
 .description {
     font-size: 1rem;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     line-height: 1.6;
     margin: 0;
 }
@@ -109,7 +109,7 @@
     font-size: 0.875rem;
     font-weight: 500;
     color: #fff;
-    border-color: var(--brand-primary-700-light);
+    border-color: var(--color-brand-primary-700);
     white-space: nowrap;
 }
 
@@ -119,8 +119,8 @@
     padding: 4px 12px;
     background: linear-gradient(
         115deg,
-        var(--brand-primary-500-light),
-        var(--brand-secondary-500-light)
+        var(--color-brand-primary-500),
+        var(--color-brand-secondary-500)
     );
     color: #fff;
     border-radius: var(--radius-md);
@@ -133,8 +133,8 @@
     align-items: center;
     gap: 4px;
     padding: 4px 12px;
-    background: var(--surface-secondary-light);
-    color: var(--text-primary-light);
+    background: var(--color-surface-secondary);
+    color: var(--color-text-primary);
     border-radius: var(--radius-md);
     font-size: 0.875rem;
 }
@@ -156,8 +156,8 @@
     padding: 6px 14px;
     background: linear-gradient(
         115deg,
-        var(--brand-primary-500-light),
-        var(--brand-secondary-500-light)
+        var(--color-brand-primary-500),
+        var(--color-brand-secondary-500)
     );
     color: #fff;
     border-radius: var(--radius-md);
@@ -183,34 +183,34 @@
 
 .overviewLabel {
     font-size: 0.875rem;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     font-weight: 500;
 }
 
 .overviewValue {
     font-size: 1.125rem;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     font-weight: 600;
 }
 
 .instructionsSection {
     margin-top: 24px;
     padding-top: 24px;
-    border-top: 1px solid var(--border-soft-light);
+    border-top: 1px solid var(--color-border-soft);
 }
 
 .sectionSubtitle {
     font-size: 1rem;
     font-weight: 600;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     margin: 0 0 12px 0;
 }
 
 .instructionsContent {
     padding: 16px;
-    background: var(--surface-secondary-light);
+    background: var(--color-surface-secondary);
     border-radius: var(--radius-md);
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     line-height: 1.6;
     white-space: pre-wrap;
 }
@@ -227,7 +227,7 @@
 .contentTitle {
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     margin: 0;
 }
 
@@ -244,10 +244,10 @@
 .partInstructions,
 .groupInstructions {
     padding: 12px 16px;
-    background: var(--surface-secondary-light);
-    border-left: 3px solid var(--brand-primary-500-light);
+    background: var(--color-surface-secondary);
+    border-left: 3px solid var(--color-brand-primary-500);
     border-radius: var(--radius-md);
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     line-height: 1.6;
     margin: 16px 0;
 }
@@ -257,8 +257,8 @@
 /* ============================================ */
 .passageSection {
     padding: 20px;
-    background: var(--surface-card-light);
-    border: 1px solid var(--border-soft-light);
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-border-soft);
     border-radius: var(--radius-lg);
     margin-bottom: 24px;
 }
@@ -266,7 +266,7 @@
 .passageTitle {
     font-size: 1.125rem;
     font-weight: 600;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     margin: 0 0 16px 0;
 }
 
@@ -285,14 +285,14 @@
     height: auto;
     border-radius: var(--radius-md);
     margin: 16px 0;
-    border: 1px solid var(--border-soft-light);
+    border: 1px solid var(--color-border-soft);
 }
 
 .passageContent {
     padding: 16px;
     background: white;
     border-radius: var(--radius-md);
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     line-height: 1.8;
     white-space: pre-wrap;
     font-size: 0.9375rem;
@@ -314,7 +314,7 @@
     height: auto;
     border-radius: var(--radius-md);
     margin: 16px 0;
-    border: 1px solid var(--border-soft-light);
+    border: 1px solid var(--color-border-soft);
 }
 
 /* ============================================ */
@@ -330,7 +330,7 @@
 .questionItem {
     padding: 20px;
     background: white;
-    border: 1px solid var(--border-soft-light);
+    border: 1px solid var(--color-border-soft);
     border-radius: var(--radius-lg);
     transition: box-shadow 0.2s ease;
 }
@@ -345,27 +345,27 @@
     align-items: center;
     margin-bottom: 12px;
     padding-bottom: 12px;
-    border-bottom: 1px solid var(--border-soft-light);
+    border-bottom: 1px solid var(--color-border-soft);
 }
 
 .questionNumber {
     font-size: 0.875rem;
     font-weight: 600;
-    color: var(--brand-primary-600-light);
+    color: var(--color-brand-primary-600);
 }
 
 .questionPoints {
     font-size: 0.875rem;
     font-weight: 500;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     padding: 4px 10px;
-    background: var(--surface-secondary-light);
+    background: var(--color-surface-secondary);
     border-radius: var(--radius-md);
 }
 
 .questionText {
     font-size: 1rem;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     line-height: 1.6;
     margin-bottom: 16px;
     white-space: pre-wrap;
@@ -376,7 +376,7 @@
     height: auto;
     border-radius: var(--radius-md);
     margin: 16px 0;
-    border: 1px solid var(--border-soft-light);
+    border: 1px solid var(--color-border-soft);
 }
 
 .questionAudio {
@@ -401,34 +401,34 @@
     align-items: center;
     gap: 12px;
     padding: 12px 16px;
-    background: var(--surface-secondary-light);
+    background: var(--color-surface-secondary);
     border-radius: var(--radius-md);
     transition: all 0.2s ease;
 }
 
 .optionItem:hover {
-    background: var(--surface-hover-light);
+    background: var(--color-surface-hover);
 }
 
 .correctOption {
-    background: var(--status-success-100-light);
-    border: 2px solid var(--status-success-500-light);
+    background: var(--color-status-success-100);
+    border: 2px solid var(--color-status-success-500);
 }
 
 .optionKey {
     font-weight: 600;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     min-width: 24px;
 }
 
 .optionText {
     flex: 1;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     line-height: 1.5;
 }
 
 .correctMark {
-    color: var(--status-success-600-light);
+    color: var(--color-status-success-600);
     font-weight: 700;
     font-size: 1.25rem;
 }
@@ -439,28 +439,28 @@
 .answerBox {
     padding: 12px 16px;
     background: var(--color-green-200);
-    border-left: 3px solid var(--status-success-500-light);
+    border-left: 3px solid var(--color-status-success-500);
     border-radius: var(--radius-md);
     margin: 16px 0;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
 }
 
 .answerBox strong {
-    color: var(--status-success-700-light);
+    color: var(--color-status-success-700);
 }
 
 .explanationBox {
     padding: 12px 16px;
-    background: var(--status-info-100-light);
-    border-left: 3px solid var(--status-info-500-light);
+    background: var(--color-status-info-100);
+    border-left: 3px solid var(--color-status-info-500);
     border-radius: var(--radius-md);
     margin: 16px 0;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     line-height: 1.6;
 }
 
 .explanationBox strong {
-    color: var(--status-info-700-light);
+    color: var(--color-status-info-700);
 }
 
 /* ============================================ */
@@ -472,7 +472,7 @@
     gap: 12px;
     margin-top: 16px;
     padding-top: 16px;
-    border-top: 1px solid var(--border-soft-light);
+    border-top: 1px solid var(--color-border-soft);
     flex-wrap: wrap;
 }
 
@@ -486,8 +486,8 @@
     display: inline-flex;
     align-items: center;
     padding: 4px 10px;
-    background: var(--surface-secondary-light);
-    color: var(--text-secondary-light);
+    background: var(--color-surface-secondary);
+    color: var(--color-text-secondary);
     border-radius: var(--radius-md);
     font-size: 0.75rem;
     font-weight: 500;
@@ -510,13 +510,13 @@
 
 .metadataLabel {
     font-size: 0.875rem;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     font-weight: 500;
 }
 
 .metadataValue {
     font-size: 0.9375rem;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     font-family: 'Courier New', monospace;
     word-break: break-all;
 }
@@ -580,8 +580,8 @@
     align-items: center;
     gap: 8px;
     padding: 20px;
-    background: var(--surface-secondary-light);
-    border: 2px solid var(--boder-soft-light);
+    background: var(--color-surface-secondary);
+    border: 2px solid var(--color-border-soft);
     border-radius: var(--radius-md);
     transition: all 0.2s ease;
 }
@@ -589,13 +589,13 @@
 .statCard:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    border-color: var(--brand-primary-light);
+    border-color: var(--color-brand-primary);
 }
 
 .statValue {
     font-size: 32px;
     font-weight: 700;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
 }
 
 .statValue.pending {
@@ -612,7 +612,7 @@
 
 .statLabel {
     font-size: 14px;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     text-align: center;
 }
 
@@ -648,7 +648,7 @@
 .alertText {
     flex: 1;
     font-size: 14px;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
 }
 
 .alertText strong {

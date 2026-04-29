@@ -18,7 +18,7 @@
 .pageTitle {
     font-size: clamp(2rem, 4vw, 2.75rem);
     font-weight: 700;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     letter-spacing: -0.03em;
     line-height: 1.2;
     text-align: center;
@@ -38,7 +38,7 @@
 .dateDisplay {
     font-size: 16px;
     font-weight: 600;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     min-width: 200px;
     text-align: center;
 }

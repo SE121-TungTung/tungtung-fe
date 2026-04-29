@@ -15,14 +15,14 @@
     margin: 0 0 16px;
     padding-bottom: 12px;
     border-bottom: 1px solid #eee;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
 }
 
 .content {
     font-family: 'Times New Roman', Times, serif;
     font-size: 15px;
     line-height: 1.7;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     white-space: pre-wrap;
 }
 

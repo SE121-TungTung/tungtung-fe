@@ -103,7 +103,7 @@
     --text-primary: var(--color-text-primary);
     --text-secondary: var(--color-text-secondary);
     --bg: var(--color-surface-card);
-    --bd: var(--border-soft-dark);
+    --bd: var(--color-border-soft);
 }
 .dark.flat {
     background: var(--color-surface-raised);

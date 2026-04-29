@@ -1,6 +1,6 @@
 .root {
     --bg: var(--color-surface-card);
-    --bd: var(--border-soft-light);
+    --bd: var(--color-border-soft);
     --text-primary: var(--color-text-primary);
     --text-secondary: var(--color-text-secondary);
 
@@ -74,7 +74,7 @@
 
 .dark {
     --bg: var(--color-surface-card);
-    --bd: var(--border-soft-dark);
+    --bd: var(--color-border-soft);
     --text-primary: var(--color-text-primary);
     --text-secondary: var(--color-text-secondary);
 }

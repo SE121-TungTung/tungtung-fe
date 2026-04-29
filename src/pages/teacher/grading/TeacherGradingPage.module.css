@@ -5,7 +5,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-24);
-    background-color: var(--surface-page-light);
+    background-color: var(--color-surface-page);
     min-height: 100vh;
 }
 
@@ -19,13 +19,13 @@
 .title {
     font-size: 28px;
     font-weight: 700;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     margin: 0 0 var(--space-8) 0;
 }
 
 .subtitle {
     font-size: 14px;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     margin: 0;
 }
 
@@ -36,8 +36,8 @@
 }
 
 .statCardWrapper {
-    background-color: var(--surface-card-light);
-    border: 1px solid var(--boder-soft-light);
+    background-color: var(--color-surface-card);
+    border: 1px solid var(--color-border-soft);
 }
 
 .statCard {
@@ -52,19 +52,19 @@
 }
 
 .textPrimary {
-    color: var(--brand-primary-500-light);
+    color: var(--color-brand-primary-500);
 }
 .textWarning {
-    color: var(--status-warning-500-dark);
+    color: var(--color-status-warning-500);
 }
 .textSuccess {
-    color: var(--status-success-500-dark);
+    color: var(--color-status-success-500);
 }
 
 .statLabel {
     font-size: 14px;
     font-weight: 500;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
 }
 
 .filterCard {
@@ -78,25 +78,25 @@
 
 .filterButton {
     padding: var(--space-8) var(--space-20);
-    border: 1px solid var(--boder-strong-light);
+    border: 1px solid var(--color-boder-strong);
     background: var(--palette-white);
     border-radius: var(--radius-md);
     font-size: 14px;
     font-weight: 600;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .filterButton:hover {
-    background: var(--surface-raised-light);
-    border-color: var(--brand-primary-500-light);
+    background: var(--color-surface-raised);
+    border-color: var(--color-brand-primary-500);
 }
 
 .filterButton.active {
-    background: var(--brand-primary-500-light);
+    background: var(--color-brand-primary-500);
     color: var(--palette-white);
-    border-color: var(--brand-primary-500-light);
+    border-color: var(--color-brand-primary-500);
     box-shadow: var(--shadow-blur-sm);
 }
 
@@ -110,14 +110,14 @@
     transition:
         transform 0.2s ease,
         box-shadow 0.2s ease;
-    border-color: var(--boder-soft-light);
+    border-color: var(--color-border-soft);
     background-color: var(--palette-white);
 }
 
 .attemptCard:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-blur-sm);
-    border-color: var(--brand-primary-600-light);
+    border-color: var(--color-brand-primary-600);
 }
 
 .attemptHeader {
@@ -126,7 +126,7 @@
     align-items: center;
     margin-bottom: var(--space-16);
     padding-bottom: var(--space-16);
-    border-bottom: 1px solid var(--boder-soft-light);
+    border-bottom: 1px solid var(--color-border-soft);
 }
 
 .studentInfo {
@@ -141,8 +141,8 @@
     border-radius: var(--radius-full);
     background: linear-gradient(
         135deg,
-        var(--brand-primary-500-light) 0%,
-        var(--brand-accent1-500-light) 100%
+        var(--color-brand-primary-500) 0%,
+        var(--color-brand-accent1-500) 100%
     );
     color: var(--palette-white);
     display: flex;
@@ -155,12 +155,12 @@
 .studentName {
     font-size: 16px;
     font-weight: 700;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
 }
 
 .attemptMeta {
     font-size: 13px;
-    color: var(--text-muted-light);
+    color: var(--color-text-muted);
     margin-top: var(--space-2);
 }
 
@@ -174,16 +174,16 @@
 }
 
 .statusPending {
-    background-color: var(--status-warning-500-dark);
+    background-color: var(--color-status-warning-500);
 }
 .statusGraded {
-    background-color: var(--status-success-500-dark);
+    background-color: var(--color-status-success-500);
 }
 .statusProgress {
-    background-color: var(--brand-accent1-500-light);
+    background-color: var(--color-brand-accent1-500);
 }
 .statusDefault {
-    background-color: var(--status-neutral-500-light);
+    background-color: var(--color-status-neutral-500);
 }
 
 .attemptBody {
@@ -206,7 +206,7 @@
 .statValueSmall {
     font-size: 15px;
     font-weight: 700;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
 }
 
 .attemptActions {
@@ -224,8 +224,8 @@
 .spinner {
     width: 40px;
     height: 40px;
-    border: 3px solid var(--surface-raised-light);
-    border-top-color: var(--brand-primary-500-light);
+    border: 3px solid var(--color-surface-raised);
+    border-top-color: var(--color-brand-primary-500);
     border-radius: var(--radius-full);
     animation: spin 0.8s linear infinite;
     margin: 0 auto var(--space-16);

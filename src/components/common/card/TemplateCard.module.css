@@ -6,7 +6,7 @@
     --card-bg: rgba(255, 255, 255, 1);
 
     --radius: var(--primitive-radius-md, 12px);
-    --grad-red: var(--brand-secondary-500-light);
+    --grad-red: var(--color-brand-secondary-500);
     --grad-blue: var(--color-brand-primary-hover);
     --border-width: 2px;
 
@@ -30,7 +30,7 @@
     border-radius: inherit;
     background: linear-gradient(
         111deg,
-        var(--brand-secondary-500-light) 0%,
+        var(--color-brand-secondary-500) 0%,
         #ef325f 49.15%,
         var(--color-brand-primary) 100%
     );

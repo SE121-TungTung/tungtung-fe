@@ -116,7 +116,7 @@
 .form select:focus,
 .form textarea:focus {
     outline: none;
-    border-color: var(--brand-primary-500-light);
+    border-color: var(--color-brand-primary-500);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -198,7 +198,7 @@
 .sectionTitle {
     font-size: 14px;
     font-weight: 700;
-    color: var(--brand-primary-600-light);
+    color: var(--color-brand-primary-600);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     border-bottom: 1px solid var(--color-border-soft);

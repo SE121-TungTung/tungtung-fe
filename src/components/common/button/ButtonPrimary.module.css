@@ -2,7 +2,7 @@
     /* defaults = light theme */
     --btn-bg: var(--button-primary-bg);
     --btn-bg-hover: var(--button-primary-bg-hover);
-    --btn-bg-pressed: var(--button-primary-bg-pressed-light);
+    --btn-bg-pressed: var(--color-button-primary-bg-pressed);
     --btn-fg: var(--button-primary-text);
     --btn-border: var(--border-soft-light, rgba(0, 0, 0, 0.08));
     --btn-focus: var(--color-focus-ring, rgb(75, 163, 195));
@@ -36,7 +36,7 @@
 [data-theme='dark'] {
     --btn-bg: var(--button-primary-bg);
     --btn-bg-hover: var(--button-primary-bg-hover);
-    --btn-bg-pressed: var(--button-primary-bg-pressed-dark);
+    --btn-bg-pressed: var(--color-button-primary-bg-pressed);
     --btn-fg: var(--button-primary-text);
     --btn-border: var(--border-soft-dark, rgba(255, 255, 255, 0.14));
     --btn-focus: var(--color-focus-ring, rgb(111, 181, 207));
@@ -235,7 +235,7 @@
 /* Outline */
 .outline {
     background: transparent;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     border-color: var(--btn-outline-border);
     box-shadow: none;
 }
@@ -272,7 +272,7 @@
         ),
         linear-gradient(
             120deg,
-            var(--brand-secondary-600-light) 0%,
+            var(--color-brand-secondary-600) 0%,
             var(--color-brand-accent-hover) 45%,
             var(--color-brand-primary-active) 100%
         );
@@ -289,7 +289,7 @@
         ),
         linear-gradient(
             120deg,
-            var(--brand-secondary-600-dark) 0%,
+            var(--color-brand-secondary-600) 0%,
             var(--color-brand-accent-hover) 45%,
             var(--color-brand-primary-active) 100%
         );

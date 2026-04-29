@@ -44,10 +44,10 @@
 .optionItem.selected {
     background-color: color-mix(
         in srgb,
-        var(--brand-secondary-light) 60%,
+        var(--color-brand-secondary) 60%,
         transparent
     );
-    border-color: var(--brand-secondary-light);
+    border-color: var(--color-brand-secondary);
 }
 
 .optionLabel {
@@ -58,7 +58,7 @@
     color: var(--color-text-secondary);
 }
 .optionItem.selected .optionLabel {
-    color: var(--brand-primary-dark);
+    color: var(--color-brand-primary);
 }
 
 .optionText {
@@ -69,5 +69,5 @@
 
 .optionInput {
     margin-right: 5px;
-    accent-color: var(--brand-primary-light);
+    accent-color: var(--color-brand-primary);
 }

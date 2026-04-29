@@ -43,7 +43,7 @@
         --gradient-text,
         linear-gradient(
             135deg,
-            var(--brand-secondary-500-light) 0%,
+            var(--color-brand-secondary-500) 0%,
             var(--color-brand-secondary) 69.5%,
             var(--color-brand-primary) 141.42%
         )
@@ -62,7 +62,7 @@
     padding: 0 16px 16px 16px;
     font-size: 14px;
     color: var(--color-text-secondary);
-    border-bottom: 1px solid var(--border-soft-light);
+    border-bottom: 1px solid var(--color-border-soft);
 }
 
 .timeline {

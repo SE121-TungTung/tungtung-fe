@@ -1,12 +1,12 @@
 .wrapper {
-    --input-bg: var(--surface-raised-light);
+    --input-bg: var(--color-surface-raised);
     --input-bd: var(--input-border);
     --input-bd-focus: var(--input-border-focus);
-    --input-text: var(--text-primary-light);
-    --input-placeholder: var(--text-placeholder-light);
-    --input-icon: var(--text-secondary-light);
-    --input-shadow: var(--shadow-sm-light);
-    --label-color: var(--text-primary-light);
+    --input-text: var(--color-text-primary);
+    --input-placeholder: var(--color-text-placeholder);
+    --input-icon: var(--color-text-secondary);
+    --input-shadow: var(--color-shadow-sm);
+    --label-color: var(--color-text-primary);
 
     --pad-y: 10px;
     --pad-x: 16px;
@@ -20,14 +20,14 @@
 }
 
 .wrapper.dark {
-    --input-bg: var(--surface-raised-dark);
+    --input-bg: var(--color-surface-raised);
     --input-bd: var(--input-border);
     --input-bd-focus: var(--input-border-focus);
-    --input-text: var(--text-primary-dark);
-    --input-placeholder: var(--text-placeholder-dark);
-    --input-icon: var(--text-secondary-dark);
-    --input-shadow: var(--shadow-sm-dark);
-    --label-color: var(--text-primary-dark);
+    --input-text: var(--color-text-primary);
+    --input-placeholder: var(--color-text-placeholder);
+    --input-icon: var(--color-text-secondary);
+    --input-shadow: var(--color-shadow-sm);
+    --label-color: var(--color-text-primary);
 }
 
 .fullWidth {
@@ -110,29 +110,29 @@
 }
 
 .variant-neutral .select {
-    background-color: var(--surface-page-light);
+    background-color: var(--color-surface-page);
 }
 
 .variant-soft .select {
-    background-color: var(--surface-raised-light);
+    background-color: var(--color-surface-raised);
 }
 
 .invalid .select {
-    border-color: var(--status-danger-light);
+    border-color: var(--color-status-danger);
     background-color: color-mix(
         in srgb,
-        var(--status-danger-light) 4%,
+        var(--color-status-danger) 4%,
         var(--input-bg)
     );
 }
 
 .select option {
-    background-color: var(--surface-raised-light);
-    color: var(--text-primary-light);
+    background-color: var(--color-surface-raised);
+    color: var(--color-text-primary);
     padding: 10px;
 }
 
 .dark .select option {
-    background-color: var(--surface-raised-dark);
-    color: var(--text-primary-dark);
+    background-color: var(--color-surface-raised);
+    color: var(--color-text-primary);
 }

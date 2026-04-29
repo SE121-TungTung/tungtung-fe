@@ -91,7 +91,7 @@
 
 .fieldHelperText {
     font-size: var(--caption-medium-font-size);
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     margin-top: var(--space-6);
     line-height: 1.4;
 }
@@ -116,7 +116,7 @@
 .form select:focus,
 .form textarea:focus {
     outline: none;
-    border-color: var(--brand-primary-500-light);
+    border-color: var(--color-brand-primary-500);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 

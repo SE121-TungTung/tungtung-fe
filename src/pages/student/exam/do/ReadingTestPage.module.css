@@ -282,7 +282,7 @@ span[data-highlight-id][data-color='blue'] {
 }
 
 .errorContainer {
-    color: var(--status-danger-light);
+    color: var(--color-status-danger);
 }
 
 .submitOverlay {

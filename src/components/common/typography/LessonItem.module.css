@@ -10,7 +10,7 @@
 }
 
 .light {
-    --bg: var(--background-primary-light);
+    --bg: var(--color-background-primary);
     --bd: rgba(0, 0, 0, 0.08);
     --text-primary: var(--color-text-primary);
     --text-secondary: var(--color-text-secondary);
@@ -19,7 +19,7 @@
 }
 
 .dark {
-    --bg: var(--background-primary-dark);
+    --bg: var(--color-background-primary);
     --bd: rgba(255, 255, 255, 0.15);
     --text-primary: var(--color-text-primary);
     --text-secondary: var(--color-text-secondary);

@@ -319,7 +319,7 @@
     margin-bottom: 32px;
     height: var(--nav-h);
     flex-shrink: 0;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
 }
 
 .mobileMenuList {
@@ -336,7 +336,7 @@
     padding: 16px;
     font-size: 1rem;
     font-weight: 600;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     border-radius: 12px;
     text-decoration: none;
     background: transparent;

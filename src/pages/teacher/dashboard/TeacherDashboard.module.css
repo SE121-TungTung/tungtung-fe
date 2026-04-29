@@ -27,7 +27,7 @@
     font-size: clamp(2.2rem, 5vw, 3rem);
     font-weight: 700;
     text-align: center;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     letter-spacing: -0.04em;
     margin: 0 auto 40px;
     overflow: visible;

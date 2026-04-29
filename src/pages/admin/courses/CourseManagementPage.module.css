@@ -92,7 +92,7 @@
 }
 
 .pageInfo {
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     text-align: center;
     width: 100%;
     margin: 20px;

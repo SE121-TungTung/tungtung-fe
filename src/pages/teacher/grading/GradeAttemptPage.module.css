@@ -5,7 +5,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-24);
-    background-color: var(--surface-page-light);
+    background-color: var(--color-surface-page);
     min-height: 100vh;
 }
 
@@ -31,19 +31,19 @@
 .title {
     font-size: 24px;
     font-weight: 800;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     margin: 0 0 var(--space-4) 0;
 }
 
 .subtitle {
     font-size: 15px;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     margin: 0;
 }
 
 .meta {
     font-size: 13px;
-    color: var(--text-muted-light);
+    color: var(--color-text-muted);
     margin-top: var(--space-4);
 }
 
@@ -56,10 +56,10 @@
 .feedbackTextarea {
     width: 100%;
     padding: var(--space-16);
-    border: 2px solid var(--boder-soft-light);
+    border: 2px solid var(--color-border-soft);
     border-radius: var(--radius-md);
     background-color: var(--palette-white);
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     font-family: inherit;
     font-size: 15px;
     line-height: 1.6;
@@ -68,11 +68,11 @@
 
 .feedbackTextarea:focus {
     outline: none;
-    border-color: var(--brand-primary-500-light);
+    border-color: var(--color-brand-primary-500);
 }
 
 .feedbackTextarea:disabled {
-    background-color: var(--surface-raised-light);
+    background-color: var(--color-surface-raised);
     cursor: not-allowed;
 }
 
@@ -92,8 +92,8 @@
 .spinner {
     width: 48px;
     height: 48px;
-    border: 4px solid var(--surface-raised-light);
-    border-top-color: var(--brand-primary-500-light);
+    border: 4px solid var(--color-surface-raised);
+    border-top-color: var(--color-brand-primary-500);
     border-radius: var(--radius-full);
     animation: spin 1s linear infinite;
     margin: 0 auto var(--space-20);

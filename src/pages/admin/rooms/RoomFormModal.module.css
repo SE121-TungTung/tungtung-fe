@@ -91,7 +91,7 @@
 
 .fieldHelperText {
     font-size: var(--caption-medium-font-size);
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     margin-top: var(--space-6);
     line-height: 1.4;
 }
@@ -99,7 +99,7 @@
 .sectionDivider {
     margin: var(--space-12) 0;
     border: none;
-    border-top: 1px solid var(--brand-primary-500-light);
+    border-top: 1px solid var(--color-brand-primary-500);
 }
 
 .sectionTitle {
@@ -116,7 +116,7 @@
 .form select:focus,
 .form textarea:focus {
     outline: none;
-    border-color: var(--brand-primary-500-light);
+    border-color: var(--color-brand-primary-500);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -192,7 +192,7 @@
 }
 
 .addBtn:hover {
-    background-color: var(--color-brand-primary-light);
+    background-color: var(--color-brand-primary);
     border-style: solid;
     color: var(--color-text-on-primary);
 }
@@ -209,7 +209,7 @@
         margin-top: 0;
         width: 100%;
         border-color: var(--color-border-default);
-        color: var(--status-danger-500-light);
+        color: var(--color-status-danger-500);
     }
 }
 
