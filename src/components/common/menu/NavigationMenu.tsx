@@ -331,10 +331,31 @@ export default function NavigationMenu({
                                   )?.dropdownItems ?? [])
                             ).map((it) => ({
                                 ...it,
-                                onClick: (e) => {
-                                    setActiveDropdown(null)
-                                    requestAnimationFrame(() => it.onClick?.(e))
-                                },
+                                ...(it.subItems && it.subItems.length > 0
+                                    ? {}
+                                    : {
+                                          onClick: (e: React.MouseEvent) => {
+                                              setActiveDropdown(null)
+                                              requestAnimationFrame(() =>
+                                                  it.onClick?.(e)
+                                              )
+                                          },
+                                      }),
+                                ...(it.subItems && it.subItems.length > 0
+                                    ? {
+                                          subItems: it.subItems.map((sub) => ({
+                                              ...sub,
+                                              onClick: (
+                                                  e: React.MouseEvent
+                                              ) => {
+                                                  setActiveDropdown(null)
+                                                  requestAnimationFrame(() =>
+                                                      sub.onClick?.(e)
+                                                  )
+                                              },
+                                          })),
+                                      }
+                                    : {}),
                             }))}
                         />
                     </div>,

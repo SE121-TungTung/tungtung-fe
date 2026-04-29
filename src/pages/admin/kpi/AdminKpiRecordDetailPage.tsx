@@ -10,7 +10,10 @@ import {
     useApproveRecord,
     useRejectRecord,
     useApprovalLog,
+    useUpdateRecordMetrics,
+    useUpdateTeachingHours,
 } from '@/hooks/domain/useKpi'
+import type { MetricActualValueInput } from '@/types/kpi.types'
 import { EmptyState } from '@/components/common/state/EmptyState'
 import ButtonGhost from '@/components/common/button/ButtonGhost'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
@@ -28,9 +31,21 @@ export default function AdminKpiRecordDetailPage() {
     const submitMutation = useSubmitRecord()
     const approveMutation = useApproveRecord()
     const rejectMutation = useRejectRecord()
+    const updateMetricsMutation = useUpdateRecordMetrics()
+    const updateTeachingHoursMutation = useUpdateTeachingHours()
 
     const [isRejectOpen, setIsRejectOpen] = useState(false)
     const [rejectComment, setRejectComment] = useState('')
+
+    const handleSaveMetrics = (metrics: MetricActualValueInput[]) => {
+        if (!recordId) return
+        updateMetricsMutation.mutate({ recordId, payload: { metrics } })
+    }
+
+    const handleSaveTeachingHours = (hours: number) => {
+        if (!recordId) return
+        updateTeachingHoursMutation.mutate({ recordId, hours })
+    }
 
     const handleCalculate = () => {
         if (!recordId) return
@@ -88,6 +103,15 @@ export default function AdminKpiRecordDetailPage() {
                     >
                         Chi tiết bản ghi KPI
                     </h1>
+                    <ButtonGhost
+                        onClick={() =>
+                            navigate(
+                                `/admin/kpi/support-calc?recordId=${recordId}`
+                            )
+                        }
+                    >
+                        Tới máy tính hỗ trợ A1/A2 →
+                    </ButtonGhost>
                 </div>
 
                 {isLoading ? (
@@ -100,103 +124,106 @@ export default function AdminKpiRecordDetailPage() {
                             gap: '24px',
                         }}
                     >
-                        <KpiBreakdownCard data={record} readOnly={false} />
+                        <KpiBreakdownCard
+                            data={record}
+                            readOnly={false}
+                            onSaveMetrics={handleSaveMetrics}
+                            isSaving={updateMetricsMutation.isPending}
+                            onSaveTeachingHours={handleSaveTeachingHours}
+                            isSavingTeachingHours={
+                                updateTeachingHoursMutation.isPending
+                            }
+                        />
 
                         {/* Action Buttons */}
                         <Card
                             variant="outline"
-                            style={{
-                                padding: '20px 24px',
-                                display: 'flex',
-                                gap: 12,
-                                flexWrap: 'wrap',
-                                alignItems: 'center',
-                            }}
+                            style={{ padding: '20px 24px' }}
                         >
-                            <span
+                            <div
                                 style={{
-                                    fontSize: 14,
-                                    fontWeight: 600,
-                                    marginRight: 'auto',
-                                    color: 'var(--color-text-secondary)',
+                                    display: 'flex',
+                                    gap: 12,
+                                    flexWrap: 'wrap',
+                                    alignItems: 'center',
                                 }}
                             >
-                                Hành động:
-                            </span>
-
-                            {/* Calculate — available for DRAFT and SUBMITTED */}
-                            {(status === 'DRAFT' || status === 'SUBMITTED') && (
-                                <ButtonPrimary
-                                    onClick={handleCalculate}
-                                    disabled={isPending}
-                                    style={{
-                                        background: '#6366f1',
-                                        borderColor: '#6366f1',
-                                    }}
-                                >
-                                    {calcMutation.isPending
-                                        ? 'Đang tính...'
-                                        : 'Tính lại điểm'}
-                                </ButtonPrimary>
-                            )}
-
-                            {/* Submit — available for DRAFT or REJECTED */}
-                            {(status === 'DRAFT' || status === 'REJECTED') && (
-                                <ButtonPrimary
-                                    onClick={handleSubmit}
-                                    disabled={isPending}
-                                    style={{
-                                        background: '#2563eb',
-                                        borderColor: '#2563eb',
-                                    }}
-                                >
-                                    {submitMutation.isPending
-                                        ? 'Đang gửi...'
-                                        : 'Submit duyệt'}
-                                </ButtonPrimary>
-                            )}
-
-                            {/* Approve — available for SUBMITTED */}
-                            {status === 'SUBMITTED' && (
-                                <ButtonPrimary
-                                    onClick={handleApprove}
-                                    disabled={isPending}
-                                    style={{
-                                        background: '#16a34a',
-                                        borderColor: '#16a34a',
-                                    }}
-                                >
-                                    {approveMutation.isPending
-                                        ? 'Đang duyệt...'
-                                        : '✓ Duyệt'}
-                                </ButtonPrimary>
-                            )}
-
-                            {/* Reject — available for SUBMITTED */}
-                            {status === 'SUBMITTED' && (
-                                <ButtonPrimary
-                                    onClick={() => setIsRejectOpen(true)}
-                                    disabled={isPending}
-                                    style={{
-                                        background: '#dc2626',
-                                        borderColor: '#dc2626',
-                                    }}
-                                >
-                                    ✕ Từ chối
-                                </ButtonPrimary>
-                            )}
-
-                            {status === 'APPROVED' && (
                                 <span
                                     style={{
                                         fontSize: 14,
-                                        color: '#16a34a',
                                         fontWeight: 600,
+                                        marginRight: 'auto',
+                                        color: 'var(--color-text-secondary)',
                                     }}
                                 >
-                                    ✓ Bản ghi đã được duyệt
+                                    Hành động:
                                 </span>
-                            )}
+
+                                {/* Calculate — available for DRAFT and SUBMITTED */}
+                                {(status === 'DRAFT' ||
+                                    status === 'SUBMITTED') && (
+                                    <ButtonPrimary
+                                        onClick={handleCalculate}
+                                        disabled={isPending}
+                                        variant="outline"
+                                        tone="brand"
+                                    >
+                                        {calcMutation.isPending
+                                            ? 'Đang tính...'
+                                            : 'Tính lại điểm'}
+                                    </ButtonPrimary>
+                                )}
+
+                                {/* Submit — available for DRAFT or REJECTED */}
+                                {(status === 'DRAFT' ||
+                                    status === 'REJECTED') && (
+                                    <ButtonPrimary
+                                        onClick={handleSubmit}
+                                        disabled={isPending}
+                                        tone="brand"
+                                    >
+                                        {submitMutation.isPending
+                                            ? 'Đang gửi...'
+                                            : 'Submit duyệt'}
+                                    </ButtonPrimary>
+                                )}
+
+                                {/* Approve — available for SUBMITTED */}
+                                {status === 'SUBMITTED' && (
+                                    <ButtonPrimary
+                                        onClick={handleApprove}
+                                        disabled={isPending}
+                                        tone="success"
+                                    >
+                                        {approveMutation.isPending
+                                            ? 'Đang duyệt...'
+                                            : '✓ Duyệt'}
+                                    </ButtonPrimary>
+                                )}
+
+                                {/* Reject — available for SUBMITTED */}
+                                {status === 'SUBMITTED' && (
+                                    <ButtonPrimary
+                                        onClick={() => setIsRejectOpen(true)}
+                                        disabled={isPending}
+                                        tone="danger"
+                                    >
+                                        ✕ Từ chối
+                                    </ButtonPrimary>
+                                )}
+
+                                {status === 'APPROVED' && (
+                                    <span
+                                        style={{
+                                            fontSize: 14,
+                                            color: 'var(--color-status-success)',
+                                            fontWeight: 600,
+                                        }}
+                                    >
+                                        ✓ Bản ghi đã được duyệt
+                                    </span>
+                                )}
+                            </div>
                         </Card>
 
                         {/* Approval Log */}

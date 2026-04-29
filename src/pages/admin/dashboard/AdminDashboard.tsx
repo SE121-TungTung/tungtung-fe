@@ -210,14 +210,14 @@ export default function AdminDashboard() {
                             title="Phê duyệt bảng lương"
                             description="Xác nhận lương giáo viên tháng này"
                             mode="light"
-                            onClick={() => navigate('/admin/salary')}
+                            onClick={() => navigate('/admin/payroll')}
                         />
                         <TextHorizontal
                             icon={<img src={ChartBarIcon} alt="" />}
                             title="Xem báo cáo doanh thu"
                             description="Phân tích số liệu tài chính trung tâm"
                             mode="light"
-                            onClick={() => navigate('/admin/reports')}
+                            onClick={() => navigate('/admin/finance/reports')}
                         />
                     </div>
                 )

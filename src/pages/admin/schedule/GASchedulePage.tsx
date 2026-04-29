@@ -377,6 +377,7 @@ function GAOptimizerTab() {
                             <div className={s.configPanel}>
                                 <SliderField
                                     label="Population Size"
+                                    tooltip="Số phương án thời khóa biểu mà hệ thống thử cùng lúc trong mỗi vòng xử lý. Tăng lên sẽ tìm được lịch tốt hơn, nhưng thời gian chạy sẽ lâu hơn."
                                     value={form.population_size!}
                                     min={10}
                                     max={500}
@@ -387,6 +388,7 @@ function GAOptimizerTab() {
                                 />
                                 <SliderField
                                     label="Generations"
+                                    tooltip="Số vòng lặp tối đa mà hệ thống chạy để cải thiện lịch. Càng nhiều vòng thì kết quả càng chính xác. Hệ thống sẽ tự dừng sớm nếu lịch đã đủ tốt."
                                     value={form.generations!}
                                     min={50}
                                     max={2000}
@@ -397,6 +399,7 @@ function GAOptimizerTab() {
                                 />
                                 <SliderField
                                     label="Crossover Rate"
+                                    tooltip="Tỷ lệ hệ thống kết hợp 2 phương án tốt lại với nhau để tạo phương án mới. Giá trị cao (0.7–0.9) giúp nhanh tìm được lịch tối ưu."
                                     value={form.crossover_rate!}
                                     min={0}
                                     max={1}
@@ -407,6 +410,7 @@ function GAOptimizerTab() {
                                 />
                                 <SliderField
                                     label="Mutation Rate"
+                                    tooltip="Tỷ lệ hệ thống thử thay đổi ngẫu nhiên một buổi học (đổi ngày, tiết, hoặc phòng) để tìm phương án tốt hơn. Nên để trong khoảng 0.05–0.20."
                                     value={form.mutation_rate!}
                                     min={0}
                                     max={1}
@@ -422,6 +426,7 @@ function GAOptimizerTab() {
                             <div className={s.configPanel}>
                                 <SliderField
                                     label="Lịch liên tiếp"
+                                    tooltip="Mức ưu tiên tránh xếp giáo viên dạy quá 3 tiết liên tiếp trong cùng ngày. Số càng cao, hệ thống càng cố tránh xếp lịch dày cho giáo viên."
                                     value={form.weight_consecutive_limit!}
                                     min={0}
                                     max={20}
@@ -435,6 +440,7 @@ function GAOptimizerTab() {
                                 />
                                 <SliderField
                                     label="Cặp lớp cùng buổi"
+                                    tooltip="Mức ưu tiên xếp các cặp lớp liên quan vào cùng buổi (sáng/chiều/tối) trong cùng ngày. Thuận tiện cho học sinh học nhiều môn liên tiếp."
                                     value={form.weight_paired_classes!}
                                     min={0}
                                     max={20}
@@ -448,6 +454,7 @@ function GAOptimizerTab() {
                                 />
                                 <SliderField
                                     label="Sở thích buổi"
+                                    tooltip="Mức ưu tiên xếp lớp đúng buổi mong muốn (sáng/chiều/tối) mà lớp đó đã đăng ký. Số càng cao, lịch càng sát với nguyện vọng thời gian."
                                     value={form.weight_time_preference!}
                                     min={0}
                                     max={20}
@@ -461,6 +468,7 @@ function GAOptimizerTab() {
                                 />
                                 <SliderField
                                     label="Tối ưu phòng"
+                                    tooltip="Mức ưu tiên chọn phòng phù hợp với sĩ số lớp. Hệ thống sẽ cố tránh xếp lớp ít học sinh vào phòng quá lớn, hoặc ngược lại."
                                     value={form.weight_room_utilization!}
                                     min={0}
                                     max={20}
@@ -474,6 +482,7 @@ function GAOptimizerTab() {
                                 />
                                 <SliderField
                                     label="Giữ lịch cũ"
+                                    tooltip="Mức ưu tiên giữ nguyên lịch hiện tại đang có trong hệ thống. Số càng cao, hệ thống càng hạn chế thay đổi so với lịch cũ, tránh xáo trộn."
                                     value={form.weight_preserve_existing!}
                                     min={0}
                                     max={20}
@@ -865,7 +874,7 @@ function TeacherUnavailabilityTab() {
 
     const { data: teachersData } = useQuery({
         queryKey: ['users', 'teachers', 'unavail-list'],
-        queryFn: () => listUsers({ role: 'teacher', limit: 200 }),
+        queryFn: () => listUsers({ role: 'teacher', limit: 100 }),
         staleTime: 5 * 60_000,
     })
 
@@ -1367,6 +1376,83 @@ function TeacherUnavailabilityTab() {
 // Sub-components
 // ============================================================================
 
+function TooltipIcon({ text }: { text: string }) {
+    const [show, setShow] = useState(false)
+    return (
+        <span
+            style={{
+                position: 'relative',
+                display: 'inline-flex',
+                marginLeft: 6,
+                flexShrink: 0,
+            }}
+            onMouseEnter={() => setShow(true)}
+            onMouseLeave={() => setShow(false)}
+        >
+            <span
+                style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: 16,
+                    height: 16,
+                    borderRadius: '50%',
+                    background: show
+                        ? 'var(--color-brand-primary)'
+                        : 'var(--color-border-soft)',
+                    color: show ? '#fff' : 'var(--color-text-muted)',
+                    fontSize: 10,
+                    fontWeight: 700,
+                    cursor: 'help',
+                    transition: 'all 0.15s ease',
+                }}
+            >
+                ?
+            </span>
+            {show && (
+                <span
+                    style={{
+                        position: 'absolute',
+                        bottom: 'calc(100% + 8px)',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        width: 260,
+                        padding: '10px 14px',
+                        borderRadius: 'var(--primitive-radius-sm)',
+                        background: 'var(--color-surface-raised)',
+                        color: 'var(--color-text-primary)',
+                        fontSize: 12,
+                        lineHeight: 1.55,
+                        fontWeight: 400,
+                        boxShadow: '0 4px 16px rgba(0,0,0,0.14)',
+                        border: '1px solid var(--color-border-soft)',
+                        zIndex: 100,
+                        pointerEvents: 'none',
+                        whiteSpace: 'normal',
+                        wordBreak: 'break-word',
+                    }}
+                >
+                    {text}
+                    {/* Arrow */}
+                    <span
+                        style={{
+                            position: 'absolute',
+                            bottom: -5,
+                            left: '50%',
+                            transform: 'translateX(-50%) rotate(45deg)',
+                            width: 8,
+                            height: 8,
+                            background: 'var(--color-surface-raised)',
+                            borderRight: '1px solid var(--color-border-soft)',
+                            borderBottom: '1px solid var(--color-border-soft)',
+                        }}
+                    />
+                </span>
+            )}
+        </span>
+    )
+}
+
 function SliderField({
     label,
     value,
@@ -1374,6 +1460,7 @@ function SliderField({
     max,
     step,
     onChange,
+    tooltip,
 }: {
     label: string
     value: number
@@ -1381,6 +1468,7 @@ function SliderField({
     max: number
     step: number
     onChange: (v: number) => void
+    tooltip?: string
 }) {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -1389,15 +1477,19 @@ function SliderField({
                     display: 'flex',
                     justifyContent: 'space-between',
                     fontSize: 13,
+                    alignItems: 'center',
                 }}
             >
                 <span
                     style={{
                         fontWeight: 500,
                         color: 'var(--color-text-primary)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
                     }}
                 >
                     {label}
+                    {tooltip && <TooltipIcon text={tooltip} />}
                 </span>
                 <span
                     style={{

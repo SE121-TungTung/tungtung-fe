@@ -110,14 +110,14 @@ export const listClasses = async (
 
     const queryParams = new URLSearchParams()
     queryParams.append('skip', '0')
-    queryParams.append('limit', '1000')
+    queryParams.append('limit', '100')
     if (search) queryParams.append('search', search)
 
     const url = `${CLASSES_API_URL}?${queryParams.toString()}`
     const res = await api<any>(url, { method: 'GET' })
 
     const rawItems: BackendClass[] =
-        res.items ?? (Array.isArray(res) ? res : [])
+        res.data ?? res.items ?? (Array.isArray(res) ? res : [])
     let items = rawItems.map(mapClass)
 
     if (status) {

@@ -51,7 +51,7 @@
 }
 .iconBtn:hover {
     opacity: 1;
-    background-color: var(--surface-raised-light);
+    background-color: var(--color-surface-raised);
 }
 .iconBtn img {
     width: 22px;
@@ -77,7 +77,7 @@
 }
 
 .sendButton:disabled {
-    background-color: var(--surface-raised-light) !important;
+    background-color: var(--color-surface-raised) !important;
     cursor: not-allowed;
 }
 .sendButton:not(:disabled):hover {

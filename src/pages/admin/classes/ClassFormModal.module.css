@@ -1,23 +1,23 @@
 .form {
     display: flex;
     flex-direction: column;
-    gap: var(--space-24);
-    padding: var(--space-4) 0;
+    gap: var(--primitive-space-6);
+    padding: var(--primitive-space-1) 0;
 }
 
 .grid2Cols {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--space-20);
+    gap: var(--primitive-space-5);
 }
 
 .footer {
     display: flex;
     justify-content: flex-end;
-    gap: var(--space-12);
-    margin-top: var(--space-32);
-    padding-top: var(--space-24);
-    border-top: 1px solid var(--color-border-default);
+    gap: var(--primitive-space-3);
+    margin-top: var(--primitive-space-8);
+    padding-top: var(--primitive-space-6);
+    border-top: 1px solid var(--color-border-soft);
 }
 
 .submitButton {
@@ -34,34 +34,34 @@
 
 .inputLabel {
     font-weight: 600;
-    font-size: var(--caption-medium-font-size);
-    margin-bottom: var(--space-8);
-    color: var(--text-primary-light);
+    font-size: var(--primitive-text-xs);
+    margin-bottom: var(--primitive-space-2);
+    color: var(--color-text-primary);
     display: block;
 }
 
 .inputLabel::after {
     content: '*';
-    color: var(--status-danger-500-light);
-    margin-left: var(--space-4);
+    color: var(--color-status-danger);
+    margin-left: var(--primitive-space-1);
     font-weight: 700;
 }
 
 .inputLabel.optional::after {
     content: '(Tùy chọn)';
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     font-weight: 400;
     font-size: 10px;
-    margin-left: var(--space-8);
+    margin-left: var(--primitive-space-2);
 }
 
 .errorMessage {
-    color: var(--status-danger-500-light);
-    font-size: var(--font-size-xs);
-    margin-top: var(--space-8);
+    color: var(--color-status-danger);
+    font-size: var(--primitive-text-xs);
+    margin-top: var(--primitive-space-2);
     display: flex;
     align-items: center;
-    gap: var(--space-6);
+    gap: var(--primitive-space-1);
     font-weight: 500;
 }
 
@@ -103,12 +103,12 @@
 }
 
 .sectionTitle {
-    font-size: var(--font-size-md);
+    font-size: var(--primitive-text-sm);
     font-weight: 600;
     color: var(--color-text-primary);
-    margin-bottom: var(--space-16);
-    padding-bottom: var(--space-8);
-    border-bottom: 2px solid var(--color-border-strong);
+    margin-bottom: var(--primitive-space-4);
+    padding-bottom: var(--primitive-space-2);
+    border-bottom: 2px solid var(--color-border-soft);
 }
 
 /* Input focus styles enhancement */

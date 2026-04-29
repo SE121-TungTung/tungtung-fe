@@ -53,6 +53,7 @@ async function parseBody<T>(res: Response): Promise<T> {
             'data' in json &&
             'success' in json
         ) {
+            if ('meta' in json) return json as T
             return json.data as T
         }
         return json as T
@@ -66,6 +67,7 @@ async function parseBody<T>(res: Response): Promise<T> {
             'data' in json &&
             'success' in json
         ) {
+            if ('meta' in json) return json as T
             return json.data as T
         }
         return json as T

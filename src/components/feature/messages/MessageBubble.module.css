@@ -1,6 +1,6 @@
 .bubbleWrapper {
     display: flex;
-    gap: var(--space-12);
+    gap: var(--primitive-space-12);
     max-width: 70%;
 }
 
@@ -30,7 +30,7 @@
 .bubbleGroup {
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
+    gap: var(--primitive-space-4);
     max-width: 100%;
     min-width: 0;
 }
@@ -47,9 +47,9 @@
 
 .sent .bubble {
     background-color: var(--color-brand-primary);
-    color: var(--text-on-primary-light);
-    border-radius: var(--radius-lg) var(--radius-lg) var(--radius-xs)
-        var(--radius-lg);
+    color: var(--color-text-on-primary);
+    border-radius: var(--primitive-radius-lg) var(--primitive-radius-lg)
+        var(--primitive-radius-xs) var(--primitive-radius-lg);
 }
 
 .sent .bubbleGroup {
@@ -89,8 +89,8 @@
 .received .bubble {
     background-color: var(--color-surface-raised);
     color: var(--color-text-primary);
-    border-radius: var(--radius-xs) var(--radius-lg) var(--radius-lg)
-        var(--radius-lg);
+    border-radius: var(--primitive-radius-xs) var(--primitive-radius-lg)
+        var(--primitive-radius-lg) var(--primitive-radius-lg);
 }
 
 .received .bubbleGroup {
@@ -98,7 +98,7 @@
 }
 
 .bubble {
-    padding: var(--space-12) var(--space-16);
+    padding: var(--primitive-space-4) var(--primitive-space-8);
     font-size: 15px;
     line-height: 1.5;
     word-wrap: break-word;
@@ -138,15 +138,15 @@
     height: 32px;
     border-radius: 50%;
     object-fit: cover;
-    border: 1px solid var(--boder-soft-light);
+    border: 1px solid var(--color-border-soft);
 }
 
 .senderName {
     font-size: 12px;
     font-weight: 500;
     color: var(--color-text-secondary);
-    margin-bottom: var(--space-2);
-    padding: 0 var(--space-4);
+    margin-bottom: var(--primitive-space-2);
+    padding: 0 var(--primitive-space-4);
 }
 
 .text {
@@ -156,9 +156,9 @@
 
 .time {
     font-size: 11px;
-    color: var(--text-muted-light);
-    margin-top: var(--space-2);
-    padding: 0 var(--space-4);
+    color: var(--color-text-muted);
+    margin-top: var(--primitive-space-2);
+    padding: 0 var(--primitive-space-4);
 }
 
 @media (max-width: 800px) {
@@ -167,7 +167,7 @@
     }
 
     .bubble {
-        padding: var(--space-8) var(--space-12);
+        padding: var(--primitive-space-8) var(--primitive-space-12);
         font-size: 14px;
     }
 }
@@ -180,16 +180,16 @@
     font-size: 11px;
     font-style: italic;
     opacity: 0.7;
-    padding: 0 var(--space-4);
+    padding: 0 var(--primitive-space-4);
 }
 
 .sent .editedBadge {
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     justify-content: flex-end;
 }
 
 .received .editedBadge {
-    color: var(--text-muted-light);
+    color: var(--color-text-muted);
     justify-content: flex-start;
 }
 
@@ -197,27 +197,27 @@
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: var(--space-8);
+    gap: var(--primitive-space-8);
 }
 
 .editInput {
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     width: 100%;
     min-height: 60px;
-    padding: var(--space-8);
-    border: 1px solid var(--boder-soft-light);
-    border-radius: var(--radius-md);
+    padding: var(--primitive-space-8);
+    border: 1px solid var(--color-border-soft);
+    border-radius: var(--primitive-radius-md);
     font-family: inherit;
     font-size: 14px;
     resize: vertical;
-    background: var(--surface-page-light);
+    background: var(--color-surface-page);
 }
 
 .editActions {
     display: flex;
-    gap: var(--space-8);
+    gap: var(--primitive-space-8);
     justify-content: flex-end;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
 }
 
 .bubbleContainer {
@@ -234,7 +234,7 @@
     height: 28px;
     border-radius: 50%;
     border: none;
-    background-color: var(--surface-card-light);
+    background-color: var(--color-surface-card);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -246,7 +246,7 @@
 }
 
 .actionBtn:hover {
-    background-color: var(--surface-raised-light);
+    background-color: var(--color-surface-raised);
 }
 
 .bubbleWrapper:hover .actionBtn,
@@ -281,5 +281,5 @@
 }
 
 .received .statusIcon {
-    color: var(--text-muted-light);
+    color: var(--color-text-muted);
 }

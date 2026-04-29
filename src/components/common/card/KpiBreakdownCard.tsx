@@ -1,10 +1,19 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import Card from '@/components/common/card/Card'
-import type { KPIRecordDetail, ApprovalStatus } from '@/types/kpi.types'
+import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
+import type {
+    KPIRecordDetail,
+    ApprovalStatus,
+    MetricActualValueInput,
+} from '@/types/kpi.types'
 
 interface KpiBreakdownCardProps {
     data?: KPIRecordDetail | null
     readOnly?: boolean
+    onSaveMetrics?: (metrics: MetricActualValueInput[]) => void
+    isSaving?: boolean
+    onSaveTeachingHours?: (hours: number) => void
+    isSavingTeachingHours?: boolean
 }
 
 function getApprovalBadge(status: ApprovalStatus) {
@@ -55,8 +64,40 @@ function formatCurrency(v: number | null | undefined): string {
 export const KpiBreakdownCard: React.FC<KpiBreakdownCardProps> = ({
     data,
     readOnly = true,
+    onSaveMetrics,
+    isSaving = false,
+    onSaveTeachingHours,
+    isSavingTeachingHours = false,
 }) => {
+    const [edits, setEdits] = useState<Record<string, string>>({})
+    const [hoursEdit, setHoursEdit] = useState<string>('')
+
+    useEffect(() => {
+        setEdits({})
+        setHoursEdit(data?.teaching_hours?.toString() ?? '')
+    }, [data])
+
     if (!data) return null
+
+    const handleEditChange = (metricCode: string, value: string) => {
+        setEdits((prev) => ({ ...prev, [metricCode]: value }))
+    }
+
+    const handleSave = () => {
+        if (!onSaveMetrics) return
+        const metricList = Object.entries(edits)
+            .map(([metric_code, val]) => ({
+                metric_code,
+                actual_value: parseFloat(val),
+            }))
+            .filter((m) => !isNaN(m.actual_value))
+
+        if (metricList.length > 0) {
+            onSaveMetrics(metricList)
+        }
+    }
+
+    const hasEdits = Object.keys(edits).length > 0
 
     return (
         <Card variant="glass" style={{ padding: '24px' }}>
@@ -113,6 +154,7 @@ export const KpiBreakdownCard: React.FC<KpiBreakdownCardProps> = ({
                             <th style={{ ...thStyle, textAlign: 'left' }}>
                                 Tiêu chí
                             </th>
+                            <th style={thStyle}>Đơn vị</th>
                             <th style={thStyle}>Trọng số</th>
                             <th style={thStyle}>Giá trị thực</th>
                             <th style={thStyle}>Điểm quy đổi</th>
@@ -154,6 +196,15 @@ export const KpiBreakdownCard: React.FC<KpiBreakdownCardProps> = ({
                                     >
                                         {m.metric_name}
                                     </td>
+                                    <td
+                                        style={{
+                                            ...tdStyle,
+                                            textAlign: 'center',
+                                            color: 'var(--color-text-secondary)',
+                                        }}
+                                    >
+                                        {isGroup ? '' : m.unit || '—'}
+                                    </td>
                                     <td style={tdStyle}>
                                         {isGroup
                                             ? m.group_weight != null
@@ -164,13 +215,45 @@ export const KpiBreakdownCard: React.FC<KpiBreakdownCardProps> = ({
                                               : '—'}
                                     </td>
                                     <td style={tdStyle}>
-                                        {isGroup
-                                            ? ''
-                                            : m.actual_value != null
-                                              ? m.unit === '%'
-                                                  ? `${(m.actual_value * 100).toFixed(1)}%`
-                                                  : m.actual_value.toFixed(2)
-                                              : '—'}
+                                        {isGroup ? (
+                                            ''
+                                        ) : !readOnly &&
+                                          m.data_source === 'MANUAL' ? (
+                                            <input
+                                                type="number"
+                                                step={
+                                                    m.unit === '%'
+                                                        ? '0.01'
+                                                        : '0.1'
+                                                }
+                                                style={{
+                                                    width: '80px',
+                                                    textAlign: 'right',
+                                                    padding: '4px 8px',
+                                                    borderRadius: '4px',
+                                                    border: '1px solid var(--color-border-soft)',
+                                                }}
+                                                value={
+                                                    edits[m.metric_code] ??
+                                                    m.actual_value ??
+                                                    ''
+                                                }
+                                                onChange={(e) =>
+                                                    handleEditChange(
+                                                        m.metric_code,
+                                                        e.target.value
+                                                    )
+                                                }
+                                            />
+                                        ) : m.actual_value != null ? (
+                                            m.unit === '%' ? (
+                                                `${(m.actual_value * 100).toFixed(1)}%`
+                                            ) : (
+                                                m.actual_value.toFixed(2)
+                                            )
+                                        ) : (
+                                            '—'
+                                        )}
                                     </td>
                                     <td
                                         style={{
@@ -257,7 +340,60 @@ export const KpiBreakdownCard: React.FC<KpiBreakdownCardProps> = ({
                         {formatCurrency(data.bonus_amount)}
                     </div>
                 </div>
-                {data.teaching_hours != null && (
+                {data.staff_contract === 'PART_TIME' && !readOnly ? (
+                    <div>
+                        <div
+                            style={{
+                                fontSize: 12,
+                                color: 'var(--color-text-secondary)',
+                                marginBottom: 4,
+                            }}
+                        >
+                            Số giờ dạy
+                        </div>
+                        <div
+                            style={{
+                                display: 'flex',
+                                gap: 8,
+                                alignItems: 'center',
+                            }}
+                        >
+                            <input
+                                type="number"
+                                step="0.5"
+                                value={hoursEdit}
+                                onChange={(e) => setHoursEdit(e.target.value)}
+                                style={{
+                                    width: '80px',
+                                    padding: '4px 8px',
+                                    borderRadius: '4px',
+                                    border: '1px solid var(--color-border-soft)',
+                                    fontSize: 16,
+                                    fontWeight: 700,
+                                }}
+                            />
+                            {hoursEdit !== data.teaching_hours?.toString() &&
+                                onSaveTeachingHours && (
+                                    <ButtonPrimary
+                                        size="sm"
+                                        disabled={isSavingTeachingHours}
+                                        onClick={() =>
+                                            onSaveTeachingHours(
+                                                parseFloat(hoursEdit || '0')
+                                            )
+                                        }
+                                        style={{
+                                            padding: '4px 8px',
+                                            height: 'auto',
+                                            minHeight: 0,
+                                        }}
+                                    >
+                                        Lưu
+                                    </ButtonPrimary>
+                                )}
+                        </div>
+                    </div>
+                ) : data.teaching_hours != null ? (
                     <div>
                         <div
                             style={{
@@ -272,7 +408,7 @@ export const KpiBreakdownCard: React.FC<KpiBreakdownCardProps> = ({
                             {data.teaching_hours}h
                         </div>
                     </div>
-                )}
+                ) : null}
             </div>
 
             {data.rejection_note && (
@@ -292,16 +428,36 @@ export const KpiBreakdownCard: React.FC<KpiBreakdownCardProps> = ({
             )}
 
             {!readOnly && (
-                <p
+                <div
                     style={{
-                        marginTop: '16px',
-                        fontSize: '13px',
-                        color: 'var(--color-text-secondary)',
+                        marginTop: '24px',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        flexWrap: 'wrap',
+                        gap: '12px',
                     }}
                 >
-                    * Quản trị viên có thể chỉnh sửa giá trị thực và tính lại
-                    điểm từ trang chi tiết bản ghi KPI.
-                </p>
+                    <p
+                        style={{
+                            margin: 0,
+                            fontSize: '13px',
+                            color: 'var(--color-text-secondary)',
+                        }}
+                    >
+                        * Quản trị viên nhập giá trị thực cho các tiêu chí{' '}
+                        <strong>thủ công (MANUAL)</strong> và nhấn Lưu thay đổi
+                        trước khi tính lại điểm.
+                    </p>
+                    {onSaveMetrics && (
+                        <ButtonPrimary
+                            disabled={!hasEdits || isSaving}
+                            onClick={handleSave}
+                        >
+                            {isSaving ? 'Đang lưu...' : 'Lưu lại các thay đổi'}
+                        </ButtonPrimary>
+                    )}
+                </div>
             )}
         </Card>
     )

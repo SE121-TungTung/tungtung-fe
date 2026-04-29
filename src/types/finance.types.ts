@@ -1,6 +1,20 @@
-export type InvoiceStatus = 'PENDING' | 'PAID' | 'CANCELLED'
-export type PaymentStatus = 'PENDING' | 'SUCCESS' | 'FAILED'
-export type PaymentGateway = 'VNPAY' | 'MOMO' | 'CASH' | 'BANK_TRANSFER'
+export type InvoiceStatus =
+    | 'PENDING'
+    | 'PAID'
+    | 'CANCELLED'
+    | 'pending'
+    | 'paid'
+    | 'cancelled'
+export type PaymentStatus = 'pending' | 'success' | 'failed' | 'cancelled'
+export type PaymentGateway =
+    | 'vnpay'
+    | 'momo'
+    | 'cash'
+    | 'bank_transfer'
+    | 'VNPAY'
+    | 'MOMO'
+    | 'CASH'
+    | 'BANK_TRANSFER'
 export type RefundStatus = 'PENDING' | 'APPROVED' | 'REJECTED'
 
 // ============================================================================
@@ -48,6 +62,7 @@ export interface PaymentResponse {
 
 export interface PaymentCreate {
     invoice_id: string
+    amount: number
     gateway: PaymentGateway
     return_url?: string // Dùng cho web redirect
 }
@@ -100,27 +115,36 @@ export interface RefundStatusUpdate {
 export interface RevenueReportBreakdown {
     course_id: string
     course_name: string
-    revenue: number
+    total_revenue: number
+    total_invoices: number
 }
 
 export interface RevenueReportResponse {
     total_revenue: number
     total_invoices: number
     avg_payment_value: number
-    breakdown: RevenueReportBreakdown[]
+    breakdown_by_course: RevenueReportBreakdown[]
+    date_from?: string | null
+    date_to?: string | null
+}
+
+export interface ExpensesReportBreakdown {
+    category: string
+    total: number
 }
 
 export interface ExpensesReportResponse {
-    total_salary: number
-    total_operations: number
+    cost_type: string
     total_expenses: number
-    breakdown: Record<string, number>
+    breakdown_by_category: ExpensesReportBreakdown[]
+    date_from?: string | null
+    date_to?: string | null
 }
 
 export interface ProfitReportResponse {
     total_revenue: number
     total_expenses: number
-    net_profit: number
+    profit: number
     profit_margin: number
 }
 

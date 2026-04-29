@@ -12,7 +12,7 @@
 }
 
 .item:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: var(--color-surface-raised);
     transform: translateX(2px);
 }
 
@@ -83,7 +83,7 @@
     width: var(--primitive-space-6);
     height: var(--primitive-space-6);
     background-color: var(--color-status-success);
-    border: 2.5px solid var(--primitive-white);
+    border: 2.5px solid var(--color-surface-card);
     border-radius: var(--primitive-radius-full);
     box-shadow: 0 0 0 1px rgba(89, 255, 125, 0.3);
     animation: onlinePulse 2s ease-in-out infinite;

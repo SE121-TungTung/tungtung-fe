@@ -35,6 +35,18 @@ export const useMyInvoices = (page: number = 1, limit: number = 20) =>
         placeholderData: keepPreviousData,
     })
 
+export const useInvoices = (params: {
+    status?: string
+    student_id?: string
+    page?: number
+    limit?: number
+}) =>
+    useQuery({
+        queryKey: ['invoices', params],
+        queryFn: () => financeApi.listInvoices(params),
+        placeholderData: keepPreviousData,
+    })
+
 export const useInvoiceDetail = (id: string | undefined) =>
     useQuery({
         queryKey: ['invoice', id],

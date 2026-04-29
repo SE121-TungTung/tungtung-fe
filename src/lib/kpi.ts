@@ -29,9 +29,7 @@ import type {
     KpiDispute,
     KpiDisputeCreate,
     KpiDisputeResolveRequest,
-    // Tiers (deprecated)
-    KpiTier,
-    KpiTierUpdate,
+
     // Payroll
     TeacherPayrollConfig,
     TeacherPayrollConfigUpdate,
@@ -303,23 +301,13 @@ export const resolveKpiDispute = async (
     })
 
 // ============================================================================
-// 8. KPI Tiers (deprecated — kept for backward compat)
-// ============================================================================
-
-export const getKpiTiers = async (): Promise<KpiTier[]> =>
-    api<KpiTier[]>(`${API_V1}/settings/kpi-tiers`)
-
-export const updateKpiTiers = async (
-    payload: KpiTierUpdate[]
-): Promise<KpiTier[]> =>
-    api<KpiTier[]>(`${API_V1}/settings/kpi-tiers`, {
-        method: 'PUT',
-        body: JSON.stringify(payload),
-    })
-
-// ============================================================================
 // 9. Payroll Config
 // ============================================================================
+
+export const getTeacherPayrollConfig = async (
+    teacherId: string
+): Promise<TeacherPayrollConfig> =>
+    api<TeacherPayrollConfig>(`${API_V1}/teachers/${teacherId}/payroll-config`)
 
 export const updateTeacherPayrollConfig = async (
     teacherId: string,
@@ -384,6 +372,24 @@ export const getMySalaryHistory = async (params: {
     )
 }
 
+export const getTeacherSalaryHistory = async (
+    teacherId: string,
+    params: {
+        page?: number
+        limit?: number
+        period?: string
+    }
+): Promise<PaginatedResponse<Salary>> => {
+    const query = new URLSearchParams()
+    if (params.period) query.append('period', params.period)
+    if (params.page) query.append('page', params.page.toString())
+    if (params.limit) query.append('limit', params.limit.toString())
+
+    return api<PaginatedResponse<Salary>>(
+        `${API_V1}/teachers/${teacherId}/salary-history?${query.toString()}`
+    )
+}
+
 export const getSalaryDetail = async (id: string): Promise<Salary> =>
     api<Salary>(`${API_V1}/salaries/${id}`)
 
@@ -408,3 +414,9 @@ export const createPayrollRun = async (period: string): Promise<PayrollRun> =>
         method: 'POST',
         body: JSON.stringify({ period }),
     })
+
+export const getPayrollRuns = async (): Promise<PayrollRun[]> =>
+    api<PayrollRun[]>(`${API_V1}/payroll-runs`)
+
+export const getPayrollRunDetail = async (runId: string): Promise<PayrollRun> =>
+    api<PayrollRun>(`${API_V1}/payroll-runs/${runId}`)

@@ -72,10 +72,13 @@ function formatCurrency(v: number | null | undefined): string {
     }).format(v)
 }
 
+import { CreateKpiPeriodModal } from './CreateKpiPeriodModal'
+
 export default function AdminKpiOverviewPage() {
     const navigate = useNavigate()
     const [periodId, setPeriodId] = useState('')
     const [page, setPage] = useState(1)
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
     const limit = 15
 
     const handlePeriodChange = useCallback((id: string) => {
@@ -118,6 +121,17 @@ export default function AdminKpiOverviewPage() {
                         label="Chọn kỳ đánh giá"
                     />
                     <ButtonPrimary
+                        onClick={() => setIsCreateModalOpen(true)}
+                        style={{
+                            background:
+                                'var(--color-status-success-dark, #02bc2a)',
+                            borderColor:
+                                'var(--color-status-success-dark, #02bc2a)',
+                        }}
+                    >
+                        Tạo kỳ mới
+                    </ButtonPrimary>
+                    <ButtonPrimary
                         onClick={() =>
                             navigate(
                                 `/admin/kpi/calculation${periodId ? `?periodId=${periodId}` : ''}`
@@ -137,6 +151,12 @@ export default function AdminKpiOverviewPage() {
                         Quản lý Template
                     </ButtonPrimary>
                 </div>
+
+                <CreateKpiPeriodModal
+                    isOpen={isCreateModalOpen}
+                    onClose={() => setIsCreateModalOpen(false)}
+                    onSuccess={(newId) => handlePeriodChange(newId)}
+                />
 
                 {/* Stat Cards from Dashboard API */}
                 {!isLoading && dashboard && (

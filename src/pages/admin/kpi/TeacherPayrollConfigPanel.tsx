@@ -17,7 +17,7 @@ const useGetPayrollConfig = (teacherId: string) => {
             const res = await api<any>(
                 `/api/v1/teachers/${teacherId}/payroll-config`
             )
-            return res.data
+            return res
         },
         enabled: !!teacherId,
     })
@@ -82,8 +82,8 @@ export const TeacherPayrollConfigPanel: React.FC<{ teacherId: string }> = ({
                 label="Loại hợp đồng"
                 registration={register('contract_type')}
                 options={[
-                    { label: 'Thỉnh giảng (Part-time)', value: 'PART_TIME' },
-                    { label: 'Cơ hữu (Full-time)', value: 'FULL_TIME' },
+                    { label: 'Bán thời gian (Part-time)', value: 'PART_TIME' },
+                    { label: 'Toàn thời gian (Full-time)', value: 'FULL_TIME' },
                     { label: 'Giáo viên Bản ngữ', value: 'NATIVE' },
                 ]}
             />

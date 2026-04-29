@@ -4,6 +4,8 @@ export const NotificationType = {
     CLASS_ALERT: 'class_alert',
     GRADE: 'grade',
     ANNOUNCEMENT: 'announcement',
+    SCHEDULE_CHANGE: 'schedule_change',
+    PAYMENT: 'payment',
 } as const
 
 export type NotificationType =
@@ -45,10 +47,15 @@ export function isNotificationType(value: string): value is NotificationType {
     return Object.values(NotificationType).includes(value as NotificationType)
 }
 
+// New BE response shape: { success, data: Notification[], message, meta }
 export interface NotificationListResponse {
-    // notifications: NotificationResponse[]
-    notifications: Notification[]
-    total: number
+    success?: boolean
+    data: Notification[]
+    message?: string | null
+    meta?: { total?: number; page?: number; limit?: number } | null
+    // Legacy fields (kept for backward compat)
+    notifications?: Notification[]
+    total?: number
 }
 
 export interface UnreadCountResponse {

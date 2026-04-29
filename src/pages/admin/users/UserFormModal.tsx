@@ -11,8 +11,6 @@ import {
 import { Modal } from '@/components/core/Modal'
 import InputField from '@/components/common/input/InputField'
 import { SelectField } from '@/components/common/input/SelectField'
-import TabMenu from '@/components/common/menu/TabMenu'
-import { TeacherPayrollConfigPanel } from '@/pages/admin/kpi/TeacherPayrollConfigPanel'
 import styles from './UserFormModal.module.css'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import { createUser, updateUser } from '@/lib/users'
@@ -50,13 +48,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
     // const { can } = usePermissions()
     const qc = useQueryClient()
     const isEditMode = !!editingUser
-    const isTeacher = editingUser?.role === 'teacher'
-    const [activeTab, setActiveTab] = React.useState<'info' | 'payroll'>('info')
     const { alert: showAlert } = useDialog()
-
-    useEffect(() => {
-        if (!isOpen) setActiveTab('info')
-    }, [isOpen])
 
     // 1. Fetch Classes (Create only)
     const { data: classesData, isLoading: isLoadingClasses } = useQuery({
@@ -219,49 +211,28 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
             onClose={onClose}
             title={isEditMode ? 'Cập nhật hồ sơ' : 'Thêm người dùng mới'}
             footer={
-                activeTab === 'info' ? (
-                    <div className={styles.footer}>
-                        <ButtonGhost
-                            onClick={onClose}
-                            className={styles.cancelButton}
-                        >
-                            Hủy
-                        </ButtonGhost>
-                        <ButtonPrimary
-                            onClick={handleSubmit(onSubmit)}
-                            disabled={
-                                isSubmitting ||
-                                createUserMutation.isPending ||
-                                updateUserMutation.isPending
-                            }
-                            className={styles.submitButton}
-                        >
-                            {isEditMode ? 'Lưu thay đổi' : 'Tạo mới'}
-                        </ButtonPrimary>
-                    </div>
-                ) : null
+                <div className={styles.footer}>
+                    <ButtonGhost
+                        onClick={onClose}
+                        className={styles.cancelButton}
+                    >
+                        Hủy
+                    </ButtonGhost>
+                    <ButtonPrimary
+                        onClick={handleSubmit(onSubmit)}
+                        disabled={
+                            isSubmitting ||
+                            createUserMutation.isPending ||
+                            updateUserMutation.isPending
+                        }
+                        className={styles.submitButton}
+                    >
+                        {isEditMode ? 'Lưu thay đổi' : 'Tạo mới'}
+                    </ButtonPrimary>
+                </div>
             }
         >
-            {isEditMode && isTeacher && (
-                <div style={{ marginBottom: 16 }}>
-                    <TabMenu
-                        items={[
-                            { label: 'Hồ sơ', value: 'info' },
-                            { label: 'Cấu hình lương', value: 'payroll' },
-                        ]}
-                        value={activeTab}
-                        onChange={(val) =>
-                            setActiveTab(val as 'info' | 'payroll')
-                        }
-                    />
-                </div>
-            )}
-
-            <form
-                className={styles.form}
-                onSubmit={handleSubmit(onSubmit)}
-                style={{ display: activeTab === 'info' ? 'flex' : 'none' }}
-            >
+            <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
                 {/* --- NHÓM 1: THÔNG TIN CƠ BẢN --- */}
                 <h5 className={styles.sectionTitle}>Thông tin cơ bản</h5>
 
@@ -366,10 +337,6 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                     </>
                 )}
             </form>
-
-            {activeTab === 'payroll' && editingUser && (
-                <TeacherPayrollConfigPanel teacherId={editingUser.id} />
-            )}
         </Modal>
     )
 }

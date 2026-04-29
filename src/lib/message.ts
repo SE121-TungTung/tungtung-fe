@@ -62,63 +62,37 @@ function mapParticipant(member: BackendMemberResponse): Participant {
     }
 }
 
-function mapMessage(msg: BackendMessageResponse): Message {
+function mapMessage(msg: any): Message {
     let sender: Participant | undefined
 
     if (msg.sender) {
-        const fullName =
-            `${msg.sender.first_name} ${msg.sender.last_name}`.trim()
-        const { firstName, lastName } = parseFullName(fullName)
+        const originalFullName =
+            msg.sender.full_name ||
+            `${msg.sender.first_name || ''} ${msg.sender.last_name || ''}`.trim()
+        const { firstName, lastName } = parseFullName(originalFullName)
 
         sender = {
             id: msg.sender.id,
-            fullName: fullName,
+            fullName: originalFullName,
             firstName: firstName,
             lastName: lastName,
             avatarUrl: msg.sender.avatar_url || null,
-            email: '',
+            email: msg.sender.email || '',
         }
     }
 
     return {
-        id: msg.id,
+        id: msg.id || msg.message_id,
         conversationId: msg.chat_room_id,
         senderId: msg.sender_id,
         content: msg.content,
         messageType: msg.message_type,
         status: (msg.status as any) || 'read',
-        createdAt: msg.timestamp,
+        createdAt: msg.created_at || msg.timestamp || new Date().toISOString(),
         updatedAt: msg.updated_at,
         isEdited: msg.is_edited,
         attachments: msg.attachments || [],
         sender: sender,
-    }
-}
-
-function mapHistoryMessage(msg: BackendChatHistoryMessage): Message {
-    const { firstName, lastName } = parseFullName(msg.sender_name)
-
-    return {
-        id: msg.message_id,
-        conversationId: '',
-        senderId: msg.sender_id,
-        content: msg.content,
-        messageType: msg.message_type,
-        createdAt: msg.timestamp,
-        attachments: msg.attachments || [],
-        isRead: msg.is_read,
-        isStarred: msg.is_starred,
-        isEdited: msg.is_edited,
-        sender: msg.sender_id
-            ? {
-                  id: msg.sender_id,
-                  fullName: msg.sender_name,
-                  firstName,
-                  lastName,
-                  email: '',
-                  avatarUrl: null,
-              }
-            : undefined,
     }
 }
 
@@ -156,11 +130,13 @@ export const messageApi = {
 
     getConversations: async (): Promise<Conversation[]> => {
         try {
-            const response = await api<BackendConversationResponse[]>(
-                `${BASE_URL}/conversations/all`,
-                { method: 'GET' }
-            )
-            return response.map(mapConversation)
+            const response = await api<any>(`${BASE_URL}/conversations/all`, {
+                method: 'GET',
+            })
+            const data = Array.isArray(response)
+                ? response
+                : response.data || []
+            return data.map(mapConversation)
         } catch (error) {
             console.error('Error fetching conversations:', error)
             return []
@@ -186,12 +162,13 @@ export const messageApi = {
         skip = 0,
         limit = 50
     ): Promise<Message[]> => {
-        const response = await api<BackendChatHistoryMessage[]>(
+        const response = await api<any>(
             `${BASE_URL}/rooms/${roomId}/history?skip=${skip}&limit=${limit}`,
             { method: 'GET' }
         )
-        return response.map((msg) => ({
-            ...mapHistoryMessage(msg),
+        const data = Array.isArray(response) ? response : response.data || []
+        return data.map((msg: any) => ({
+            ...mapMessage(msg),
             conversationId: roomId,
         }))
     },

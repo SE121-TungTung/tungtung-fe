@@ -313,22 +313,6 @@ export interface KpiDisputeResolveRequest {
 }
 
 // ============================================================================
-// KPI Tiers (deprecated — kept for backward compat)
-// ============================================================================
-
-export interface KpiTier {
-    id: number
-    tier_name: string
-    min_score: number
-    max_score: number
-    reward_percentage: number
-    reward_per_lesson: number
-    status: ActiveStatus
-}
-
-export type KpiTierUpdate = Partial<KpiTier> & Omit<KpiTier, 'id'>
-
-// ============================================================================
 // Payroll Config
 // ============================================================================
 
@@ -357,6 +341,7 @@ export interface TeacherPayrollConfigUpdate {
 export interface Salary {
     id: string
     teacher_id: string
+    teacher_name?: string
     period: string
     contract_type: ContractType
     lesson_count: number

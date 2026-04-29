@@ -4,11 +4,12 @@ import { AsyncJobCard } from '@/components/common/async/AsyncJobCard'
 import { PeriodSelector } from '@/components/common/input/PeriodSelector'
 import { useNavigate } from 'react-router-dom'
 import { api } from '@/lib/api'
+// (no useKpiPeriods logic needed)
 import type { PayrollRun } from '@/types/kpi.types'
 
 export default function AdminPayrollRunPage() {
     const navigate = useNavigate()
-    const [period, setPeriod] = useState(() => {
+    const [period, setPeriod] = useState<string>(() => {
         const d = new Date()
         return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}`
     })
@@ -54,7 +55,7 @@ export default function AdminPayrollRunPage() {
                         <PeriodSelector
                             value={period}
                             onChange={setPeriod}
-                            label="Tháng chạy lương"
+                            label="Chọn tháng tính lương"
                         />
                     </div>
 

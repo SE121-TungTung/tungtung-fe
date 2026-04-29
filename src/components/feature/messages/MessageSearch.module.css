@@ -3,22 +3,22 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    background-color: var(--surface-card-light);
-    border-left: 1px solid var(--boder-soft-light);
+    background-color: var(--color-surface-card);
+    border-left: 1px solid var(--color-border-soft);
 }
 
 .searchHeader {
-    padding: var(--space-16);
+    padding: var(--primitive-space-16);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid var(--boder-soft-light);
+    border-bottom: 1px solid var(--color-border-soft);
 }
 
 .searchTitle {
     font-size: 16px;
     font-weight: 600;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     margin: 0;
 }
 
@@ -28,26 +28,26 @@
     border: none;
     background: transparent;
     cursor: pointer;
-    border-radius: var(--radius-full);
+    border-radius: var(--primitive-radius-full);
     display: flex;
     align-items: center;
     justify-content: center;
     transition: background-color 0.2s;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
 }
 
 .closeBtn:hover {
-    background-color: var(--surface-raised-light);
-    color: var(--text-primary-light);
+    background-color: var(--color-surface-raised);
+    color: var(--color-text-primary);
 }
 
 .searchForm {
-    padding: var(--space-12) var(--space-16);
+    padding: var(--primitive-space-12) var(--primitive-space-16);
     display: flex;
     flex-direction: column;
-    gap: var(--space-12);
-    background-color: var(--surface-page-light);
-    border-bottom: 1px solid var(--boder-soft-light);
+    gap: var(--primitive-space-12);
+    background-color: var(--color-surface-page);
+    border-bottom: 1px solid var(--color-border-soft);
 }
 
 .searchInputWrapper {
@@ -69,17 +69,17 @@
     width: 100%;
     height: 36px;
     padding: 0 12px 0 36px;
-    border: 1px solid var(--boder-soft-light);
-    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border-soft);
+    border-radius: var(--primitive-radius-md);
     font-size: 14px;
-    background: var(--palette-white);
+    background: var(--primitive-white);
     transition: all 0.2s;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
 }
 
 .searchInput:focus {
     outline: none;
-    border-color: var(--brand-primary-500-light);
+    border-color: var(--color-brand-primary);
     box-shadow: 0 0 0 2px rgba(23, 86, 118, 0.1);
 }
 
@@ -93,7 +93,7 @@
 .searchStatus {
     font-size: 12px;
     font-weight: 500;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
 }
 
 .searchNav {
@@ -104,9 +104,9 @@
 .navBtn {
     width: 28px;
     height: 28px;
-    border: 1px solid var(--boder-soft-light);
-    background: var(--palette-white);
-    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border-soft);
+    background: var(--primitive-white);
+    border-radius: var(--primitive-radius-sm);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -115,30 +115,30 @@
 }
 
 .navBtn:hover:not(:disabled) {
-    background: var(--surface-raised-light);
-    border-color: var(--brand-primary-500-light);
+    background: var(--color-surface-raised);
+    border-color: var(--color-brand-primary);
 }
 
 .navBtn:disabled {
     opacity: 0.4;
     cursor: not-allowed;
-    background: var(--surface-page-light);
+    background: var(--color-surface-page);
 }
 
 .resultList {
     flex: 1;
     overflow-y: auto;
-    padding: var(--space-8);
+    padding: var(--primitive-space-8);
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
+    gap: var(--primitive-space-4);
 }
 
 .resultItem {
     width: 100%;
-    padding: var(--space-12);
+    padding: var(--primitive-space-12);
     border: 1px solid transparent;
-    border-radius: var(--radius-md);
+    border-radius: var(--primitive-radius-md);
     background: transparent;
     cursor: pointer;
     text-align: left;
@@ -146,12 +146,12 @@
 }
 
 .resultItem:hover {
-    background: var(--surface-raised-light);
+    background: var(--color-surface-raised);
 }
 
 .resultItem.active {
     background: rgba(23, 86, 118, 0.08); /* Brand color alpha */
-    border-color: var(--brand-primary-500-light);
+    border-color: var(--color-brand-primary);
 }
 
 .resultContent {
@@ -163,12 +163,12 @@
 .resultSender {
     font-size: 12px;
     font-weight: 600;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
 }
 
 .resultText {
     font-size: 13px;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     margin: 0;
     line-height: 1.4;
     display: -webkit-box;
@@ -180,6 +180,6 @@
 
 .resultTime {
     font-size: 11px;
-    color: var(--text-muted-light);
+    color: var(--color-text-muted);
     margin-top: 2px;
 }

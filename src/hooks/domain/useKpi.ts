@@ -4,9 +4,9 @@ import {
     useQueryClient,
     keepPreviousData,
 } from '@tanstack/react-query'
+import type { UseQueryOptions } from '@tanstack/react-query'
 import * as api from '@/lib/kpi'
 import type {
-    KpiTierUpdate,
     TeacherPayrollConfigUpdate,
     KpiDisputeCreate,
     KpiDisputeResolveRequest,
@@ -351,28 +351,15 @@ export const useResolveKpiDispute = () => {
 }
 
 // ============================================================================
-// KPI Tiers (deprecated — kept for backward compat)
-// ============================================================================
-
-export const useKpiTiers = () =>
-    useQuery({
-        queryKey: ['kpi-tiers'],
-        queryFn: api.getKpiTiers,
-    })
-
-export const useUpdateKpiTiers = () => {
-    const qc = useQueryClient()
-    return useMutation({
-        mutationFn: (payload: KpiTierUpdate[]) => api.updateKpiTiers(payload),
-        onSuccess: () => {
-            qc.invalidateQueries({ queryKey: ['kpi-tiers'] })
-        },
-    })
-}
-
-// ============================================================================
 // Payroll Config
 // ============================================================================
+
+export const useTeacherPayrollConfig = (teacherId: string | undefined) =>
+    useQuery({
+        queryKey: ['teacher-payroll-config', teacherId],
+        queryFn: () => api.getTeacherPayrollConfig(teacherId!),
+        enabled: !!teacherId,
+    })
 
 export const useUpdateTeacherPayrollConfig = () => {
     const qc = useQueryClient()
@@ -397,15 +384,19 @@ export const useUpdateTeacherPayrollConfig = () => {
 // Salaries
 // ============================================================================
 
-export const useSalaries = (params: {
-    period?: string
-    page?: number
-    limit?: number
-}) =>
+export const useSalaries = (
+    params: {
+        period?: string
+        page?: number
+        limit?: number
+    },
+    options?: Omit<UseQueryOptions<any, any, any, any>, 'queryKey' | 'queryFn'>
+) =>
     useQuery({
         queryKey: ['salaries', params],
         queryFn: () => api.getSalaries(params),
         placeholderData: keepPreviousData,
+        ...options,
     })
 
 export const useMySalaryHistory = (params: {
@@ -416,6 +407,21 @@ export const useMySalaryHistory = (params: {
     useQuery({
         queryKey: ['my-salary-history', params],
         queryFn: () => api.getMySalaryHistory(params),
+        placeholderData: keepPreviousData,
+    })
+
+export const useTeacherSalaryHistory = (
+    teacherId: string | undefined,
+    params: {
+        period?: string
+        page?: number
+        limit?: number
+    }
+) =>
+    useQuery({
+        queryKey: ['teacher-salary-history', teacherId, params],
+        queryFn: () => api.getTeacherSalaryHistory(teacherId!, params),
+        enabled: !!teacherId,
         placeholderData: keepPreviousData,
     })
 
@@ -457,4 +463,17 @@ export const useAddSalaryAdjustment = () => {
 export const useCreatePayrollRun = () =>
     useMutation({
         mutationFn: (period: string) => api.createPayrollRun(period),
+    })
+
+export const usePayrollRuns = () =>
+    useQuery({
+        queryKey: ['payroll-runs'],
+        queryFn: () => api.getPayrollRuns(),
+    })
+
+export const usePayrollRunDetail = (runId: string | undefined) =>
+    useQuery({
+        queryKey: ['payroll-run-detail', runId],
+        queryFn: () => api.getPayrollRunDetail(runId!),
+        enabled: !!runId,
     })

@@ -1,23 +1,23 @@
 .form {
     display: flex;
     flex-direction: column;
-    gap: var(--space-24);
-    padding: var(--space-4) 0;
+    gap: var(--primitive-space-6);
+    padding: var(--primitive-space-1) 0;
 }
 
 .grid2Cols {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--space-20);
+    gap: var(--primitive-space-5);
 }
 
 .footer {
     display: flex;
     justify-content: flex-end;
-    gap: var(--space-12);
-    margin-top: var(--space-32);
-    padding-top: var(--space-24);
-    border-top: 1px solid var(--color-border-default);
+    gap: var(--primitive-space-3);
+    margin-top: var(--primitive-space-8);
+    padding-top: var(--primitive-space-6);
+    border-top: 1px solid var(--color-border-soft);
 }
 
 .submitButton {
@@ -34,34 +34,34 @@
 
 .inputLabel {
     font-weight: 600;
-    font-size: var(--caption-medium-font-size);
-    margin-bottom: var(--space-8);
-    color: var(--text-primary-light);
+    font-size: var(--primitive-text-xs);
+    margin-bottom: var(--primitive-space-2);
+    color: var(--color-text-primary);
     display: block;
 }
 
 .inputLabel::after {
     content: '*';
-    color: var(--status-danger-500-light);
-    margin-left: var(--space-4);
+    color: var(--color-status-danger);
+    margin-left: var(--primitive-space-1);
     font-weight: 700;
 }
 
 .inputLabel.optional::after {
     content: '(Tùy chọn)';
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     font-weight: 400;
     font-size: 10px;
-    margin-left: var(--space-8);
+    margin-left: var(--primitive-space-2);
 }
 
 .errorMessage {
-    color: var(--status-danger-500-light);
-    font-size: var(--font-size-xs);
-    margin-top: var(--space-8);
+    color: var(--color-status-danger);
+    font-size: var(--primitive-text-xs);
+    margin-top: var(--primitive-space-2);
     display: flex;
     align-items: center;
-    gap: var(--space-6);
+    gap: var(--primitive-space-1);
     font-weight: 500;
 }
 
@@ -103,12 +103,12 @@
 }
 
 .sectionTitle {
-    font-size: var(--font-size-md);
+    font-size: var(--primitive-text-sm);
     font-weight: 600;
     color: var(--color-text-primary);
-    margin-bottom: var(--space-16);
-    padding-bottom: var(--space-8);
-    border-bottom: 2px solid var(--color-border-strong);
+    margin-bottom: var(--primitive-space-4);
+    padding-bottom: var(--primitive-space-2);
+    border-bottom: 2px solid var(--color-border-soft);
 }
 
 /* Input focus styles enhancement */
@@ -140,14 +140,14 @@
     display: grid;
     /* Chia cột: Tên (lớn) - Số lượng (nhỏ) - Nút xóa (icon) */
     grid-template-columns: 2fr 1fr auto;
-    gap: var(--space-12);
+    gap: var(--primitive-space-3);
     align-items: flex-start; /* Căn lề trên để khớp input */
-    padding: var(--space-12);
+    padding: var(--primitive-space-3);
     background-color: var(
-        --surface-raised-light
+        --color-surface-raised
     ); /* Nền nổi nhẹ để phân biệt */
-    border: 1px solid var(--container-border-light);
-    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border-soft);
+    border-radius: var(--primitive-radius-md);
     animation: fadeIn 0.2s ease-out;
 }
 
@@ -158,44 +158,43 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--color-semantic-status-danger-500);
+    border: 1px solid var(--color-status-danger);
     background-color: transparent;
-    color: var(--color-semantic-status-danger-500);
-    border-radius: var(--radius-sm);
+    color: var(--color-status-danger);
+    border-radius: var(--primitive-radius-sm);
     cursor: pointer;
     transition: all 0.2s;
-    margin-top: 28px; /* Đẩy xuống để ngang hàng với input field (trừ label) */
+    margin-top: var(
+        --primitive-space-7
+    ); /* Đẩy xuống để ngang hàng với input field (trừ label) */
 }
 
 .removeBtn:hover {
-    background-color: var(--status-danger-500-light);
-    color: var(--text-on-primary-light);
+    background-color: var(--color-status-danger-bg);
 }
 
 .addBtn {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--space-8);
+    gap: var(--primitive-space-2);
     width: 100%;
-    padding: var(--space-8) var(--space-16);
-    margin-top: var(--space-8);
-    border: 1px dashed var(--brand-primary-500-light);
-    border-radius: var(--radius-md);
+    padding: var(--primitive-space-2) var(--primitive-space-4);
+    margin-top: var(--primitive-space-2);
+    border: 1px dashed var(--color-brand-primary);
+    border-radius: var(--primitive-radius-md);
     background-color: transparent;
-    color: var(--brand-primary-500-light);
+    color: var(--color-brand-primary);
     font-weight: 600;
-    font-size: var(--caption-medium-font-size);
+    font-size: var(--primitive-text-xs);
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .addBtn:hover {
-    background-color: var(
-        --button-primary-bg-light
-    ); /* Hoặc dùng semantic surface overlay */
+    background-color: var(--color-brand-primary-light);
     border-style: solid;
-    color: var(--text-on-primary-light);
+    color: var(--color-text-on-primary);
 }
 
 /* Responsive cho mobile */

@@ -106,7 +106,8 @@ export async function listRooms(
     const url = `/api/v1/rooms/${qs.toString() ? `?${qs.toString()}` : ''}`
     const res = await api<any>(url, { method: 'GET' })
 
-    const raw = res.items ?? res.rooms ?? (Array.isArray(res) ? res : [])
+    const raw =
+        res.data ?? res.items ?? res.rooms ?? (Array.isArray(res) ? res : [])
     let items = raw.map(mapRoom)
 
     if (status) {

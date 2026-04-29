@@ -2,17 +2,39 @@ import { useState } from 'react'
 import Card from '@/components/common/card/Card'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import { EmptyState } from '@/components/common/state/EmptyState'
-import { usePayments, usePaymentReceipt } from '@/hooks/domain/useFinance'
+import {
+    usePayments,
+    usePaymentReceipt,
+    useInvoices,
+} from '@/hooks/domain/useFinance'
+import { CreateInvoiceModal } from './CreateInvoiceModal'
+import { useQueryClient } from '@tanstack/react-query'
 import s from './Finance.module.css'
 
 function StatusBadge({ status }: { status: string }) {
-    if (status === 'SUCCESS')
+    const isSuccessOrPaid =
+        status === 'success' || status === 'PAID' || status === 'paid'
+    const isCancelled = status === 'cancelled' || status === 'CANCELLED'
+    const isPending = status === 'PENDING' || status === 'pending'
+
+    if (isSuccessOrPaid)
         return (
-            <span className={`${s.badge} ${s.badgeSuccess}`}>Thành công</span>
+            <span className={`${s.badge} ${s.badgeSuccess}`}>
+                {status === 'PAID' || status === 'paid'
+                    ? 'Đã thu'
+                    : 'Thành công'}
+            </span>
         )
-    if (status === 'FAILED')
+    if (status === 'failed')
         return <span className={`${s.badge} ${s.badgeFailed}`}>Thất bại</span>
-    return <span className={`${s.badge} ${s.badgePending}`}>Chờ xử lý</span>
+    if (isCancelled)
+        return <span className={`${s.badge} ${s.badgeFailed}`}>Đã hủy</span>
+
+    return (
+        <span className={`${s.badge} ${s.badgePending}`}>
+            {isPending ? 'Chưa thu' : 'Chờ xử lý'}
+        </span>
+    )
 }
 
 function ReceiptButton({ paymentId }: { paymentId: string }) {
@@ -29,7 +51,7 @@ function ReceiptButton({ paymentId }: { paymentId: string }) {
         <button
             onClick={handleDownload}
             disabled={isFetching}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-brand-primary bg-brand-primary/10 rounded-md hover:bg-brand-primary/20 transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-brand-primary bg-brand-primary/10 rounded-md hover:bg-brand-primary/20 transition-colors border-0"
         >
             <svg
                 width="16"
@@ -53,17 +75,45 @@ function ReceiptButton({ paymentId }: { paymentId: string }) {
 }
 
 export default function AdminInvoicePage() {
+    const [activeTab, setActiveTab] = useState<'invoices' | 'payments'>(
+        'invoices'
+    )
     const [page, setPage] = useState(1)
     const [statusFilter, setStatusFilter] = useState<string>('')
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+    const queryClient = useQueryClient()
+
+    // 1. Fetch Invoices
+    const {
+        data: invoicesRes,
+        isLoading: isLoadingInvoices,
+        isError: isErrorInvoices,
+    } = useInvoices({ page, limit: 15, status: statusFilter || undefined })
+
+    // 2. Fetch Payments
     const {
         data: paymentsRes,
-        isLoading,
-        isError,
+        isLoading: isLoadingPayments,
+        isError: isErrorPayments,
     } = usePayments({ page, limit: 15, status: statusFilter || undefined })
 
+    const invoices = invoicesRes?.data || []
     const payments = paymentsRes?.data || []
-    // TODO: implement actual pagination correctly using paymentsRes.meta.total_pages
-    const totalPages = paymentsRes?.meta?.total_pages || 1
+
+    const isLoading =
+        activeTab === 'invoices' ? isLoadingInvoices : isLoadingPayments
+    const isError = activeTab === 'invoices' ? isErrorInvoices : isErrorPayments
+    const items = activeTab === 'invoices' ? invoices : payments
+    const totalPages =
+        activeTab === 'invoices'
+            ? invoicesRes?.meta?.total_pages || 1
+            : paymentsRes?.meta?.total_pages || 1
+
+    const handleTabChange = (tab: 'invoices' | 'payments') => {
+        setActiveTab(tab)
+        setPage(1)
+        setStatusFilter('')
+    }
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -90,10 +140,10 @@ export default function AdminInvoicePage() {
                             margin: 0,
                         }}
                     >
-                        Theo dõi lịch sử giao dịch và xuất biên lai học phí.
+                        Theo dõi danh sách hóa đơn học phí và lịch sử giao dịch.
                     </p>
                 </div>
-                <ButtonPrimary>
+                <ButtonPrimary onClick={() => setIsCreateModalOpen(true)}>
                     <div
                         style={{
                             display: 'flex',
@@ -117,6 +167,67 @@ export default function AdminInvoicePage() {
                         Tạo Hóa Đơn Mới
                     </div>
                 </ButtonPrimary>
+
+                <CreateInvoiceModal
+                    isOpen={isCreateModalOpen}
+                    onClose={() => setIsCreateModalOpen(false)}
+                    onSuccess={() => {
+                        queryClient.invalidateQueries({
+                            queryKey: ['invoices'],
+                        })
+                        queryClient.invalidateQueries({
+                            queryKey: ['payments'],
+                        })
+                    }}
+                />
+            </div>
+
+            {/* Tabs */}
+            <div
+                style={{
+                    borderBottom: '1px solid var(--color-border-soft)',
+                    display: 'flex',
+                    gap: '24px',
+                }}
+            >
+                <div
+                    onClick={() => handleTabChange('invoices')}
+                    style={{
+                        padding: '12px 4px',
+                        cursor: 'pointer',
+                        borderBottom:
+                            activeTab === 'invoices'
+                                ? '2px solid var(--color-primary)'
+                                : '2px solid transparent',
+                        color:
+                            activeTab === 'invoices'
+                                ? 'var(--color-primary)'
+                                : 'var(--color-text-secondary)',
+                        fontWeight: activeTab === 'invoices' ? 600 : 500,
+                        transition: 'all 0.2s',
+                    }}
+                >
+                    Danh sách hóa đơn
+                </div>
+                <div
+                    onClick={() => handleTabChange('payments')}
+                    style={{
+                        padding: '12px 4px',
+                        cursor: 'pointer',
+                        borderBottom:
+                            activeTab === 'payments'
+                                ? '2px solid var(--color-primary)'
+                                : '2px solid transparent',
+                        color:
+                            activeTab === 'payments'
+                                ? 'var(--color-primary)'
+                                : 'var(--color-text-secondary)',
+                        fontWeight: activeTab === 'payments' ? 600 : 500,
+                        transition: 'all 0.2s',
+                    }}
+                >
+                    Lịch sử thanh toán
+                </div>
             </div>
 
             <Card variant="glass" style={{ padding: '16px' }}>
@@ -150,7 +261,7 @@ export default function AdminInvoicePage() {
                         </svg>
                         <input
                             type="text"
-                            placeholder="Tìm kiếm theo mã giao dịch..."
+                            placeholder="Tìm kiếm..."
                             style={{
                                 width: '100%',
                                 padding: '10px 10px 10px 40px',
@@ -161,25 +272,48 @@ export default function AdminInvoicePage() {
                             }}
                         />
                     </div>
-                    <select
-                        value={statusFilter}
-                        onChange={(e) => {
-                            setStatusFilter(e.target.value)
-                            setPage(1)
-                        }}
-                        style={{
-                            padding: '10px 16px',
-                            borderRadius: 'var(--input-radius)',
-                            border: '1px solid var(--input-border)',
-                            background: 'var(--input-bg)',
-                            color: 'var(--input-text)',
-                        }}
-                    >
-                        <option value="">Tất cả trạng thái</option>
-                        <option value="SUCCESS">Thành công</option>
-                        <option value="PENDING">Chờ xử lý</option>
-                        <option value="FAILED">Thất bại</option>
-                    </select>
+                    {activeTab === 'invoices' ? (
+                        <select
+                            value={statusFilter}
+                            onChange={(e) => {
+                                setStatusFilter(e.target.value)
+                                setPage(1)
+                            }}
+                            style={{
+                                padding: '10px 16px',
+                                borderRadius: 'var(--input-radius)',
+                                border: '1px solid var(--input-border)',
+                                background: 'var(--input-bg)',
+                                color: 'var(--input-text)',
+                            }}
+                        >
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="PENDING">Chưa thu</option>
+                            <option value="PAID">Đã thu</option>
+                            <option value="CANCELLED">Đã hủy</option>
+                        </select>
+                    ) : (
+                        <select
+                            value={statusFilter}
+                            onChange={(e) => {
+                                setStatusFilter(e.target.value)
+                                setPage(1)
+                            }}
+                            style={{
+                                padding: '10px 16px',
+                                borderRadius: 'var(--input-radius)',
+                                border: '1px solid var(--input-border)',
+                                background: 'var(--input-bg)',
+                                color: 'var(--input-text)',
+                            }}
+                        >
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="success">Thành công</option>
+                            <option value="pending">Chờ xử lý</option>
+                            <option value="failed">Thất bại</option>
+                            <option value="cancelled">Đã hủy</option>
+                        </select>
+                    )}
                 </div>
             </Card>
 
@@ -199,51 +333,90 @@ export default function AdminInvoicePage() {
                         title="Lỗi tải dữ liệu"
                         description="Không thể kết nối đến máy chủ."
                     />
-                ) : payments.length === 0 ? (
+                ) : items.length === 0 ? (
                     <EmptyState
-                        title="Chống vắng"
-                        description="Không tìm thấy giao dịch nào."
+                        title="Trống vắng"
+                        description="Không tìm thấy dữ liệu nào."
                     />
                 ) : (
                     <div className={s.tableWrapper}>
                         <table className={s.table}>
                             <thead>
-                                <tr>
-                                    <th>Mã GD Gateway</th>
-                                    <th>Phương thức</th>
-                                    <th>Số tiền</th>
-                                    <th>Thời gian</th>
-                                    <th>Trạng thái</th>
-                                    <th>Hành động</th>
-                                </tr>
+                                {activeTab === 'invoices' ? (
+                                    <tr>
+                                        <th>Khách hàng</th>
+                                        <th>Khóa học</th>
+                                        <th>Tổng tiền</th>
+                                        <th>Ngày tạo</th>
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                ) : (
+                                    <tr>
+                                        <th>Mã GD Gateway</th>
+                                        <th>Phương thức</th>
+                                        <th>Số tiền</th>
+                                        <th>Thời gian</th>
+                                        <th>Trạng thái</th>
+                                        <th>Hành động</th>
+                                    </tr>
+                                )}
                             </thead>
                             <tbody>
-                                {payments.map((p) => (
-                                    <tr key={p.id} className={s.tableRow}>
-                                        <td className={s.tdNum}>
-                                            {p.gateway_transaction_id || '—'}
-                                        </td>
-                                        <td>{p.payment_method}</td>
-                                        <td className={s.tdAmount}>
-                                            {p.amount.toLocaleString()} đ
-                                        </td>
-                                        <td className={s.tdNum}>
-                                            {new Date(
-                                                p.created_at
-                                            ).toLocaleString('vi-VN')}
-                                        </td>
-                                        <td>
-                                            <StatusBadge status={p.status} />
-                                        </td>
-                                        <td className={s.actionCell}>
-                                            {p.status === 'SUCCESS' && (
-                                                <ReceiptButton
-                                                    paymentId={p.id}
-                                                />
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))}
+                                {activeTab === 'invoices'
+                                    ? invoices.map((inv: any) => (
+                                          <tr
+                                              key={inv.id}
+                                              className={s.tableRow}
+                                          >
+                                              <td style={{ fontWeight: 500 }}>
+                                                  {inv.student_name || '—'}
+                                              </td>
+                                              <td>{inv.course_name || '—'}</td>
+                                              <td className={s.tdAmount}>
+                                                  {inv.final_amount?.toLocaleString()}{' '}
+                                                  đ
+                                              </td>
+                                              <td className={s.tdNum}>
+                                                  {new Date(
+                                                      inv.created_at
+                                                  ).toLocaleString('vi-VN')}
+                                              </td>
+                                              <td>
+                                                  <StatusBadge
+                                                      status={inv.status}
+                                                  />
+                                              </td>
+                                          </tr>
+                                      ))
+                                    : payments.map((p: any) => (
+                                          <tr key={p.id} className={s.tableRow}>
+                                              <td className={s.tdNum}>
+                                                  {p.gateway_transaction_id ||
+                                                      '—'}
+                                              </td>
+                                              <td>{p.payment_method}</td>
+                                              <td className={s.tdAmount}>
+                                                  {p.amount?.toLocaleString()} đ
+                                              </td>
+                                              <td className={s.tdNum}>
+                                                  {new Date(
+                                                      p.created_at
+                                                  ).toLocaleString('vi-VN')}
+                                              </td>
+                                              <td>
+                                                  <StatusBadge
+                                                      status={p.status}
+                                                  />
+                                              </td>
+                                              <td className={s.actionCell}>
+                                                  {p.status === 'success' && (
+                                                      <ReceiptButton
+                                                          paymentId={p.id}
+                                                      />
+                                                  )}
+                                              </td>
+                                          </tr>
+                                      ))}
                             </tbody>
                         </table>
                     </div>
@@ -265,6 +438,8 @@ export default function AdminInvoicePage() {
                             padding: '8px 16px',
                             borderRadius: '8px',
                             border: '1px solid var(--color-border-soft)',
+                            background: 'transparent',
+                            cursor: page === 1 ? 'not-allowed' : 'pointer',
                         }}
                     >
                         Trước
@@ -281,6 +456,9 @@ export default function AdminInvoicePage() {
                             padding: '8px 16px',
                             borderRadius: '8px',
                             border: '1px solid var(--color-border-soft)',
+                            background: 'transparent',
+                            cursor:
+                                page === totalPages ? 'not-allowed' : 'pointer',
                         }}
                     >
                         Sau

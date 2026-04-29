@@ -398,11 +398,11 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                                                             'admin' ? (
                                                                 <span
                                                                     style={{
-                                                                        color: 'var(--brand-primary-500-light)',
+                                                                        color: 'var(--color-text-on-primary)',
                                                                         fontWeight: 700,
                                                                         fontSize: 11,
                                                                         backgroundColor:
-                                                                            'var(--brand-primary-50-light)',
+                                                                            'var(--color-brand-primary)',
                                                                         padding:
                                                                             '2px 6px',
                                                                         borderRadius:
@@ -616,7 +616,7 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                                 height: '200px',
                                 borderRadius: '50%',
                                 overflow: 'hidden',
-                                border: '4px solid var(--surface-raised-light)',
+                                border: '4px solid var(--color-surface-raised)',
                                 boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                             }}
                         >
@@ -635,7 +635,7 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                         <p
                             style={{
                                 marginTop: '16px',
-                                color: 'var(--text-secondary-light)',
+                                color: 'var(--color-text-secondary)',
                                 textAlign: 'center',
                             }}
                         >
@@ -712,9 +712,8 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                                 disabled={leaveGroupMutation.isPending}
                                 style={{
                                     backgroundColor:
-                                        'var(--status-danger-500-light)',
-                                    borderColor:
-                                        'var(--status-danger-500-light)',
+                                        'var(--color-status-danger)',
+                                    borderColor: 'var(--color-status-danger)',
                                 }}
                             >
                                 {leaveGroupMutation.isPending
@@ -726,7 +725,7 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                 >
                     <p
                         style={{
-                            color: 'var(--text-secondary-light)',
+                            color: 'var(--color-text-secondary)',
                             lineHeight: 1.5,
                         }}
                     >
@@ -804,7 +803,7 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                                         key={u.id}
                                         style={{
                                             background: '#eef2ff',
-                                            color: 'var(--brand-primary-600-light)',
+                                            color: 'var(--color-brand-primary)',
                                             padding: '4px 10px',
                                             borderRadius: '16px',
                                             fontSize: '12px',
@@ -866,7 +865,7 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                                                     ? '#eff6ff'
                                                     : undefined,
                                                 border: isSelected
-                                                    ? '1px solid var(--brand-primary-200-light)'
+                                                    ? '1px solid var(--color-brand-primary)'
                                                     : '1px solid transparent',
                                             }}
                                         >
@@ -939,9 +938,8 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                                 disabled={deleteConversationMutation.isPending}
                                 style={{
                                     backgroundColor:
-                                        'var(--status-danger-500-light)',
-                                    borderColor:
-                                        'var(--status-danger-500-light)',
+                                        'var(--color-status-danger)',
+                                    borderColor: 'var(--color-status-danger)',
                                 }}
                             >
                                 {deleteConversationMutation.isPending
@@ -953,7 +951,7 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                 >
                     <p
                         style={{
-                            color: 'var(--text-secondary-light)',
+                            color: 'var(--color-text-secondary)',
                             lineHeight: 1.5,
                         }}
                     >

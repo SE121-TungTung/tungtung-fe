@@ -41,8 +41,8 @@ export default function AuditLogPage() {
         placeholderData: (previousData) => previousData,
     })
 
-    const logs = data?.items || []
-    const totalCount = data?.total || 0
+    const logs = data?.data || []
+    const totalCount = data?.meta?.total || 0
     const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
 
     // Handle filter changes

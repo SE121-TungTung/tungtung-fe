@@ -1,13 +1,14 @@
 import React, { useState } from 'react'
 import s from './UserManagementPage.module.css'
 import Card from '@/components/common/card/Card'
-import { Button } from '@/components/common/button/Button'
 import IconPlus from '@/assets/Plus Thin.svg'
 import IconSearch from '@/assets/Lens.svg'
 import InputField from '@/components/common/input/InputField'
 import { ALL_ROLES } from '@/types/auth'
 import { UserFormModal } from './UserFormModal'
 import { UserTable } from './UserTable'
+import { UserEnrollmentsModal } from './UserEnrollmentsModal'
+import { TeacherFinanceModal } from './TeacherFinanceModal'
 import { usePermissions } from '@/hooks/usePermissions'
 import { SelectField } from '@/components/common/input/SelectField'
 import { useDialog } from '@/hooks/useDialog'
@@ -18,11 +19,14 @@ import Pagination from '@/components/common/menu/Pagination'
 import { useUsers, useDeleteUser } from '@/hooks/domain/useUsers'
 import { useTableParams } from '@/hooks/useTableParams'
 import { useQueryClient } from '@tanstack/react-query'
+import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 
 export const UserManagementPage: React.FC = () => {
     // 1. Setup UI State (Modal)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [editingUser, setEditingUser] = useState<User | null>(null)
+    const [enrollmentUser, setEnrollmentUser] = useState<User | null>(null)
+    const [financeUser, setFinanceUser] = useState<User | null>(null)
     const { alert: showAlert, confirm: showConfirm } = useDialog()
     const { canAny } = usePermissions()
     const canCreateUser = canAny(['user:create:student', 'user:create:teacher'])
@@ -100,6 +104,14 @@ export const UserManagementPage: React.FC = () => {
             console.log('Toggling lock for user:', user.id)
             showAlert('Chức năng này chưa được triển khai.', 'Thông báo')
         }
+    }
+
+    const handleViewEnrollments = (user: User) => {
+        setEnrollmentUser(user)
+    }
+
+    const handleViewFinance = (user: User) => {
+        setFinanceUser(user)
     }
 
     return (
@@ -184,14 +196,12 @@ export const UserManagementPage: React.FC = () => {
                     </div>
 
                     {canCreateUser && (
-                        <Button variant="glass" onClick={handleOpenCreateModal}>
-                            <img
-                                src={IconPlus}
-                                alt=""
-                                className={s.buttonIcon}
-                            />
+                        <ButtonPrimary
+                            leftIcon={<img src={IconPlus} alt="" />}
+                            onClick={handleOpenCreateModal}
+                        >
                             Tạo Người dùng
-                        </Button>
+                        </ButtonPrimary>
                     )}
                 </Card>
 
@@ -203,6 +213,8 @@ export const UserManagementPage: React.FC = () => {
                         onEditUser={handleOpenEditModal}
                         onDeleteUser={handleDeleteUser}
                         onLockUser={handleLockUser}
+                        onViewEnrollments={handleViewEnrollments}
+                        onViewFinance={handleViewFinance}
                     />
                     <div className={s.paginationWrapper}>
                         <Pagination
@@ -219,6 +231,18 @@ export const UserManagementPage: React.FC = () => {
                 onClose={handleCloseModal}
                 editingUser={editingUser}
                 onSuccess={handleUserSaved}
+            />
+
+            <UserEnrollmentsModal
+                isOpen={!!enrollmentUser}
+                onClose={() => setEnrollmentUser(null)}
+                user={enrollmentUser}
+            />
+
+            <TeacherFinanceModal
+                isOpen={!!financeUser}
+                onClose={() => setFinanceUser(null)}
+                user={financeUser}
             />
         </div>
     )

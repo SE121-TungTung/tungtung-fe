@@ -4,18 +4,20 @@ import Card from '@/components/common/card/Card'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import { PeriodSelector } from '@/components/common/input/PeriodSelector'
 import { useNavigate } from 'react-router-dom'
-import { useMySalaryHistory } from '@/hooks/domain/useKpi'
+import { useSalaries } from '@/hooks/domain/useKpi'
 import Pagination from '@/components/common/menu/Pagination'
 import { StatusBadge } from '@/components/common/typography/StatusBadge'
 import { EmptyState } from '@/components/common/state/EmptyState'
 export default function TeacherSalaryHistoryPage() {
     const navigate = useNavigate()
-    const [period, setPeriod] = useState('')
-    const [page, setPage] = useState(0)
+    const [page, setPage] = useState(1)
+    const [period, setPeriod] = useState<string>(() => {
+        const d = new Date()
+        return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}`
+    })
 
-    // We fetch my salary history, allowing pagination and optional period filtering
-    const { data: history, isLoading } = useMySalaryHistory({
-        period: period || undefined,
+    const { data: history, isLoading } = useSalaries({
+        period: period,
         page,
         limit: 10,
     })
@@ -49,7 +51,7 @@ export default function TeacherSalaryHistoryPage() {
                     <PeriodSelector
                         value={period}
                         onChange={setPeriod}
-                        label="Lọc theo tháng (Để trống xem tất cả)"
+                        label="Lọc theo tháng"
                     />
                 </div>
 
@@ -131,7 +133,7 @@ export default function TeacherSalaryHistoryPage() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {items.map((s) => (
+                                    {history?.data?.map((s: any) => (
                                         <tr key={s.id}>
                                             <td
                                                 style={{

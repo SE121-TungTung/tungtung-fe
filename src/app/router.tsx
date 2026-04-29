@@ -43,7 +43,7 @@ import GradeAttemptPage from '@/pages/teacher/grading/GradeAttemptPage'
 import { useSession } from '@/stores/session.store'
 
 // KPI & Salary
-import KpiTiersSettingsPage from '@/pages/admin/kpi/KpiTiersSettingsPage'
+
 import AdminKpiOverviewPage from '@/pages/admin/kpi/AdminKpiOverviewPage'
 import AdminKpiCalculationPage from '@/pages/admin/kpi/AdminKpiCalculationPage'
 import AdminKpiRecordDetailPage from '@/pages/admin/kpi/AdminKpiRecordDetailPage'
@@ -51,6 +51,7 @@ import AdminKpiTemplatePage from '@/pages/admin/kpi/AdminKpiTemplatePage'
 import AdminSupportCalcPage from '@/pages/admin/kpi/AdminSupportCalcPage'
 import AdminPayrollListPage from '@/pages/admin/salary/AdminPayrollListPage'
 import AdminPayrollRunPage from '@/pages/admin/salary/AdminPayrollRunPage'
+import AdminPayrollRunDetailPage from '@/pages/admin/salary/AdminPayrollRunDetailPage'
 import AdminSalaryDetailPage from '@/pages/admin/salary/AdminSalaryDetailPage'
 
 import TeacherKpiDashboard from '@/pages/teacher/kpi/TeacherKpiDashboard'
@@ -430,16 +431,7 @@ export const router = createBrowserRouter([
                             </ProtectedRoute>
                         ),
                     },
-                    {
-                        path: '/admin/settings/kpi-tiers',
-                        element: (
-                            <ProtectedRoute
-                                allowedRoles={['system_admin', 'center_admin']}
-                            >
-                                <KpiTiersSettingsPage />
-                            </ProtectedRoute>
-                        ),
-                    },
+
                     {
                         path: '/admin/kpi',
                         element: (
@@ -547,6 +539,16 @@ export const router = createBrowserRouter([
                                 allowedRoles={['system_admin', 'center_admin']}
                             >
                                 <AdminPayrollRunPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/admin/payroll-runs/:runId',
+                        element: (
+                            <ProtectedRoute
+                                allowedRoles={['system_admin', 'center_admin']}
+                            >
+                                <AdminPayrollRunDetailPage />
                             </ProtectedRoute>
                         ),
                     },

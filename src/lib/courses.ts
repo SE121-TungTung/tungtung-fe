@@ -87,7 +87,7 @@ export const listCourses = async (
     const url = `${COURSES_API_URL}${qs.toString() ? `?${qs.toString()}` : ''}`
     const res = await api<any>(url, { method: 'GET' })
 
-    const raw = res.items ?? (Array.isArray(res) ? res : [])
+    const raw = res.data ?? res.items ?? (Array.isArray(res) ? res : [])
     let items = raw.map(mapCourse)
 
     if (level) {

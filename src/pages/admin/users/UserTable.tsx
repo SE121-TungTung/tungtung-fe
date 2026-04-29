@@ -40,6 +40,8 @@ interface UserTableProps {
     onEditUser: (user: User) => void
     onDeleteUser: (user: User) => void
     onLockUser: (user: User) => void
+    onViewEnrollments?: (user: User) => void
+    onViewFinance?: (user: User) => void
     users: User[]
     isLoading?: boolean
 }
@@ -48,6 +50,8 @@ export const UserTable: React.FC<UserTableProps> = ({
     onEditUser,
     onDeleteUser,
     onLockUser,
+    onViewEnrollments,
+    onViewFinance,
     users,
     isLoading,
 }) => {
@@ -162,6 +166,8 @@ export const UserTable: React.FC<UserTableProps> = ({
                         const canLock = can('user:lock') && canActOnUser(user)
                         const canDelete =
                             can('user:delete') && canActOnUser(user)
+                        const isStudent = user.role === 'student'
+                        const isTeacher = user.role === 'teacher'
                         return (
                             <tr key={user.id}>
                                 <td>
@@ -205,6 +211,66 @@ export const UserTable: React.FC<UserTableProps> = ({
                                 </td>
                                 <td>
                                     <div className={s.actionsCell}>
+                                        {isStudent && onViewEnrollments && (
+                                            <ButtonPrimary
+                                                variant="ghost"
+                                                size="sm"
+                                                iconOnly
+                                                onClick={() =>
+                                                    onViewEnrollments(user)
+                                                }
+                                                title="Quản lý lớp học"
+                                                style={{
+                                                    color: 'var(--color-text-secondary)',
+                                                }}
+                                            >
+                                                <svg
+                                                    width="24"
+                                                    height="24"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="2"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                >
+                                                    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
+                                                </svg>
+                                            </ButtonPrimary>
+                                        )}
+                                        {isTeacher && onViewFinance && (
+                                            <ButtonPrimary
+                                                variant="ghost"
+                                                size="sm"
+                                                iconOnly
+                                                onClick={() =>
+                                                    onViewFinance(user)
+                                                }
+                                                title="Cấu hình & Lịch sử lương"
+                                                style={{
+                                                    color: 'var(--color-text-secondary)',
+                                                }}
+                                            >
+                                                <svg
+                                                    width="24"
+                                                    height="24"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="2"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                >
+                                                    <circle
+                                                        cx="12"
+                                                        cy="12"
+                                                        r="10"
+                                                    />
+                                                    <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
+                                                    <path d="M12 18V6" />
+                                                </svg>
+                                            </ButtonPrimary>
+                                        )}
                                         <ButtonPrimary
                                             variant="ghost"
                                             size="sm"

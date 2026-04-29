@@ -66,7 +66,11 @@ export async function listUsers(params: ListUsersParams = {}) {
     const qs = new URLSearchParams()
     if (params.role) qs.set('role', params.role)
     if (params.search) qs.set('search', params.search)
-    if (params.skip != null) qs.set('skip', String(params.skip))
+    if (params.page != null) {
+        qs.set('page', String(params.page))
+    } else if (params.skip != null && params.limit != null) {
+        qs.set('page', String(Math.floor(params.skip / params.limit) + 1))
+    }
     if (params.limit != null) qs.set('limit', String(params.limit))
     if (typeof params.include_deleted === 'boolean') {
         qs.set('include_deleted', String(params.include_deleted))
@@ -75,14 +79,20 @@ export async function listUsers(params: ListUsersParams = {}) {
     const path = `/api/v1/users/?${qs.toString()}`
     const res = await api<ListUsersResponse>(path, { method: 'GET' })
 
+    // Handle both paginated object and direct array (just in case)
+    const backendData = Array.isArray(res) ? res : res.data || []
+    const meta = !Array.isArray(res) ? res.meta : null
+
     const raw =
         params.include_deleted === true
-            ? res.users
-            : res.users.filter((u) => !u.deleted_at)
+            ? backendData
+            : backendData.filter((u) => !u.deleted_at)
 
     return {
-        ...res,
         users: raw.map(mapUser),
+        total: meta?.total ?? backendData.length,
+        page: meta?.page ?? 1,
+        pages: meta?.total_pages ?? 1,
     }
 }
 

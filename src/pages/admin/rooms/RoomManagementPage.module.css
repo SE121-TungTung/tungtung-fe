@@ -15,23 +15,23 @@
 }
 
 .pageTitle {
-    font-size: clamp(2rem, 4vw, 2.75rem);
+    font-size: var(--primitive-text-4xl);
     font-weight: 700;
-    color: var(--text-primary-light);
-    letter-spacing: -0.03em;
-    line-height: 1.2;
+    color: var(--color-text-primary);
+    letter-spacing: var(--primitive-tracking-tight);
+    line-height: var(--primitive-leading-tight);
     text-align: center;
     width: 100%;
-    margin-bottom: var(--space-8);
+    margin-bottom: var(--primitive-space-8);
 }
 
 .filterCard {
     width: 100%;
-    padding: var(--space-20);
-    background: var(--surface-page-light);
-    border-radius: var(--radius-xl);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-    border: 1px solid var(--color-border-default);
+    padding: var(--primitive-space-10);
+    background: var(--color-surface-card);
+    border-radius: var(--primitive-radius-lg);
+    box-shadow: var(--primitive-shadow-sm);
+    border: 1px solid var(--color-border-soft);
 }
 
 .searchWrapper {
@@ -40,18 +40,18 @@
     align-items: flex-end;
     max-width: 1000vh;
     flex-direction: row;
-    gap: var(--space-16);
+    gap: 16px;
 }
 
 .filterControls {
     display: flex;
-    gap: var(--space-24);
+    gap: 16px;
     flex-grow: 1;
 }
 
 .filterCard > div {
     display: flex;
-    gap: var(--space-16);
+    gap: 16px;
     align-items: center;
     flex-wrap: wrap;
 }
@@ -59,17 +59,17 @@
 .buttonIcon {
     width: 18px;
     height: 18px;
-    margin-right: var(--space-8);
+    margin-right: 8px;
 }
 
 .tableCard {
     width: 100%;
-    padding: 10px;
+    padding: var(--primitive-space-2);
     overflow: hidden;
-    border-radius: var(--radius-xl);
-    background: var(--surface-page-light);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-    border: 1px solid var(--color-border-default);
+    border-radius: var(--primitive-radius-lg);
+    background: var(--color-surface-card);
+    box-shadow: var(--primitive-shadow-sm);
+    border: 1px solid var(--color-border-soft);
 }
 
 .filterCard,
@@ -82,13 +82,13 @@
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    gap: var(--space-12);
+    gap: 12px;
 }
 
 .paginationInfo {
-    margin-top: var(--space-12);
+    margin-top: 12px;
     font-size: 14px;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
 }
 
 .pageInfo {

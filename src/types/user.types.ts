@@ -121,11 +121,14 @@ export interface ListUsersParams {
 }
 
 export interface ListUsersResponse {
-    users: BackendUser[]
-    total: number
-    page: number
-    size: number
-    pages: number
+    success: boolean
+    data: BackendUser[]
+    meta?: {
+        page: number
+        limit: number
+        total: number
+        total_pages: number
+    }
 }
 
 export interface StudentOverviewStats {

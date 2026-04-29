@@ -1,11 +1,11 @@
 .wrapper {
     --input-bg: var(--color-surface-raised);
-    --input-bd: var(--border-soft-light);
-    --input-bd-focus: var(--brand-primary-light);
+    --input-bd: var(--color-border-soft);
+    --input-bd-focus: var(--color-brand-primary);
     --input-text: var(--color-text-primary);
     --input-placeholder: var(--color-text-placeholder);
     --input-icon: var(--color-text-secondary);
-    --input-shadow: var(--shadow-sm-light);
+    --input-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     --label-color: var(--color-text-primary);
 
     --pad-y: 10px;
@@ -21,14 +21,7 @@
 }
 
 .wrapper.dark {
-    --input-bg: var(--color-surface-raised);
-    --input-bd: var(--border-soft-dark);
-    --input-bd-focus: var(--brand-primary-dark);
-    --input-text: var(--color-text-primary);
-    --input-placeholder: var(--text-placeholder-dark);
-    --input-icon: var(--color-text-secondary);
-    --input-shadow: var(--shadow-sm-dark);
-    --label-color: var(--color-text-primary);
+    /* Kept for backward compatibility, but ideally theme should be controlled by data-theme */
 }
 
 .fullWidth {
@@ -207,33 +200,21 @@
 /* --- Variants --- */
 .variant-glass .input {
     --input-bg: color-mix(in srgb, var(--color-surface-page) 50%, transparent);
-    --input-bd: color-mix(in srgb, var(--border-soft-light) 30%, transparent);
+    --input-bd: color-mix(in srgb, var(--color-border-soft) 30%, transparent);
     backdrop-filter: blur(8px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-.variant-glass.dark .input {
-    --input-bg: color-mix(in srgb, var(--color-surface-page) 50%, transparent);
-    --input-bd: color-mix(in srgb, var(--border-soft-dark) 30%, transparent);
 }
 
 .variant-neutral .input {
     --input-bg: var(--color-surface-page);
-    --input-bd: var(--border-hard-light);
+    --input-bd: var(--color-border-medium);
     box-shadow: none;
-}
-.variant-neutral.dark .input {
-    --input-bg: var(--color-surface-page);
-    --input-bd: var(--border-hard-dark);
 }
 
 .variant-soft .input {
     --input-bg: var(--color-surface-raised);
-    --input-bd: var(--border-hard-light);
+    --input-bd: var(--color-border-soft);
     box-shadow: none;
-}
-.variant-soft.dark .input {
-    --input-bg: var(--color-surface-raised);
-    --input-bd: var(--border-hard-dark);
 }
 
 /* --- States --- */

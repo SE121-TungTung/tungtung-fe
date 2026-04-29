@@ -7,6 +7,7 @@ interface KpiPeriodSelectorProps {
     onChange: (periodId: string) => void
     disabled?: boolean
     label?: string
+    allowAll?: boolean
 }
 
 /**
@@ -18,6 +19,7 @@ export const KpiPeriodSelector: React.FC<KpiPeriodSelectorProps> = ({
     onChange,
     disabled = false,
     label = 'Chọn kỳ đánh giá',
+    allowAll = false,
 }) => {
     const { data: periods, isLoading } = useKpiPeriods()
 
@@ -25,19 +27,23 @@ export const KpiPeriodSelector: React.FC<KpiPeriodSelectorProps> = ({
         if (!periods || periods.length === 0) {
             return [{ label: 'Chưa có kỳ KPI', value: '' }]
         }
-        return periods.map((p) => ({
+        const opts = periods.map((p) => ({
             label: `${p.name} ${p.is_active ? '' : '(Đã đóng)'}`.trim(),
             value: p.id,
         }))
-    }, [periods])
+        if (allowAll) {
+            opts.unshift({ label: 'Tất cả kì', value: '' })
+        }
+        return opts
+    }, [periods, allowAll])
 
-    // Auto-select the first active period if value is empty
+    // Auto-select the first active period if value is empty and allowAll is false
     React.useEffect(() => {
-        if (!value && periods && periods.length > 0) {
+        if (!value && !allowAll && periods && periods.length > 0) {
             const activePeriod = periods.find((p) => p.is_active)
             onChange(activePeriod?.id ?? periods[0].id)
         }
-    }, [periods, value, onChange])
+    }, [periods, value, onChange, allowAll])
 
     return (
         <div style={{ width: '260px' }}>

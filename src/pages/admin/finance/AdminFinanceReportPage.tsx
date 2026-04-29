@@ -9,6 +9,42 @@ import {
     useCreateExportJob,
 } from '@/hooks/domain/useFinance'
 import s from './Finance.module.css'
+import {
+    startOfMonth,
+    endOfMonth,
+    startOfYear,
+    endOfYear,
+    subMonths,
+    format,
+} from 'date-fns'
+
+type TimeRange = 'ALL_TIME' | 'THIS_MONTH' | 'LAST_MONTH' | 'THIS_YEAR'
+
+function getDateRange(range: TimeRange): { dateFrom: string; dateTo: string } {
+    const now = new Date()
+    switch (range) {
+        case 'THIS_MONTH':
+            return {
+                dateFrom: format(startOfMonth(now), 'yyyy-MM-dd'),
+                dateTo: format(endOfMonth(now), 'yyyy-MM-dd'),
+            }
+        case 'LAST_MONTH': {
+            const lastMonth = subMonths(now, 1)
+            return {
+                dateFrom: format(startOfMonth(lastMonth), 'yyyy-MM-dd'),
+                dateTo: format(endOfMonth(lastMonth), 'yyyy-MM-dd'),
+            }
+        }
+        case 'THIS_YEAR':
+            return {
+                dateFrom: format(startOfYear(now), 'yyyy-MM-dd'),
+                dateTo: format(endOfYear(now), 'yyyy-MM-dd'),
+            }
+        case 'ALL_TIME':
+        default:
+            return { dateFrom: '', dateTo: '' }
+    }
+}
 
 function StatCard({
     title,
@@ -60,8 +96,14 @@ function StatCard({
     )
 }
 
-function RevenueTab() {
-    const { data: revRes, isLoading } = useRevenueReport('', '', true)
+function RevenueTab({
+    dateFrom,
+    dateTo,
+}: {
+    dateFrom: string
+    dateTo: string
+}) {
+    const { data: revRes, isLoading } = useRevenueReport(dateFrom, dateTo, true)
     const { mutate: exportJob } = useCreateExportJob()
 
     if (isLoading) return <div>Đang tải...</div>
@@ -74,7 +116,7 @@ function RevenueTab() {
             <div className={s.statsRow}>
                 <StatCard
                     title="Tổng doanh thu"
-                    value={`${rev.total_revenue.toLocaleString()} đ`}
+                    value={`${Number(rev.total_revenue || 0).toLocaleString()} đ`}
                     icon={
                         <svg
                             width="24"
@@ -99,7 +141,7 @@ function RevenueTab() {
                 />
                 <StatCard
                     title="Trung bình HS/HĐ"
-                    value={`${rev.avg_payment_value.toLocaleString()} đ`}
+                    value={`${Number(rev.avg_payment_value || 0).toLocaleString()} đ`}
                     icon={
                         <svg
                             width="24"
@@ -174,13 +216,16 @@ function RevenueTab() {
                             </tr>
                         </thead>
                         <tbody>
-                            {rev.breakdown.map((b: any) => (
+                            {(rev.breakdown_by_course || []).map((b: any) => (
                                 <tr key={b.course_id} className={s.tableRow}>
                                     <td className={s.tdName}>
                                         {b.course_name}
                                     </td>
                                     <td className={s.tdAmount}>
-                                        {b.revenue.toLocaleString()} đ
+                                        {Number(
+                                            b.total_revenue || 0
+                                        ).toLocaleString()}{' '}
+                                        đ
                                     </td>
                                 </tr>
                             ))}
@@ -192,19 +237,51 @@ function RevenueTab() {
     )
 }
 
-function ExpenseTab() {
-    const { data: expRes, isLoading } = useExpensesReport('', '', 'ALL')
+function ExpenseTab({
+    dateFrom,
+    dateTo,
+}: {
+    dateFrom: string
+    dateTo: string
+}) {
+    const { data: expRes, isLoading } = useExpensesReport(
+        dateFrom,
+        dateTo,
+        'ALL'
+    )
     if (isLoading) return <div>Đang tải...</div>
     const exp = expRes
     if (!exp)
         return <EmptyState title="Lỗi" description="Không lấy được báo cáo" />
+
+    const breakdown = exp.breakdown_by_category || []
+    const salaryCategories = ['FULL_TIME', 'PART_TIME', 'KPI_BONUS']
+    const operationsCategories = ['FACILITY', 'MARKETING', 'UTILITY', 'OTHER']
+
+    const totalSalary = breakdown
+        .filter((b: any) => salaryCategories.includes(b.category))
+        .reduce((sum: number, b: any) => sum + Number(b.total || 0), 0)
+
+    const totalOperations = breakdown
+        .filter((b: any) => operationsCategories.includes(b.category))
+        .reduce((sum: number, b: any) => sum + Number(b.total || 0), 0)
+
+    const categoryLabels: Record<string, string> = {
+        FULL_TIME: 'Lương cố định (Full-time)',
+        PART_TIME: 'Lương giờ (Part-time)',
+        KPI_BONUS: 'Thưởng KPI',
+        FACILITY: 'Cơ sở vật chất',
+        MARKETING: 'Marketing',
+        UTILITY: 'Điện nước',
+        OTHER: 'Khác',
+    }
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div className={s.statsRow}>
                 <StatCard
                     title="Tổng chi phí"
-                    value={`${exp.total_expenses.toLocaleString()} đ`}
+                    value={`${Number(exp.total_expenses || 0).toLocaleString()} đ`}
                     icon={
                         <svg
                             width="24"
@@ -224,7 +301,7 @@ function ExpenseTab() {
                 />
                 <StatCard
                     title="Lương giáo viên"
-                    value={`${exp.total_salary.toLocaleString()} đ`}
+                    value={`${totalSalary.toLocaleString()} đ`}
                     icon={
                         <svg
                             width="24"
@@ -246,7 +323,7 @@ function ExpenseTab() {
                 />
                 <StatCard
                     title="Vận hành"
-                    value={`${exp.total_operations.toLocaleString()} đ`}
+                    value={`${totalOperations.toLocaleString()} đ`}
                     icon={
                         <svg
                             width="24"
@@ -265,13 +342,53 @@ function ExpenseTab() {
                     color="var(--color-status-info)"
                 />
             </div>
-            {/* Breakdown table */}
+
+            <Card
+                variant="outline"
+                className={s.tableCard}
+                style={{ padding: 0 }}
+            >
+                <div
+                    style={{
+                        padding: '16px 24px',
+                        borderBottom: '1px solid var(--color-border-soft)',
+                    }}
+                >
+                    <h3 style={{ margin: 0, fontSize: '16px' }}>
+                        Chi tiết chi phí
+                    </h3>
+                </div>
+                <div className={s.tableWrapper}>
+                    <table className={s.table}>
+                        <thead>
+                            <tr>
+                                <th>Danh mục</th>
+                                <th>Số tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {breakdown.map((b: any, idx: number) => (
+                                <tr key={idx} className={s.tableRow}>
+                                    <td className={s.tdName}>
+                                        {categoryLabels[b.category] ||
+                                            b.category}
+                                    </td>
+                                    <td className={s.tdAmount}>
+                                        {Number(b.total || 0).toLocaleString()}{' '}
+                                        đ
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </Card>
         </div>
     )
 }
 
-function ProfitTab() {
-    const { data: profRes, isLoading } = useProfitReport()
+function ProfitTab({ dateFrom, dateTo }: { dateFrom: string; dateTo: string }) {
+    const { data: profRes, isLoading } = useProfitReport(dateFrom, dateTo)
     if (isLoading) return <div>Đang tải...</div>
     const prof = profRes
     if (!prof) return null
@@ -280,7 +397,7 @@ function ProfitTab() {
         <div className={s.statsRow}>
             <StatCard
                 title="Doanh thu"
-                value={`${prof.total_revenue.toLocaleString()} đ`}
+                value={`${Number(prof.total_revenue || 0).toLocaleString()} đ`}
                 icon={
                     <svg
                         width="24"
@@ -300,7 +417,7 @@ function ProfitTab() {
             />
             <StatCard
                 title="Chi phí"
-                value={`${prof.total_expenses.toLocaleString()} đ`}
+                value={`${Number(prof.total_expenses || 0).toLocaleString()} đ`}
                 icon={
                     <svg
                         width="24"
@@ -320,7 +437,7 @@ function ProfitTab() {
             />
             <StatCard
                 title="Lợi nhuận ròng"
-                value={`${prof.net_profit.toLocaleString()} đ`}
+                value={`${Number(prof.profit || 0).toLocaleString()} đ`}
                 icon={
                     <svg
                         width="24"
@@ -340,7 +457,7 @@ function ProfitTab() {
             />
             <StatCard
                 title="Biên lợi nhuận (Margin)"
-                value={`${prof.profit_margin.toFixed(2)}%`}
+                value={`${Number(prof.profit_margin || 0).toFixed(2)}%`}
                 icon={
                     <svg
                         width="24"
@@ -392,7 +509,10 @@ function DebtTab() {
                                         color: 'var(--color-status-danger)',
                                     }}
                                 >
-                                    {d.debt_amount.toLocaleString()} đ
+                                    {Number(
+                                        d.debt_amount || 0
+                                    ).toLocaleString()}{' '}
+                                    đ
                                 </td>
                                 <td>
                                     <span
@@ -438,23 +558,62 @@ export default function AdminFinanceReportPage() {
     const [tab, setTab] = useState<'REVENUE' | 'EXPENSE' | 'PROFIT' | 'DEBT'>(
         'REVENUE'
     )
+    const [timeRange, setTimeRange] = useState<TimeRange>('ALL_TIME')
+    const { dateFrom, dateTo } = getDateRange(timeRange)
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <div>
-                <h1
-                    style={{
-                        fontSize: '24px',
-                        fontWeight: 700,
-                        margin: '0 0 8px 0',
-                    }}
-                >
-                    Báo cáo Tài chính
-                </h1>
-                <p style={{ color: 'var(--color-text-secondary)', margin: 0 }}>
-                    Theo dõi doanh thu, chi phí, lợi nhuận và công nợ của trung
-                    tâm.
-                </p>
+            <div
+                style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                }}
+            >
+                <div>
+                    <h1
+                        style={{
+                            fontSize: '24px',
+                            fontWeight: 700,
+                            margin: '0 0 8px 0',
+                        }}
+                    >
+                        Báo cáo Tài chính
+                    </h1>
+                    <p
+                        style={{
+                            color: 'var(--color-text-secondary)',
+                            margin: 0,
+                        }}
+                    >
+                        Theo dõi doanh thu, chi phí, lợi nhuận và công nợ của
+                        trung tâm.
+                    </p>
+                </div>
+                {tab !== 'DEBT' && (
+                    <select
+                        value={timeRange}
+                        onChange={(e) =>
+                            setTimeRange(e.target.value as TimeRange)
+                        }
+                        style={{
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            border: '1px solid var(--color-border-soft)',
+                            background: 'var(--color-surface-card)',
+                            color: 'var(--color-text-primary)',
+                            outline: 'none',
+                            cursor: 'pointer',
+                            fontSize: '14px',
+                            fontWeight: 500,
+                        }}
+                    >
+                        <option value="ALL_TIME">Tất cả thời gian</option>
+                        <option value="THIS_MONTH">Tháng này</option>
+                        <option value="LAST_MONTH">Tháng trước</option>
+                        <option value="THIS_YEAR">Năm nay</option>
+                    </select>
+                )}
             </div>
 
             <Card
@@ -502,9 +661,15 @@ export default function AdminFinanceReportPage() {
             </Card>
 
             <div style={{ minHeight: '400px' }}>
-                {tab === 'REVENUE' && <RevenueTab />}
-                {tab === 'EXPENSE' && <ExpenseTab />}
-                {tab === 'PROFIT' && <ProfitTab />}
+                {tab === 'REVENUE' && (
+                    <RevenueTab dateFrom={dateFrom} dateTo={dateTo} />
+                )}
+                {tab === 'EXPENSE' && (
+                    <ExpenseTab dateFrom={dateFrom} dateTo={dateTo} />
+                )}
+                {tab === 'PROFIT' && (
+                    <ProfitTab dateFrom={dateFrom} dateTo={dateTo} />
+                )}
                 {tab === 'DEBT' && <DebtTab />}
             </div>
         </div>

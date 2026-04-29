@@ -2,6 +2,9 @@ import { useState } from 'react'
 import Card from '@/components/common/card/Card'
 import { EmptyState } from '@/components/common/state/EmptyState'
 import { useMyInvoices, useProcessPayment } from '@/hooks/domain/useFinance'
+import { useDialog } from '@/hooks/useDialog'
+import { api } from '@/lib/api'
+import { useQueryClient } from '@tanstack/react-query'
 import s from '../../admin/finance/Finance.module.css'
 import type { InvoiceResponse, PaymentGateway } from '@/types/finance.types'
 
@@ -13,6 +16,8 @@ function PaymentModal({
     onClose: () => void
 }) {
     const { mutate: processPayment, isPending } = useProcessPayment()
+    const { alert, confirm } = useDialog()
+    const queryClient = useQueryClient()
     const [gateway, setGateway] = useState<PaymentGateway>('VNPAY')
 
     const handlePay = () => {
@@ -21,22 +26,70 @@ function PaymentModal({
             {
                 payload: {
                     invoice_id: invoice.id,
-                    gateway: gateway,
+                    amount: invoice.final_amount,
+                    gateway: gateway.toLowerCase() as PaymentGateway,
                     return_url: `${window.location.origin}/student/finance/callback`,
                 },
                 idempotencyKey,
             },
             {
-                onSuccess: (res) => {
-                    if (res?.payment_url) {
-                        window.location.href = res.payment_url
+                onSuccess: async (res) => {
+                    const payUrl = res?.payment_url
+                    if (payUrl) {
+                        if (payUrl.includes('example.com')) {
+                            const transactionId =
+                                res.gateway_transaction_id || ''
+                            const simulate = await confirm({
+                                title: 'Môi trường DEV',
+                                message: `Backend trả về Gateway URL ảo:\n${payUrl}\n\nBạn có muốn tự động giả lập Webhook báo "Thanh toán thành công"?`,
+                                confirmText: 'Giả lập thành công',
+                                cancelText: 'Không, chỉ xem',
+                                type: 'confirm',
+                            })
+
+                            if (simulate && transactionId) {
+                                try {
+                                    await api(
+                                        `/api/v1/payments/webhooks/${gateway.toLowerCase()}`,
+                                        {
+                                            method: 'POST',
+                                            body: JSON.stringify({
+                                                transaction_id: transactionId,
+                                                status: 'success',
+                                            }),
+                                        }
+                                    )
+                                    await alert(
+                                        'Giả lập thành công. Vui lòng kiểm tra lại trạng thái hóa đơn.',
+                                        'Thông báo'
+                                    )
+                                    queryClient.invalidateQueries({
+                                        queryKey: ['my-invoices'],
+                                    })
+                                    queryClient.invalidateQueries({
+                                        queryKey: ['payments'],
+                                    })
+                                } catch (e: any) {
+                                    let msg = 'Lỗi không xác định'
+                                    if (e instanceof Error) msg = e.message
+                                    await alert(
+                                        'Gửi webhook giả lập thất bại: ' + msg
+                                    )
+                                }
+                            }
+                            onClose()
+                        } else {
+                            window.location.href = payUrl
+                        }
                     } else {
-                        alert('Thanh toán nội bộ thành công hoặc chưa có URL.')
+                        await alert(
+                            'Thanh toán nội bộ thành công hoặc chưa có URL.'
+                        )
                         onClose()
                     }
                 },
-                onError: (err: any) => {
-                    alert('Lỗi: ' + err.message)
+                onError: async (err: any) => {
+                    await alert(err.message || 'Đã có lỗi xảy ra', 'Lỗi')
                 },
             }
         )
@@ -271,7 +324,8 @@ export default function StudentInvoicePage() {
                                                 : '—'}
                                         </td>
                                         <td>
-                                            {inv.status === 'PAID' ? (
+                                            {inv.status === 'PAID' ||
+                                            inv.status === 'paid' ? (
                                                 <span
                                                     className={`${s.badge} ${s.badgePaid}`}
                                                 >
@@ -292,7 +346,8 @@ export default function StudentInvoicePage() {
                                                     </svg>{' '}
                                                     Đã thanh toán
                                                 </span>
-                                            ) : inv.status === 'PENDING' ? (
+                                            ) : inv.status === 'PENDING' ||
+                                              inv.status === 'pending' ? (
                                                 <span
                                                     className={`${s.badge} ${s.badgePending}`}
                                                 >
@@ -338,7 +393,8 @@ export default function StudentInvoicePage() {
                                             )}
                                         </td>
                                         <td className={s.actionCell}>
-                                            {inv.status === 'PENDING' && (
+                                            {(inv.status === 'PENDING' ||
+                                                inv.status === 'pending') && (
                                                 <button
                                                     onClick={() =>
                                                         setSelectedInvoice(inv)

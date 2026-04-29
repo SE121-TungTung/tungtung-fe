@@ -5,10 +5,10 @@
     --pad-y: clamp(6px, 0.9vw, 10px);
     --gap: clamp(10px, 2vw, 24px);
 
-    --fg: var(--text-primary-light);
-    --bg: var(--container-border-light, rgba(255, 255, 255, 0.6));
-    --bd: var(--border-default, rgba(0, 0, 0, 0.12));
-    --hover: var(--state-hover, rgba(0, 0, 0, 0.06));
+    --fg: var(--color-text-primary);
+    --bg: var(--color-surface-card);
+    --bd: var(--color-border-soft);
+    --hover: var(--color-surface-raised);
     --elev: var(
         --Shadow-2,
         0 10px 24px rgba(0, 0, 0, 0.12),
@@ -26,7 +26,7 @@
     box-shadow:
         0 10px 24px rgba(0, 0, 0, 0.12),
         0 4px 8px rgba(0, 0, 0, 0.08);
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     overflow: visible;
 }
 
@@ -114,9 +114,9 @@
     position: absolute;
     inset: 0;
     z-index: -1;
-    background: #fff;
+    background: var(--color-surface-card, #fff);
     border-radius: inherit;
-    border: 3px solid var(--boder-soft-light);
+    border: 3px solid var(--color-border-soft);
 }
 
 .icon {

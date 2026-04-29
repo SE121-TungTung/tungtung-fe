@@ -155,39 +155,46 @@ const adminNavItems: AppNavItem[] = [
                 href: '/admin/schedule/ga',
             },
             {
-                id: 'kpi',
-                label: 'Quản lý KPI',
-                href: '/admin/kpi',
+                id: 'kpi-payroll',
+                label: 'KPI & Lương',
+                subItems: [
+                    {
+                        id: 'kpi',
+                        label: 'Quản lý KPI',
+                        href: '/admin/kpi',
+                    },
+                    {
+                        id: 'kpi-templates',
+                        label: 'Template KPI',
+                        href: '/admin/kpi/templates',
+                    },
+                    {
+                        id: 'kpi-support-calc',
+                        label: 'Hỗ trợ tính A1/A2',
+                        href: '/admin/kpi/support-calc',
+                    },
+                    {
+                        id: 'salary',
+                        label: 'Quản lý Lương',
+                        href: '/admin/payroll',
+                    },
+                ],
             },
             {
-                id: 'kpi-templates',
-                label: 'Template KPI',
-                href: '/admin/kpi/templates',
-            },
-            {
-                id: 'kpi-support-calc',
-                label: 'Hỗ trợ tính A1/A2',
-                href: '/admin/kpi/support-calc',
-            },
-            {
-                id: 'salary',
-                label: 'Quản lý Lương',
-                href: '/admin/payroll',
-            },
-            {
-                id: 'kpi-tiers',
-                label: 'Cấu hình hạng KPI',
-                href: '/admin/settings/kpi-tiers',
-            },
-            {
-                id: 'invoices',
-                label: 'Quản lý Tài chính',
-                href: '/admin/finance/invoices',
-            },
-            {
-                id: 'finance-reports',
-                label: 'Báo cáo Tài chính',
-                href: '/admin/finance/reports',
+                id: 'finance',
+                label: 'Tài chính',
+                subItems: [
+                    {
+                        id: 'invoices',
+                        label: 'Quản lý Tài chính',
+                        href: '/admin/finance/invoices',
+                    },
+                    {
+                        id: 'finance-reports',
+                        label: 'Báo cáo Tài chính',
+                        href: '/admin/finance/reports',
+                    },
+                ],
             },
         ],
     },
@@ -276,19 +283,25 @@ export const getNavItems = (
     return navs.map((item): NavItem => {
         const { dropdownItems, rightIcon, ...restOfItem } = item
 
+        const mapSubItem = (sub: ExtendedSideMenuItem): SideMenuItem => {
+            const { href, subItems, ...restOfSub } =
+                sub as ExtendedSideMenuItem & {
+                    subItems?: ExtendedSideMenuItem[]
+                }
+            return {
+                ...restOfSub,
+                ...(href ? { onClick: () => navigate(href) } : {}),
+                ...(subItems ? { subItems: subItems.map(mapSubItem) } : {}),
+            }
+        }
+
         const finalDropdownItems = (
             dropdownItems as ExtendedSideMenuItem[] | undefined
         )
             ?.filter(
                 (sub) => !sub.allowedRoles || sub.allowedRoles.includes(role)
             )
-            .map((sub) => {
-                const { href, ...restOfSub } = sub
-                return {
-                    ...restOfSub,
-                    onClick: () => href && navigate(href),
-                }
-            })
+            .map(mapSubItem)
 
         return {
             ...restOfItem,

@@ -59,6 +59,21 @@ export const createInvoice = async (
         body: JSON.stringify(payload),
     })
 
+export const listInvoices = async (params: {
+    status?: string
+    student_id?: string
+    page?: number
+    limit?: number
+}): Promise<PaginatedResult<InvoiceResponse>> => {
+    const query = new URLSearchParams()
+    if (params.status) query.append('status', params.status)
+    if (params.student_id) query.append('student_id', params.student_id)
+    if (params.page) query.append('page', params.page.toString())
+    if (params.limit) query.append('limit', params.limit.toString())
+
+    return rawFetch<InvoiceResponse>(`${API_V1}/invoices?${query.toString()}`)
+}
+
 export const getMyInvoices = async (
     page: number = 1,
     limit: number = 20

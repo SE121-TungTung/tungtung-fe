@@ -3,20 +3,20 @@
     border-collapse: separate;
     border-spacing: 0;
     background: inherit;
-    font-size: var(--font-size-sm);
+    font-size: var(--primitive-text-sm);
 }
 
 .table th,
 .table td {
-    padding: var(--space-16) var(--space-20);
+    padding: var(--primitive-space-6) var(--primitive-space-8);
     text-align: left;
     vertical-align: middle;
 }
 
 .table th {
-    background: var(--color-bg-muted);
+    background: var(--color-surface-raised);
     color: var(--color-text-secondary);
-    font-size: var(--font-size-xs);
+    font-size: var(--primitive-text-xs);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.8px;
@@ -24,15 +24,15 @@
     top: 0;
     z-index: 10;
     white-space: nowrap;
-    border-bottom: 1px solid var(--boder-soft-dark);
+    border-bottom: 1px solid var(--color-border-soft);
 }
 
 .table thead tr th:first-child {
-    padding-left: var(--space-24);
+    padding-left: var(--primitive-space-6);
 }
 
 .table tbody tr td:first-child {
-    padding-left: var(--space-24);
+    padding-left: var(--primitive-space-6);
 }
 
 .table tbody tr {
@@ -41,7 +41,7 @@
 }
 
 .table tbody tr:hover {
-    background-color: var(--palette-columbia-blue-800);
+    background-color: var(--primitive-blue-800);
     transform: translateY(-1px);
 }
 
@@ -52,16 +52,16 @@
 .userCell {
     display: flex;
     align-items: center;
-    gap: var(--space-12);
+    gap: var(--primitive-space-4);
     min-width: 240px;
 }
 
 .avatar {
     width: 42px;
     height: 42px;
-    border-radius: var(--radius-lg);
+    border-radius: var(--primitive-radius-lg);
     object-fit: cover;
-    border: 2px solid var(--color-border-default);
+    border: 2px solid var(--color-border-soft);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     transition: all 0.2s ease;
     flex-shrink: 0;
@@ -75,21 +75,21 @@
 .userInfo {
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
+    gap: var(--primitive-space-1);
     min-width: 0;
 }
 
 .userName {
     font-weight: 600;
     color: var(--color-text-primary);
-    font-size: var(--font-size-sm);
+    font-size: var(--primitive-text-sm);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .userEmail {
-    font-size: var(--font-size-xs);
+    font-size: var(--primitive-text-xs);
     color: var(--color-text-secondary);
     white-space: nowrap;
     overflow: hidden;
@@ -99,17 +99,17 @@
 .contactCell {
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
-    font-size: var(--font-size-sm);
+    gap: var(--primitive-space-1);
+    font-size: var(--primitive-text-sm);
     color: var(--color-text-secondary);
 }
 
 .statusBadge {
     display: inline-flex;
     align-items: center;
-    padding: var(--space-4) var(--space-12);
-    border-radius: var(--radius-full);
-    font-size: var(--font-size-xs);
+    padding: var(--primitive-space-1) var(--primitive-space-4);
+    border-radius: var(--primitive-radius-full);
+    font-size: var(--primitive-text-xs);
     font-weight: 600;
     letter-spacing: 0.3px;
     transition: all 0.2s ease;
@@ -125,18 +125,18 @@
 .actionsCell {
     display: flex;
     justify-content: flex-end;
-    gap: var(--space-8);
-    padding-right: var(--space-24);
+    gap: var(--primitive-space-2);
+    padding-right: var(--primitive-space-6);
 }
 
 .actionsHeader {
     text-align: right;
-    padding-right: var(--space-24);
+    padding-right: var(--primitive-space-6);
 }
 
 .actionButton {
-    padding: var(--space-8);
-    border-radius: var(--radius-md);
+    padding: var(--primitive-space-2);
+    border-radius: var(--primitive-radius-md);
     background: transparent;
     border: none;
     cursor: pointer;
@@ -156,7 +156,7 @@
 }
 
 .actionButton:hover:not(:disabled) {
-    background-color: var(--color-bg-deep);
+    background-color: var(--color-surface-raised);
     transform: translateY(-2px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
@@ -175,7 +175,7 @@
 }
 
 .dangerButton:hover:not(:disabled) {
-    background-color: rgba(239, 68, 68, 0.1) !important;
+    background-color: var(--color-status-danger-bg) !important;
 }
 
 .dangerButton:hover:not(:disabled) img {
@@ -192,7 +192,7 @@
 
 /* Empty state */
 .emptyState {
-    padding: var(--space-80) var(--space-40);
+    padding: var(--primitive-space-20) var(--primitive-space-10);
     text-align: center;
     color: var(--color-text-secondary);
 }
@@ -201,14 +201,14 @@
     width: 120px;
     height: 120px;
     opacity: 0.3;
-    margin-bottom: var(--space-16);
+    margin-bottom: var(--primitive-space-4);
 }
 
 /* Responsive adjustments */
 @media (max-width: 1024px) {
     .table th,
     .table td {
-        padding: var(--space-12) var(--space-16);
+        padding: var(--primitive-space-3) var(--primitive-space-4);
     }
 
     .userCell {
@@ -223,7 +223,7 @@
 
 @media (max-width: 768px) {
     .table {
-        font-size: var(--font-size-xs);
+        font-size: var(--primitive-text-xs);
     }
 
     .table th {
@@ -231,13 +231,13 @@
     }
 
     .actionsCell {
-        gap: var(--space-4);
+        gap: var(--primitive-space-1);
     }
 
     .actionButton {
         width: 32px;
         height: 32px;
-        padding: var(--space-6);
+        padding: var(--primitive-space-1);
     }
 
     .actionButton img {

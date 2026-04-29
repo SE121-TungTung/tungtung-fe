@@ -91,8 +91,8 @@ export default function AdminKpiCalculationPage() {
                             }}
                         >
                             <p style={{ margin: 0, fontWeight: 600 }}>
-                                ✅ Đã xử lý {result.processed}/{result.total}{' '}
-                                bản ghi
+                                Đã xử lý {result.processed}/{result.total} bản
+                                ghi
                             </p>
                             {result.errors.length > 0 && (
                                 <div style={{ marginTop: 8 }}>

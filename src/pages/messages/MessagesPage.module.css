@@ -54,9 +54,9 @@
     position: relative;
     transition: all 0.3s ease;
     height: auto;
-    border-radius: var(--radius-lg);
+    border-radius: var(--primitive-radius-lg);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    background: white;
+    background: var(--color-surface-card);
 }
 
 /* --- SIDEBAR STYLES --- */
@@ -95,14 +95,14 @@
     align-items: center;
     justify-content: center;
     height: 100%;
-    color: #888;
+    color: var(--color-text-muted);
     gap: 12px;
 }
 
 .spinner {
     width: 32px;
     height: 32px;
-    border: 3px solid #f3f3f3;
+    border: 3px solid var(--color-border-soft);
     border-top: 3px solid var(--color-brand-primary);
     border-radius: 50%;
     animation: spin 1s linear infinite;
