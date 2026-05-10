@@ -42,7 +42,6 @@ export const UserEnrollmentsModal: React.FC<UserEnrollmentsModalProps> = ({
                 isOpen={isOpen}
                 onClose={onClose}
                 title={`Lớp học của ${user.lastName} ${user.firstName}`}
-                size="lg"
             >
                 <div style={{ padding: '20px' }}>
                     <table

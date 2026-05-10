@@ -10,7 +10,6 @@ import type {
     BackendGroupDetailResponse,
     BackendMessageResponse,
     BackendMemberResponse,
-    BackendChatHistoryMessage,
     UnreadCountResponse,
     OnlineUsersResponse,
     AddMembersResponse,
