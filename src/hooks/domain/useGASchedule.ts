@@ -8,6 +8,7 @@ import * as gaApi from '@/lib/ga-schedule'
 import type {
     GAScheduleRequest,
     TeacherUnavailabilityCreate,
+    AIAnalyzeRequest,
 } from '@/types/ga-schedule.types'
 
 // ============================================================================
@@ -70,6 +71,18 @@ export const useDeleteGARun = () => {
         onSuccess: () => {
             qc.invalidateQueries({ queryKey: ['ga-runs'] })
         },
+    })
+}
+
+// ============================================================================
+// AI Analyze Constraints
+// ============================================================================
+
+/** Mutation: Gửi yêu cầu ngôn ngữ tự nhiên → AI phân tích ràng buộc */
+export const useAnalyzeConstraints = () => {
+    return useMutation({
+        mutationFn: (request: AIAnalyzeRequest) =>
+            gaApi.analyzeConstraints(request),
     })
 }
 

@@ -7,6 +7,8 @@ import type {
     GAPaginationResponse,
     TeacherUnavailabilityCreate,
     TeacherUnavailabilityResponse,
+    AIAnalyzeRequest,
+    AIAnalyzeResponse,
 } from '@/types/ga-schedule.types'
 
 const BASE = '/api/v1/schedule/ga'
@@ -45,6 +47,19 @@ export const deleteRun = (
 ): Promise<{ success: boolean; message: string }> =>
     api<{ success: boolean; message: string }>(`${BASE}/runs/${runId}`, {
         method: 'DELETE',
+    })
+
+// ============================================================================
+// AI Analyze Constraints
+// ============================================================================
+
+/** Gửi yêu cầu ngôn ngữ tự nhiên → AI phân tích ra ràng buộc GA */
+export const analyzeConstraints = (
+    request: AIAnalyzeRequest
+): Promise<AIAnalyzeResponse> =>
+    api<AIAnalyzeResponse>(`${BASE}/analyze-constraints`, {
+        method: 'POST',
+        body: JSON.stringify(request),
     })
 
 // ============================================================================

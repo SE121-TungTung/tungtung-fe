@@ -1,6 +1,6 @@
 // ============================================================================
 // GA Schedule Optimizer — TypeScript Types
-// Maps 1:1 to backend schemas/ga_schedule.py
+// Maps 1:1 to backend schemas/ga_schedule.py + ai_schedule.py
 // ============================================================================
 
 // --- Status Enum ---
@@ -10,6 +10,12 @@ export type GARunStatus =
     | 'completed'
     | 'failed'
     | 'applied'
+
+// --- Class Preference (maps to GAClassPreference on BE) ---
+export interface GAClassPreference {
+    class_id: string
+    preferred_time_period: 'morning' | 'afternoon' | 'evening'
+}
 
 // --- Request ---
 
@@ -24,15 +30,18 @@ export interface GAScheduleRequest {
     crossover_rate?: number // 0–1, default 0.70
     mutation_rate?: number // 0–1, default 0.15
 
-    // Soft constraint weights
-    weight_consecutive_limit?: number // default 10
-    weight_paired_classes?: number // default 8
-    weight_time_preference?: number // default 5
-    weight_room_utilization?: number // default 3
-    weight_preserve_existing?: number // default 6
+    // Soft constraint penalties (maps to penalty_* on BE)
+    penalty_consecutive_limit?: number // default 5.0
+    penalty_paired_classes?: number // default 10.0
+    penalty_time_preference?: number // default 1.0
+    penalty_room_utilization?: number // default 2.0
+    penalty_preserve_existing?: number // default 3.0
 
     // Optional: paired classes
     paired_class_ids?: string[][] | null // [[classA, classB], ...]
+
+    // Optional: per-class time preference
+    class_preferences?: GAClassPreference[] | null
 }
 
 // --- Run Responses ---
@@ -40,6 +49,7 @@ export interface GAScheduleRequest {
 export interface GARunResponse {
     run_id: string
     status: GARunStatus
+    review_status?: string | null
     best_fitness: number | null
     hard_violations: number | null
     soft_score: number | null
@@ -113,6 +123,21 @@ export interface TeacherUnavailabilityResponse {
     is_recurring: boolean
     day_of_week: number | null
     created_at: string
+}
+
+// --- AI Analyze Constraints (maps to ai_schedule.py) ---
+
+export interface AIAnalyzeRequest {
+    natural_language_text: string
+}
+
+export interface AIAnalyzeResponse {
+    paired_class_ids?: string[][] | null
+    class_preferences?: GAClassPreference[] | null
+    penalties_override?: Record<string, number> | null
+    ai_explanation?: string | null
+    warnings?: string[] | null
+    raw_response?: Record<string, unknown> | null
 }
 
 // --- Pagination wrapper (matches BE PaginationResponse) ---

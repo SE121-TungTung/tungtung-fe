@@ -17,11 +17,13 @@ import {
     useTeacherUnavailability,
     useCreateTeacherUnavailability,
     useDeleteTeacherUnavailability,
+    useAnalyzeConstraints,
 } from '@/hooks/domain/useGASchedule'
 import type {
     GAScheduleRequest,
     GARunResponse,
     GARunStatus,
+    AIAnalyzeResponse,
 } from '@/types/ga-schedule.types'
 
 // ============================================================================
@@ -143,11 +145,13 @@ function GAOptimizerTab() {
         generations: 300,
         crossover_rate: 0.7,
         mutation_rate: 0.15,
-        weight_consecutive_limit: 10,
-        weight_paired_classes: 8,
-        weight_time_preference: 5,
-        weight_room_utilization: 3,
-        weight_preserve_existing: 6,
+        penalty_consecutive_limit: 5,
+        penalty_paired_classes: 10,
+        penalty_time_preference: 1,
+        penalty_room_utilization: 2,
+        penalty_preserve_existing: 3,
+        paired_class_ids: null,
+        class_preferences: null,
     })
 
     const { data: classesData, isLoading: loadingClasses } = useQuery({
@@ -211,6 +215,62 @@ function GAOptimizerTab() {
         }
     }
 
+    const [aiInputText, setAiInputText] = useState('')
+    const [aiResponse, setAiResponse] = useState<AIAnalyzeResponse | null>(null)
+    const analyzeMutation = useAnalyzeConstraints()
+
+    const handleAnalyze = () => {
+        if (!aiInputText.trim()) return alert('Vui lòng nhập yêu cầu tự nhiên')
+        analyzeMutation.mutate(
+            { natural_language_text: aiInputText },
+            {
+                onSuccess: (res) => {
+                    setAiResponse(res)
+                },
+                onError: (err: any) => {
+                    alert('Lỗi khi gọi AI Gemini: ' + err.message)
+                },
+            }
+        )
+    }
+
+    const handleApplyAI = () => {
+        if (!aiResponse) return
+        setForm((prev) => {
+            const next = { ...prev }
+            if (aiResponse.paired_class_ids) {
+                next.paired_class_ids = aiResponse.paired_class_ids
+            }
+            if (aiResponse.class_preferences) {
+                next.class_preferences = aiResponse.class_preferences
+            }
+            if (aiResponse.penalties_override) {
+                const po = aiResponse.penalties_override
+                const consec =
+                    po.penalty_consecutive_limit ?? po.consecutive_limit
+                const paired = po.penalty_paired_classes ?? po.paired_classes
+                const timePref =
+                    po.penalty_time_preference ?? po.time_preference
+                const roomUtil =
+                    po.penalty_room_utilization ?? po.room_utilization
+                const preserve =
+                    po.penalty_preserve_existing ?? po.preserve_existing
+
+                if (consec !== undefined)
+                    next.penalty_consecutive_limit = consec
+                if (paired !== undefined) next.penalty_paired_classes = paired
+                if (timePref !== undefined)
+                    next.penalty_time_preference = timePref
+                if (roomUtil !== undefined)
+                    next.penalty_room_utilization = roomUtil
+                if (preserve !== undefined)
+                    next.penalty_preserve_existing = preserve
+            }
+            return next
+        })
+        alert('Đã áp dụng ràng buộc từ AI thành công!')
+    }
+
     const handleClassToggle = (classId: string) => {
         setForm((prev) => {
             const ids = prev.class_ids || []
@@ -246,6 +306,465 @@ function GAOptimizerTab() {
                             gap: 20,
                         }}
                     >
+                        <Card
+                            title="🤖 Trợ lý Xếp lịch AI (Gemini)"
+                            mode="light"
+                        >
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: 12,
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        fontSize: 13,
+                                        color: 'var(--color-text-secondary)',
+                                        lineHeight: 1.5,
+                                    }}
+                                >
+                                    Nhập các yêu cầu xếp lịch bằng ngôn ngữ tự
+                                    nhiên (Ví dụ:{' '}
+                                    <i>
+                                        "Xếp lớp Guitar và Piano học cùng buổi
+                                        sáng thứ hai. Giáo viên Nguyễn Văn A bận
+                                        chiều thứ sáu. Tăng tối đa ưu tiên tối
+                                        ưu phòng."
+                                    </i>
+                                    ) để tự động trích xuất các ràng buộc cho
+                                    GA.
+                                </div>
+                                <textarea
+                                    value={aiInputText}
+                                    onChange={(e) =>
+                                        setAiInputText(e.target.value)
+                                    }
+                                    placeholder="Nhập yêu cầu xếp lịch của bạn ở đây..."
+                                    style={{
+                                        width: '100%',
+                                        minHeight: 80,
+                                        padding: 12,
+                                        borderRadius:
+                                            'var(--primitive-radius-sm)',
+                                        border: '1px solid var(--color-border-soft)',
+                                        fontSize: 13,
+                                        background: 'var(--color-surface-card)',
+                                        color: 'var(--color-text-primary)',
+                                        resize: 'vertical',
+                                        fontFamily: 'inherit',
+                                    }}
+                                />
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        justifyContent: 'flex-end',
+                                    }}
+                                >
+                                    <ButtonPrimary
+                                        onClick={handleAnalyze}
+                                        loading={analyzeMutation.isPending}
+                                    >
+                                        ✨ Phân tích yêu cầu
+                                    </ButtonPrimary>
+                                </div>
+
+                                {aiResponse && (
+                                    <div
+                                        style={{
+                                            marginTop: 12,
+                                            padding: 16,
+                                            borderRadius:
+                                                'var(--primitive-radius-sm)',
+                                            background:
+                                                'var(--color-surface-card)',
+                                            border: '1px solid var(--color-border-soft)',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            gap: 12,
+                                        }}
+                                    >
+                                        <div
+                                            style={{
+                                                fontWeight: 600,
+                                                fontSize: 14,
+                                                color: 'var(--color-brand-primary)',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 6,
+                                            }}
+                                        >
+                                            <span>
+                                                🔍 Kết quả phân tích của AI
+                                            </span>
+                                        </div>
+
+                                        {aiResponse.ai_explanation && (
+                                            <div
+                                                style={{
+                                                    fontSize: 13,
+                                                    background:
+                                                        'var(--color-surface-raised)',
+                                                    padding: 10,
+                                                    borderRadius: 6,
+                                                    borderLeft:
+                                                        '3px solid var(--color-brand-primary)',
+                                                }}
+                                            >
+                                                <strong>Giải thích:</strong>{' '}
+                                                {aiResponse.ai_explanation}
+                                            </div>
+                                        )}
+
+                                        {aiResponse.warnings &&
+                                            aiResponse.warnings.length > 0 && (
+                                                <div
+                                                    style={{
+                                                        fontSize: 12,
+                                                        color: 'var(--color-status-warning)',
+                                                        background:
+                                                            'var(--color-status-warning-bg)',
+                                                        padding: 10,
+                                                        borderRadius: 6,
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        gap: 4,
+                                                    }}
+                                                >
+                                                    <strong>
+                                                        ⚠️ Cảnh báo từ AI:
+                                                    </strong>
+                                                    {aiResponse.warnings.map(
+                                                        (w, idx) => (
+                                                            <span key={idx}>
+                                                                • {w}
+                                                            </span>
+                                                        )
+                                                    )}
+                                                </div>
+                                            )}
+
+                                        <div
+                                            style={{
+                                                display: 'grid',
+                                                gridTemplateColumns: '1fr 1fr',
+                                                gap: 12,
+                                                fontSize: 13,
+                                            }}
+                                        >
+                                            {/* Paired classes */}
+                                            <div
+                                                style={{
+                                                    background:
+                                                        'var(--color-surface-raised)',
+                                                    padding: 12,
+                                                    borderRadius: 6,
+                                                }}
+                                            >
+                                                <div
+                                                    style={{
+                                                        fontWeight: 600,
+                                                        marginBottom: 8,
+                                                        color: 'var(--color-text-primary)',
+                                                    }}
+                                                >
+                                                    🔗 Lớp học đi kèm (Xếp cùng
+                                                    buổi):
+                                                </div>
+                                                {!aiResponse.paired_class_ids ||
+                                                aiResponse.paired_class_ids
+                                                    .length === 0 ? (
+                                                    <span
+                                                        style={{
+                                                            color: 'var(--color-text-muted)',
+                                                            fontSize: 12,
+                                                        }}
+                                                    >
+                                                        Không phát hiện cặp lớp
+                                                        nào
+                                                    </span>
+                                                ) : (
+                                                    <div
+                                                        style={{
+                                                            display: 'flex',
+                                                            flexDirection:
+                                                                'column',
+                                                            gap: 4,
+                                                        }}
+                                                    >
+                                                        {aiResponse.paired_class_ids.map(
+                                                            (pair, idx) => {
+                                                                const names =
+                                                                    pair.map(
+                                                                        (
+                                                                            id
+                                                                        ) => {
+                                                                            const c =
+                                                                                classesData?.items?.find(
+                                                                                    (
+                                                                                        item: any
+                                                                                    ) =>
+                                                                                        item.id ===
+                                                                                        id
+                                                                                )
+                                                                            return c
+                                                                                ? c.name
+                                                                                : id.slice(
+                                                                                      0,
+                                                                                      8
+                                                                                  ) +
+                                                                                      '...'
+                                                                        }
+                                                                    )
+                                                                return (
+                                                                    <span
+                                                                        key={
+                                                                            idx
+                                                                        }
+                                                                        style={{
+                                                                            fontSize: 12,
+                                                                        }}
+                                                                    >
+                                                                        •{' '}
+                                                                        {names.join(
+                                                                            ' và '
+                                                                        )}
+                                                                    </span>
+                                                                )
+                                                            }
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Class preferences */}
+                                            <div
+                                                style={{
+                                                    background:
+                                                        'var(--color-surface-raised)',
+                                                    padding: 12,
+                                                    borderRadius: 6,
+                                                }}
+                                            >
+                                                <div
+                                                    style={{
+                                                        fontWeight: 600,
+                                                        marginBottom: 8,
+                                                        color: 'var(--color-text-primary)',
+                                                    }}
+                                                >
+                                                    ⏰ Sở thích buổi học:
+                                                </div>
+                                                {!aiResponse.class_preferences ||
+                                                aiResponse.class_preferences
+                                                    .length === 0 ? (
+                                                    <span
+                                                        style={{
+                                                            color: 'var(--color-text-muted)',
+                                                            fontSize: 12,
+                                                        }}
+                                                    >
+                                                        Không phát hiện sở thích
+                                                        buổi
+                                                    </span>
+                                                ) : (
+                                                    <div
+                                                        style={{
+                                                            display: 'flex',
+                                                            flexDirection:
+                                                                'column',
+                                                            gap: 4,
+                                                        }}
+                                                    >
+                                                        {aiResponse.class_preferences.map(
+                                                            (pref, idx) => {
+                                                                const c =
+                                                                    classesData?.items?.find(
+                                                                        (
+                                                                            item: any
+                                                                        ) =>
+                                                                            item.id ===
+                                                                            pref.class_id
+                                                                    )
+                                                                const className =
+                                                                    c
+                                                                        ? c.name
+                                                                        : pref.class_id.slice(
+                                                                              0,
+                                                                              8
+                                                                          ) +
+                                                                          '...'
+                                                                const periodLabel =
+                                                                    pref.preferred_time_period ===
+                                                                    'morning'
+                                                                        ? 'Sáng'
+                                                                        : pref.preferred_time_period ===
+                                                                            'afternoon'
+                                                                          ? 'Chiều'
+                                                                          : 'Tối'
+                                                                return (
+                                                                    <span
+                                                                        key={
+                                                                            idx
+                                                                        }
+                                                                        style={{
+                                                                            fontSize: 12,
+                                                                        }}
+                                                                    >
+                                                                        •{' '}
+                                                                        {
+                                                                            className
+                                                                        }
+                                                                        :{' '}
+                                                                        <strong>
+                                                                            Buổi{' '}
+                                                                            {
+                                                                                periodLabel
+                                                                            }
+                                                                        </strong>
+                                                                    </span>
+                                                                )
+                                                            }
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Penalties Override */}
+                                        {aiResponse.penalties_override &&
+                                            Object.keys(
+                                                aiResponse.penalties_override
+                                            ).length > 0 && (
+                                                <div
+                                                    style={{
+                                                        background:
+                                                            'var(--color-surface-raised)',
+                                                        padding: 12,
+                                                        borderRadius: 6,
+                                                        fontSize: 13,
+                                                    }}
+                                                >
+                                                    <div
+                                                        style={{
+                                                            fontWeight: 600,
+                                                            marginBottom: 8,
+                                                            color: 'var(--color-text-primary)',
+                                                        }}
+                                                    >
+                                                        📈 Điều chỉnh mức độ ưu
+                                                        tiên (Trọng số):
+                                                    </div>
+                                                    <div
+                                                        style={{
+                                                            display: 'grid',
+                                                            gridTemplateColumns:
+                                                                'repeat(auto-fill, minmax(200px, 1fr))',
+                                                            gap: 8,
+                                                        }}
+                                                    >
+                                                        {Object.entries(
+                                                            aiResponse.penalties_override
+                                                        ).map(
+                                                            ([key, value]) => {
+                                                                let label = key
+                                                                if (
+                                                                    key ===
+                                                                        'penalty_consecutive_limit' ||
+                                                                    key ===
+                                                                        'consecutive_limit'
+                                                                )
+                                                                    label =
+                                                                        'Tránh lịch liên tiếp'
+                                                                if (
+                                                                    key ===
+                                                                        'penalty_paired_classes' ||
+                                                                    key ===
+                                                                        'paired_classes'
+                                                                )
+                                                                    label =
+                                                                        'Lớp cùng buổi'
+                                                                if (
+                                                                    key ===
+                                                                        'penalty_time_preference' ||
+                                                                    key ===
+                                                                        'time_preference'
+                                                                )
+                                                                    label =
+                                                                        'Đúng buổi mong muốn'
+                                                                if (
+                                                                    key ===
+                                                                        'penalty_room_utilization' ||
+                                                                    key ===
+                                                                        'room_utilization'
+                                                                )
+                                                                    label =
+                                                                        'Tối ưu hóa phòng'
+                                                                if (
+                                                                    key ===
+                                                                        'penalty_preserve_existing' ||
+                                                                    key ===
+                                                                        'preserve_existing'
+                                                                )
+                                                                    label =
+                                                                        'Giữ nguyên lịch cũ'
+                                                                return (
+                                                                    <span
+                                                                        key={
+                                                                            key
+                                                                        }
+                                                                        style={{
+                                                                            fontSize: 12,
+                                                                        }}
+                                                                    >
+                                                                        •{' '}
+                                                                        {label}:{' '}
+                                                                        <strong
+                                                                            style={{
+                                                                                color: 'var(--color-brand-primary)',
+                                                                            }}
+                                                                        >
+                                                                            {
+                                                                                value
+                                                                            }
+                                                                        </strong>
+                                                                    </span>
+                                                                )
+                                                            }
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                justifyContent: 'flex-end',
+                                                gap: 12,
+                                                marginTop: 8,
+                                            }}
+                                        >
+                                            <ButtonPrimary
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() =>
+                                                    setAiResponse(null)
+                                                }
+                                            >
+                                                Hủy bỏ
+                                            </ButtonPrimary>
+                                            <ButtonPrimary
+                                                size="sm"
+                                                onClick={handleApplyAI}
+                                            >
+                                                ✓ Áp dụng vào cấu hình
+                                            </ButtonPrimary>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </Card>
+
                         <Card title="1. Khoảng thời gian" mode="light">
                             <div className={s.configPanel}>
                                 <InputField
@@ -371,6 +890,154 @@ function GAOptimizerTab() {
                                     ))
                                 )}
                             </div>
+
+                            {form.paired_class_ids &&
+                                form.paired_class_ids.length > 0 && (
+                                    <div
+                                        style={{
+                                            marginTop: 12,
+                                            padding: 10,
+                                            background:
+                                                'var(--color-status-info-bg)',
+                                            borderRadius: 6,
+                                            fontSize: 12,
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            gap: 6,
+                                        }}
+                                    >
+                                        <strong
+                                            style={{
+                                                color: 'var(--color-status-info)',
+                                            }}
+                                        >
+                                            🔗 Cặp lớp học xếp cùng buổi (AI /
+                                            Cấu hình):
+                                        </strong>
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                flexWrap: 'wrap',
+                                                gap: 8,
+                                            }}
+                                        >
+                                            {form.paired_class_ids.map(
+                                                (pair, idx) => {
+                                                    const names = pair.map(
+                                                        (id) => {
+                                                            const c =
+                                                                classesData?.items?.find(
+                                                                    (
+                                                                        item: any
+                                                                    ) =>
+                                                                        item.id ===
+                                                                        id
+                                                                )
+                                                            return c
+                                                                ? c.name
+                                                                : id.slice(
+                                                                      0,
+                                                                      8
+                                                                  ) + '...'
+                                                        }
+                                                    )
+                                                    return (
+                                                        <span
+                                                            key={idx}
+                                                            style={{
+                                                                background:
+                                                                    'var(--color-surface-card)',
+                                                                padding:
+                                                                    '3px 8px',
+                                                                borderRadius: 4,
+                                                                border: '1px solid var(--color-border-soft)',
+                                                            }}
+                                                        >
+                                                            {names.join(' + ')}
+                                                        </span>
+                                                    )
+                                                }
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                            {form.class_preferences &&
+                                form.class_preferences.length > 0 && (
+                                    <div
+                                        style={{
+                                            marginTop: 8,
+                                            padding: 10,
+                                            background:
+                                                'var(--color-status-info-bg)',
+                                            borderRadius: 6,
+                                            fontSize: 12,
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            gap: 6,
+                                        }}
+                                    >
+                                        <strong
+                                            style={{
+                                                color: 'var(--color-status-info)',
+                                            }}
+                                        >
+                                            ⏰ Sở thích buổi học của các lớp (AI
+                                            / Cấu hình):
+                                        </strong>
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                flexWrap: 'wrap',
+                                                gap: 8,
+                                            }}
+                                        >
+                                            {form.class_preferences.map(
+                                                (pref, idx) => {
+                                                    const c =
+                                                        classesData?.items?.find(
+                                                            (item: any) =>
+                                                                item.id ===
+                                                                pref.class_id
+                                                        )
+                                                    const className = c
+                                                        ? c.name
+                                                        : pref.class_id.slice(
+                                                              0,
+                                                              8
+                                                          ) + '...'
+                                                    const periodLabel =
+                                                        pref.preferred_time_period ===
+                                                        'morning'
+                                                            ? 'Sáng'
+                                                            : pref.preferred_time_period ===
+                                                                'afternoon'
+                                                              ? 'Chiều'
+                                                              : 'Tối'
+                                                    return (
+                                                        <span
+                                                            key={idx}
+                                                            style={{
+                                                                background:
+                                                                    'var(--color-surface-card)',
+                                                                padding:
+                                                                    '3px 8px',
+                                                                borderRadius: 4,
+                                                                border: '1px solid var(--color-border-soft)',
+                                                            }}
+                                                        >
+                                                            {className}:{' '}
+                                                            <strong>
+                                                                Buổi{' '}
+                                                                {periodLabel}
+                                                            </strong>
+                                                        </span>
+                                                    )
+                                                }
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
                         </Card>
 
                         <Card title="3. Tham số GA" mode="light">
@@ -427,70 +1094,70 @@ function GAOptimizerTab() {
                                 <SliderField
                                     label="Lịch liên tiếp"
                                     tooltip="Mức ưu tiên tránh xếp giáo viên dạy quá 3 tiết liên tiếp trong cùng ngày. Số càng cao, hệ thống càng cố tránh xếp lịch dày cho giáo viên."
-                                    value={form.weight_consecutive_limit!}
+                                    value={form.penalty_consecutive_limit!}
                                     min={0}
-                                    max={20}
+                                    max={50}
                                     step={1}
                                     onChange={(v) =>
                                         setForm({
                                             ...form,
-                                            weight_consecutive_limit: v,
+                                            penalty_consecutive_limit: v,
                                         })
                                     }
                                 />
                                 <SliderField
                                     label="Cặp lớp cùng buổi"
                                     tooltip="Mức ưu tiên xếp các cặp lớp liên quan vào cùng buổi (sáng/chiều/tối) trong cùng ngày. Thuận tiện cho học sinh học nhiều môn liên tiếp."
-                                    value={form.weight_paired_classes!}
+                                    value={form.penalty_paired_classes!}
                                     min={0}
-                                    max={20}
+                                    max={50}
                                     step={1}
                                     onChange={(v) =>
                                         setForm({
                                             ...form,
-                                            weight_paired_classes: v,
+                                            penalty_paired_classes: v,
                                         })
                                     }
                                 />
                                 <SliderField
                                     label="Sở thích buổi"
                                     tooltip="Mức ưu tiên xếp lớp đúng buổi mong muốn (sáng/chiều/tối) mà lớp đó đã đăng ký. Số càng cao, lịch càng sát với nguyện vọng thời gian."
-                                    value={form.weight_time_preference!}
+                                    value={form.penalty_time_preference!}
                                     min={0}
-                                    max={20}
+                                    max={50}
                                     step={1}
                                     onChange={(v) =>
                                         setForm({
                                             ...form,
-                                            weight_time_preference: v,
+                                            penalty_time_preference: v,
                                         })
                                     }
                                 />
                                 <SliderField
                                     label="Tối ưu phòng"
                                     tooltip="Mức ưu tiên chọn phòng phù hợp với sĩ số lớp. Hệ thống sẽ cố tránh xếp lớp ít học sinh vào phòng quá lớn, hoặc ngược lại."
-                                    value={form.weight_room_utilization!}
+                                    value={form.penalty_room_utilization!}
                                     min={0}
-                                    max={20}
+                                    max={50}
                                     step={1}
                                     onChange={(v) =>
                                         setForm({
                                             ...form,
-                                            weight_room_utilization: v,
+                                            penalty_room_utilization: v,
                                         })
                                     }
                                 />
                                 <SliderField
                                     label="Giữ lịch cũ"
                                     tooltip="Mức ưu tiên giữ nguyên lịch hiện tại đang có trong hệ thống. Số càng cao, hệ thống càng hạn chế thay đổi so với lịch cũ, tránh xáo trộn."
-                                    value={form.weight_preserve_existing!}
+                                    value={form.penalty_preserve_existing!}
                                     min={0}
-                                    max={20}
+                                    max={50}
                                     step={1}
                                     onChange={(v) =>
                                         setForm({
                                             ...form,
-                                            weight_preserve_existing: v,
+                                            penalty_preserve_existing: v,
                                         })
                                     }
                                 />
