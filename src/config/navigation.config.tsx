@@ -30,7 +30,7 @@ const studyMenuItems: ExtendedSideMenuItem[] = [
     {
         id: 'roadmap',
         label: 'Lộ trình',
-        href: '/coming-soon',
+        href: '/student/roadmap',
     },
 ]
 

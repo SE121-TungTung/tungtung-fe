@@ -127,22 +127,140 @@
 
 .statsGrid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 16px;
+}
+
+.tipsList {
+    width: 100%;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.skillGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.skillHeader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-secondary);
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--color-border-soft, rgba(0, 0, 0, 0.06));
+}
+
+.skillIcon {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.skillTipsUl {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.skillTipLi {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    padding: 6px 10px;
+    background-color: rgba(0, 0, 0, 0.02);
+    border-left: 3px solid var(--color-brand-primary, #3182ce);
+    border-radius: 0 4px 4px 0;
+    color: var(--color-text-secondary);
+}
+
+.skillTipLi[data-skill='reading'] {
+    border-left-color: #3182ce;
+}
+.skillTipLi[data-skill='listening'] {
+    border-left-color: #38a169;
+}
+.skillTipLi[data-skill='writing'] {
+    border-left-color: #d69e2e;
+}
+.skillTipLi[data-skill='speaking'] {
+    border-left-color: #e53e3e;
+}
+.skillTipLi[data-skill='overall'] {
+    border-left-color: #805ad5;
+}
+
+/* Legacy flat tips (backward compat) */
+.tipsTitle {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--color-brand-primary, #4a5568);
+}
+
+.tipsUl {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tipLi {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    padding: 8px 12px;
+    background-color: rgba(0, 0, 0, 0.02);
+    border-left: 3px solid var(--color-brand-primary, #3182ce);
+    border-radius: 0 4px 4px 0;
+    color: var(--color-text-secondary);
 }
 
 .suggestionBody {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 32px;
-    align-items: flex-end;
+    align-items: flex-start;
 }
 
 .suggestionTip {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 4px 12px 4px 0;
+    max-height: 320px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.suggestionTip::-webkit-scrollbar {
+    width: 6px;
+}
+.suggestionTip::-webkit-scrollbar-track {
+    background: transparent;
+}
+.suggestionTip::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+}
+.suggestionTip::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+:global([data-theme='dark']) .suggestionTip::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+}
+:global([data-theme='dark']) .suggestionTip::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
 }
 
 .fab {

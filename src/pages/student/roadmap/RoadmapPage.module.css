@@ -1,23 +1,5 @@
 .pageWrapper {
-    background: linear-gradient(115deg, #e4ecf7, #fff);
-    min-height: 100vh;
-    padding: 24px clamp(24px, 5vw, 80px);
-}
-.header {
-    margin-bottom: 40px;
-    position: relative;
-    z-index: 10;
-    width: 70%;
-    align-self: center;
-    margin-left: auto;
-    margin-right: auto;
-}
-.avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    object-fit: cover;
-    display: block;
+    width: 100%;
 }
 .mainContent {
     display: flex;
