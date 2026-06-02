@@ -17,12 +17,14 @@ export default function ChatbotUploadPage() {
 
     // State
     const [selectedFile, setSelectedFile] = useState<File | null>(null)
+    const [docCategory, setDocCategory] = useState<string>('business')
     const [isDragOver, setIsDragOver] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     // API Mutation
     const uploadMutation = useMutation({
-        mutationFn: (file: File) => chatbotApi.uploadDocument(file),
+        mutationFn: (file: File) =>
+            chatbotApi.uploadDocument(file, docCategory),
         onSuccess: () => {
             showAlert(
                 'Tải tài liệu thành công! Chatbot sẽ sớm học được kiến thức này.',
@@ -135,6 +137,43 @@ export default function ChatbotUploadPage() {
                             >
                                 Xóa
                             </button>
+                        </div>
+                    )}
+
+                    {/* Category Selection */}
+                    {selectedFile && (
+                        <div
+                            style={{
+                                marginTop: 24,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: 8,
+                            }}
+                        >
+                            <label style={{ fontWeight: 600, fontSize: 14 }}>
+                                Phân loại tài liệu:
+                            </label>
+                            <select
+                                value={docCategory}
+                                onChange={(e) => setDocCategory(e.target.value)}
+                                disabled={uploadMutation.isPending}
+                                style={{
+                                    padding: '10px',
+                                    borderRadius: '8px',
+                                    border: '1px solid #e2e8f0',
+                                    backgroundColor: '#fff',
+                                    fontSize: 14,
+                                }}
+                            >
+                                <option value="business">
+                                    Tài liệu Nghiệp vụ (Nội quy, Học phí, Lịch
+                                    trình, HDSD...)
+                                </option>
+                                <option value="learning">
+                                    Tài liệu Học tập (Kiến thức tiếng Anh, Ngữ
+                                    pháp, IELTS...)
+                                </option>
+                            </select>
                         </div>
                     )}
 

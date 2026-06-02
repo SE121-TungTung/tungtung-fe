@@ -14,9 +14,13 @@ export interface UploadResponse {
 }
 
 export const chatbotApi = {
-    uploadDocument: async (file: File): Promise<UploadResponse> => {
+    uploadDocument: async (
+        file: File,
+        docCategory: string = 'business'
+    ): Promise<UploadResponse> => {
         const formData = new FormData()
         formData.append('file', file)
+        formData.append('doc_category', docCategory)
 
         return api<UploadResponse>(`${BASE_URL}/admin/upload-doc`, {
             method: 'POST',
