@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { chatbotApi } from '@/lib/chatbot'
 
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
@@ -14,6 +14,7 @@ import { useDialog } from '@/hooks/useDialog'
 export default function ChatbotUploadPage() {
     // Navigation Setup
     const { alert: showAlert } = useDialog()
+    const queryClient = useQueryClient()
 
     // State
     const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -21,7 +22,18 @@ export default function ChatbotUploadPage() {
     const [isDragOver, setIsDragOver] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
-    // API Mutation
+    // Edit state
+    const replaceInputRef = useRef<HTMLInputElement>(null)
+    const [editingDocId, setEditingDocId] = useState<string | null>(null)
+
+    // Fetch documents
+    const { data: documentsData, isLoading } = useQuery({
+        queryKey: ['chatbotDocuments'],
+        queryFn: () => chatbotApi.getDocuments(),
+    })
+    const documents = documentsData?.data || []
+
+    // API Mutations
     const uploadMutation = useMutation({
         mutationFn: (file: File) =>
             chatbotApi.uploadDocument(file, docCategory),
@@ -31,6 +43,7 @@ export default function ChatbotUploadPage() {
                 'Thành công'
             )
             setSelectedFile(null)
+            queryClient.invalidateQueries({ queryKey: ['chatbotDocuments'] })
         },
         onError: (error: any) => {
             console.error(error)
@@ -38,10 +51,50 @@ export default function ChatbotUploadPage() {
         },
     })
 
+    const deleteMutation = useMutation({
+        mutationFn: (docId: string) => chatbotApi.deleteDocument(docId),
+        onSuccess: () => {
+            showAlert('Đã xóa tài liệu thành công.', 'Thành công')
+            queryClient.invalidateQueries({ queryKey: ['chatbotDocuments'] })
+        },
+        onError: (error: any) => {
+            console.error(error)
+            showAlert('Có lỗi xảy ra khi xóa: ' + error.message, 'Lỗi')
+        },
+    })
+
+    const updateMutation = useMutation({
+        mutationFn: ({ docId, file }: { docId: string; file: File }) =>
+            chatbotApi.updateDocument(docId, file),
+        onSuccess: () => {
+            showAlert('Đã thay thế tài liệu thành công.', 'Thành công')
+            queryClient.invalidateQueries({ queryKey: ['chatbotDocuments'] })
+            setEditingDocId(null)
+        },
+        onError: (error: any) => {
+            console.error(error)
+            showAlert('Có lỗi xảy ra khi cập nhật: ' + error.message, 'Lỗi')
+            setEditingDocId(null)
+        },
+    })
+
     // Handlers
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             setSelectedFile(e.target.files[0])
+        }
+    }
+
+    const handleReplaceFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0] && editingDocId) {
+            updateMutation.mutate({
+                docId: editingDocId,
+                file: e.target.files[0],
+            })
+            // Reset input
+            if (replaceInputRef.current) {
+                replaceInputRef.current.value = ''
+            }
         }
     }
 
@@ -69,6 +122,36 @@ export default function ChatbotUploadPage() {
         }
     }
 
+    const handleDelete = (docId: string) => {
+        if (
+            window.confirm(
+                'Bạn có chắc chắn muốn xóa tài liệu này? Chatbot sẽ không thể trả lời dựa trên tài liệu này nữa.'
+            )
+        ) {
+            deleteMutation.mutate(docId)
+        }
+    }
+
+    const triggerReplace = (docId: string) => {
+        setEditingDocId(docId)
+        replaceInputRef.current?.click()
+    }
+
+    const formatDate = (dateString: string) => {
+        return new Date(dateString).toLocaleDateString('vi-VN', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        })
+    }
+
+    const isPending =
+        uploadMutation.isPending ||
+        deleteMutation.isPending ||
+        updateMutation.isPending
+
     return (
         <div className={s.pageWrapperWithoutHeader}>
             <main className={s.mainContent}>
@@ -89,7 +172,7 @@ export default function ChatbotUploadPage() {
                                 ref={fileInputRef}
                                 style={{ display: 'none' }}
                                 onChange={handleFileSelect}
-                                accept=".pdf,.doc,.docx,.txt"
+                                accept=".pdf,.doc,.docx,.txt,.md"
                             />
                             <img
                                 src={UploadIcon}
@@ -100,7 +183,7 @@ export default function ChatbotUploadPage() {
                                 Kéo thả tài liệu vào đây hoặc bấm để chọn
                             </p>
                             <p className={s.uploadSubText}>
-                                Hỗ trợ: PDF, Word, TXT (Tối đa 10MB)
+                                Hỗ trợ: PDF, Word, TXT, MD
                             </p>
                         </div>
                     ) : (
@@ -133,7 +216,7 @@ export default function ChatbotUploadPage() {
                             <button
                                 className={s.removeBtn}
                                 onClick={() => setSelectedFile(null)}
-                                disabled={uploadMutation.isPending}
+                                disabled={isPending}
                             >
                                 Xóa
                             </button>
@@ -156,7 +239,7 @@ export default function ChatbotUploadPage() {
                             <select
                                 value={docCategory}
                                 onChange={(e) => setDocCategory(e.target.value)}
-                                disabled={uploadMutation.isPending}
+                                disabled={isPending}
                                 style={{
                                     padding: '10px',
                                     borderRadius: '8px',
@@ -181,18 +264,111 @@ export default function ChatbotUploadPage() {
                     <div className={s.actions}>
                         <ButtonGhost
                             onClick={() => setSelectedFile(null)}
-                            disabled={!selectedFile || uploadMutation.isPending}
+                            disabled={!selectedFile || isPending}
                         >
                             Hủy bỏ
                         </ButtonGhost>
                         <ButtonPrimary
                             onClick={handleUpload}
-                            disabled={!selectedFile || uploadMutation.isPending}
+                            disabled={!selectedFile || isPending}
                         >
                             {uploadMutation.isPending
                                 ? 'Đang tải lên...'
                                 : 'Xác nhận tải lên'}
                         </ButtonPrimary>
+                    </div>
+                </Card>
+
+                <Card className={s.uploadCard} style={{ marginTop: 0 }}>
+                    <h2 style={{ fontSize: '18px', fontWeight: 600 }}>
+                        Lịch sử tài liệu
+                    </h2>
+                    <p className={s.uploadSubText}>
+                        Danh sách các tài liệu Chatbot đã học
+                    </p>
+
+                    <input
+                        type="file"
+                        ref={replaceInputRef}
+                        style={{ display: 'none' }}
+                        onChange={handleReplaceFile}
+                        accept=".pdf,.doc,.docx,.txt,.md"
+                    />
+
+                    <div className={s.tableContainer}>
+                        {isLoading ? (
+                            <div className={s.emptyState}>
+                                Đang tải danh sách...
+                            </div>
+                        ) : documents.length === 0 ? (
+                            <div className={s.emptyState}>
+                                Chưa có tài liệu nào được tải lên.
+                            </div>
+                        ) : (
+                            <table className={s.documentTable}>
+                                <thead>
+                                    <tr>
+                                        <th>Tên file</th>
+                                        <th>Phân loại</th>
+                                        <th>Người tải lên</th>
+                                        <th>Ngày tải</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {documents.map((doc: any) => (
+                                        <tr key={doc.doc_id}>
+                                            <td style={{ fontWeight: 500 }}>
+                                                {doc.filename}
+                                            </td>
+                                            <td>
+                                                <span
+                                                    className={`${s.tag} ${doc.category === 'business' ? s.tagBusiness : s.tagLearning}`}
+                                                >
+                                                    {doc.category === 'business'
+                                                        ? 'Nghiệp vụ'
+                                                        : 'Học tập'}
+                                                </span>
+                                            </td>
+                                            <td>{doc.uploaded_by_name}</td>
+                                            <td style={{ color: '#64748b' }}>
+                                                {formatDate(doc.created_at)}
+                                            </td>
+                                            <td>
+                                                <div className={s.tableActions}>
+                                                    <button
+                                                        className={s.btnText}
+                                                        onClick={() =>
+                                                            triggerReplace(
+                                                                doc.doc_id
+                                                            )
+                                                        }
+                                                        disabled={isPending}
+                                                    >
+                                                        {updateMutation.isPending &&
+                                                        editingDocId ===
+                                                            doc.doc_id
+                                                            ? 'Đang tải...'
+                                                            : 'Thay thế'}
+                                                    </button>
+                                                    <button
+                                                        className={`${s.btnText} ${s.btnTextDanger}`}
+                                                        onClick={() =>
+                                                            handleDelete(
+                                                                doc.doc_id
+                                                            )
+                                                        }
+                                                        disabled={isPending}
+                                                    >
+                                                        Xóa
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
                     </div>
                 </Card>
             </main>

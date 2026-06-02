@@ -139,3 +139,85 @@
         transform: translateY(0);
     }
 }
+
+.tableContainer {
+    margin-top: 24px;
+    width: 100%;
+    overflow-x: auto;
+}
+
+.documentTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.documentTable th {
+    background-color: #f8fafc;
+    color: var(--color-text-secondary);
+    font-weight: 600;
+    text-align: left;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.documentTable td {
+    padding: 16px;
+    border-bottom: 1px solid #e2e8f0;
+    color: var(--color-text-primary);
+    vertical-align: middle;
+}
+
+.documentTable tr:last-child td {
+    border-bottom: none;
+}
+
+.documentTable tr:hover {
+    background-color: #f8fafc;
+}
+
+.tag {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.tagBusiness {
+    background-color: #e0e7ff;
+    color: #4f46e5;
+}
+
+.tagLearning {
+    background-color: #dcfce7;
+    color: #16a34a;
+}
+
+.tableActions {
+    display: flex;
+    gap: 8px;
+}
+
+.btnText {
+    background: none;
+    border: none;
+    color: var(--color-brand-primary-500);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.btnText:hover {
+    text-decoration: underline;
+}
+
+.btnTextDanger {
+    color: #ef4444;
+}
+
+.emptyState {
+    text-align: center;
+    padding: 32px;
+    color: var(--color-text-secondary);
+}
