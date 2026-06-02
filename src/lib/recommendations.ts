@@ -12,6 +12,13 @@ export interface RecommendationData {
     suggested_test_ids: string[]
     tips: string[]
     materials: any[]
+    suggested_course?: {
+        id: string
+        name: string
+        required_band: number
+        target_band: number
+        description: string
+    }
 }
 
 export interface Milestone {
