@@ -76,10 +76,10 @@ export interface ReceiptResponse {
 // Refunds
 // ============================================================================
 export interface RefundCalculationResponse {
-    total_sessions: number
-    attended_sessions: number
-    remaining_sessions: number
-    total_fee: number
+    sessions_total: number
+    sessions_attended: number
+    sessions_remaining: number
+    original_fee: number
     refundable_amount: number
 }
 
