@@ -251,6 +251,7 @@
        ------------------------------------------------------------------------ */
 
     --color-brand-primary: var(--primitive-lapis-500);
+    --color-brand-primary-500: var(--primitive-lapis-500);
     --color-brand-primary-hover: var(--primitive-lapis-600);
     --color-brand-primary-active: var(--primitive-lapis-700);
 
@@ -258,6 +259,7 @@
     --color-brand-accent-hover: var(--primitive-cyan-600);
 
     --color-brand-secondary: var(--primitive-crimson-500);
+    --color-brand-secondary-500: var(--primitive-crimson-500);
     --color-brand-secondary-hover: var(--primitive-crimson-600);
 
     /* ------------------------------------------------------------------------
@@ -323,8 +325,10 @@
 [data-theme='dark'] {
     /* Brand colors remain the same in dark mode */
     --color-brand-primary: var(--primitive-lapis-500);
+    --color-brand-primary-500: var(--primitive-lapis-500);
     --color-brand-primary-hover: var(--primitive-lapis-600);
     --color-brand-primary-active: var(--primitive-lapis-700);
+    --color-brand-secondary-500: var(--primitive-crimson-500);
 
     /* Surface colors inverted */
     --color-surface-page: var(--primitive-lapis-100);
@@ -509,8 +513,10 @@
 [data-theme='monochrome'] {
     /* Brand colors remain mostly flat */
     --color-brand-primary: var(--primitive-lapis-500);
+    --color-brand-primary-500: var(--primitive-lapis-500);
     --color-brand-primary-hover: var(--primitive-lapis-600);
     --color-brand-primary-active: var(--primitive-lapis-700);
+    --color-brand-secondary-500: var(--primitive-crimson-500);
 
     /* Surface colors very clean, no transparency */
     --color-surface-page: #ffffff;
@@ -549,10 +555,23 @@
         var(--brand-secondary-500-light, #f06292),
         var(--color-brand-primary)
     );
+
+    --gradient-text: linear-gradient(
+        135deg,
+        var(--color-brand-secondary-500) 0%,
+        var(--color-brand-secondary) 69.5%,
+        var(--color-brand-primary) 100%
+    );
 }
 
 [data-theme='dark'] {
     --bg-page-gradient: var(--color-surface-page);
+
+    --gradient-text: linear-gradient(
+        135deg,
+        var(--primitive-rose-600) 0%,
+        var(--primitive-cyan-500) 100%
+    );
 }
 
 [data-theme='monochrome'] {
@@ -560,6 +579,11 @@
     /* In monochrome, gradients become solid colors */
     --bg-brand-gradient: var(--color-brand-primary);
     --bg-avatar-gradient: var(--color-brand-primary);
+    --gradient-text: linear-gradient(
+        0deg,
+        var(--color-text-primary) 0%,
+        var(--color-text-primary) 100%
+    );
 }
 
 /* ============================================================================

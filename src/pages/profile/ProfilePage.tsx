@@ -76,6 +76,7 @@ export default function ProfilePage() {
                 {/* Tiêu đề trang */}
                 <h1 className={s.pageTitle}>
                     <TextType
+                        as="span"
                         text="Hồ sơ "
                         typingSpeed={50}
                         loop={false}
