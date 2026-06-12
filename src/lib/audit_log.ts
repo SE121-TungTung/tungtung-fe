@@ -4,7 +4,7 @@ import type {
     AuditLogFilters,
 } from '@/types/audit_log.types'
 
-const BASE_URL = '/api/v1/audit_logs/'
+const BASE_URL = '/api/v1/audit-logs'
 
 export async function getAuditLogs(
     filters: AuditLogFilters = {}
@@ -25,9 +25,12 @@ export async function getAuditLogs(
         )
     }
 
-    // Pagination
-    if (filters.skip !== undefined) params.set('skip', String(filters.skip))
-    if (filters.limit !== undefined) params.set('limit', String(filters.limit))
+    // Pagination (translate skip + limit to page + limit)
+    const limit = filters.limit ?? 20
+    const page =
+        filters.skip !== undefined ? Math.floor(filters.skip / limit) + 1 : 1
+    params.set('page', String(page))
+    params.set('limit', String(limit))
 
     // Filters
     if (filters.user_id) params.set('user_id', filters.user_id)

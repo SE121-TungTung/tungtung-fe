@@ -16,7 +16,13 @@ export const useCreateEnrollment = () => {
             api.createEnrollment(payload),
         onSuccess: (_, variables) => {
             qc.invalidateQueries({
-                queryKey: ['enrollments', 'student', variables.student_id],
+                queryKey: ['enrollments'],
+            })
+            qc.invalidateQueries({
+                queryKey: ['class-enrollments', variables.class_id],
+            })
+            qc.invalidateQueries({
+                queryKey: ['classes'],
             })
         },
     })

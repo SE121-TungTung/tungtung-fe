@@ -1,6 +1,7 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { chatbotApi } from '@/lib/chatbot'
+import type { ChatbotDocument } from '@/lib/chatbot'
 
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import ButtonGhost from '@/components/common/button/ButtonGhost'
@@ -13,7 +14,7 @@ import { useDialog } from '@/hooks/useDialog'
 
 export default function ChatbotUploadPage() {
     // Navigation Setup
-    const { alert: showAlert } = useDialog()
+    const { alert: showAlert, confirm } = useDialog()
     const queryClient = useQueryClient()
 
     // State
@@ -26,6 +27,11 @@ export default function ChatbotUploadPage() {
     const replaceInputRef = useRef<HTMLInputElement>(null)
     const [editingDocId, setEditingDocId] = useState<string | null>(null)
 
+    // Polling state: track docs that are still processing
+    const [processingDocIds, setProcessingDocIds] = useState<Set<string>>(
+        new Set()
+    )
+
     // Fetch documents
     const { data: documentsData, isLoading } = useQuery({
         queryKey: ['chatbotDocuments'],
@@ -33,16 +39,63 @@ export default function ChatbotUploadPage() {
     })
     const documents = documentsData?.data || []
 
-    // API Mutations
+    // ─── Polling for processing documents ──────────────────────────
+    const pollProcessingDocs = useCallback(async () => {
+        if (processingDocIds.size === 0) return
+
+        let anyChanged = false
+        for (const docId of processingDocIds) {
+            try {
+                const updated = await chatbotApi.getDocumentStatus(docId)
+                if (updated.status !== 'processing') {
+                    anyChanged = true
+                    setProcessingDocIds((prev) => {
+                        const next = new Set(prev)
+                        next.delete(docId)
+                        return next
+                    })
+                }
+            } catch {
+                // Ignore polling errors
+            }
+        }
+        if (anyChanged) {
+            queryClient.invalidateQueries({ queryKey: ['chatbotDocuments'] })
+        }
+    }, [processingDocIds, queryClient])
+
+    useEffect(() => {
+        if (processingDocIds.size === 0) return
+        const interval = setInterval(pollProcessingDocs, 5000)
+        return () => clearInterval(interval)
+    }, [processingDocIds, pollProcessingDocs])
+
+    // Track processing docs from the documents list
+    useEffect(() => {
+        const ids = documents
+            .filter((doc: ChatbotDocument) => doc.status === 'processing')
+            .map((doc: ChatbotDocument) => doc.id)
+        if (ids.length > 0) {
+            setProcessingDocIds((prev) => {
+                const next = new Set(prev)
+                ids.forEach((id: string) => next.add(id))
+                return next
+            })
+        }
+    }, [documents])
+
+    // ─── API Mutations ─────────────────────────────────────────────
     const uploadMutation = useMutation({
         mutationFn: (file: File) =>
             chatbotApi.uploadDocument(file, docCategory),
-        onSuccess: () => {
+        onSuccess: (data: ChatbotDocument) => {
             showAlert(
-                'Tải tài liệu thành công! Chatbot sẽ sớm học được kiến thức này.',
-                'Thành công'
+                'Tài liệu đang được tải lên AI Server. Bạn sẽ nhận thông báo khi hoàn tất.',
+                'Đang xử lý'
             )
             setSelectedFile(null)
+            // Track this new processing doc
+            setProcessingDocIds((prev) => new Set(prev).add(data.id))
             queryClient.invalidateQueries({ queryKey: ['chatbotDocuments'] })
         },
         onError: (error: any) => {
@@ -78,7 +131,7 @@ export default function ChatbotUploadPage() {
         },
     })
 
-    // Handlers
+    // ─── Handlers ──────────────────────────────────────────────────
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             setSelectedFile(e.target.files[0])
@@ -122,13 +175,22 @@ export default function ChatbotUploadPage() {
         }
     }
 
-    const handleDelete = (docId: string) => {
-        if (
-            window.confirm(
-                'Bạn có chắc chắn muốn xóa tài liệu này? Chatbot sẽ không thể trả lời dựa trên tài liệu này nữa.'
-            )
-        ) {
-            deleteMutation.mutate(docId)
+    const handleDelete = async (doc: ChatbotDocument) => {
+        // For processing/failed docs use the DB id, for completed use doc_id
+        const deleteId =
+            doc.status === 'completed' && doc.doc_id ? doc.doc_id : doc.id
+
+        const ok = await confirm({
+            title: 'Xác nhận xóa',
+            message:
+                'Bạn có chắc chắn muốn xóa tài liệu này? Chatbot sẽ không thể trả lời dựa trên tài liệu này nữa.',
+            type: 'danger',
+            confirmText: 'Xóa',
+            cancelText: 'Hủy',
+        })
+
+        if (ok) {
+            deleteMutation.mutate(deleteId)
         }
     }
 
@@ -151,6 +213,82 @@ export default function ChatbotUploadPage() {
         uploadMutation.isPending ||
         deleteMutation.isPending ||
         updateMutation.isPending
+
+    // ─── Status badge renderer ─────────────────────────────────────
+    const renderStatusBadge = (doc: ChatbotDocument) => {
+        switch (doc.status) {
+            case 'processing':
+                return (
+                    <span className={`${s.tag} ${s.tagProcessing}`}>
+                        <span className={s.spinner} />
+                        Đang tải lên
+                    </span>
+                )
+            case 'failed':
+                return (
+                    <span
+                        className={`${s.tag} ${s.tagFailed}`}
+                        title={doc.error_message || 'Unknown error'}
+                    >
+                        Thất bại
+                    </span>
+                )
+            case 'completed':
+            default:
+                return (
+                    <span className={`${s.tag} ${s.tagCompleted}`}>
+                        Hoàn tất
+                    </span>
+                )
+        }
+    }
+
+    // ─── Row actions based on status ───────────────────────────────
+    const renderRowActions = (doc: ChatbotDocument) => {
+        if (doc.status === 'processing') {
+            return (
+                <span style={{ fontSize: 12, color: '#94a3b8' }}>
+                    Đang xử lý...
+                </span>
+            )
+        }
+
+        if (doc.status === 'failed') {
+            return (
+                <div className={s.tableActions}>
+                    <button
+                        className={`${s.btnText} ${s.btnTextDanger}`}
+                        onClick={() => handleDelete(doc)}
+                        disabled={isPending}
+                    >
+                        Xóa
+                    </button>
+                </div>
+            )
+        }
+
+        // completed
+        return (
+            <div className={s.tableActions}>
+                <button
+                    className={s.btnText}
+                    onClick={() => triggerReplace(doc.doc_id!)}
+                    disabled={isPending}
+                >
+                    {updateMutation.isPending && editingDocId === doc.doc_id
+                        ? 'Đang tải...'
+                        : 'Thay thế'}
+                </button>
+                <button
+                    className={`${s.btnText} ${s.btnTextDanger}`}
+                    onClick={() => handleDelete(doc)}
+                    disabled={isPending}
+                >
+                    Xóa
+                </button>
+            </div>
+        )
+    }
 
     return (
         <div className={s.pageWrapperWithoutHeader}>
@@ -273,7 +411,7 @@ export default function ChatbotUploadPage() {
                             disabled={!selectedFile || isPending}
                         >
                             {uploadMutation.isPending
-                                ? 'Đang tải lên...'
+                                ? 'Đang gửi...'
                                 : 'Xác nhận tải lên'}
                         </ButtonPrimary>
                     </div>
@@ -310,14 +448,24 @@ export default function ChatbotUploadPage() {
                                     <tr>
                                         <th>Tên file</th>
                                         <th>Phân loại</th>
+                                        <th>Trạng thái</th>
                                         <th>Người tải lên</th>
                                         <th>Ngày tải</th>
                                         <th>Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {documents.map((doc: any) => (
-                                        <tr key={doc.doc_id}>
+                                    {documents.map((doc: ChatbotDocument) => (
+                                        <tr
+                                            key={doc.id}
+                                            className={
+                                                doc.status === 'processing'
+                                                    ? s.rowProcessing
+                                                    : doc.status === 'failed'
+                                                      ? s.rowFailed
+                                                      : ''
+                                            }
+                                        >
                                             <td style={{ fontWeight: 500 }}>
                                                 {doc.filename}
                                             </td>
@@ -330,40 +478,12 @@ export default function ChatbotUploadPage() {
                                                         : 'Học tập'}
                                                 </span>
                                             </td>
+                                            <td>{renderStatusBadge(doc)}</td>
                                             <td>{doc.uploaded_by_name}</td>
                                             <td style={{ color: '#64748b' }}>
                                                 {formatDate(doc.created_at)}
                                             </td>
-                                            <td>
-                                                <div className={s.tableActions}>
-                                                    <button
-                                                        className={s.btnText}
-                                                        onClick={() =>
-                                                            triggerReplace(
-                                                                doc.doc_id
-                                                            )
-                                                        }
-                                                        disabled={isPending}
-                                                    >
-                                                        {updateMutation.isPending &&
-                                                        editingDocId ===
-                                                            doc.doc_id
-                                                            ? 'Đang tải...'
-                                                            : 'Thay thế'}
-                                                    </button>
-                                                    <button
-                                                        className={`${s.btnText} ${s.btnTextDanger}`}
-                                                        onClick={() =>
-                                                            handleDelete(
-                                                                doc.doc_id
-                                                            )
-                                                        }
-                                                        disabled={isPending}
-                                                    >
-                                                        Xóa
-                                                    </button>
-                                                </div>
-                                            </td>
+                                            <td>{renderRowActions(doc)}</td>
                                         </tr>
                                     ))}
                                 </tbody>

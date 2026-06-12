@@ -133,3 +133,99 @@
         opacity: 0.6;
     }
 }
+
+/* Premium action buttons */
+.actionBtn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    background: transparent;
+    transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.actionBtnApprove {
+    color: var(--color-status-success, #22c55e);
+    background: rgba(34, 197, 94, 0.1);
+}
+
+.actionBtnApprove:hover {
+    color: #fff !important;
+    background: var(--color-status-success, #22c55e);
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
+    transform: scale(1.08);
+}
+
+.actionBtnApprove:active {
+    transform: scale(0.95);
+}
+
+.actionBtnReject {
+    color: var(--color-status-danger, #ef4444);
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.actionBtnReject:hover {
+    color: #fff !important;
+    background: var(--color-status-danger, #ef4444);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+    transform: scale(1.08);
+}
+
+.actionBtnReject:active {
+    transform: scale(0.95);
+}
+
+/* Tooltip container */
+.tooltipWrapper {
+    position: relative;
+    display: inline-flex;
+}
+
+/* Tooltip text */
+.tooltipText {
+    visibility: hidden;
+    position: absolute;
+    bottom: 125%; /* Position above the button */
+    left: 50%;
+    transform: translateX(-50%) translateY(8px);
+    background: rgba(15, 23, 42, 0.95); /* Deep slate background */
+    backdrop-filter: blur(8px);
+    color: #fff;
+    text-align: center;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    transition: all 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    z-index: 100;
+}
+
+/* Tooltip arrow */
+.tooltipText::after {
+    content: '';
+    position: absolute;
+    top: 100%; /* At the bottom of the tooltip */
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: rgba(15, 23, 42, 0.95) transparent transparent transparent;
+}
+
+/* Show tooltip on hover */
+.tooltipWrapper:hover .tooltipText {
+    visibility: visible;
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}

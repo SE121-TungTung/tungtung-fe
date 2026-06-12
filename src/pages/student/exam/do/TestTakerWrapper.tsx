@@ -32,6 +32,13 @@ import { SubmitConfirmationDialog } from './SubmitConfirmationDialog'
 // Types
 import type { EnhancedSection } from '../QuestionGroupRenderer'
 
+// SVG Icons
+import HeadphoneIcon from '@/assets/Headphone.svg'
+import BookOpenIcon from '@/assets/Book Open.svg'
+import PenIcon from '@/assets/Pen.svg'
+import MicrophoneIcon from '@/assets/Microphone.svg'
+import FileIcon from '@/assets/File.svg'
+
 // ============================================
 // MAIN WRAPPER COMPONENT
 // ============================================
@@ -340,14 +347,14 @@ export default function TestTakerWrapper() {
     const currentSection = sections[currentSectionIndex]
     const skillName = currentSection?.skillArea || test.title
 
-    const skillIcons: Record<SkillArea, string> = {
-        [SkillArea.LISTENING]: '🎧',
-        [SkillArea.READING]: '📖',
-        [SkillArea.WRITING]: '✏️',
-        [SkillArea.SPEAKING]: '🎤',
-        [SkillArea.GRAMMAR]: '',
-        [SkillArea.VOCABULARY]: '',
-        [SkillArea.PRONUNCIATION]: '',
+    const skillIcons: Record<SkillArea, React.ReactNode> = {
+        [SkillArea.LISTENING]: <img src={HeadphoneIcon} width={18} alt="" />,
+        [SkillArea.READING]: <img src={BookOpenIcon} width={18} alt="" />,
+        [SkillArea.WRITING]: <img src={PenIcon} width={18} alt="" />,
+        [SkillArea.SPEAKING]: <img src={MicrophoneIcon} width={18} alt="" />,
+        [SkillArea.GRAMMAR]: <img src={FileIcon} width={18} alt="" />,
+        [SkillArea.VOCABULARY]: <img src={FileIcon} width={18} alt="" />,
+        [SkillArea.PRONUNCIATION]: <img src={FileIcon} width={18} alt="" />,
     }
 
     // --- MAIN RENDER ---
@@ -356,7 +363,9 @@ export default function TestTakerWrapper() {
             <TestHeader
                 skillName={`IELTS ${skillName}`}
                 icon={
-                    skillIcons[currentSection?.skillArea as SkillArea] || '📝'
+                    skillIcons[currentSection?.skillArea as SkillArea] || (
+                        <img src={FileIcon} width={18} alt="" />
+                    )
                 }
                 timeLeft={timeLeft}
                 formattedTime={formattedTime}

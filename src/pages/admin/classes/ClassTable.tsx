@@ -19,16 +19,26 @@ const classStatusMap: Record<
     completed: { label: 'Đã hoàn thành', variant: 'neutral' },
     cancelled: { label: 'Đã hủy', variant: 'danger' },
     postponed: { label: 'Dời ngày', variant: 'neutral' },
+    draft: { label: 'Nháp (DRAFT)', variant: 'warning' },
+    open: { label: 'Mở đăng ký (OPEN)', variant: 'success' },
+    ongoing: { label: 'Bắt đầu học (ONGOING)', variant: 'success' },
 }
 
 const getClassStatusProps = (status: ClassStatus) => {
-    return classStatusMap[status] || classStatusMap.cancelled
+    return (
+        classStatusMap[status] || {
+            label: status,
+            variant: 'neutral' as StatusBadgeVariant,
+        }
+    )
 }
 
 type Props = {
     classes: Class[]
     onEditClass: (classItem: Class) => void
     onDeleteClass: (classItem: Class) => void
+    onUpdateStatus: (classItem: Class, newStatus: ClassStatus) => void
+    onViewDetail?: (classItem: Class) => void
     isLoading?: boolean
 }
 
@@ -36,6 +46,8 @@ export default function ClassTable({
     classes,
     onEditClass,
     onDeleteClass,
+    onUpdateStatus,
+    onViewDetail,
     isLoading,
 }: Props) {
     const { can } = usePermissions()
@@ -133,7 +145,7 @@ export default function ClassTable({
                     classes.map((c) => {
                         const statusProps = getClassStatusProps(c.status)
                         return (
-                            <tr key={c.id}>
+                            <tr key={c.id} onClick={() => onViewDetail?.(c)}>
                                 <td>
                                     <div className={s.userInfo}>
                                         <span className={s.userName}>
@@ -148,7 +160,7 @@ export default function ClassTable({
                                 <td>{c.course.name}</td>
                                 <td>{c.teacher.name}</td>
                                 <td>{c.room.name}</td>
-                                <td>
+                                <td onClick={(e) => e.stopPropagation()}>
                                     <StatusBadge
                                         variant={statusProps.variant}
                                         label={statusProps.label}
@@ -157,8 +169,46 @@ export default function ClassTable({
                                 <td>
                                     {c.startDate} - {c.endDate}
                                 </td>
-                                <td>
+                                <td onClick={(e) => e.stopPropagation()}>
                                     <div className={s.actionsCell}>
+                                        {(c.status === 'draft' ||
+                                            c.status === 'scheduled') && (
+                                            <ButtonPrimary
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() =>
+                                                    onUpdateStatus(c, 'open')
+                                                }
+                                                title="Mở đăng ký lớp học (Chuyển sang trạng thái OPEN)"
+                                                style={{
+                                                    fontSize: '12px',
+                                                    padding: '4px 8px',
+                                                    minHeight: 'unset',
+                                                    whiteSpace: 'nowrap',
+                                                }}
+                                            >
+                                                Mở đăng ký
+                                            </ButtonPrimary>
+                                        )}
+                                        {c.status === 'open' && (
+                                            <ButtonPrimary
+                                                variant="outline"
+                                                tone="success"
+                                                size="sm"
+                                                onClick={() =>
+                                                    onUpdateStatus(c, 'ongoing')
+                                                }
+                                                title="Bắt đầu lớp học (Chuyển sang trạng thái ONGOING)"
+                                                style={{
+                                                    fontSize: '12px',
+                                                    padding: '4px 8px',
+                                                    minHeight: 'unset',
+                                                    whiteSpace: 'nowrap',
+                                                }}
+                                            >
+                                                Bắt đầu lớp
+                                            </ButtonPrimary>
+                                        )}
                                         <ButtonPrimary
                                             variant="ghost"
                                             size="sm"

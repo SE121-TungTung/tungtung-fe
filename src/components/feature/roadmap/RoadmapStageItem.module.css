@@ -114,3 +114,96 @@
     filter: invert(61%) sepia(91%) saturate(353%) hue-rotate(85deg)
         brightness(89%) contrast(92%);
 }
+
+.expandButton {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-brand-primary);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px 0;
+    margin-top: 12px;
+    transition: opacity 0.2s;
+}
+
+.expandButton:hover {
+    opacity: 0.8;
+}
+
+.chevron {
+    transition: transform 0.2s ease;
+}
+
+.chevron.expanded {
+    transform: rotate(180deg);
+}
+
+.expandedContent {
+    margin-top: 16px;
+    padding: 16px;
+    background-color: var(--color-surface-raised);
+    border-radius: 8px;
+    border: 1px solid var(--color-border-soft);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.sectionTitle {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-secondary);
+    margin: 0 0 6px;
+}
+
+.rationaleText {
+    font-size: 14px;
+    color: var(--color-text-primary);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.taskList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.taskItem {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--color-text-primary);
+    line-height: 1.5;
+}
+
+.taskBullet {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--color-brand-primary);
+    margin-top: 8px;
+    flex-shrink: 0;
+}

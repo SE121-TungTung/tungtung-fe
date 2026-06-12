@@ -283,6 +283,18 @@
     --color-text-on-accent: var(--primitive-white);
 
     /* ------------------------------------------------------------------------
+       COMPATIBILITY / LEGACY: Dialog and Action Badges
+       ------------------------------------------------------------------------ */
+    --status-danger-500-light: var(--primitive-crimson-500);
+    --status-success-500-light: var(--primitive-success-dark);
+    --status-success-500-dark: var(--primitive-success-dark);
+    --status-warning-500-light: var(--primitive-warning);
+    --brand-primary-500-light: var(--primitive-lapis-500);
+    --brand-primary-600-light: var(--primitive-lapis-600);
+    --brand-secondary-500-light: var(--primitive-crimson-500);
+    --text-secondary-light: var(--color-text-secondary);
+
+    /* ------------------------------------------------------------------------
        SEMANTIC: Border Colors
        ------------------------------------------------------------------------ */
 

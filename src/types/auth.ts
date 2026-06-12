@@ -1,6 +1,7 @@
 export const ALL_ROLES = [
     'student',
     'teacher',
+    'ta',
     'office_admin',
     'center_admin',
     'system_admin',
@@ -30,6 +31,7 @@ export interface User {
     isFirstLogin: boolean
     createdAt: string
     updatedAt: string
+    preferences?: Record<string, any> | null
 }
 
 export interface LoginResponse {

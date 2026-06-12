@@ -10,6 +10,7 @@ import CheckIcon from '@/assets/Check Circle.svg'
 interface ExamCardProps {
     exam: TestListItem | StudentTestListItem
     onClick: () => void
+    onHistoryClick?: (examId: string) => void
     userRole:
         | 'student'
         | 'teacher'
@@ -18,7 +19,12 @@ interface ExamCardProps {
         | 'system_admin'
 }
 
-export default function ExamCard({ exam, onClick, userRole }: ExamCardProps) {
+export default function ExamCard({
+    exam,
+    onClick,
+    onHistoryClick,
+    userRole,
+}: ExamCardProps) {
     // Check if this is StudentTestListItem
     const isStudentView = 'canAttempt' in exam
 
@@ -108,6 +114,20 @@ export default function ExamCard({ exam, onClick, userRole }: ExamCardProps) {
 
             {/* Footer */}
             <div className={s.cardFooter}>
+                {isStudentView &&
+                    studentExam &&
+                    studentExam.attemptsCount > 0 &&
+                    onHistoryClick && (
+                        <button
+                            className={s.historyBtn}
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                onHistoryClick(exam.id)
+                            }}
+                        >
+                            Lịch sử
+                        </button>
+                    )}
                 {canAttempt ? (
                     <span className={s.ctaText}>
                         {userRole === 'student'

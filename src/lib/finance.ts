@@ -127,6 +127,21 @@ export const listPayments = async (params: {
 // Refunds
 // ============================================================================
 
+export const listRefunds = async (params: {
+    status?: string
+    student_id?: string
+    page?: number
+    limit?: number
+}): Promise<PaginatedResult<RefundResponse>> => {
+    const query = new URLSearchParams()
+    if (params.status) query.append('status', params.status)
+    if (params.student_id) query.append('student_id', params.student_id)
+    if (params.page) query.append('page', params.page.toString())
+    if (params.limit) query.append('limit', params.limit.toString())
+
+    return rawFetch<RefundResponse>(`${API_V1}/refunds?${query.toString()}`)
+}
+
 export const calculateRefund = async (
     enrollmentId: string
 ): Promise<RefundCalculationResponse> =>

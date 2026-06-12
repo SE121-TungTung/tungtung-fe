@@ -8,6 +8,9 @@ export type ClassStatus =
     | 'completed'
     | 'cancelled'
     | 'postponed'
+    | 'draft'
+    | 'open'
+    | 'ongoing'
 
 export type BackendClass = {
     id: string
@@ -15,11 +18,13 @@ export type BackendClass = {
     course_id: string
     teacher_id: string
     substitute_teacher_id?: string | null
+    substitute_teacher_name?: string | null
     room_id: string
     status: ClassStatus
     start_date: string
     end_date: string
-    schedule: any
+    preferred_slots: any
+    unavailable_slots: any
     max_students: number
     current_students: number
     fee_amount?: number | string | null
@@ -41,10 +46,12 @@ export type Class = {
     course: { id: string; name: string }
     teacher: { id: string; name: string }
     room: { id: string; name: string }
+    substituteTeacher?: { id: string; name: string } | null
     status: ClassStatus
     startDate: string
     endDate: string
-    scheduleDefinition: any
+    preferredSlots: any
+    unavailableSlots: any
     maxStudents: number
     currentStudents: number
     feeAmount?: number | null
@@ -60,10 +67,17 @@ const mapClass = (c: BackendClass): Class => ({
     course: { id: c.course_id, name: c.course_name || c.course_id },
     teacher: { id: c.teacher_id, name: c.teacher_name || c.teacher_id },
     room: { id: c.room_id, name: c.room_name || c.room_id },
+    substituteTeacher: c.substitute_teacher_id
+        ? {
+              id: c.substitute_teacher_id,
+              name: c.substitute_teacher_name || c.substitute_teacher_id,
+          }
+        : null,
     status: c.status,
     startDate: c.start_date ? c.start_date.split('T')[0] : '',
     endDate: c.end_date ? c.end_date.split('T')[0] : '',
-    scheduleDefinition: c.schedule,
+    preferredSlots: c.preferred_slots || [],
+    unavailableSlots: c.unavailable_slots || [],
     maxStudents: c.max_students,
     currentStudents: c.current_students,
     feeAmount: c.fee_amount ? Number(c.fee_amount) : null,
@@ -161,10 +175,11 @@ export type CreateClassDto = {
     status: ClassStatus
     start_date: string
     end_date: string
-    schedule: any
+    preferred_slots: any
+    unavailable_slots: any
     max_students: number
     current_students?: number
-    fee_amount?: string | null
+    fee_amount?: number | string | null
     sessions_per_week?: number | null
     notes?: string | null
 }

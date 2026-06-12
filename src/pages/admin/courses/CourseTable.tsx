@@ -1,4 +1,10 @@
-import { type Course, type CourseLevel, type CourseStatus } from '@/lib/courses'
+import React, { useState } from 'react'
+import {
+    type Course,
+    type CourseLevel,
+    type CourseStatus,
+    type CourseType,
+} from '@/lib/courses'
 import s from './CourseTable.module.css'
 import {
     StatusBadge,
@@ -19,6 +25,17 @@ const courseLevelDisplayNames: Record<CourseLevel, string> = {
     proficiency: 'Chuyên gia',
 }
 
+const courseTypeDisplayNames: Record<CourseType, string> = {
+    general_english: 'Tiếng Anh tổng quát',
+    ielts: 'IELTS',
+    toeic: 'TOEIC',
+    toefl: 'TOEFL',
+    business: 'Tiếng Anh thương mại',
+    conversation: 'Giao tiếp',
+    grammar: 'Ngữ pháp',
+    writing: 'Viết',
+}
+
 const courseStatusMap: Record<
     CourseStatus,
     { label: string; variant: StatusBadgeVariant }
@@ -31,11 +48,6 @@ const courseStatusMap: Record<
 const getCourseStatusProps = (status: CourseStatus) => {
     return courseStatusMap[status] || courseStatusMap.archived
 }
-
-const currencyFormatter = new Intl.NumberFormat('vi-VN', {
-    style: 'currency',
-    currency: 'VND',
-})
 
 type Props = {
     courses: Course[]
@@ -51,12 +63,27 @@ export default function CourseTable({
     isLoading,
 }: Props) {
     const { can } = usePermissions()
+    const [expandedCourseIds, setExpandedCourseIds] = useState<Set<string>>(
+        new Set()
+    )
 
     const canEdit = can('course:update')
     const canDelete = can('course:delete')
 
     const getCourseLevelName = (level: CourseLevel) => {
         return courseLevelDisplayNames[level] || level
+    }
+
+    const toggleExpand = (id: string) => {
+        setExpandedCourseIds((prev) => {
+            const next = new Set(prev)
+            if (next.has(id)) {
+                next.delete(id)
+            } else {
+                next.add(id)
+            }
+            return next
+        })
     }
 
     const CourseRowSkeleton = () => (
@@ -151,74 +178,308 @@ export default function CourseTable({
                 ) : (
                     courses.map((c) => {
                         const statusProps = getCourseStatusProps(c.status)
+                        const isExpanded = expandedCourseIds.has(c.id)
                         return (
-                            <tr key={c.id}>
-                                <td>
-                                    <div className={s.userInfo}>
-                                        <span className={s.userName}>
-                                            {c.name}
-                                        </span>
-                                        <span className={s.userEmail}>
-                                            {c.description
-                                                ? c.description.substring(
-                                                      0,
-                                                      40
-                                                  ) +
-                                                  (c.description.length > 40
-                                                      ? '...'
-                                                      : '')
-                                                : 'Chưa có mô tả'}
-                                        </span>
-                                    </div>
-                                </td>
-                                <td>{currencyFormatter.format(c.feeAmount)}</td>
-                                <td>{getCourseLevelName(c.level)}</td>
-                                <td>
-                                    <StatusBadge
-                                        variant={statusProps.variant}
-                                        label={statusProps.label}
-                                    />
-                                </td>
-                                <td>{c.durationHours} giờ</td>
-                                <td>
-                                    {new Date(c.createdAt).toLocaleDateString(
-                                        'vi-VN'
-                                    )}
-                                </td>
-                                <td>
-                                    <div className={s.actionsCell}>
-                                        <ButtonPrimary
-                                            variant="ghost"
-                                            size="sm"
-                                            iconOnly
-                                            onClick={() => onEditCourse(c)}
-                                            disabled={!canEdit}
-                                            title={
-                                                canEdit
-                                                    ? 'Chỉnh sửa'
-                                                    : 'Không có quyền sửa'
-                                            }
+                            <React.Fragment key={c.id}>
+                                <tr onClick={() => toggleExpand(c.id)}>
+                                    <td>
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '12px',
+                                            }}
                                         >
-                                            <img src={IconEdit} alt="Sửa" />
-                                        </ButtonPrimary>
-                                        <ButtonPrimary
-                                            variant="ghost"
-                                            size="sm"
-                                            iconOnly
-                                            onClick={() => onDeleteCourse(c)}
-                                            disabled={!canDelete}
-                                            title={
-                                                canDelete
-                                                    ? 'Xóa'
-                                                    : 'Không có quyền xóa'
-                                            }
-                                            className={s.dangerButton}
+                                            <span
+                                                style={{
+                                                    transform: isExpanded
+                                                        ? 'rotate(90deg)'
+                                                        : 'rotate(0deg)',
+                                                    transition:
+                                                        'transform 0.2s',
+                                                    display: 'inline-block',
+                                                    cursor: 'pointer',
+                                                    fontSize: '10px',
+                                                    color: 'var(--color-text-secondary)',
+                                                    userSelect: 'none',
+                                                }}
+                                            >
+                                                ▶
+                                            </span>
+                                            <div className={s.userInfo}>
+                                                <span className={s.userName}>
+                                                    {c.name}
+                                                </span>
+                                                <span className={s.userEmail}>
+                                                    {c.description
+                                                        ? c.description.substring(
+                                                              0,
+                                                              80
+                                                          ) +
+                                                          (c.description
+                                                              .length > 80
+                                                              ? '...'
+                                                              : '')
+                                                        : 'Chưa có mô tả'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {new Intl.NumberFormat('vi-VN', {
+                                            style: 'currency',
+                                            currency: c.currency || 'VND',
+                                        }).format(c.feeAmount)}
+                                    </td>
+                                    <td>{getCourseLevelName(c.level)}</td>
+                                    <td>
+                                        <StatusBadge
+                                            variant={statusProps.variant}
+                                            label={statusProps.label}
+                                        />
+                                    </td>
+                                    <td>{c.durationHours} giờ</td>
+                                    <td>
+                                        {new Date(
+                                            c.createdAt
+                                        ).toLocaleDateString('vi-VN')}
+                                    </td>
+                                    <td>
+                                        <div
+                                            className={s.actionsCell}
+                                            onClick={(e) => e.stopPropagation()}
                                         >
-                                            <img src={IconDelete} alt="Xóa" />
-                                        </ButtonPrimary>
-                                    </div>
-                                </td>
-                            </tr>
+                                            <ButtonPrimary
+                                                variant="ghost"
+                                                size="sm"
+                                                iconOnly
+                                                onClick={() => onEditCourse(c)}
+                                                disabled={!canEdit}
+                                                title={
+                                                    canEdit
+                                                        ? 'Chỉnh sửa'
+                                                        : 'Không có quyền sửa'
+                                                }
+                                            >
+                                                <img src={IconEdit} alt="Sửa" />
+                                            </ButtonPrimary>
+                                            <ButtonPrimary
+                                                variant="ghost"
+                                                size="sm"
+                                                iconOnly
+                                                onClick={() =>
+                                                    onDeleteCourse(c)
+                                                }
+                                                disabled={!canDelete}
+                                                title={
+                                                    canDelete
+                                                        ? 'Xóa'
+                                                        : 'Không có quyền xóa'
+                                                }
+                                                className={s.dangerButton}
+                                            >
+                                                <img
+                                                    src={IconDelete}
+                                                    alt="Xóa"
+                                                />
+                                            </ButtonPrimary>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {isExpanded && (
+                                    <tr>
+                                        <td
+                                            colSpan={7}
+                                            style={{
+                                                background:
+                                                    'var(--color-bg-muted)',
+                                                padding: '20px 24px',
+                                                borderBottom:
+                                                    '1px solid var(--color-border-soft)',
+                                            }}
+                                        >
+                                            <div
+                                                style={{
+                                                    display: 'grid',
+                                                    gridTemplateColumns:
+                                                        '1fr 1.2fr',
+                                                    gap: '32px',
+                                                }}
+                                            >
+                                                <div>
+                                                    <p
+                                                        style={{
+                                                            margin: '0 0 10px 0',
+                                                            fontSize: '13px',
+                                                        }}
+                                                    >
+                                                        <strong>
+                                                            Phân loại:
+                                                        </strong>{' '}
+                                                        {courseTypeDisplayNames[
+                                                            c.courseType
+                                                        ] || c.courseType}
+                                                    </p>
+                                                    <p
+                                                        style={{
+                                                            margin: '0 0 16px 0',
+                                                            fontSize: '13px',
+                                                        }}
+                                                    >
+                                                        <strong>Sĩ số:</strong>{' '}
+                                                        Tối thiểu{' '}
+                                                        {c.minStudents} • Tối đa{' '}
+                                                        {c.maxStudents} học viên
+                                                    </p>
+
+                                                    <p
+                                                        style={{
+                                                            margin: '0 0 6px 0',
+                                                            fontSize: '13px',
+                                                        }}
+                                                    >
+                                                        <strong>
+                                                            Điều kiện tiên
+                                                            quyết:
+                                                        </strong>
+                                                    </p>
+                                                    {c.prerequisites &&
+                                                    c.prerequisites.length >
+                                                        0 ? (
+                                                        <ul
+                                                            style={{
+                                                                margin: '0 0 16px 0',
+                                                                paddingLeft:
+                                                                    '20px',
+                                                                fontSize:
+                                                                    '13px',
+                                                                lineHeight:
+                                                                    '1.5',
+                                                            }}
+                                                        >
+                                                            {c.prerequisites.map(
+                                                                (p, i) => (
+                                                                    <li key={i}>
+                                                                        {p}
+                                                                    </li>
+                                                                )
+                                                            )}
+                                                        </ul>
+                                                    ) : (
+                                                        <p
+                                                            style={{
+                                                                margin: '0 0 16px 0',
+                                                                fontSize:
+                                                                    '13px',
+                                                                color: 'var(--color-text-secondary)',
+                                                            }}
+                                                        >
+                                                            Không có
+                                                        </p>
+                                                    )}
+
+                                                    <p
+                                                        style={{
+                                                            margin: '0 0 6px 0',
+                                                            fontSize: '13px',
+                                                        }}
+                                                    >
+                                                        <strong>
+                                                            Mục tiêu đầu ra:
+                                                        </strong>
+                                                    </p>
+                                                    {c.learningObjectives &&
+                                                    c.learningObjectives
+                                                        .length > 0 ? (
+                                                        <ul
+                                                            style={{
+                                                                margin: '0',
+                                                                paddingLeft:
+                                                                    '20px',
+                                                                fontSize:
+                                                                    '13px',
+                                                                lineHeight:
+                                                                    '1.5',
+                                                            }}
+                                                        >
+                                                            {c.learningObjectives.map(
+                                                                (obj, i) => (
+                                                                    <li key={i}>
+                                                                        {obj}
+                                                                    </li>
+                                                                )
+                                                            )}
+                                                        </ul>
+                                                    ) : (
+                                                        <p
+                                                            style={{
+                                                                margin: '0',
+                                                                fontSize:
+                                                                    '13px',
+                                                                color: 'var(--color-text-secondary)',
+                                                            }}
+                                                        >
+                                                            Không có
+                                                        </p>
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <p
+                                                        style={{
+                                                            margin: '0 0 10px 0',
+                                                            fontSize: '13px',
+                                                        }}
+                                                    >
+                                                        <strong>
+                                                            Giáo trình
+                                                            (Syllabus):
+                                                        </strong>
+                                                    </p>
+                                                    {c.syllabus &&
+                                                    c.syllabus.chapters &&
+                                                    c.syllabus.chapters.length >
+                                                        0 ? (
+                                                        <ol
+                                                            style={{
+                                                                margin: '0',
+                                                                paddingLeft:
+                                                                    '20px',
+                                                                fontSize:
+                                                                    '13px',
+                                                                lineHeight:
+                                                                    '1.6',
+                                                            }}
+                                                        >
+                                                            {c.syllabus.chapters.map(
+                                                                (
+                                                                    ch: string,
+                                                                    i: number
+                                                                ) => (
+                                                                    <li key={i}>
+                                                                        {ch}
+                                                                    </li>
+                                                                )
+                                                            )}
+                                                        </ol>
+                                                    ) : (
+                                                        <p
+                                                            style={{
+                                                                margin: '0',
+                                                                fontSize:
+                                                                    '13px',
+                                                                color: 'var(--color-text-secondary)',
+                                                            }}
+                                                        >
+                                                            Chưa cấu hình giáo
+                                                            trình
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}
+                            </React.Fragment>
                         )
                     })
                 )}

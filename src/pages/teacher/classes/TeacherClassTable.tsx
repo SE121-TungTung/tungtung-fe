@@ -15,6 +15,9 @@ const classStatusMap: Record<
     completed: { label: 'Đã xong', variant: 'neutral' },
     cancelled: { label: 'Đã hủy', variant: 'danger' },
     postponed: { label: 'Hoãn', variant: 'neutral' },
+    draft: { label: 'Nháp', variant: 'warning' },
+    open: { label: 'Mở đăng ký', variant: 'success' },
+    ongoing: { label: 'Đang diễn ra', variant: 'success' },
 }
 
 type Props = {

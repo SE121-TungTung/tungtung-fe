@@ -14,7 +14,7 @@
 }
 
 .bellButton:hover {
-    background: var(--colors-container-border);
+    background: var(--color-border-soft);
     transform: scale(1.05);
 }
 
@@ -32,12 +32,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--status-danger-light, #ef4444);
+    background: var(--color-status-danger);
     color: white;
     font-size: 10px;
     font-weight: 700;
     border-radius: 9px;
-    border: 2px solid var(--primitive-color-white);
+    border: 2px solid var(--primitive-white);
     box-shadow: 0 2px 4px rgba(255, 71, 87, 0.3);
     animation: pulse 2s ease-in-out infinite;
 }
@@ -82,7 +82,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--dimension-space-16) var(--dimension-space-20);
+    padding: var(--primitive-space-8) var(--primitive-space-10);
     border-bottom: 1px solid var(--color-border-soft);
     flex-shrink: 0;
     background: var(--color-surface-page);
@@ -113,7 +113,7 @@
     justify-content: center;
     width: 32px;
     height: 32px;
-    border-radius: var(--dimension-radius-sm);
+    border-radius: var(--primitive-radius-sm);
     border: none;
     background: transparent;
     color: var(--color-brand-primary);
@@ -231,7 +231,7 @@
     justify-content: center;
     padding: 48px 20px;
     gap: 12px;
-    color: var(--color-semantic-text-muted);
+    color: var(--color-text-muted);
 }
 
 .emptyIcon {
@@ -270,6 +270,8 @@
 
 @media (max-width: 480px) {
     .popup {
-        width: calc(100vw - 24px);
+        width: auto !important;
+        left: 12px !important;
+        right: 12px !important;
     }
 }

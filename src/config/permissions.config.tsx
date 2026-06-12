@@ -36,6 +36,7 @@ export type Permission =
  */
 const ROLES: Record<Role, Permission[]> = {
     student: ['user:read', 'room:read', 'course:read', 'class:read'],
+    ta: ['user:read', 'room:read', 'course:read', 'class:read'],
     teacher: [
         'user:read',
         'room:read',

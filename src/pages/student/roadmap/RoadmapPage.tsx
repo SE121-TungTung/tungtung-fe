@@ -18,7 +18,7 @@ export default function RoadmapPage() {
 
     const roadmapStages = useMemo(() => {
         if (!recData?.learning_path?.milestones) return []
-        return recData.learning_path.milestones.map((m) => ({
+        return recData.learning_path.milestones.map((m: any) => ({
             id: `milestone_${m.month}`,
             stage_order: m.month,
             title: `Tháng ${m.month}: Mục tiêu Band ${m.target_band} (${m.target_cefr})`,
@@ -28,6 +28,8 @@ export default function RoadmapPage() {
                 | 'completed'
                 | 'in_progress'
                 | 'pending',
+            rationale: m.rationale,
+            tasks: m.tasks,
         })) as RoadmapStage[]
     }, [recData])
 

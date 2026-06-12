@@ -15,6 +15,16 @@ import TemplateImg from '@/assets/banner-placeholder.png'
 import { TextHorizontal } from '@/components/common/text/TextHorizontal'
 import TextType from '@/components/common/text/TextType'
 
+// AI Recommendation Icons
+import BookOpenIcon from '@/assets/Book Open.svg'
+import HeadphoneIcon from '@/assets/Headphone.svg'
+import PenIcon from '@/assets/Pen.svg'
+import MicrophoneIcon from '@/assets/Microphone.svg'
+import CheckBadgeIcon from '@/assets/Check Badge.svg'
+import IdeaIcon from '@/assets/Light Bulb Idea.svg'
+import RobotIcon from '@/assets/Robot.svg'
+import BookReaderIcon from '@/assets/Book Reader.svg'
+
 import { getMe, getUserOverview, getMyClasses } from '@/lib/users'
 import { getTodayRecommendation } from '@/lib/recommendations'
 import type { StudentOverviewStats } from '@/types/user.types'
@@ -52,7 +62,7 @@ export default function StudentDashboard() {
     const greetingTexts = useMemo(() => {
         if (!userData) return ['Đang tải dữ liệu...']
         return [
-            `Chào mừng quay trở lại, ${userData.firstName}!`,
+            `Chào mừng quay trở lại, ${userData.firstName} ${userData.lastName}!`,
             'Hôm nay bạn muốn học kỹ năng gì?',
             'Cùng hoàn thành mục tiêu ngày hôm nay nhé!',
         ]
@@ -60,7 +70,8 @@ export default function StudentDashboard() {
 
     const todaySessions = useMemo(() => {
         if (!myClasses) return []
-        const today = new Date().toISOString().split('T')[0]
+        const now = new Date()
+        const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
 
         const formattedSessions: Lesson[] = []
 
@@ -132,8 +143,8 @@ export default function StudentDashboard() {
                     className={s.fullRow}
                 >
                     <div className={s.statsGrid}>
-                        {statsLoading || recLoading ? (
-                            <Skeleton height={140} variant="rect" count={4} />
+                        {statsLoading ? (
+                            <Skeleton height={140} variant="rect" count={3} />
                         ) : (
                             <>
                                 <StatCard
@@ -165,22 +176,26 @@ export default function StudentDashboard() {
                                         '0'
                                     }
                                 />
-                                <StatCard
-                                    title="Điểm dự kiến (AI)"
-                                    subtitle="Dự đoán band score dựa trên kết quả thi"
-                                    value={
-                                        recData?.predicted_band !== undefined &&
-                                        recData?.predicted_band !== null
-                                            ? recData.predicted_band.toString()
-                                            : 'N/A'
-                                    }
-                                    unit={
-                                        recData?.predicted_cefr
-                                            ? ` (${recData.predicted_cefr})`
-                                            : ''
-                                    }
-                                />
                             </>
+                        )}
+                        {recLoading ? (
+                            <Skeleton height={140} variant="rect" count={1} />
+                        ) : (
+                            <StatCard
+                                title="Điểm dự kiến (AI)"
+                                subtitle="Dự đoán band score dựa trên kết quả thi"
+                                value={
+                                    recData?.predicted_band !== undefined &&
+                                    recData?.predicted_band !== null
+                                        ? recData.predicted_band.toString()
+                                        : 'N/A'
+                                }
+                                unit={
+                                    recData?.predicted_cefr
+                                        ? ` (${recData.predicted_cefr})`
+                                        : ''
+                                }
+                            />
                         )}
                     </div>
                 </Card>
@@ -216,14 +231,14 @@ export default function StudentDashboard() {
                                             >
                                                 <TextHorizontal
                                                     icon={
-                                                        <span
+                                                        <img
+                                                            src={RobotIcon}
+                                                            alt="AI"
                                                             style={{
-                                                                fontSize:
-                                                                    '18px',
+                                                                width: '20px',
+                                                                height: '20px',
                                                             }}
-                                                        >
-                                                            🔔
-                                                        </span>
+                                                        />
                                                     }
                                                     title="AI khích lệ"
                                                     description={
@@ -236,44 +251,34 @@ export default function StudentDashboard() {
                                         {recData?.recommendation_data
                                             ?.suggested_course && (
                                             <div
-                                                style={{
-                                                    marginBottom: '16px',
-                                                    background: '#eef2ff',
-                                                    padding: '16px',
-                                                    borderRadius: '12px',
-                                                    border: '1px solid #c7d2fe',
-                                                }}
+                                                className={
+                                                    s.courseSuggestionCard
+                                                }
                                             >
                                                 <div
-                                                    style={{
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: '8px',
-                                                        marginBottom: '4px',
-                                                    }}
+                                                    className={
+                                                        s.courseSuggestionHeader
+                                                    }
                                                 >
-                                                    <span
-                                                        style={{
-                                                            fontSize: '20px',
-                                                        }}
-                                                    >
-                                                        🎓
-                                                    </span>
+                                                    <img
+                                                        src={BookReaderIcon}
+                                                        alt="Course"
+                                                        className={
+                                                            s.courseSuggestionIcon
+                                                        }
+                                                    />
                                                     <h4
-                                                        style={{
-                                                            margin: 0,
-                                                            color: '#3730a3',
-                                                        }}
+                                                        className={
+                                                            s.courseSuggestionTitle
+                                                        }
                                                     >
                                                         Gợi ý Khóa học Tiếp theo
                                                     </h4>
                                                 </div>
                                                 <p
-                                                    style={{
-                                                        margin: '0 0 8px 0',
-                                                        fontSize: '14px',
-                                                        color: '#4f46e5',
-                                                    }}
+                                                    className={
+                                                        s.courseSuggestionText
+                                                    }
                                                 >
                                                     Dựa trên dự đoán band{' '}
                                                     <strong>
@@ -283,11 +288,7 @@ export default function StudentDashboard() {
                                                     gia:
                                                 </p>
                                                 <strong
-                                                    style={{
-                                                        fontSize: '16px',
-                                                        display: 'block',
-                                                        color: '#1e1b4b',
-                                                    }}
+                                                    className={s.courseName}
                                                 >
                                                     {
                                                         recData
@@ -296,13 +297,7 @@ export default function StudentDashboard() {
                                                             .name
                                                     }
                                                 </strong>
-                                                <p
-                                                    style={{
-                                                        margin: '4px 0 0 0',
-                                                        fontSize: '13px',
-                                                        color: '#6366f1',
-                                                    }}
-                                                >
+                                                <p className={s.courseTarget}>
                                                     Mục tiêu khóa học: Band{' '}
                                                     {
                                                         recData
@@ -328,27 +323,27 @@ export default function StudentDashboard() {
                                                     {
                                                         key: 'reading',
                                                         label: 'Reading',
-                                                        icon: '📖',
+                                                        icon: BookOpenIcon,
                                                     },
                                                     {
                                                         key: 'listening',
                                                         label: 'Listening',
-                                                        icon: '🎧',
+                                                        icon: HeadphoneIcon,
                                                     },
                                                     {
                                                         key: 'writing',
                                                         label: 'Writing',
-                                                        icon: '✍️',
+                                                        icon: PenIcon,
                                                     },
                                                     {
                                                         key: 'speaking',
                                                         label: 'Speaking',
-                                                        icon: '🗣️',
+                                                        icon: MicrophoneIcon,
                                                     },
                                                     {
                                                         key: 'overall',
                                                         label: 'Tổng hợp',
-                                                        icon: '🎯',
+                                                        icon: CheckBadgeIcon,
                                                     },
                                                 ]
 
@@ -384,14 +379,27 @@ export default function StudentDashboard() {
 
                                                 return (
                                                     <>
-                                                        <h4
+                                                        <div
                                                             className={
-                                                                s.tipsTitle
+                                                                s.tipsSectionHeader
                                                             }
                                                         >
-                                                            💡 Gợi ý từ AI theo
-                                                            kỹ năng:
-                                                        </h4>
+                                                            <img
+                                                                src={IdeaIcon}
+                                                                alt="AI Suggestions"
+                                                                className={
+                                                                    s.tipsSectionIcon
+                                                                }
+                                                            />
+                                                            <h4
+                                                                className={
+                                                                    s.tipsTitle
+                                                                }
+                                                            >
+                                                                Gợi ý từ AI theo
+                                                                kỹ năng
+                                                            </h4>
+                                                        </div>
                                                         {skillConfig.map(
                                                             (sk) => {
                                                                 const skillTips =
@@ -421,15 +429,17 @@ export default function StudentDashboard() {
                                                                                 s.skillHeader
                                                                             }
                                                                         >
-                                                                            <span
+                                                                            <img
+                                                                                src={
+                                                                                    sk.icon
+                                                                                }
+                                                                                alt={
+                                                                                    sk.label
+                                                                                }
                                                                                 className={
                                                                                     s.skillIcon
                                                                                 }
-                                                                            >
-                                                                                {
-                                                                                    sk.icon
-                                                                                }
-                                                                            </span>
+                                                                            />
                                                                             {
                                                                                 sk.label
                                                                             }
@@ -477,14 +487,27 @@ export default function StudentDashboard() {
                                             ) {
                                                 return (
                                                     <>
-                                                        <h4
+                                                        <div
                                                             className={
-                                                                s.tipsTitle
+                                                                s.tipsSectionHeader
                                                             }
                                                         >
-                                                            💡 Mẹo học tập từ
-                                                            AI:
-                                                        </h4>
+                                                            <img
+                                                                src={IdeaIcon}
+                                                                alt="AI Suggestions"
+                                                                className={
+                                                                    s.tipsSectionIcon
+                                                                }
+                                                            />
+                                                            <h4
+                                                                className={
+                                                                    s.tipsTitle
+                                                                }
+                                                            >
+                                                                Mẹo học tập từ
+                                                                AI
+                                                            </h4>
+                                                        </div>
                                                         <ul
                                                             className={s.tipsUl}
                                                         >

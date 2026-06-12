@@ -1,18 +1,12 @@
 import React from 'react'
 import s from './ProfileOverview.module.css'
 import { ProfileHeaderCard } from './ProfileHeaderCard'
-import type { Role } from '@/types/auth'
+import type { Role, User } from '@/types/auth'
 import Card from '@/components/common/card/Card'
 import { TestHistoryItem, type TestAttempt } from './TestHistoryItem'
 import StatCard from '@/components/common/card/StatCard'
 import { useDialog } from '@/hooks/useDialog'
 
-const mockProgress = {
-    current_band: 7.0,
-    target_band: 8.0,
-    completed_lessons: 32,
-    total_lessons: 50,
-}
 const mockTestHistory: TestAttempt[] = [
     {
         id: 'att_1',
@@ -40,11 +34,22 @@ const mockTestHistory: TestAttempt[] = [
     },
 ]
 
-const StudentStats: React.FC = () => {
+interface StudentStatsProps {
+    user: User
+}
+
+const StudentStats: React.FC<StudentStatsProps> = ({ user }) => {
     const { alert } = useDialog()
-    // Tính toán tiến độ
-    const progressPercent =
-        (mockProgress.completed_lessons / mockProgress.total_lessons) * 100
+
+    // Read target band from user preferences (synced with backend)
+    const targetBand = user?.preferences?.target_band
+        ? parseFloat(user.preferences.target_band)
+        : null
+
+    // TODO: Replace with real data from API
+    const completedLessons = 32
+    const totalLessons = 50
+    const progressPercent = (completedLessons / totalLessons) * 100
 
     return (
         <>
@@ -52,19 +57,14 @@ const StudentStats: React.FC = () => {
             <Card title="Biểu đồ tiến độ" variant="flat" mode="light">
                 <div className={s.statsGrid}>
                     <StatCard
-                        title="Band hiện tại"
-                        value={mockProgress.current_band.toFixed(1)}
-                        subtitle="IELTS"
-                    />
-                    <StatCard
                         title="Band mục tiêu"
-                        value={mockProgress.target_band.toFixed(1)}
-                        subtitle="IELTS"
+                        value={targetBand ? targetBand.toFixed(1) : 'Chưa đặt'}
+                        subtitle={targetBand ? 'IELTS' : 'Vào Hồ sơ để cài đặt'}
                     />
                     <StatCard
                         title="Tiến độ khóa học"
                         value={`${progressPercent.toFixed(0)}%`}
-                        subtitle={`${mockProgress.completed_lessons}/${mockProgress.total_lessons} buổi`}
+                        subtitle={`${completedLessons}/${totalLessons} buổi`}
                     />
                 </div>
                 {/* TODO: Chart */}
@@ -116,7 +116,7 @@ export const ProfileOverview: React.FC<ProfileOverviewProps> = ({
     const renderRoleSpecificCards = () => {
         switch (role) {
             case 'student':
-                return <StudentStats />
+                return <StudentStats user={user} />
             case 'teacher':
                 return <TeacherStats />
             case 'office_admin':

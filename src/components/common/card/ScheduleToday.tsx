@@ -24,6 +24,10 @@ export default function ScheduleTodayCard({
     controls,
     isLoading = false,
 }: ScheduleTodayCardProps) {
+    const hasSessions = sessions.length > 0
+    const isAllCheckedIn =
+        hasSessions && sessions.every((s) => s.attendanceTaken)
+
     return (
         <section className={`${s.root} ${s[mode]}`}>
             <header className={s.header}>
@@ -33,15 +37,20 @@ export default function ScheduleTodayCard({
                 </div>
                 <div className={s.controls}>
                     {controls}
-                    {onCheckIn && !isLoading && (
+                    {onCheckIn && !isLoading && hasSessions && (
                         <ButtonGlow
                             size="sm"
                             variant="outline"
                             mode={mode}
                             onClick={onCheckIn}
-                            rightIcon={<img src={Icon} alt="checkin icon" />}
+                            disabled={isAllCheckedIn}
+                            rightIcon={
+                                !isAllCheckedIn ? (
+                                    <img src={Icon} alt="checkin icon" />
+                                ) : undefined
+                            }
                         >
-                            Điểm danh ngay
+                            {isAllCheckedIn ? 'Đã điểm danh' : 'Điểm danh ngay'}
                         </ButtonGlow>
                     )}
                 </div>

@@ -112,6 +112,33 @@ function parseEnum<T extends Record<string, string>>(
 }
 
 /**
+ * Normalize options from backend into a consistent array format.
+ * Backend may return:
+ *   - An array of {key, text, is_correct} objects (standard)
+ *   - A dict like {"A": "text", "B": "text"} (legacy/seed data)
+ *   - null/undefined
+ */
+function normalizeOptions(raw: any): QuestionOption[] | null {
+    if (!raw) return null
+
+    // Already an array of option objects
+    if (Array.isArray(raw)) {
+        return raw.map(mapQuestionOption)
+    }
+
+    // Dict format: {"A": "text", "B": "text", ...}
+    if (typeof raw === 'object') {
+        return Object.entries(raw).map(([key, text]) => ({
+            key,
+            text: String(text),
+            isCorrect: false, // not exposed to student view
+        }))
+    }
+
+    return null
+}
+
+/**
  * Map backend question response to frontend Question
  */
 function mapQuestion(dto: BackendQuestionResponse): Question {
@@ -124,7 +151,7 @@ function mapQuestion(dto: BackendQuestionResponse): Question {
             QuestionType.MULTIPLE_CHOICE,
         difficultyLevel: parseEnum(DifficultyLevel, dto.difficulty_level),
         skillArea: parseEnum(SkillArea, dto.skill_area),
-        options: dto.options?.map(mapQuestionOption) || null,
+        options: normalizeOptions(dto.options),
         imageUrl: dto.image_url,
         audioUrl: dto.audio_url,
         points: dto.points,
@@ -380,8 +407,9 @@ function mapStudentTestListItem(
         status: parseEnum(TestStatus, dto.status) || TestStatus.DRAFT,
         skill: dto.skill,
         difficulty: dto.difficulty,
-        durationMinutes: 0,
-        createdAt: '',
+        durationMinutes:
+            (dto as any).duration_minutes ?? dto.time_limit_minutes ?? 0,
+        createdAt: (dto as any).created_at ?? '',
     }
 }
 
@@ -673,18 +701,19 @@ export const testApi = {
                 ? `${BASE_URL}/?${queryString}`
                 : `${BASE_URL}/`
 
-            const response = await api<{
-                total: number
-                skip: number
-                limit: number
-                tests: BackendTestListResponse[]
-            }>(url, { method: 'GET' })
+            const response = await api<any>(url, { method: 'GET' })
 
+            const tests = Array.isArray(response.data)
+                ? response.data
+                : response.tests || []
+            const meta = response.meta || {}
             return {
-                total: response.total,
-                skip: response.skip,
-                limit: response.limit,
-                tests: response.tests.map(mapTestListItem),
+                total: meta.total ?? response.total ?? tests.length,
+                skip: meta.page
+                    ? (meta.page - 1) * (meta.limit || 0)
+                    : response.skip || 0,
+                limit: meta.limit ?? response.limit ?? tests.length,
+                tests: tests.map(mapTestListItem),
             }
         } catch (error) {
             console.error('Error fetching tests:', error)
@@ -734,13 +763,17 @@ export const testApi = {
                 }
             }
 
+            const tests = Array.isArray(response.data)
+                ? response.data
+                : response.tests || response.items || []
+            const meta = response.meta || {}
             return {
-                total: response.total || 0,
-                skip: response.skip || 0,
-                limit: response.limit || 0,
-                tests: (response.tests || response.items || []).map(
-                    mapStudentTestListItem
-                ),
+                total: meta.total ?? response.total ?? tests.length,
+                skip: meta.page
+                    ? (meta.page - 1) * (meta.limit || 0)
+                    : params?.skip || 0,
+                limit: meta.limit ?? response.limit ?? tests.length,
+                tests: tests.map(mapStudentTestListItem),
             }
         } catch (error) {
             console.error('Error fetching student tests:', error)
@@ -994,6 +1027,20 @@ export const testApi = {
     ): Promise<TestAttemptSummaryResponse[]> => {
         const response = await api<TestAttemptSummaryResponse[]>(
             `${BASE_URL}/${testId}/attempts`,
+            { method: 'GET' }
+        )
+        return response
+    },
+
+    /**
+     * List attempts for student (for a specific test)
+     * Endpoint: GET /tests/{testId}/my-attempts
+     */
+    listMyAttempts: async (
+        testId: string
+    ): Promise<TestAttemptSummaryResponse[]> => {
+        const response = await api<TestAttemptSummaryResponse[]>(
+            `${BASE_URL}/${testId}/my-attempts`,
             { method: 'GET' }
         )
         return response

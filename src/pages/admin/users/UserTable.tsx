@@ -17,6 +17,7 @@ import Skeleton from '@/components/effect/Skeleton'
 const roleDisplayNames: Record<Role, string> = {
     student: 'Học sinh',
     teacher: 'Giáo viên',
+    ta: 'Trợ giảng',
     office_admin: 'Admin Văn phòng',
     center_admin: 'Admin Trung tâm',
     system_admin: 'Admin Hệ thống',

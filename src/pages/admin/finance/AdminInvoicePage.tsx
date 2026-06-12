@@ -6,33 +6,55 @@ import {
     usePayments,
     usePaymentReceipt,
     useInvoices,
+    useRefunds,
 } from '@/hooks/domain/useFinance'
 import { CreateInvoiceModal } from './CreateInvoiceModal'
+import { RefundModal } from './RefundModal'
+import { ApproveRejectRefundModal } from './ApproveRejectRefundModal'
 import { useQueryClient } from '@tanstack/react-query'
+import { usePermissions } from '@/hooks/usePermissions'
+import type { RefundResponse } from '@/types/finance.types'
 import s from './Finance.module.css'
 
-function StatusBadge({ status }: { status: string }) {
+function StatusBadge({
+    status,
+    type,
+}: {
+    status: string
+    type?: 'invoice' | 'payment' | 'refund'
+}) {
+    const sUpper = status?.toUpperCase()
     const isSuccessOrPaid =
-        status === 'success' || status === 'PAID' || status === 'paid'
-    const isCancelled = status === 'cancelled' || status === 'CANCELLED'
-    const isPending = status === 'PENDING' || status === 'pending'
+        sUpper === 'SUCCESS' || sUpper === 'PAID' || sUpper === 'APPROVED'
+    const isCancelled = sUpper === 'CANCELLED' || sUpper === 'REJECTED'
+    const isPending = sUpper === 'PENDING'
 
     if (isSuccessOrPaid)
         return (
             <span className={`${s.badge} ${s.badgeSuccess}`}>
-                {status === 'PAID' || status === 'paid'
+                {sUpper === 'PAID'
                     ? 'Đã thu'
-                    : 'Thành công'}
+                    : sUpper === 'APPROVED'
+                      ? 'Đã duyệt'
+                      : 'Thành công'}
             </span>
         )
-    if (status === 'failed')
+    if (sUpper === 'FAILED')
         return <span className={`${s.badge} ${s.badgeFailed}`}>Thất bại</span>
     if (isCancelled)
-        return <span className={`${s.badge} ${s.badgeFailed}`}>Đã hủy</span>
+        return (
+            <span className={`${s.badge} ${s.badgeFailed}`}>
+                {sUpper === 'REJECTED' ? 'Từ chối' : 'Đã hủy'}
+            </span>
+        )
 
     return (
         <span className={`${s.badge} ${s.badgePending}`}>
-            {isPending ? 'Chưa thu' : 'Chờ xử lý'}
+            {isPending
+                ? type === 'refund'
+                    ? 'Chờ duyệt'
+                    : 'Chưa thu'
+                : 'Chờ xử lý'}
         </span>
     )
 }
@@ -75,13 +97,26 @@ function ReceiptButton({ paymentId }: { paymentId: string }) {
 }
 
 export default function AdminInvoicePage() {
-    const [activeTab, setActiveTab] = useState<'invoices' | 'payments'>(
-        'invoices'
-    )
+    const [activeTab, setActiveTab] = useState<
+        'invoices' | 'payments' | 'refunds'
+    >('invoices')
     const [page, setPage] = useState(1)
     const [statusFilter, setStatusFilter] = useState<string>('')
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+    const [isRefundModalOpen, setIsRefundModalOpen] = useState(false)
+
+    // Approval / Rejection states
+    const [selectedRefund, setSelectedRefund] = useState<RefundResponse | null>(
+        null
+    )
+    const [refundActionType, setRefundActionType] = useState<
+        'APPROVE' | 'REJECT'
+    >('APPROVE')
+    const [isApproveRejectModalOpen, setIsApproveRejectModalOpen] =
+        useState(false)
+
     const queryClient = useQueryClient()
+    const { role } = usePermissions()
 
     // 1. Fetch Invoices
     const {
@@ -97,19 +132,43 @@ export default function AdminInvoicePage() {
         isError: isErrorPayments,
     } = usePayments({ page, limit: 15, status: statusFilter || undefined })
 
+    // 3. Fetch Refunds
+    const {
+        data: refundsRes,
+        isLoading: isLoadingRefunds,
+        isError: isErrorRefunds,
+    } = useRefunds({ page, limit: 15, status: statusFilter || undefined })
+
     const invoices = invoicesRes?.data || []
     const payments = paymentsRes?.data || []
+    const refunds = refundsRes?.data || []
 
     const isLoading =
-        activeTab === 'invoices' ? isLoadingInvoices : isLoadingPayments
-    const isError = activeTab === 'invoices' ? isErrorInvoices : isErrorPayments
-    const items = activeTab === 'invoices' ? invoices : payments
+        activeTab === 'invoices'
+            ? isLoadingInvoices
+            : activeTab === 'payments'
+              ? isLoadingPayments
+              : isLoadingRefunds
+    const isError =
+        activeTab === 'invoices'
+            ? isErrorInvoices
+            : activeTab === 'payments'
+              ? isErrorPayments
+              : isErrorRefunds
+    const items =
+        activeTab === 'invoices'
+            ? invoices
+            : activeTab === 'payments'
+              ? payments
+              : refunds
     const totalPages =
         activeTab === 'invoices'
             ? invoicesRes?.meta?.total_pages || 1
-            : paymentsRes?.meta?.total_pages || 1
+            : activeTab === 'payments'
+              ? paymentsRes?.meta?.total_pages || 1
+              : refundsRes?.meta?.total_pages || 1
 
-    const handleTabChange = (tab: 'invoices' | 'payments') => {
+    const handleTabChange = (tab: 'invoices' | 'payments' | 'refunds') => {
         setActiveTab(tab)
         setPage(1)
         setStatusFilter('')
@@ -143,30 +202,69 @@ export default function AdminInvoicePage() {
                         Theo dõi danh sách hóa đơn học phí và lịch sử giao dịch.
                     </p>
                 </div>
-                <ButtonPrimary onClick={() => setIsCreateModalOpen(true)}>
-                    <div
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                        }}
-                    >
-                        <svg
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
+                <div style={{ display: 'flex', gap: '12px' }}>
+                    {(role === 'office_admin' ||
+                        role === 'system_admin' ||
+                        role === 'center_admin') && (
+                        <ButtonPrimary
+                            tone="danger"
+                            onClick={() => setIsRefundModalOpen(true)}
                         >
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                        Tạo Hóa Đơn Mới
-                    </div>
-                </ButtonPrimary>
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                }}
+                            >
+                                <svg
+                                    width="18"
+                                    height="18"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                                    <line
+                                        x1="12"
+                                        y1="16"
+                                        x2="12.01"
+                                        y2="16"
+                                    ></line>
+                                </svg>
+                                Yêu cầu hoàn tiền
+                            </div>
+                        </ButtonPrimary>
+                    )}
+                    <ButtonPrimary onClick={() => setIsCreateModalOpen(true)}>
+                        <div
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                            }}
+                        >
+                            <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            >
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Tạo Hóa Đơn Mới
+                        </div>
+                    </ButtonPrimary>
+                </div>
 
                 <CreateInvoiceModal
                     isOpen={isCreateModalOpen}
@@ -177,6 +275,31 @@ export default function AdminInvoicePage() {
                         })
                         queryClient.invalidateQueries({
                             queryKey: ['payments'],
+                        })
+                    }}
+                />
+
+                <RefundModal
+                    isOpen={isRefundModalOpen}
+                    onClose={() => setIsRefundModalOpen(false)}
+                    onSuccess={() => {
+                        queryClient.invalidateQueries({
+                            queryKey: ['refunds'],
+                        })
+                    }}
+                />
+
+                <ApproveRejectRefundModal
+                    isOpen={isApproveRejectModalOpen}
+                    onClose={() => {
+                        setIsApproveRejectModalOpen(false)
+                        setSelectedRefund(null)
+                    }}
+                    refund={selectedRefund}
+                    actionType={refundActionType}
+                    onSuccess={() => {
+                        queryClient.invalidateQueries({
+                            queryKey: ['refunds'],
                         })
                     }}
                 />
@@ -227,6 +350,25 @@ export default function AdminInvoicePage() {
                     }}
                 >
                     Lịch sử thanh toán
+                </div>
+                <div
+                    onClick={() => handleTabChange('refunds')}
+                    style={{
+                        padding: '12px 4px',
+                        cursor: 'pointer',
+                        borderBottom:
+                            activeTab === 'refunds'
+                                ? '2px solid var(--color-primary)'
+                                : '2px solid transparent',
+                        color:
+                            activeTab === 'refunds'
+                                ? 'var(--color-primary)'
+                                : 'var(--color-text-secondary)',
+                        fontWeight: activeTab === 'refunds' ? 600 : 500,
+                        transition: 'all 0.2s',
+                    }}
+                >
+                    Yêu cầu hoàn tiền
                 </div>
             </div>
 
@@ -292,7 +434,7 @@ export default function AdminInvoicePage() {
                             <option value="PAID">Đã thu</option>
                             <option value="CANCELLED">Đã hủy</option>
                         </select>
-                    ) : (
+                    ) : activeTab === 'payments' ? (
                         <select
                             value={statusFilter}
                             onChange={(e) => {
@@ -312,6 +454,26 @@ export default function AdminInvoicePage() {
                             <option value="pending">Chờ xử lý</option>
                             <option value="failed">Thất bại</option>
                             <option value="cancelled">Đã hủy</option>
+                        </select>
+                    ) : (
+                        <select
+                            value={statusFilter}
+                            onChange={(e) => {
+                                setStatusFilter(e.target.value)
+                                setPage(1)
+                            }}
+                            style={{
+                                padding: '10px 16px',
+                                borderRadius: 'var(--input-radius)',
+                                border: '1px solid var(--input-border)',
+                                background: 'var(--input-bg)',
+                                color: 'var(--input-text)',
+                            }}
+                        >
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="PENDING">Chờ duyệt</option>
+                            <option value="APPROVED">Đã duyệt</option>
+                            <option value="REJECTED">Từ chối</option>
                         </select>
                     )}
                 </div>
@@ -350,12 +512,22 @@ export default function AdminInvoicePage() {
                                         <th>Ngày tạo</th>
                                         <th>Trạng thái</th>
                                     </tr>
-                                ) : (
+                                ) : activeTab === 'payments' ? (
                                     <tr>
                                         <th>Mã GD Gateway</th>
                                         <th>Phương thức</th>
                                         <th>Số tiền</th>
                                         <th>Thời gian</th>
+                                        <th>Trạng thái</th>
+                                        <th>Hành động</th>
+                                    </tr>
+                                ) : (
+                                    <tr>
+                                        <th>Học viên</th>
+                                        <th>Khóa học</th>
+                                        <th>Tiền yêu cầu</th>
+                                        <th>Tiền duyệt</th>
+                                        <th>Ngày yêu cầu</th>
                                         <th>Trạng thái</th>
                                         <th>Hành động</th>
                                     </tr>
@@ -384,39 +556,217 @@ export default function AdminInvoicePage() {
                                               <td>
                                                   <StatusBadge
                                                       status={inv.status}
+                                                      type="invoice"
                                                   />
                                               </td>
                                           </tr>
                                       ))
-                                    : payments.map((p: any) => (
-                                          <tr key={p.id} className={s.tableRow}>
-                                              <td className={s.tdNum}>
-                                                  {p.gateway_transaction_id ||
-                                                      '—'}
-                                              </td>
-                                              <td>{p.payment_method}</td>
-                                              <td className={s.tdAmount}>
-                                                  {p.amount?.toLocaleString()} đ
-                                              </td>
-                                              <td className={s.tdNum}>
-                                                  {new Date(
-                                                      p.created_at
-                                                  ).toLocaleString('vi-VN')}
-                                              </td>
-                                              <td>
-                                                  <StatusBadge
-                                                      status={p.status}
-                                                  />
-                                              </td>
-                                              <td className={s.actionCell}>
-                                                  {p.status === 'success' && (
-                                                      <ReceiptButton
-                                                          paymentId={p.id}
-                                                      />
-                                                  )}
-                                              </td>
-                                          </tr>
-                                      ))}
+                                    : activeTab === 'payments'
+                                      ? payments.map((p: any) => (
+                                            <tr
+                                                key={p.id}
+                                                className={s.tableRow}
+                                            >
+                                                <td className={s.tdNum}>
+                                                    {p.gateway_transaction_id ||
+                                                        '—'}
+                                                </td>
+                                                <td>{p.payment_method}</td>
+                                                <td className={s.tdAmount}>
+                                                    {p.amount?.toLocaleString()}{' '}
+                                                    đ
+                                                </td>
+                                                <td className={s.tdNum}>
+                                                    {new Date(
+                                                        p.created_at
+                                                    ).toLocaleString('vi-VN')}
+                                                </td>
+                                                <td>
+                                                    <StatusBadge
+                                                        status={p.status}
+                                                        type="payment"
+                                                    />
+                                                </td>
+                                                <td className={s.actionCell}>
+                                                    {p.status === 'success' && (
+                                                        <ReceiptButton
+                                                            paymentId={p.id}
+                                                        />
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ))
+                                      : refunds.map((rf: any) => (
+                                            <tr
+                                                key={rf.id}
+                                                className={s.tableRow}
+                                            >
+                                                <td style={{ fontWeight: 500 }}>
+                                                    {rf.student_name || '—'}
+                                                </td>
+                                                <td>{rf.course_name || '—'}</td>
+                                                <td className={s.tdAmount}>
+                                                    {rf.requested_amount?.toLocaleString()}{' '}
+                                                    đ
+                                                </td>
+                                                <td className={s.tdAmount}>
+                                                    {rf.approved_amount !==
+                                                        null &&
+                                                    rf.approved_amount !==
+                                                        undefined
+                                                        ? `${rf.approved_amount.toLocaleString()} đ`
+                                                        : '—'}
+                                                </td>
+                                                <td className={s.tdNum}>
+                                                    {new Date(
+                                                        rf.created_at
+                                                    ).toLocaleString('vi-VN')}
+                                                </td>
+                                                <td>
+                                                    <StatusBadge
+                                                        status={rf.status}
+                                                        type="refund"
+                                                    />
+                                                </td>
+                                                <td className={s.actionCell}>
+                                                    {rf.status?.toUpperCase() ===
+                                                        'PENDING' &&
+                                                    (role === 'center_admin' ||
+                                                        role ===
+                                                            'system_admin') ? (
+                                                        <div
+                                                            style={{
+                                                                display: 'flex',
+                                                                gap: '8px',
+                                                            }}
+                                                        >
+                                                            <div
+                                                                className={
+                                                                    s.tooltipWrapper
+                                                                }
+                                                            >
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setSelectedRefund(
+                                                                            rf
+                                                                        )
+                                                                        setRefundActionType(
+                                                                            'APPROVE'
+                                                                        )
+                                                                        setIsApproveRejectModalOpen(
+                                                                            true
+                                                                        )
+                                                                    }}
+                                                                    className={`${s.actionBtn} ${s.actionBtnApprove}`}
+                                                                >
+                                                                    <svg
+                                                                        width="18"
+                                                                        height="18"
+                                                                        viewBox="0 0 24 24"
+                                                                        fill="none"
+                                                                        stroke="currentColor"
+                                                                        strokeWidth="1.5"
+                                                                        strokeLinecap="round"
+                                                                        strokeLinejoin="round"
+                                                                    >
+                                                                        <path d="M20 6L9 17l-5-5" />
+                                                                    </svg>
+                                                                </button>
+                                                                <span
+                                                                    className={
+                                                                        s.tooltipText
+                                                                    }
+                                                                >
+                                                                    Phê duyệt
+                                                                    hoàn tiền
+                                                                </span>
+                                                            </div>
+                                                            <div
+                                                                className={
+                                                                    s.tooltipWrapper
+                                                                }
+                                                            >
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setSelectedRefund(
+                                                                            rf
+                                                                        )
+                                                                        setRefundActionType(
+                                                                            'REJECT'
+                                                                        )
+                                                                        setIsApproveRejectModalOpen(
+                                                                            true
+                                                                        )
+                                                                    }}
+                                                                    className={`${s.actionBtn} ${s.actionBtnReject}`}
+                                                                >
+                                                                    <svg
+                                                                        width="18"
+                                                                        height="18"
+                                                                        viewBox="0 0 24 24"
+                                                                        fill="none"
+                                                                        stroke="currentColor"
+                                                                        strokeWidth="1.5"
+                                                                        strokeLinecap="round"
+                                                                        strokeLinejoin="round"
+                                                                    >
+                                                                        <path d="M18 6L6 18M6 6l12 12" />
+                                                                    </svg>
+                                                                </button>
+                                                                <span
+                                                                    className={
+                                                                        s.tooltipText
+                                                                    }
+                                                                >
+                                                                    Từ chối hoàn
+                                                                    tiền
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    ) : rf.status?.toUpperCase() ===
+                                                          'REJECTED' &&
+                                                      rf.rejection_reason ? (
+                                                        <span
+                                                            style={{
+                                                                fontSize:
+                                                                    '11px',
+                                                                color: 'var(--color-text-muted)',
+                                                            }}
+                                                            title={
+                                                                rf.rejection_reason
+                                                            }
+                                                        >
+                                                            Lý do:{' '}
+                                                            {rf.rejection_reason
+                                                                .length > 20
+                                                                ? `${rf.rejection_reason.slice(0, 20)}...`
+                                                                : rf.rejection_reason}
+                                                        </span>
+                                                    ) : rf.status?.toUpperCase() ===
+                                                          'APPROVED' &&
+                                                      rf.admin_note ? (
+                                                        <span
+                                                            style={{
+                                                                fontSize:
+                                                                    '11px',
+                                                                color: 'var(--color-text-muted)',
+                                                            }}
+                                                            title={
+                                                                rf.admin_note
+                                                            }
+                                                        >
+                                                            Ghi chú:{' '}
+                                                            {rf.admin_note
+                                                                .length > 20
+                                                                ? `${rf.admin_note.slice(0, 20)}...`
+                                                                : rf.admin_note}
+                                                        </span>
+                                                    ) : (
+                                                        '—'
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ))}
                             </tbody>
                         </table>
                     </div>

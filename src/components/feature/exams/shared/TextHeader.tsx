@@ -4,7 +4,7 @@ import ClockIcon from '@/assets/History.svg'
 
 interface TestHeaderProps {
     skillName: string
-    icon?: string
+    icon?: React.ReactNode
     timeLeft: number
     formattedTime: string
     isLowTime: boolean

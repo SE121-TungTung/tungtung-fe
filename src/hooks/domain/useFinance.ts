@@ -99,6 +99,18 @@ export const usePayments = (params: {
 // Refunds
 // ============================================================================
 
+export const useRefunds = (params: {
+    status?: string
+    student_id?: string
+    page?: number
+    limit?: number
+}) =>
+    useQuery({
+        queryKey: ['refunds', params],
+        queryFn: () => financeApi.listRefunds(params),
+        placeholderData: keepPreviousData,
+    })
+
 export const useCalculateRefund = (enrollmentId: string | undefined) =>
     useQuery({
         queryKey: ['refund-calculation', enrollmentId],

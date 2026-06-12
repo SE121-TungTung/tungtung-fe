@@ -139,10 +139,101 @@
     gap: 16px;
 }
 
+.courseSuggestionCard {
+    margin-bottom: 16px;
+    background: #eef2ff;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid #c7d2fe;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+:global([data-theme='dark']) .courseSuggestionCard {
+    background: #1e1b4b;
+    border-color: #312e81;
+}
+
+.courseSuggestionHeader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.courseSuggestionIcon {
+    width: 20px;
+    height: 20px;
+}
+
+:global([data-theme='dark']) .courseSuggestionIcon {
+    filter: invert(1) brightness(2);
+}
+
+.courseSuggestionTitle {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #3730a3;
+}
+
+:global([data-theme='dark']) .courseSuggestionTitle {
+    color: #e0e7ff;
+}
+
+.courseSuggestionText {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #4f46e5;
+}
+
+:global([data-theme='dark']) .courseSuggestionText {
+    color: #a5b4fc;
+}
+
+.courseName {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1e1b4b;
+}
+
+:global([data-theme='dark']) .courseName {
+    color: #f8fafc;
+}
+
+.courseTarget {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: #6366f1;
+}
+
+:global([data-theme='dark']) .courseTarget {
+    color: #818cf8;
+}
+
+.tipsSectionHeader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    margin-bottom: 16px;
+}
+
+.tipsSectionIcon {
+    width: 22px;
+    height: 22px;
+}
+
+:global([data-theme='dark']) .tipsSectionIcon {
+    filter: invert(1) brightness(2);
+}
+
 .skillGroup {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
+    margin-bottom: 12px;
 }
 
 .skillHeader {
@@ -152,15 +243,23 @@
     font-size: 0.85rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
     color: var(--color-text-secondary);
-    padding-bottom: 4px;
+    padding-bottom: 6px;
     border-bottom: 1px solid var(--color-border-soft, rgba(0, 0, 0, 0.06));
 }
 
+:global([data-theme='dark']) .skillHeader {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
 .skillIcon {
-    font-size: 1rem;
-    line-height: 1;
+    width: 16px;
+    height: 16px;
+}
+
+:global([data-theme='dark']) .skillIcon {
+    filter: invert(1) brightness(2);
 }
 
 .skillTipsUl {
@@ -169,41 +268,55 @@
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
 }
 
 .skillTipLi {
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     line-height: 1.5;
-    padding: 6px 10px;
-    background-color: rgba(0, 0, 0, 0.02);
-    border-left: 3px solid var(--color-brand-primary, #3182ce);
-    border-radius: 0 4px 4px 0;
+    padding: 10px 14px;
+    background-color: var(--color-bg-card, rgba(0, 0, 0, 0.02));
+    border-left: 4px solid var(--color-brand-primary, #3182ce);
+    border-radius: 0 8px 8px 0;
     color: var(--color-text-secondary);
+    transition: all 0.2s ease;
+}
+
+.skillTipLi:hover {
+    transform: translateX(4px);
+    background-color: var(--color-bg-card-hover, rgba(0, 0, 0, 0.04));
+}
+
+:global([data-theme='dark']) .skillTipLi {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+:global([data-theme='dark']) .skillTipLi:hover {
+    background-color: rgba(255, 255, 255, 0.06);
 }
 
 .skillTipLi[data-skill='reading'] {
-    border-left-color: #3182ce;
+    border-left-color: #3b82f6;
 }
 .skillTipLi[data-skill='listening'] {
-    border-left-color: #38a169;
+    border-left-color: #10b981;
 }
 .skillTipLi[data-skill='writing'] {
-    border-left-color: #d69e2e;
+    border-left-color: #f59e0b;
 }
 .skillTipLi[data-skill='speaking'] {
-    border-left-color: #e53e3e;
+    border-left-color: #ef4444;
 }
 .skillTipLi[data-skill='overall'] {
-    border-left-color: #805ad5;
+    border-left-color: #8b5cf6;
 }
 
 /* Legacy flat tips (backward compat) */
 .tipsTitle {
     font-size: 1.1rem;
     font-weight: 600;
-    margin-bottom: 12px;
-    color: var(--color-brand-primary, #4a5568);
+    margin: 0;
+    color: var(--color-text-primary);
 }
 
 .tipsUl {
@@ -218,11 +331,25 @@
 .tipLi {
     font-size: 0.9rem;
     line-height: 1.4;
-    padding: 8px 12px;
-    background-color: rgba(0, 0, 0, 0.02);
-    border-left: 3px solid var(--color-brand-primary, #3182ce);
-    border-radius: 0 4px 4px 0;
+    padding: 10px 14px;
+    background-color: var(--color-bg-card, rgba(0, 0, 0, 0.02));
+    border-left: 4px solid var(--color-brand-primary, #3182ce);
+    border-radius: 0 8px 8px 0;
     color: var(--color-text-secondary);
+    transition: all 0.2s ease;
+}
+
+.tipLi:hover {
+    transform: translateX(4px);
+    background-color: var(--color-bg-card-hover, rgba(0, 0, 0, 0.04));
+}
+
+:global([data-theme='dark']) .tipLi {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+:global([data-theme='dark']) .tipLi:hover {
+    background-color: rgba(255, 255, 255, 0.06);
 }
 
 .suggestionBody {

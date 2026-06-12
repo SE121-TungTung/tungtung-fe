@@ -29,6 +29,7 @@ interface UserFormModalProps {
 const roleDisplayNames: Record<Role, string> = {
     student: 'Học sinh',
     teacher: 'Giáo viên',
+    ta: 'Trợ giảng',
     office_admin: 'Admin Văn phòng',
     center_admin: 'Admin Trung tâm',
     system_admin: 'Admin Hệ thống',
@@ -173,13 +174,26 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
 
     // 5. Submit Handler
     const onSubmit = (data: UserFormValues) => {
+        const hasEmergency = !!(
+            data.emergencyContact?.name ||
+            data.emergencyContact?.relationship ||
+            data.emergencyContact?.phone
+        )
+
         if (isEditMode && editingUser) {
             const updatePayload: UpdateUserPayload = {
                 first_name: data.firstName,
                 last_name: data.lastName,
-                phone: data.phone,
-                address: data.address,
-                emergency_contact: data.emergencyContact,
+                phone: data.phone || undefined,
+                address: data.address || undefined,
+                emergency_contact: hasEmergency
+                    ? {
+                          name: data.emergencyContact?.name || undefined,
+                          relationship:
+                              data.emergencyContact?.relationship || undefined,
+                          phone: data.emergencyContact?.phone || undefined,
+                      }
+                    : undefined,
             }
 
             updateUserMutation.mutate({
@@ -193,10 +207,10 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                     email: data.email,
                     first_name: data.firstName,
                     last_name: data.lastName,
-                    phone: data.phone,
+                    phone: data.phone || undefined,
                     role: data.role,
-                    date_of_birth: data.dateOfBirth,
-                    address: data.address,
+                    date_of_birth: data.dateOfBirth || undefined,
+                    address: data.address || undefined,
                     // Lưu ý: Nếu BE CreateUser model hỗ trợ emergency_contact thì thêm vào đây
                     // Hiện tại UserCreate model chỉ có fields cơ bản, nên ta bỏ qua hoặc update sau
                 },

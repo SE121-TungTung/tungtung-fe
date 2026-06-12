@@ -4,7 +4,13 @@ import {
     useQueryClient,
     keepPreviousData,
 } from '@tanstack/react-query'
-import { listClasses, deleteClass, type ListClassesParams } from '@/lib/classes'
+import {
+    listClasses,
+    deleteClass,
+    updateClass,
+    type ListClassesParams,
+    type UpdateClassDto,
+} from '@/lib/classes'
 
 export const useClasses = (params: ListClassesParams) => {
     return useQuery({
@@ -19,6 +25,18 @@ export const useDeleteClass = () => {
 
     return useMutation({
         mutationFn: deleteClass,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['classes'] })
+        },
+    })
+}
+
+export const useUpdateClass = () => {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: ({ id, body }: { id: string; body: UpdateClassDto }) =>
+            updateClass(id, body),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['classes'] })
         },

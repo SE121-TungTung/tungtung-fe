@@ -170,14 +170,67 @@ export default function TeacherClassDetailPage() {
 
             case 'schedule':
                 return (
-                    <div className={s.placeholderContent}>
-                        <div className={s.placeholderBox}>
-                            <p>
-                                Lịch học:{' '}
-                                {JSON.stringify(
-                                    classDetail?.scheduleDefinition
-                                )}
+                    <div
+                        className={s.placeholderContent}
+                        style={{
+                            display: 'block',
+                            textAlign: 'left',
+                            width: '100%',
+                            maxWidth: 600,
+                        }}
+                    >
+                        <div
+                            style={{
+                                background: 'white',
+                                padding: 24,
+                                borderRadius: 12,
+                                border: '1px solid #eee',
+                            }}
+                        >
+                            <p style={{ fontWeight: 600, marginBottom: 8 }}>
+                                Lịch học mong muốn:
                             </p>
+                            <pre
+                                style={{
+                                    background: '#f5f5f5',
+                                    padding: 12,
+                                    borderRadius: 6,
+                                    fontSize: 13,
+                                    fontFamily: 'monospace',
+                                    overflowX: 'auto',
+                                }}
+                            >
+                                {JSON.stringify(
+                                    classDetail?.preferredSlots,
+                                    null,
+                                    2
+                                )}
+                            </pre>
+                            <p
+                                style={{
+                                    fontWeight: 600,
+                                    marginTop: 16,
+                                    marginBottom: 8,
+                                }}
+                            >
+                                Lịch bận cố định:
+                            </p>
+                            <pre
+                                style={{
+                                    background: '#f5f5f5',
+                                    padding: 12,
+                                    borderRadius: 6,
+                                    fontSize: 13,
+                                    fontFamily: 'monospace',
+                                    overflowX: 'auto',
+                                }}
+                            >
+                                {JSON.stringify(
+                                    classDetail?.unavailableSlots,
+                                    null,
+                                    2
+                                )}
+                            </pre>
                         </div>
                     </div>
                 )

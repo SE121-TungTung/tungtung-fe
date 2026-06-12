@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 import s from './Class.module.css'
 
@@ -26,6 +26,7 @@ import SearchIcon from '@/assets/Book Search.svg'
 
 // API & Types
 import { getMyClasses } from '@/lib/users' // Đảm bảo hàm này đã được export từ file users.ts
+import { selfCheckIn } from '@/lib/attendance'
 import type { MyClass, ClassSession, MyClassUser } from '@/types/user.types'
 import type { ClassMember } from '@/components/common/card/MemberCard'
 import type { Lesson } from '@/components/common/typography/LessonItem'
@@ -72,11 +73,27 @@ export default function ClassPage() {
     const [viewMode, setViewMode] = useState('week')
     const [showGradientName, setShowGradientName] = useState(false)
     const { alert } = useDialog()
+    const queryClient = useQueryClient()
 
     const [memberSearchTerm, setMemberSearchTerm] = useState('')
     const [memberFilterRole, setMemberFilterRole] = useState<
         'all' | 'student' | 'teacher'
     >('all')
+
+    const checkInMutation = useMutation({
+        mutationFn: (sessionId: string) => selfCheckIn(sessionId),
+        onSuccess: (res) => {
+            queryClient.invalidateQueries({ queryKey: ['my-classes'] })
+            alert(res.message || 'Điểm danh thành công!', 'Thành công')
+        },
+        onError: (err: any) => {
+            alert(
+                err?.message ||
+                    'Có lỗi xảy ra khi điểm danh. Vui lòng thử lại!',
+                'Thất bại'
+            )
+        },
+    })
 
     // 1. Fetch data từ API
     const { data: myClasses, isLoading: classesLoading } = useQuery({
@@ -159,6 +176,8 @@ export default function ClassPage() {
                     | 'scheduled'
                     | 'completed'
                     | 'cancelled',
+                attendanceTaken:
+                    session.student_checked_in ?? session.attendance_taken,
             }))
             .sort(
                 (a: Lesson, b: Lesson) =>
@@ -169,9 +188,29 @@ export default function ClassPage() {
 
     // Lọc ra buổi học hôm nay (nếu có)
     const todaySessions: Lesson[] = useMemo(() => {
-        const today = new Date().toISOString().split('T')[0]
+        const now = new Date()
+        const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
         return allSessions.filter((s) => s.sessionDate === today)
     }, [allSessions])
+
+    const handleCheckIn = useCallback(() => {
+        const checkInTarget = todaySessions.find((s) => !s.attendanceTaken)
+        if (!checkInTarget) {
+            if (todaySessions.length === 0) {
+                alert(
+                    'Hôm nay bạn không có lịch học để điểm danh.',
+                    'Thông báo'
+                )
+            } else {
+                alert(
+                    'Bạn đã điểm danh cho tất cả các buổi học hôm nay rồi!',
+                    'Thông báo'
+                )
+            }
+            return
+        }
+        checkInMutation.mutate(checkInTarget.id)
+    }, [todaySessions, checkInMutation, alert])
 
     // Render Content
     const renderTabContent = () => {
@@ -182,9 +221,7 @@ export default function ClassPage() {
                         <ScheduleTodayCard
                             title="Lịch học hôm nay"
                             sessions={todaySessions}
-                            onCheckIn={() =>
-                                alert('Chức năng điểm danh đang phát triển!')
-                            }
+                            onCheckIn={handleCheckIn}
                             controls={
                                 <SegmentedControl
                                     items={viewModeItems}

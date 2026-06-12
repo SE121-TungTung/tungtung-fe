@@ -1,6 +1,7 @@
 export type Role =
     | 'student'
     | 'teacher'
+    | 'ta'
     | 'office_admin'
     | 'center_admin'
     | 'system_admin'
@@ -8,6 +9,7 @@ export type Role =
 export const ALL_ROLES: Role[] = [
     'student',
     'teacher',
+    'ta',
     'office_admin',
     'center_admin',
     'system_admin',
@@ -74,6 +76,7 @@ export interface User {
     updatedAt: string
     isFirstLogin: boolean
     emergencyContact?: EmergencyContact | null
+    preferences?: Record<string, any> | null
 }
 
 // --- PAYLOADS ---
@@ -175,6 +178,8 @@ export interface ClassSession {
     end_time: string
     status: string
     room_id?: string | null
+    attendance_taken?: boolean
+    student_checked_in?: boolean | null
 }
 
 export interface MyClassUser {

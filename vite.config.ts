@@ -17,8 +17,16 @@ export default defineConfig({
     },
     server: {
         port: 3000,
+        watch: {
+            usePolling: true,
+        },
         proxy: {
             '/api': {
+                target: process.env.VITE_API_URL || 'http://localhost:8787',
+                changeOrigin: true,
+                secure: false,
+            },
+            '/receipts': {
                 target: process.env.VITE_API_URL || 'http://localhost:8787',
                 changeOrigin: true,
                 secure: false,

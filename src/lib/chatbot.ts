@@ -20,11 +20,15 @@ export interface UploadResponse {
     message: string
 }
 
+export type DocStatus = 'processing' | 'completed' | 'failed'
+
 export interface ChatbotDocument {
     id: string
-    doc_id: string
+    doc_id: string | null
     filename: string
     category: string
+    status: DocStatus
+    error_message: string | null
     uploaded_by_name: string
     created_at: string
     updated_at: string
@@ -34,12 +38,12 @@ export const chatbotApi = {
     uploadDocument: async (
         file: File,
         docCategory: string = 'business'
-    ): Promise<UploadResponse> => {
+    ): Promise<ChatbotDocument> => {
         const formData = new FormData()
         formData.append('file', file)
         formData.append('doc_category', docCategory)
 
-        return api<UploadResponse>(`${BASE_URL}/admin/upload-doc`, {
+        return api<ChatbotDocument>(`${BASE_URL}/admin/upload-doc`, {
             method: 'POST',
             body: formData,
         })
@@ -62,6 +66,13 @@ export const chatbotApi = {
         })
     },
 
+    getDocumentStatus: async (docDbId: string): Promise<ChatbotDocument> => {
+        return api<ChatbotDocument>(
+            `${BASE_URL}/admin/documents/${docDbId}/status`,
+            { method: 'GET' }
+        )
+    },
+
     deleteDocument: async (docId: string) => {
         return api<string>(`${BASE_URL}/admin/documents/${docId}`, {
             method: 'DELETE',
@@ -79,6 +90,22 @@ export const chatbotApi = {
             method: 'PUT',
             body: formData,
         })
+    },
+
+    retryUpload: async (
+        docDbId: string,
+        file: File
+    ): Promise<ChatbotDocument> => {
+        const formData = new FormData()
+        formData.append('file', file)
+
+        return api<ChatbotDocument>(
+            `${BASE_URL}/admin/documents/${docDbId}/retry`,
+            {
+                method: 'POST',
+                body: formData,
+            }
+        )
     },
 
     askBot: async (message: string, history: any[] = []) => {

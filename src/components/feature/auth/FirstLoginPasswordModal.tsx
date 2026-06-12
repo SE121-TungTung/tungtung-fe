@@ -122,7 +122,7 @@ export default function FirstLoginPasswordModal({
                 alignItems: 'center',
                 justifyContent: 'center',
                 padding: '20px',
-                background: 'rgba(0, 0, 0, 0.75)',
+                background: 'var(--modal-backdrop)',
                 backdropFilter: 'blur(12px)',
             }}
         >
@@ -133,12 +133,12 @@ export default function FirstLoginPasswordModal({
                     maxWidth: '500px',
                     width: '100%',
                     background:
-                        'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.08) 100%)',
+                        'color-mix(in srgb, var(--modal-bg) 85%, transparent)',
                     backdropFilter: 'blur(24px)',
-                    border: '1px solid rgba(255, 255, 255, 0.18)',
-                    borderRadius: '24px',
+                    border: '1px solid var(--color-border-soft)',
+                    borderRadius: 'var(--modal-radius, 24px)',
                     padding: '40px',
-                    boxShadow: '0 24px 72px rgba(0, 0, 0, 0.5)',
+                    boxShadow: 'var(--modal-shadow)',
                     animation: 'modalSlideIn 0.4s ease-out',
                 }}
                 role="dialog"
@@ -191,7 +191,7 @@ export default function FirstLoginPasswordModal({
                         margin: '0 0 8px 0',
                         fontSize: '26px',
                         fontWeight: 600,
-                        color: '#fff',
+                        color: 'var(--color-text-primary)',
                         textAlign: 'center',
                         letterSpacing: '-0.5px',
                     }}
@@ -204,7 +204,7 @@ export default function FirstLoginPasswordModal({
                     style={{
                         margin: '0 0 28px 0',
                         fontSize: '14px',
-                        color: 'rgba(255, 255, 255, 0.75)',
+                        color: 'var(--color-text-secondary)',
                         textAlign: 'center',
                         lineHeight: 1.6,
                     }}
@@ -222,7 +222,6 @@ export default function FirstLoginPasswordModal({
                             type="password"
                             enablePasswordToggle={true}
                             placeholder="Nhập mật khẩu hiện tại"
-                            mode="dark"
                             {...register('currentPassword')}
                         />
                         {errors.currentPassword && (
@@ -239,7 +238,6 @@ export default function FirstLoginPasswordModal({
                             type="password"
                             enablePasswordToggle={true}
                             placeholder="Nhập mật khẩu mới"
-                            mode="dark"
                             {...register('newPassword')}
                         />
 
@@ -256,7 +254,7 @@ export default function FirstLoginPasswordModal({
                                     <span
                                         style={{
                                             fontSize: 11,
-                                            color: 'rgba(255,255,255,0.6)',
+                                            color: 'var(--color-text-muted)',
                                         }}
                                     >
                                         Độ mạnh:
@@ -275,7 +273,7 @@ export default function FirstLoginPasswordModal({
                                     style={{
                                         width: '100%',
                                         height: 3,
-                                        background: 'rgba(255,255,255,0.1)',
+                                        background: 'var(--color-border-soft)',
                                         borderRadius: 2,
                                         overflow: 'hidden',
                                     }}
@@ -306,7 +304,6 @@ export default function FirstLoginPasswordModal({
                             type="password"
                             enablePasswordToggle={true}
                             placeholder="Nhập lại mật khẩu mới"
-                            mode="dark"
                             {...register('confirmPassword')}
                         />
                         {errors.confirmPassword && (
@@ -321,15 +318,15 @@ export default function FirstLoginPasswordModal({
                         style={{
                             marginBottom: '24px',
                             padding: '12px 14px',
-                            background: 'rgba(255,255,255,0.06)',
+                            background: 'var(--color-surface-raised)',
                             borderRadius: '10px',
-                            border: '1px solid rgba(255,255,255,0.12)',
+                            border: '1px solid var(--color-border-soft)',
                         }}
                     >
                         <div
                             style={{
                                 fontSize: 12,
-                                color: 'rgba(255,255,255,0.85)',
+                                color: 'var(--color-text-primary)',
                                 marginBottom: 8,
                                 fontWeight: 500,
                             }}
@@ -341,7 +338,7 @@ export default function FirstLoginPasswordModal({
                                 margin: 0,
                                 paddingLeft: 18,
                                 fontSize: 11,
-                                color: 'rgba(255,255,255,0.65)',
+                                color: 'var(--color-text-secondary)',
                                 lineHeight: 1.7,
                             }}
                         >
@@ -394,10 +391,10 @@ export default function FirstLoginPasswordModal({
                             style={{
                                 marginBottom: '16px',
                                 padding: '10px 12px',
-                                background: 'rgba(255, 77, 79, 0.15)',
-                                border: '1px solid rgba(255, 77, 79, 0.3)',
+                                background: 'var(--color-status-danger-bg)',
+                                border: '1px solid var(--color-status-danger)',
                                 borderRadius: '8px',
-                                color: '#ff9aa2',
+                                color: 'var(--color-status-danger)',
                                 fontSize: '13px',
                             }}
                             role="alert"
@@ -409,7 +406,7 @@ export default function FirstLoginPasswordModal({
                     {/* Submit Button */}
                     <ButtonPrimary
                         type="submit"
-                        variant="glass"
+                        variant="solid"
                         shape="rounded"
                         loading={mut.isPending}
                         disabled={mut.isPending}
@@ -426,7 +423,7 @@ export default function FirstLoginPasswordModal({
                             marginTop: '16px',
                             marginBottom: 0,
                             fontSize: '12px',
-                            color: 'rgba(255, 255, 255, 0.5)',
+                            color: 'var(--color-text-muted)',
                             textAlign: 'center',
                             lineHeight: 1.5,
                         }}

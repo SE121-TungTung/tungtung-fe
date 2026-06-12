@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import {
     createClass,
     updateClass,
@@ -16,8 +16,8 @@ import { Modal } from '@/components/core/Modal'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import styles from './ClassFormModal.module.css'
 import { useQuery } from '@tanstack/react-query'
-import { prune } from '@/utils/prune'
 import { useDialog } from '@/hooks/useDialog'
+import { SlotSelectionMatrix } from '@/components/feature/schedule/SlotSelectionMatrix'
 
 interface Props {
     isOpen: boolean
@@ -85,12 +85,32 @@ export const ClassFormModal: React.FC<Props> = ({
         value: r.id,
     }))
 
+    type FormValues = {
+        name: string
+        course_id: string
+        teacher_id: string
+        substitute_teacher_id?: string | null
+        room_id: string
+        status: ClassStatus
+        start_date: string
+        end_date: string
+        max_students: number
+        sessions_per_week?: number | null
+        fee_amount?: number | string | null
+        notes?: string | null
+        preferred_slots: any[]
+        unavailable_slots: any[]
+    }
+
     const {
         register,
         handleSubmit,
         reset,
+        control,
+        watch,
+        setValue,
         formState: { errors, isSubmitting },
-    } = useForm<CreateClassDto>({
+    } = useForm<FormValues>({
         defaultValues: {
             name: '',
             course_id: '',
@@ -104,9 +124,24 @@ export const ClassFormModal: React.FC<Props> = ({
             sessions_per_week: undefined,
             fee_amount: undefined,
             notes: '',
-            schedule: '{"type":"weekly","days":[1,3,5],"time":"18:00"}',
+            preferred_slots: [{ day: 'monday', slots: [1, 2] }],
+            unavailable_slots: [],
         },
     })
+
+    const watchedCourseId = watch('course_id')
+
+    useEffect(() => {
+        if (!editing && watchedCourseId && coursesData?.items) {
+            const selectedCourse = coursesData.items.find(
+                (c) => c.id === watchedCourseId
+            )
+            if (selectedCourse) {
+                setValue('fee_amount', selectedCourse.feeAmount)
+                setValue('max_students', selectedCourse.maxStudents)
+            }
+        }
+    }, [watchedCourseId, coursesData?.items, editing, setValue])
 
     useEffect(() => {
         if (isOpen) {
@@ -115,59 +150,64 @@ export const ClassFormModal: React.FC<Props> = ({
                     name: editing.name,
                     course_id: editing.course.id,
                     teacher_id: editing.teacher.id,
+                    substitute_teacher_id: editing.substituteTeacher?.id || '',
                     room_id: editing.room.id,
                     status: editing.status,
                     start_date: editing.startDate,
                     end_date: editing.endDate,
                     max_students: editing.maxStudents,
-                    schedule: JSON.stringify(editing.scheduleDefinition),
+                    sessions_per_week: editing.sessionsPerWeek ?? undefined,
+                    fee_amount: editing.feeAmount ?? undefined,
+                    notes: editing.notes || '',
+                    preferred_slots: editing.preferredSlots || [],
+                    unavailable_slots: editing.unavailableSlots || [],
                 })
             } else {
                 reset({
                     name: '',
                     course_id: '',
                     teacher_id: '',
+                    substitute_teacher_id: '',
                     room_id: '',
                     status: 'scheduled',
                     start_date: '',
                     end_date: '',
                     max_students: 20,
-                    schedule:
-                        '{"type": "weekly", "days": [1,3,5], "time": "18:00"}',
+                    sessions_per_week: undefined,
+                    fee_amount: undefined,
+                    notes: '',
+                    preferred_slots: [{ day: 'monday', slots: [1, 2] }],
+                    unavailable_slots: [],
                 })
             }
         }
     }, [isOpen, editing, reset])
 
-    const onSubmit = async (form: CreateClassDto) => {
-        let scheduleObj: any = form.schedule
-        if (typeof scheduleObj === 'string') {
-            try {
-                scheduleObj = JSON.parse(scheduleObj)
-            } catch {
-                alert('Lịch học không phải JSON hợp lệ')
-                return
-            }
-        }
-
-        const payload = prune({
-            ...form,
+    const onSubmit = async (form: FormValues) => {
+        const payload: CreateClassDto = {
+            name: form.name,
+            course_id: form.course_id,
+            teacher_id: form.teacher_id,
+            substitute_teacher_id: form.substitute_teacher_id || null,
+            room_id: form.room_id,
             status: form.status || 'scheduled',
-            schedule: scheduleObj,
-            fee_amount:
-                typeof form.fee_amount === 'number' &&
-                !Number.isNaN(form.fee_amount)
-                    ? form.fee_amount
-                    : undefined,
+            start_date: form.start_date,
+            end_date: form.end_date,
+            max_students: Number(form.max_students),
             sessions_per_week:
                 typeof form.sessions_per_week === 'number' &&
                 Number.isInteger(form.sessions_per_week)
                     ? form.sessions_per_week
-                    : undefined,
-            substitute_teacher_id: form.substitute_teacher_id || undefined,
-            notes: form.notes?.trim() || undefined,
-            current_students: undefined,
-        })
+                    : null,
+            fee_amount:
+                typeof form.fee_amount === 'number' &&
+                !Number.isNaN(form.fee_amount)
+                    ? form.fee_amount
+                    : null,
+            notes: form.notes?.trim() || null,
+            preferred_slots: form.preferred_slots || [],
+            unavailable_slots: form.unavailable_slots || [],
+        }
 
         try {
             const saved = editing
@@ -182,13 +222,6 @@ export const ClassFormModal: React.FC<Props> = ({
 
     const isLoadingDropdowns =
         isLoadingCourses || isLoadingTeachers || isLoadingRooms
-
-    const getErrorMessage = (error: any): string | undefined => {
-        if (!error) return undefined
-        if (typeof error === 'string') return error
-        if (error.message) return error.message
-        return undefined
-    }
 
     return (
         <Modal
@@ -336,32 +369,47 @@ export const ClassFormModal: React.FC<Props> = ({
                     />
                 </div>
 
-                <div>
-                    <label
-                        htmlFor="schedule_definition"
-                        className={styles.inputLabel}
-                    >
-                        Lịch học (JSON)
-                    </label>
-                    <textarea
-                        id="schedule_definition"
-                        rows={4}
-                        {...register('schedule', {
-                            validate: (value) => {
-                                try {
-                                    JSON.parse(value)
-                                    return true
-                                } catch {
-                                    return 'JSON không hợp lệ'
-                                }
-                            },
-                        })}
-                    />
-                    {errors.schedule?.message && (
-                        <p className={styles.fieldHelperText}>
-                            {getErrorMessage(errors.schedule)}
-                        </p>
-                    )}
+                <div
+                    className={styles.grid2Cols}
+                    style={{ gridTemplateColumns: '1fr', gap: '24px' }}
+                >
+                    <div>
+                        <label
+                            className={styles.inputLabel}
+                            style={{ marginBottom: 12, display: 'block' }}
+                        >
+                            Lịch học mong muốn (Preferred Slots)
+                        </label>
+                        <Controller
+                            control={control}
+                            name="preferred_slots"
+                            render={({ field: { value, onChange } }) => (
+                                <SlotSelectionMatrix
+                                    value={value}
+                                    onChange={onChange}
+                                />
+                            )}
+                        />
+                    </div>
+
+                    <div>
+                        <label
+                            className={styles.inputLabel}
+                            style={{ marginBottom: 12, display: 'block' }}
+                        >
+                            Lịch bận cố định (Unavailable Slots)
+                        </label>
+                        <Controller
+                            control={control}
+                            name="unavailable_slots"
+                            render={({ field: { value, onChange } }) => (
+                                <SlotSelectionMatrix
+                                    value={value}
+                                    onChange={onChange}
+                                />
+                            )}
+                        />
+                    </div>
                 </div>
             </form>
         </Modal>
