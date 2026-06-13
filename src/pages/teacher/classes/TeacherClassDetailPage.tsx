@@ -29,7 +29,6 @@ import {
     createClassPost,
     deleteClassPost,
 } from '@/lib/classes'
-import Card from '@/components/common/card/Card'
 import { getMyClasses, listUsers } from '@/lib/users'
 import { createSubstitutionRequest } from '@/lib/substitutions'
 import { type ClassMember } from '@/components/common/card/MemberCard'

@@ -11,9 +11,6 @@ import SegmentedControl, {
 import ScheduleTodayCard from '@/components/common/card/ScheduleToday'
 import SessionList from './SessionList'
 import TextType from '@/components/common/text/TextType'
-import RecentActivityCard, {
-    type Activity,
-} from '@/components/common/card/RecentActivityCard'
 import AssignmentCard, {
     type Assignment,
 } from '@/components/common/card/AssignmentCard'
@@ -42,22 +39,6 @@ const tabItems: TabItem[] = [
 const viewModeItems: SegItem[] = [
     { label: 'Tuần', value: 'week' },
     { label: 'Tháng', value: 'month' },
-]
-
-// Mock data cho News và Assignments (Vì API classes thường chưa bao gồm cái này)
-const recentActivities: Activity[] = [
-    {
-        id: 'a1',
-        title: 'Giáo viên đã đăng tài liệu "Unit 5 Grammar"',
-        timestamp: '2 giờ trước',
-        type: 'material',
-    },
-    {
-        id: 'a3',
-        title: 'Thông báo: Lớp học tuần sau nghỉ lễ',
-        timestamp: '2 ngày trước',
-        type: 'announcement',
-    },
 ]
 
 const upcomingAssignments: Assignment[] = [
