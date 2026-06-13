@@ -330,6 +330,7 @@ export const useCreateKpiDispute = () => {
         onSuccess: () => {
             qc.invalidateQueries({ queryKey: ['my-kpi-record'] })
             qc.invalidateQueries({ queryKey: ['kpi-record-detail'] })
+            qc.invalidateQueries({ queryKey: ['my-kpi-disputes'] })
         },
     })
 }
@@ -346,9 +347,32 @@ export const useResolveKpiDispute = () => {
         }) => api.resolveKpiDispute(id, payload),
         onSuccess: () => {
             qc.invalidateQueries({ queryKey: ['kpi-record-detail'] })
+            qc.invalidateQueries({ queryKey: ['kpi-disputes'] })
         },
     })
 }
+
+export const useKpiDisputes = (params: {
+    status?: string
+    page?: number
+    limit?: number
+}) =>
+    useQuery({
+        queryKey: ['kpi-disputes', params],
+        queryFn: () => api.getKpiDisputes(params),
+        placeholderData: keepPreviousData,
+    })
+
+export const useMyKpiDisputes = (params: {
+    status?: string
+    page?: number
+    limit?: number
+}) =>
+    useQuery({
+        queryKey: ['my-kpi-disputes', params],
+        queryFn: () => api.getMyKpiDisputes(params),
+        placeholderData: keepPreviousData,
+    })
 
 // ============================================================================
 // Payroll Config

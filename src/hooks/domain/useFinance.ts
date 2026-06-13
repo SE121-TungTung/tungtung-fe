@@ -187,3 +187,15 @@ export const useCreateExportJob = () =>
         mutationFn: (payload: ExportJobCreate) =>
             financeApi.createExportJob(payload),
     })
+
+export const useExportJob = (id: string | undefined) =>
+    useQuery({
+        queryKey: ['export-job', id],
+        queryFn: () => financeApi.getExportJob(id!),
+        enabled: !!id,
+        refetchInterval: (query) => {
+            const status = query.state.data?.status
+            if (status === 'completed' || status === 'failed') return false
+            return 1000
+        },
+    })

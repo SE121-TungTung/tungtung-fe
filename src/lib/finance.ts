@@ -226,3 +226,6 @@ export const createExportJob = async (
         method: 'POST',
         body: JSON.stringify(payload),
     })
+
+export const getExportJob = async (id: string): Promise<ExportJobResponse> =>
+    api<ExportJobResponse>(`${API_V1}/reports/export-jobs/${id}`)

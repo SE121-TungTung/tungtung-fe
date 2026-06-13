@@ -300,6 +300,70 @@ export const resolveKpiDispute = async (
         body: JSON.stringify(payload),
     })
 
+export const getKpiDisputes = async (params: {
+    status?: string
+    page?: number
+    limit?: number
+}): Promise<PaginatedResponse<KpiDispute>> => {
+    const query = new URLSearchParams()
+    if (params.status) query.append('status', params.status)
+    if (params.page) query.append('page', params.page.toString())
+    if (params.limit) query.append('limit', params.limit.toString())
+
+    const API_BASE = (
+        import.meta.env.VITE_API_URL ||
+        'https://tungtung-be-production.up.railway.app'
+    ).replace(/\/$/, '')
+    const url = `${API_BASE}${API_V1}/kpi/disputes?${query.toString()}`
+
+    const token =
+        sessionStorage.getItem('access_token') ||
+        localStorage.getItem('access_token')
+    const headers: HeadersInit = { Accept: 'application/json' }
+    if (token) headers['Authorization'] = `Bearer ${token}`
+
+    const res = await fetch(url, { headers })
+    if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}))
+        throw new Error(
+            errBody?.message || errBody?.detail || `HTTP ${res.status}`
+        )
+    }
+    return res.json() as Promise<PaginatedResponse<KpiDispute>>
+}
+
+export const getMyKpiDisputes = async (params: {
+    status?: string
+    page?: number
+    limit?: number
+}): Promise<PaginatedResponse<KpiDispute>> => {
+    const query = new URLSearchParams()
+    if (params.status) query.append('status', params.status)
+    if (params.page) query.append('page', params.page.toString())
+    if (params.limit) query.append('limit', params.limit.toString())
+
+    const API_BASE = (
+        import.meta.env.VITE_API_URL ||
+        'https://tungtung-be-production.up.railway.app'
+    ).replace(/\/$/, '')
+    const url = `${API_BASE}${API_V1}/teachers/me/kpi-disputes?${query.toString()}`
+
+    const token =
+        sessionStorage.getItem('access_token') ||
+        localStorage.getItem('access_token')
+    const headers: HeadersInit = { Accept: 'application/json' }
+    if (token) headers['Authorization'] = `Bearer ${token}`
+
+    const res = await fetch(url, { headers })
+    if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}))
+        throw new Error(
+            errBody?.message || errBody?.detail || `HTTP ${res.status}`
+        )
+    }
+    return res.json() as Promise<PaginatedResponse<KpiDispute>>
+}
+
 // ============================================================================
 // 9. Payroll Config
 // ============================================================================

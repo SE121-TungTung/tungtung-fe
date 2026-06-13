@@ -160,15 +160,20 @@ export interface DebtListResponse {
 }
 
 export interface ExportJobCreate {
-    report_type: 'REVENUE' | 'EXPENSE' | 'PROFIT' | 'DEBT'
-    date_from?: string
-    date_to?: string
+    report_type: 'revenue' | 'expenses' | 'profit' | 'debts'
+    filters?: {
+        date_from?: string
+        date_to?: string
+        [key: string]: any
+    }
 }
 
 export interface ExportJobResponse {
-    job_id: string
-    status: 'PENDING' | 'COMPLETED' | 'FAILED'
+    id: string
+    report_type: 'revenue' | 'expenses' | 'profit' | 'debts'
+    status: 'pending' | 'processing' | 'completed' | 'failed'
     file_url?: string
+    error_message?: string | null
 }
 
 export interface PaginationMeta {

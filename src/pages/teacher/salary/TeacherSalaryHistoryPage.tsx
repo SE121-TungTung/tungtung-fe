@@ -4,7 +4,7 @@ import Card from '@/components/common/card/Card'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import { PeriodSelector } from '@/components/common/input/PeriodSelector'
 import { useNavigate } from 'react-router-dom'
-import { useSalaries } from '@/hooks/domain/useKpi'
+import { useMySalaryHistory } from '@/hooks/domain/useKpi'
 import Pagination from '@/components/common/menu/Pagination'
 import { StatusBadge } from '@/components/common/typography/StatusBadge'
 import { EmptyState } from '@/components/common/state/EmptyState'
@@ -16,7 +16,7 @@ export default function TeacherSalaryHistoryPage() {
         return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}`
     })
 
-    const { data: history, isLoading } = useSalaries({
+    const { data: history, isLoading } = useMySalaryHistory({
         period: period,
         page,
         limit: 10,
