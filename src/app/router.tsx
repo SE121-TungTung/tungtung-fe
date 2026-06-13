@@ -28,6 +28,7 @@ import GeneralDashboard from '@/pages/Dashboard'
 import SettingsPage from '@/pages/settings/SettingsPage'
 import TestDetailPage from '@/pages/student/exam/TestDetailPage'
 import ChatbotUploadPage from '@/pages/admin/system/ChatbotUploadPage'
+import SystemConfigPage from '@/pages/admin/system/SystemConfigPage'
 import { MainLayout } from './layouts/MainLayout'
 import AdminInvoicePage from '@/pages/admin/finance/AdminInvoicePage'
 import AdminFinanceReportPage from '@/pages/admin/finance/AdminFinanceReportPage'
@@ -37,6 +38,7 @@ import TeacherClassPage from '@/pages/teacher/classes/TeacherClassPage'
 import TestTakerWrapper from '@/pages/student/exam/do/TestTakerWrapper'
 import AuditLogPage from '@/pages/admin/audit/AuditLogPage'
 import TeacherClassDetailPage from '@/pages/teacher/classes/TeacherClassDetailPage'
+import TeacherSchedulePage from '@/pages/teacher/schedule/TeacherSchedulePage'
 import EditTestPage from '@/pages/student/exam/EditTestPage'
 import TeacherGradingPage from '@/pages/teacher/grading/TeacherGradingPage'
 import GradeAttemptPage from '@/pages/teacher/grading/GradeAttemptPage'
@@ -49,6 +51,7 @@ import AdminKpiCalculationPage from '@/pages/admin/kpi/AdminKpiCalculationPage'
 import AdminKpiRecordDetailPage from '@/pages/admin/kpi/AdminKpiRecordDetailPage'
 import AdminKpiTemplatePage from '@/pages/admin/kpi/AdminKpiTemplatePage'
 import AdminSupportCalcPage from '@/pages/admin/kpi/AdminSupportCalcPage'
+import AdminKpiDisputesPage from '@/pages/admin/kpi/AdminKpiDisputesPage'
 import AdminPayrollListPage from '@/pages/admin/salary/AdminPayrollListPage'
 import AdminPayrollRunPage from '@/pages/admin/salary/AdminPayrollRunPage'
 import AdminPayrollRunDetailPage from '@/pages/admin/salary/AdminPayrollRunDetailPage'
@@ -165,6 +168,10 @@ export const router = createBrowserRouter([
                         element: <TestResultPage />,
                     },
                     {
+                        path: '/student/tests/attempts/:attemptId',
+                        element: <TestResultPage />,
+                    },
+                    {
                         path: '/student/notifications',
                         element: (
                             <ProtectedRoute allowedRoles={['student']}>
@@ -223,6 +230,14 @@ export const router = createBrowserRouter([
                         element: (
                             <ProtectedRoute allowedRoles={['teacher']}>
                                 <TeacherClassDetailPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/teacher/schedule',
+                        element: (
+                            <ProtectedRoute allowedRoles={['teacher']}>
+                                <TeacherSchedulePage />
                             </ProtectedRoute>
                         ),
                     },
@@ -422,6 +437,16 @@ export const router = createBrowserRouter([
                         ),
                     },
                     {
+                        path: '/admin/system',
+                        element: (
+                            <ProtectedRoute
+                                allowedRoles={['system_admin', 'center_admin']}
+                            >
+                                <SystemConfigPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
                         path: '/admin/system/chatbot-documents',
                         element: (
                             <ProtectedRoute
@@ -467,6 +492,20 @@ export const router = createBrowserRouter([
                                 ]}
                             >
                                 <AdminKpiRecordDetailPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/admin/kpi/disputes',
+                        element: (
+                            <ProtectedRoute
+                                allowedRoles={[
+                                    'system_admin',
+                                    'center_admin',
+                                    'office_admin',
+                                ]}
+                            >
+                                <AdminKpiDisputesPage />
                             </ProtectedRoute>
                         ),
                     },

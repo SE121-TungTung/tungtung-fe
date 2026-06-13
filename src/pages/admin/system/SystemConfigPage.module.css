@@ -1,0 +1,158 @@
+.pageWrapperWithoutHeader {
+    width: 100%;
+    min-height: calc(100vh - 80px);
+    padding: 24px 0;
+}
+
+.mainContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.pageTitle {
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    letter-spacing: -0.02em;
+    width: 100%;
+    margin-bottom: 8px;
+    text-align: left;
+}
+
+.configCard {
+    width: 100%;
+    padding: 32px;
+    background: var(--color-surface-page);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--color-border-default);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cardHeader {
+    border-bottom: 1px solid var(--color-border-default);
+    padding-bottom: 16px;
+    margin-bottom: 8px;
+}
+
+.cardTitle {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: 4px;
+}
+
+.cardDescription {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+    border-radius: var(--radius-lg);
+    background-color: var(--color-surface-card);
+    border: 1px solid var(--color-border-default);
+    transition: all 0.2s ease;
+}
+
+.formGroup:hover {
+    border-color: var(--color-brand-primary-300);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.labelWrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.fieldLabel {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--color-text-primary);
+}
+
+.inputWrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 240px;
+    margin-top: 4px;
+}
+
+.textInput {
+    flex: 1;
+    padding: 10px 14px;
+    font-size: 14px;
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface-page);
+    color: var(--color-text-primary);
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.textInput:focus {
+    border-color: var(--color-brand-primary-500);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.inputUnit {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    min-width: 48px;
+}
+
+.fieldDescription {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    line-height: 1.4;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    margin-top: 16px;
+    border-top: 1px solid var(--color-border-default);
+    padding-top: 24px;
+}
+
+.loadingSpinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
