@@ -17,14 +17,17 @@ type SlotConfig = { day: string; slots: number[] }
 
 interface Props {
     value?: SlotConfig[]
-    onChange: (value: SlotConfig[]) => void
+    onChange?: (value: SlotConfig[]) => void
+    readOnly?: boolean
 }
 
 export const SlotSelectionMatrix: React.FC<Props> = ({
     value = [],
     onChange,
+    readOnly = false,
 }) => {
     const handleToggle = (day: string, slot: number) => {
+        if (readOnly || !onChange) return
         let newConfig = [...(value || [])]
         let dayObj = newConfig.find((d) => d.day === day)
 
@@ -66,7 +69,7 @@ export const SlotSelectionMatrix: React.FC<Props> = ({
                     {SLOTS.map((slot) => (
                         <div
                             key={`${day.value}-${slot}`}
-                            className={`${styles.cell} ${isSelected(day.value, slot) ? styles.selected : ''}`}
+                            className={`${styles.cell} ${isSelected(day.value, slot) ? styles.selected : ''} ${readOnly ? styles.readOnly : ''}`}
                             onClick={() => handleToggle(day.value, slot)}
                         >
                             {isSelected(day.value, slot) && '✓'}

@@ -179,6 +179,7 @@ export interface WeeklySession {
     start_time: string // "08:00:00"
     end_time: string // "09:30:00"
     topic: string | null
+    is_conflict?: boolean
 }
 
 export interface WeeklyScheduleResponse {

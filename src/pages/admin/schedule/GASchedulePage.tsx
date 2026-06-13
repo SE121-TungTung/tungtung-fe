@@ -1,4 +1,11 @@
-import { useState } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { startOfWeek, format, addWeeks, subWeeks } from 'date-fns'
+import ViewModeSelector, {
+    type ViewMode,
+} from '@/components/feature/schedule/ViewModeSelector'
+import TimeGridView from '@/components/feature/schedule/views/TimeGridView'
+import RoomGridView from '@/components/feature/schedule/views/RoomGridView'
+import ScheduleListView from '@/components/feature/schedule/views/ScheduleListView'
 
 import s from './Schedule.module.css'
 
@@ -186,6 +193,15 @@ function GAOptimizerTab() {
 
     const { data: historyData } = useGARunHistory(1, 10)
 
+    const [currentDate, setCurrentDate] = useState<Date | null>(null)
+    const [viewMode, setViewMode] = useState<ViewMode>('time-grid')
+
+    useEffect(() => {
+        if (runDetail.data?.start_date) {
+            setCurrentDate(new Date(runDetail.data.start_date))
+        }
+    }, [runDetail.data?.start_date])
+
     const [form, setForm] = useState<GAScheduleRequest>({
         start_date: '',
 
@@ -225,6 +241,88 @@ function GAOptimizerTab() {
 
         staleTime: 5 * 60_000,
     })
+
+    const [selectedClass, setSelectedClass] = useState<string>('')
+    const [selectedTeacher, setSelectedTeacher] = useState<string>('')
+    const [selectedRoom, setSelectedRoom] = useState<string>('')
+
+    const weeklySessions = useMemo(() => {
+        if (!runDetail.data?.sessions) return []
+        return runDetail.data.sessions.map((ses) => ({
+            session_id: ses.id,
+            class_name: ses.class_name,
+            teacher_name: ses.teacher_name,
+            room_name: ses.room_name || 'Chưa xếp phòng',
+            session_date: ses.session_date,
+            day_of_week: '',
+            start_time: ses.start_time,
+            end_time: ses.end_time,
+            topic: ses.lesson_topic,
+            is_conflict: ses.is_conflict,
+        }))
+    }, [runDetail.data?.sessions])
+
+    const currentWeekStart = useMemo(() => {
+        if (!currentDate) return new Date()
+        return startOfWeek(currentDate, { weekStartsOn: 1 })
+    }, [currentDate])
+
+    const currentWeekEnd = useMemo(() => {
+        return new Date(currentWeekStart.getTime() + 6 * 24 * 60 * 60 * 1000)
+    }, [currentWeekStart])
+
+    const uniqueClasses = useMemo(() => {
+        return Array.from(
+            new Set(weeklySessions.map((s) => s.class_name))
+        ).sort()
+    }, [weeklySessions])
+
+    const uniqueTeachers = useMemo(() => {
+        return Array.from(
+            new Set(weeklySessions.map((s) => s.teacher_name))
+        ).sort()
+    }, [weeklySessions])
+
+    const uniqueRooms = useMemo(() => {
+        return Array.from(
+            new Set(weeklySessions.map((s) => s.room_name))
+        ).sort()
+    }, [weeklySessions])
+
+    const filteredSessions = useMemo(() => {
+        let res = weeklySessions
+        if (selectedClass) {
+            res = res.filter((s) => s.class_name === selectedClass)
+        }
+        if (selectedTeacher) {
+            res = res.filter((s) => s.teacher_name === selectedTeacher)
+        }
+        if (selectedRoom) {
+            res = res.filter((s) => s.room_name === selectedRoom)
+        }
+        return res
+    }, [weeklySessions, selectedClass, selectedTeacher, selectedRoom])
+
+    const currentWeekSessions = useMemo(() => {
+        if (!currentWeekStart) return filteredSessions
+        const startStr = format(currentWeekStart, 'yyyy-MM-dd')
+        const endStr = format(currentWeekEnd, 'yyyy-MM-dd')
+        return filteredSessions.filter(
+            (s) => s.session_date >= startStr && s.session_date <= endStr
+        )
+    }, [filteredSessions, currentWeekStart, currentWeekEnd])
+
+    const handlePrevWeek = () => {
+        if (currentDate) {
+            setCurrentDate((prev) => (prev ? subWeeks(prev, 1) : null))
+        }
+    }
+
+    const handleNextWeek = () => {
+        if (currentDate) {
+            setCurrentDate((prev) => (prev ? addWeeks(prev, 1) : null))
+        }
+    }
 
     // When polling detects completion, auto-advance to result
 
@@ -388,7 +486,7 @@ function GAOptimizerTab() {
                 )
             }
 
-            next.class_ids = list(affectedClassIds)
+            next.class_ids = Array.from(affectedClassIds)
 
             return next
         })
@@ -1838,10 +1936,9 @@ function GAOptimizerTab() {
 
                                     borderRadius: 'var(--primitive-radius-sm)',
 
-                                    background:
-                                        'var(--color-status-warning-bg)',
+                                    background: 'var(--color-status-danger-bg)',
 
-                                    border: '1px solid var(--color-status-warning)',
+                                    border: '1px solid var(--color-status-danger)',
                                 }}
                             >
                                 <strong>
@@ -1850,138 +1947,267 @@ function GAOptimizerTab() {
                                 </strong>
 
                                 <div style={{ fontSize: 13, marginTop: 4 }}>
-                                    Không thể apply khi còn hard violations. Hãy
-                                    chạy lại với tham số khác.
+                                    Hệ thống phát hiện{' '}
+                                    {runDetail.data.conflicts.length} điểm xung
+                                    đột/vi phạm trong kết quả đề xuất.
                                 </div>
                             </div>
                         )}
 
-                        {/* Sessions table */}
+                        {/* Sessions card */}
 
                         <Card
                             title={`Danh sách buổi đề xuất (${runDetail.data.sessions.length})`}
                             mode="light"
                         >
-                            <div style={{ overflowX: 'auto' }}>
-                                <table
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: 16,
+                                }}
+                            >
+                                {/* Controls Bar */}
+                                <div
                                     style={{
-                                        width: '100%',
-
-                                        borderCollapse: 'collapse',
-
-                                        fontSize: 13,
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        flexWrap: 'wrap',
+                                        gap: 12,
+                                        borderBottom:
+                                            '1px solid var(--color-border-soft)',
+                                        paddingBottom: 16,
                                     }}
                                 >
-                                    <thead>
-                                        <tr
+                                    {/* Week Navigation */}
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 12,
+                                        }}
+                                    >
+                                        <ButtonPrimary
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={handlePrevWeek}
+                                        >
+                                            ← Tuần trước
+                                        </ButtonPrimary>
+                                        <span
                                             style={{
-                                                borderBottom:
-                                                    '2px solid var(--color-border-soft)',
-
-                                                textAlign: 'left',
+                                                fontWeight: 600,
+                                                fontSize: 14,
+                                                color: 'var(--color-text-primary)',
                                             }}
                                         >
-                                            <th style={thStyle}>Lớp</th>
+                                            {currentDate
+                                                ? `${format(currentWeekStart, 'dd/MM/yyyy')} - ${format(currentWeekEnd, 'dd/MM/yyyy')}`
+                                                : ''}
+                                        </span>
+                                        <ButtonPrimary
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={handleNextWeek}
+                                        >
+                                            Tuần sau →
+                                        </ButtonPrimary>
+                                    </div>
 
-                                            <th style={thStyle}>Giáo viên</th>
+                                    {/* View Mode Selector */}
+                                    <ViewModeSelector
+                                        currentMode={viewMode}
+                                        onModeChange={setViewMode}
+                                    />
+                                </div>
 
-                                            <th style={thStyle}>Phòng</th>
+                                {/* Filters Bar */}
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        gap: 16,
+                                        alignItems: 'center',
+                                        flexWrap: 'wrap',
+                                        background:
+                                            'var(--color-surface-raised)',
+                                        padding: '12px 16px',
+                                        borderRadius: 'var(--radius-md)',
+                                        border: '1px solid var(--color-border-soft)',
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 8,
+                                        }}
+                                    >
+                                        <label
+                                            style={{
+                                                fontSize: 13,
+                                                fontWeight: 500,
+                                                color: 'var(--color-text-secondary)',
+                                            }}
+                                        >
+                                            Lớp:
+                                        </label>
+                                        <select
+                                            value={selectedClass}
+                                            onChange={(e) =>
+                                                setSelectedClass(e.target.value)
+                                            }
+                                            style={{
+                                                padding: '6px 12px',
+                                                borderRadius:
+                                                    'var(--radius-sm)',
+                                                border: '1px solid var(--color-border-soft)',
+                                                fontSize: 13,
+                                                background:
+                                                    'var(--color-surface-card)',
+                                                color: 'var(--color-text-primary)',
+                                            }}
+                                        >
+                                            <option value="">Tất cả</option>
+                                            {uniqueClasses.map((c) => (
+                                                <option key={c} value={c}>
+                                                    {c}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
 
-                                            <th style={thStyle}>Ngày</th>
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 8,
+                                        }}
+                                    >
+                                        <label
+                                            style={{
+                                                fontSize: 13,
+                                                fontWeight: 500,
+                                                color: 'var(--color-text-secondary)',
+                                            }}
+                                        >
+                                            Giáo viên:
+                                        </label>
+                                        <select
+                                            value={selectedTeacher}
+                                            onChange={(e) =>
+                                                setSelectedTeacher(
+                                                    e.target.value
+                                                )
+                                            }
+                                            style={{
+                                                padding: '6px 12px',
+                                                borderRadius:
+                                                    'var(--radius-sm)',
+                                                border: '1px solid var(--color-border-soft)',
+                                                fontSize: 13,
+                                                background:
+                                                    'var(--color-surface-card)',
+                                                color: 'var(--color-text-primary)',
+                                            }}
+                                        >
+                                            <option value="">Tất cả</option>
+                                            {uniqueTeachers.map((t) => (
+                                                <option key={t} value={t}>
+                                                    {t}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
 
-                                            <th style={thStyle}>Tiết</th>
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 8,
+                                        }}
+                                    >
+                                        <label
+                                            style={{
+                                                fontSize: 13,
+                                                fontWeight: 500,
+                                                color: 'var(--color-text-secondary)',
+                                            }}
+                                        >
+                                            Phòng:
+                                        </label>
+                                        <select
+                                            value={selectedRoom}
+                                            onChange={(e) =>
+                                                setSelectedRoom(e.target.value)
+                                            }
+                                            style={{
+                                                padding: '6px 12px',
+                                                borderRadius:
+                                                    'var(--radius-sm)',
+                                                border: '1px solid var(--color-border-soft)',
+                                                fontSize: 13,
+                                                background:
+                                                    'var(--color-surface-card)',
+                                                color: 'var(--color-text-primary)',
+                                            }}
+                                        >
+                                            <option value="">Tất cả</option>
+                                            {uniqueRooms.map((r) => (
+                                                <option key={r} value={r}>
+                                                    {r}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
 
-                                            <th style={thStyle}>Giờ</th>
+                                    {(selectedClass ||
+                                        selectedTeacher ||
+                                        selectedRoom) && (
+                                        <button
+                                            onClick={() => {
+                                                setSelectedClass('')
+                                                setSelectedTeacher('')
+                                                setSelectedRoom('')
+                                            }}
+                                            style={{
+                                                padding: '6px 12px',
+                                                background: 'transparent',
+                                                border: '1px solid var(--color-status-danger)',
+                                                borderRadius:
+                                                    'var(--radius-sm)',
+                                                color: 'var(--color-status-danger)',
+                                                fontSize: 13,
+                                                cursor: 'pointer',
+                                            }}
+                                        >
+                                            Xóa bộ lọc
+                                        </button>
+                                    )}
+                                </div>
 
-                                            <th style={thStyle}>Trạng thái</th>
-                                        </tr>
-                                    </thead>
-
-                                    <tbody>
-                                        {runDetail.data.sessions.map((ses) => (
-                                            <tr
-                                                key={ses.id}
-                                                style={{
-                                                    borderBottom:
-                                                        '1px solid var(--color-border-soft)',
-
-                                                    background: ses.is_conflict
-                                                        ? 'var(--color-status-danger-bg)'
-                                                        : 'transparent',
-                                                }}
-                                            >
-                                                <td style={tdStyle}>
-                                                    {ses.class_name}
-                                                </td>
-
-                                                <td style={tdStyle}>
-                                                    {ses.teacher_name}
-                                                </td>
-
-                                                <td style={tdStyle}>
-                                                    {ses.room_name || '—'}
-                                                </td>
-
-                                                <td style={tdStyle}>
-                                                    {ses.session_date}
-                                                </td>
-
-                                                <td style={tdStyle}>
-                                                    {ses.time_slots.join(', ')}
-                                                </td>
-
-                                                <td style={tdStyle}>
-                                                    {fmtTime(ses.start_time)}–
-                                                    {fmtTime(ses.end_time)}
-                                                </td>
-
-                                                <td style={tdStyle}>
-                                                    {ses.is_conflict ? (
-                                                        <span
-                                                            style={{
-                                                                padding:
-                                                                    '2px 8px',
-
-                                                                borderRadius: 99,
-
-                                                                fontSize: 11,
-
-                                                                fontWeight: 600,
-
-                                                                background:
-                                                                    'var(--color-status-danger)',
-
-                                                                color: '#fff',
-                                                            }}
-                                                        >
-                                                            Xung đột
-                                                        </span>
-                                                    ) : (
-                                                        <span
-                                                            style={{
-                                                                padding:
-                                                                    '2px 8px',
-
-                                                                borderRadius: 99,
-
-                                                                fontSize: 11,
-
-                                                                fontWeight: 600,
-
-                                                                background:
-                                                                    'var(--color-status-success-bg)',
-
-                                                                color: 'var(--color-status-success)',
-                                                            }}
-                                                        >
-                                                            OK
-                                                        </span>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                {/* Active View Grid / List */}
+                                <div style={{ minHeight: 400 }}>
+                                    {viewMode === 'time-grid' &&
+                                        currentDate && (
+                                            <TimeGridView
+                                                startDate={currentWeekStart}
+                                                sessions={currentWeekSessions}
+                                            />
+                                        )}
+                                    {viewMode === 'room-grid' &&
+                                        currentDate && (
+                                            <RoomGridView
+                                                startDate={currentWeekStart}
+                                                sessions={currentWeekSessions}
+                                            />
+                                        )}
+                                    {viewMode === 'list' && (
+                                        <ScheduleListView
+                                            sessions={currentWeekSessions}
+                                        />
+                                    )}
+                                </div>
                             </div>
                         </Card>
 
@@ -3216,12 +3442,6 @@ const thStyle: React.CSSProperties = {
 }
 
 const tdStyle: React.CSSProperties = { padding: '10px 12px' }
-
-function fmtTime(t: string): string {
-    // "08:00:00" → "08:00"
-
-    return t?.slice(0, 5) || ''
-}
 
 function formatDateShort(iso: string): string {
     try {

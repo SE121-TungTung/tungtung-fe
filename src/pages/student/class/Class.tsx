@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 import s from './Class.module.css'
@@ -80,20 +80,16 @@ export default function ClassPage() {
         'all' | 'student' | 'teacher'
     >('all')
 
-    const checkInMutation = useMutation({
-        mutationFn: (sessionId: string) => selfCheckIn(sessionId),
-        onSuccess: (res) => {
-            queryClient.invalidateQueries({ queryKey: ['my-classes'] })
-            alert(res.message || 'Điểm danh thành công!', 'Thành công')
-        },
-        onError: (err: any) => {
-            alert(
-                err?.message ||
-                    'Có lỗi xảy ra khi điểm danh. Vui lòng thử lại!',
-                'Thất bại'
-            )
-        },
-    })
+    const [isQRScannerOpen, setIsQRScannerOpen] = useState(false)
+    const [manualQrToken, setManualQrToken] = useState('')
+
+    const [cameraActive, setCameraActive] = useState(false)
+    const [cameraError, setCameraError] = useState<string | null>(null)
+    const [jsQrLoaded, setJsQrLoaded] = useState(false)
+
+    const videoRef = useRef<HTMLVideoElement | null>(null)
+    const canvasRef = useRef<HTMLCanvasElement | null>(null)
+    const streamRef = useRef<MediaStream | null>(null)
 
     // 1. Fetch data từ API
     const { data: myClasses, isLoading: classesLoading } = useQuery({
@@ -108,6 +104,221 @@ export default function ClassPage() {
         if (myClasses?.classes) return myClasses.classes[0] as MyClass
         return undefined
     }, [myClasses])
+
+    const checkInMutation = useMutation({
+        mutationFn: ({
+            sessionId,
+            qrToken,
+        }: {
+            sessionId: string
+            qrToken?: string
+        }) => selfCheckIn(sessionId, qrToken),
+        onSuccess: (res) => {
+            queryClient.invalidateQueries({ queryKey: ['my-classes'] })
+            alert(res.message || 'Điểm danh thành công!', 'Thành công')
+            setIsQRScannerOpen(false)
+            setManualQrToken('')
+        },
+        onError: (err: any) => {
+            alert(
+                err?.message ||
+                    'Có lỗi xảy ra khi điểm danh. Vui lòng thử lại!',
+                'Thất bại'
+            )
+        },
+    })
+
+    // 3. Map dữ liệu Sessions (Lịch học) từ API sang UI
+    const allSessions: Lesson[] = useMemo(() => {
+        if (!currentClass || !currentClass.sessions) return []
+
+        return currentClass.sessions
+            .map((session: ClassSession) => ({
+                id: session.id,
+                sessionDate: session.session_date,
+                startTime: session.start_time.slice(0, 5), // Cắt giây (08:00:00 -> 08:00)
+                endTime: session.end_time.slice(0, 5),
+                className:
+                    session.title || `Buổi học ngày ${session.session_date}`,
+                courseName: currentClass.course_name || currentClass.name,
+                roomName: currentClass.room_name || 'Đang cập nhật',
+                teacherName: currentClass.teacher?.full_name || 'Giáo viên',
+                status: session.status as
+                    | 'scheduled'
+                    | 'completed'
+                    | 'cancelled',
+                attendanceTaken:
+                    session.student_checked_in ?? session.attendance_taken,
+            }))
+            .sort(
+                (a: Lesson, b: Lesson) =>
+                    new Date(a.sessionDate).getTime() -
+                    new Date(b.sessionDate).getTime()
+            ) // Sắp xếp tăng dần theo ngày
+    }, [currentClass])
+
+    // Lọc ra buổi học hôm nay (nếu có)
+    const todaySessions: Lesson[] = useMemo(() => {
+        const now = new Date()
+        const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+        return allSessions.filter((s) => s.sessionDate === today)
+    }, [allSessions])
+
+    // Load jsQR library from CDN when scanner modal is opened
+    useEffect(() => {
+        if (!isQRScannerOpen) return
+
+        if ((window as any).jsQR) {
+            setJsQrLoaded(true)
+            return
+        }
+
+        const script = document.createElement('script')
+        script.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js'
+        script.async = true
+        script.onload = () => setJsQrLoaded(true)
+        script.onerror = () =>
+            setCameraError('Không thể tải thư viện quét mã QR.')
+        document.body.appendChild(script)
+    }, [isQRScannerOpen])
+
+    // Manage camera stream and scanning loop
+    useEffect(() => {
+        if (!isQRScannerOpen || !jsQrLoaded) {
+            if (streamRef.current) {
+                streamRef.current.getTracks().forEach((track) => track.stop())
+                streamRef.current = null
+            }
+            setCameraActive(false)
+            setCameraError(null)
+            return
+        }
+
+        let active = true
+        let animationFrameId: number
+
+        const startCamera = async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' },
+                })
+                if (!active) {
+                    stream.getTracks().forEach((track) => track.stop())
+                    return
+                }
+                streamRef.current = stream
+                if (videoRef.current) {
+                    videoRef.current.srcObject = stream
+                    videoRef.current.setAttribute('playsinline', 'true')
+                    videoRef.current.play()
+                    setCameraActive(true)
+                }
+            } catch (err: any) {
+                console.error('Error accessing camera:', err)
+                setCameraError(
+                    'Không thể truy cập camera. Vui lòng nhập mã thủ công.'
+                )
+            }
+        }
+
+        startCamera()
+
+        const scan = () => {
+            if (!active) return
+            const video = videoRef.current
+            const canvas = canvasRef.current
+            const jsQR = (window as any).jsQR
+
+            if (
+                video &&
+                canvas &&
+                jsQR &&
+                video.readyState === video.HAVE_ENOUGH_DATA
+            ) {
+                const ctx = canvas.getContext('2d')
+                if (ctx) {
+                    canvas.width = video.videoWidth
+                    canvas.height = video.videoHeight
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+                    const imageData = ctx.getImageData(
+                        0,
+                        0,
+                        canvas.width,
+                        canvas.height
+                    )
+                    const code = jsQR(
+                        imageData.data,
+                        imageData.width,
+                        imageData.height,
+                        {
+                            inversionAttempts: 'dontInvert',
+                        }
+                    )
+
+                    if (code && code.data) {
+                        const scannedToken = code.data.trim()
+
+                        try {
+                            const audioCtx = new (window.AudioContext ||
+                                (window as any).webkitAudioContext)()
+                            const oscillator = audioCtx.createOscillator()
+                            oscillator.type = 'sine'
+                            oscillator.frequency.setValueAtTime(
+                                800,
+                                audioCtx.currentTime
+                            )
+                            oscillator.connect(audioCtx.destination)
+                            oscillator.start()
+                            oscillator.stop(audioCtx.currentTime + 0.1)
+                        } catch {
+                            // ignore audio context failures
+                        }
+
+                        if (streamRef.current) {
+                            streamRef.current
+                                .getTracks()
+                                .forEach((track) => track.stop())
+                            streamRef.current = null
+                        }
+                        setCameraActive(false)
+                        setManualQrToken(scannedToken)
+
+                        const sessionToUse =
+                            todaySessions[0]?.id ||
+                            currentClass?.sessions?.[0]?.id
+                        if (sessionToUse) {
+                            checkInMutation.mutate({
+                                sessionId: sessionToUse,
+                                qrToken: scannedToken,
+                            })
+                        }
+                        return
+                    }
+                }
+            }
+            animationFrameId = requestAnimationFrame(scan)
+        }
+
+        const timer = setTimeout(() => {
+            if (active) scan()
+        }, 500)
+
+        return () => {
+            active = false
+            clearTimeout(timer)
+            cancelAnimationFrame(animationFrameId)
+            if (streamRef.current) {
+                streamRef.current.getTracks().forEach((track) => track.stop())
+                streamRef.current = null
+            }
+        }
+    }, [
+        isQRScannerOpen,
+        jsQrLoaded,
+        todaySessions,
+        currentClass,
+        checkInMutation,
+    ])
 
     const handleGreetingComplete = useCallback(() => {
         setShowGradientName(true)
@@ -157,42 +368,6 @@ export default function ClassPage() {
         return members
     }, [currentClass])
 
-    // 3. Map dữ liệu Sessions (Lịch học) từ API sang UI
-    const allSessions: Lesson[] = useMemo(() => {
-        if (!currentClass || !currentClass.sessions) return []
-
-        return currentClass.sessions
-            .map((session: ClassSession) => ({
-                id: session.id,
-                sessionDate: session.session_date,
-                startTime: session.start_time.slice(0, 5), // Cắt giây (08:00:00 -> 08:00)
-                endTime: session.end_time.slice(0, 5),
-                className:
-                    session.title || `Buổi học ngày ${session.session_date}`,
-                courseName: currentClass.course_name || currentClass.name,
-                roomName: currentClass.room_name || 'Đang cập nhật',
-                teacherName: currentClass.teacher?.full_name || 'Giáo viên',
-                status: session.status as
-                    | 'scheduled'
-                    | 'completed'
-                    | 'cancelled',
-                attendanceTaken:
-                    session.student_checked_in ?? session.attendance_taken,
-            }))
-            .sort(
-                (a: Lesson, b: Lesson) =>
-                    new Date(a.sessionDate).getTime() -
-                    new Date(b.sessionDate).getTime()
-            ) // Sắp xếp tăng dần theo ngày
-    }, [currentClass])
-
-    // Lọc ra buổi học hôm nay (nếu có)
-    const todaySessions: Lesson[] = useMemo(() => {
-        const now = new Date()
-        const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
-        return allSessions.filter((s) => s.sessionDate === today)
-    }, [allSessions])
-
     const handleCheckIn = useCallback(() => {
         const checkInTarget = todaySessions.find((s) => !s.attendanceTaken)
         if (!checkInTarget) {
@@ -209,7 +384,7 @@ export default function ClassPage() {
             }
             return
         }
-        checkInMutation.mutate(checkInTarget.id)
+        checkInMutation.mutate({ sessionId: checkInTarget.id })
     }, [todaySessions, checkInMutation, alert])
 
     // Render Content
@@ -223,12 +398,38 @@ export default function ClassPage() {
                             sessions={todaySessions}
                             onCheckIn={handleCheckIn}
                             controls={
-                                <SegmentedControl
-                                    items={viewModeItems}
-                                    value={viewMode}
-                                    onChange={setViewMode}
-                                    size="sm"
-                                />
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        gap: '8px',
+                                        alignItems: 'center',
+                                    }}
+                                >
+                                    <button
+                                        onClick={() => setIsQRScannerOpen(true)}
+                                        style={{
+                                            padding: '8px 16px',
+                                            borderRadius: '8px',
+                                            background:
+                                                'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                            color: '#fff',
+                                            border: 'none',
+                                            fontWeight: '600',
+                                            fontSize: '13px',
+                                            cursor: 'pointer',
+                                            boxShadow:
+                                                '0 4px 10px rgba(16, 185, 129, 0.3)',
+                                        }}
+                                    >
+                                        Quét QR tự điểm danh
+                                    </button>
+                                    <SegmentedControl
+                                        items={viewModeItems}
+                                        value={viewMode}
+                                        onChange={setViewMode}
+                                        size="sm"
+                                    />
+                                </div>
                             }
                         />
                         <SessionList sessions={allSessions} />
@@ -381,6 +582,310 @@ export default function ClassPage() {
                     </div>
                 )}
             </main>
+
+            {isQRScannerOpen && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        width: '100vw',
+                        height: '100vh',
+                        backgroundColor: 'rgba(15, 23, 42, 0.75)',
+                        backdropFilter: 'blur(8px)',
+                        zIndex: 9999,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '16px',
+                    }}
+                >
+                    <div
+                        style={{
+                            background: '#fff',
+                            borderRadius: '24px',
+                            padding: '32px',
+                            width: '100%',
+                            maxWidth: '450px',
+                            boxShadow:
+                                '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                            textAlign: 'center',
+                            border: '1px solid rgba(226, 232, 240, 0.8)',
+                        }}
+                    >
+                        <h2
+                            style={{
+                                fontSize: '20px',
+                                fontWeight: '700',
+                                marginBottom: '8px',
+                                color: '#1e293b',
+                            }}
+                        >
+                            Quét mã QR tự điểm danh
+                        </h2>
+                        <p
+                            style={{
+                                fontSize: '14px',
+                                color: '#64748b',
+                                marginBottom: '24px',
+                            }}
+                        >
+                            Vui lòng đưa camera của bạn tới mã QR do giáo viên
+                            cung cấp hoặc nhập mã token vào ô bên dưới.
+                        </p>
+
+                        <div
+                            style={{
+                                position: 'relative',
+                                width: '260px',
+                                height: '260px',
+                                margin: '0 auto 24px',
+                                border: '2px solid #cbd5e1',
+                                borderRadius: '20px',
+                                overflow: 'hidden',
+                                background: '#0f172a',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                boxShadow:
+                                    '0 10px 15px -3px rgba(0, 0, 0, 0.3), inset 0 2px 4px 0 rgba(0,0,0,0.2)',
+                            }}
+                        >
+                            <canvas
+                                ref={canvasRef}
+                                style={{ display: 'none' }}
+                            />
+                            <video
+                                ref={videoRef}
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'cover',
+                                    display: cameraActive ? 'block' : 'none',
+                                }}
+                            />
+                            {!cameraActive && (
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        gap: '12px',
+                                        padding: '24px',
+                                        textAlign: 'center',
+                                        zIndex: 1,
+                                    }}
+                                >
+                                    {cameraError ? (
+                                        <span
+                                            style={{
+                                                fontSize: '13px',
+                                                color: '#f87171',
+                                                fontWeight: '500',
+                                            }}
+                                        >
+                                            ⚠️ {cameraError}
+                                        </span>
+                                    ) : (
+                                        <>
+                                            <div
+                                                className="spinner"
+                                                style={{
+                                                    borderLeftColor: '#4f46e5',
+                                                    width: '28px',
+                                                    height: '28px',
+                                                }}
+                                            ></div>
+                                            <span
+                                                style={{
+                                                    fontSize: '13px',
+                                                    color: '#94a3b8',
+                                                    fontWeight: '500',
+                                                }}
+                                            >
+                                                Đang khởi động camera...
+                                            </span>
+                                        </>
+                                    )}
+                                </div>
+                            )}
+                            {cameraActive && (
+                                <>
+                                    <div
+                                        style={{
+                                            position: 'absolute',
+                                            width: '100%',
+                                            height: '2px',
+                                            background: '#10b981',
+                                            boxShadow: '0 0 10px #10b981',
+                                            top: '0%',
+                                            left: 0,
+                                            animation:
+                                                'scan 2s linear infinite',
+                                            zIndex: 2,
+                                        }}
+                                    />
+                                    <div
+                                        style={{
+                                            position: 'absolute',
+                                            top: 16,
+                                            left: 16,
+                                            width: 24,
+                                            height: 24,
+                                            borderTop: '4px solid #10b981',
+                                            borderLeft: '4px solid #10b981',
+                                            zIndex: 2,
+                                        }}
+                                    />
+                                    <div
+                                        style={{
+                                            position: 'absolute',
+                                            top: 16,
+                                            right: 16,
+                                            width: 24,
+                                            height: 24,
+                                            borderTop: '4px solid #10b981',
+                                            borderRight: '4px solid #10b981',
+                                            zIndex: 2,
+                                        }}
+                                    />
+                                    <div
+                                        style={{
+                                            position: 'absolute',
+                                            bottom: 16,
+                                            left: 16,
+                                            width: 24,
+                                            height: 24,
+                                            borderBottom: '4px solid #10b981',
+                                            borderLeft: '4px solid #10b981',
+                                            zIndex: 2,
+                                        }}
+                                    />
+                                    <div
+                                        style={{
+                                            position: 'absolute',
+                                            bottom: 16,
+                                            right: 16,
+                                            width: 24,
+                                            height: 24,
+                                            borderBottom: '4px solid #10b981',
+                                            borderRight: '4px solid #10b981',
+                                            zIndex: 2,
+                                        }}
+                                    />
+                                </>
+                            )}
+                        </div>
+
+                        <style>{`
+                            @keyframes scan {
+                                0% { top: 0%; }
+                                50% { top: 100%; }
+                                100% { top: 0%; }
+                            }
+                        `}</style>
+
+                        <div
+                            style={{ textAlign: 'left', marginBottom: '24px' }}
+                        >
+                            <label
+                                style={{
+                                    fontSize: '13px',
+                                    fontWeight: '600',
+                                    color: '#475569',
+                                    marginBottom: '6px',
+                                    display: 'block',
+                                }}
+                            >
+                                Nhập mã QR token:
+                            </label>
+                            <input
+                                type="text"
+                                placeholder="Dán mã QR token từ giáo viên..."
+                                value={manualQrToken}
+                                onChange={(e) =>
+                                    setManualQrToken(e.target.value)
+                                }
+                                style={{
+                                    width: '100%',
+                                    padding: '12px 16px',
+                                    borderRadius: '10px',
+                                    border: '1px solid #cbd5e1',
+                                    fontSize: '14px',
+                                    outline: 'none',
+                                    transition: 'border-color 0.2s',
+                                    boxShadow:
+                                        'inset 0 1px 2px rgba(0,0,0,0.05)',
+                                }}
+                            />
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '12px' }}>
+                            <button
+                                onClick={() => {
+                                    setIsQRScannerOpen(false)
+                                    setManualQrToken('')
+                                }}
+                                style={{
+                                    flex: 1,
+                                    padding: '12px',
+                                    borderRadius: '10px',
+                                    border: '1px solid #cbd5e1',
+                                    backgroundColor: '#fff',
+                                    color: '#475569',
+                                    fontWeight: '600',
+                                    cursor: 'pointer',
+                                }}
+                            >
+                                Hủy bỏ
+                            </button>
+                            <button
+                                onClick={() => {
+                                    if (!manualQrToken.trim()) {
+                                        alert(
+                                            'Vui lòng nhập mã QR token.',
+                                            'Lỗi'
+                                        )
+                                        return
+                                    }
+                                    const sessionToUse =
+                                        todaySessions[0]?.id ||
+                                        currentClass?.sessions?.[0]?.id
+                                    if (!sessionToUse) {
+                                        alert(
+                                            'Không tìm thấy buổi học nào để điểm danh.',
+                                            'Lỗi'
+                                        )
+                                        return
+                                    }
+                                    checkInMutation.mutate({
+                                        sessionId: sessionToUse,
+                                        qrToken: manualQrToken.trim(),
+                                    })
+                                }}
+                                disabled={checkInMutation.isPending}
+                                style={{
+                                    flex: 1,
+                                    padding: '12px',
+                                    borderRadius: '10px',
+                                    border: 'none',
+                                    backgroundColor: '#4f46e5',
+                                    color: '#fff',
+                                    fontWeight: '600',
+                                    cursor: 'pointer',
+                                    opacity: checkInMutation.isPending
+                                        ? 0.7
+                                        : 1,
+                                }}
+                            >
+                                {checkInMutation.isPending
+                                    ? 'Đang gửi...'
+                                    : 'Gửi mã'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

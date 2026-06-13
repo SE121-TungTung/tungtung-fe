@@ -65,3 +65,12 @@
     background: var(--color-brand-primary-500);
     border-color: var(--color-brand-primary-600);
 }
+.cell.readOnly {
+    cursor: default;
+}
+.cell.readOnly:hover {
+    background: transparent;
+}
+.cell.readOnly.selected:hover {
+    background: var(--color-brand-primary-500);
+}

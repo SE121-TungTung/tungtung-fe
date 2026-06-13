@@ -219,8 +219,10 @@ export async function getClass(id: string): Promise<Class> {
 }
 
 export async function getTeacherClasses(): Promise<Class[]> {
-    const res = await api<BackendClass[]>(`/api/v1/teacher/classes`, {
+    const res = await api<any>(`/api/v1/teacher/classes`, {
         method: 'GET',
     })
-    return res.map(mapClass)
+    const rawItems: BackendClass[] =
+        res.data ?? res.items ?? (Array.isArray(res) ? res : [])
+    return rawItems.map(mapClass)
 }

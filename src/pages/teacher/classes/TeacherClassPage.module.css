@@ -27,21 +27,21 @@
 
 .filterCard {
     width: 100%;
-    padding: var(--space-20);
+    padding: var(--primitive-space-10);
     background: var(--color-surface-page);
-    border-radius: var(--radius-xl);
+    border-radius: var(--primitive-radius-xl);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-    border: 1px solid var(--color-border-default);
+    border: 1px solid var(--color-border-soft);
     display: flex;
     flex-direction: column;
-    gap: var(--space-16);
+    gap: var(--primitive-space-8);
     animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Row chứa search và filter */
 .filterRow {
     display: flex;
-    gap: var(--space-16);
+    gap: var(--primitive-space-8);
     align-items: flex-end;
     flex-wrap: wrap;
 }
@@ -54,18 +54,19 @@
 .filterControls {
     flex: 1;
     display: flex;
-    gap: var(--space-16);
+    gap: var(--primitive-space-8);
     min-width: 200px;
+    align-items: flex-end;
 }
 
 .tableCard {
     width: 100%;
-    padding: 10px;
+    padding: var(--primitive-space-5);
     overflow: hidden;
-    border-radius: var(--radius-xl);
+    border-radius: var(--primitive-radius-xl);
     background: var(--color-surface-page);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-    border: 1px solid var(--color-border-default);
+    border: 1px solid var(--color-border-soft);
     animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
