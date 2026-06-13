@@ -226,3 +226,69 @@ export async function getTeacherClasses(): Promise<Class[]> {
         res.data ?? res.items ?? (Array.isArray(res) ? res : [])
     return rawItems.map(mapClass)
 }
+
+export interface ClassPostAttachment {
+    file_name: string
+    file_url: string
+    file_size: number
+    mime_type: string
+}
+
+export interface ClassPost {
+    id: string
+    class_id: string
+    author_id: string
+    title: string
+    content?: string
+    post_type: 'announcement' | 'material'
+    attachments: ClassPostAttachment[]
+    created_at: string
+    updated_at: string
+    author?: {
+        id: string
+        full_name: string
+        role: string
+        avatar_url?: string | null
+    }
+}
+
+export async function getClassPosts(
+    classId: string,
+    page = 1,
+    limit = 20
+): Promise<{ data: ClassPost[]; total: number }> {
+    const res = await api<any>(
+        `/api/v1/classes/${classId}/posts?page=${page}&limit=${limit}`,
+        {
+            method: 'GET',
+        }
+    )
+
+    // Normalize response structure from backend pagination
+    const items = res?.data ?? res?.items ?? (Array.isArray(res) ? res : [])
+    const total = res?.total ?? items.length
+
+    return {
+        data: items,
+        total: total,
+    }
+}
+
+export async function createClassPost(
+    classId: string,
+    formData: FormData
+): Promise<ClassPost> {
+    return await api<ClassPost>(`/api/v1/classes/${classId}/posts`, {
+        method: 'POST',
+        body: formData,
+    })
+}
+
+export async function deleteClassPost(
+    classId: string,
+    postId: string
+): Promise<void> {
+    await api(`/api/v1/classes/${classId}/posts/${postId}`, {
+        method: 'DELETE',
+    })
+}

@@ -28,6 +28,7 @@ import SearchIcon from '@/assets/Book Search.svg'
 import { getMyClasses } from '@/lib/users' // Đảm bảo hàm này đã được export từ file users.ts
 import { selfCheckIn } from '@/lib/attendance'
 import type { MyClass, ClassSession, MyClassUser } from '@/types/user.types'
+import { getClassPosts } from '@/lib/classes'
 import type { ClassMember } from '@/components/common/card/MemberCard'
 import type { Lesson } from '@/components/common/typography/LessonItem'
 import { useDialog } from '@/hooks/useDialog'
@@ -104,6 +105,12 @@ export default function ClassPage() {
         if (myClasses?.classes) return myClasses.classes[0] as MyClass
         return undefined
     }, [myClasses])
+
+    const { data: postsData, isLoading: postsLoading } = useQuery({
+        queryKey: ['class-posts', currentClass?.id],
+        queryFn: () => getClassPosts(currentClass!.id, 1, 100),
+        enabled: !!currentClass?.id,
+    })
 
     const checkInMutation = useMutation({
         mutationFn: ({
@@ -437,17 +444,317 @@ export default function ClassPage() {
                 )
             case 'news':
                 return (
-                    <div className={s.grid}>
-                        <RecentActivityCard
-                            activities={recentActivities}
-                            viewMode={viewMode}
-                            onViewModeChange={setViewMode}
-                            viewModeItems={viewModeItems}
-                        />
-                        <AssignmentCard
-                            assignments={upcomingAssignments}
-                            onShowOld={() => {}}
-                        />
+                    <div
+                        className={s.grid}
+                        style={{ gridTemplateColumns: '2fr 1fr', gap: '24px' }}
+                    >
+                        <div>
+                            <Card
+                                title="Bảng tin & Tài liệu lớp học"
+                                variant="outline"
+                                mode="light"
+                            >
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: '20px',
+                                        padding: '16px',
+                                    }}
+                                >
+                                    {postsLoading ? (
+                                        <div
+                                            style={{
+                                                textAlign: 'center',
+                                                padding: '20px',
+                                                color: '#666',
+                                            }}
+                                        >
+                                            Đang tải...
+                                        </div>
+                                    ) : !postsData?.data ||
+                                      postsData.data.length === 0 ? (
+                                        <div
+                                            style={{
+                                                textAlign: 'center',
+                                                padding: '40px 20px',
+                                                color: '#888',
+                                            }}
+                                        >
+                                            Lớp học chưa có thông báo hoặc tài
+                                            liệu nào.
+                                        </div>
+                                    ) : (
+                                        postsData.data.map((post) => (
+                                            <div
+                                                key={post.id}
+                                                style={{
+                                                    padding: '20px',
+                                                    borderRadius: '12px',
+                                                    border: '1px solid #eef2f6',
+                                                    background: '#fff',
+                                                    boxShadow:
+                                                        '0 2px 8px rgba(0, 0, 0, 0.02)',
+                                                    transition:
+                                                        'all 0.2s ease-in-out',
+                                                }}
+                                            >
+                                                <div
+                                                    style={{
+                                                        display: 'flex',
+                                                        justifyContent:
+                                                            'space-between',
+                                                        alignItems:
+                                                            'flex-start',
+                                                        marginBottom: '12px',
+                                                    }}
+                                                >
+                                                    <div
+                                                        style={{
+                                                            display: 'flex',
+                                                            gap: '12px',
+                                                            alignItems:
+                                                                'center',
+                                                        }}
+                                                    >
+                                                        <div
+                                                            style={{
+                                                                width: '40px',
+                                                                height: '40px',
+                                                                borderRadius:
+                                                                    '50%',
+                                                                background:
+                                                                    'linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)',
+                                                                color: '#fff',
+                                                                display: 'flex',
+                                                                alignItems:
+                                                                    'center',
+                                                                justifyContent:
+                                                                    'center',
+                                                                fontWeight:
+                                                                    'bold',
+                                                                fontSize:
+                                                                    '16px',
+                                                            }}
+                                                        >
+                                                            {post.author?.full_name
+                                                                ?.charAt(0)
+                                                                .toUpperCase() ||
+                                                                'G'}
+                                                        </div>
+                                                        <div>
+                                                            <div
+                                                                style={{
+                                                                    fontWeight:
+                                                                        '600',
+                                                                    color: '#1e293b',
+                                                                }}
+                                                            >
+                                                                {post.author
+                                                                    ?.full_name ||
+                                                                    'Giảng viên'}
+                                                            </div>
+                                                            <div
+                                                                style={{
+                                                                    fontSize:
+                                                                        '12px',
+                                                                    color: '#64748b',
+                                                                }}
+                                                            >
+                                                                {new Date(
+                                                                    post.created_at
+                                                                ).toLocaleString(
+                                                                    'vi-VN'
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <span
+                                                        style={{
+                                                            padding: '4px 10px',
+                                                            borderRadius:
+                                                                '20px',
+                                                            fontSize: '11px',
+                                                            fontWeight: '600',
+                                                            textTransform:
+                                                                'uppercase',
+                                                            background:
+                                                                post.post_type ===
+                                                                'material'
+                                                                    ? '#e0f2fe'
+                                                                    : '#fef3c7',
+                                                            color:
+                                                                post.post_type ===
+                                                                'material'
+                                                                    ? '#0369a1'
+                                                                    : '#b45309',
+                                                        }}
+                                                    >
+                                                        {post.post_type ===
+                                                        'material'
+                                                            ? 'Tài liệu'
+                                                            : 'Thông báo'}
+                                                    </span>
+                                                </div>
+
+                                                <h4
+                                                    style={{
+                                                        fontSize: '16px',
+                                                        fontWeight: '700',
+                                                        color: '#0f172a',
+                                                        marginBottom: '8px',
+                                                    }}
+                                                >
+                                                    {post.title}
+                                                </h4>
+
+                                                {post.content && (
+                                                    <p
+                                                        style={{
+                                                            color: '#334155',
+                                                            fontSize: '14px',
+                                                            lineHeight: '1.6',
+                                                            whiteSpace:
+                                                                'pre-wrap',
+                                                            marginBottom:
+                                                                '16px',
+                                                        }}
+                                                    >
+                                                        {post.content}
+                                                    </p>
+                                                )}
+
+                                                {post.attachments &&
+                                                    post.attachments.length >
+                                                        0 && (
+                                                        <div
+                                                            style={{
+                                                                borderTop:
+                                                                    '1px dashed #e2e8f0',
+                                                                paddingTop:
+                                                                    '12px',
+                                                                marginTop:
+                                                                    '12px',
+                                                            }}
+                                                        >
+                                                            <div
+                                                                style={{
+                                                                    fontSize:
+                                                                        '12px',
+                                                                    fontWeight:
+                                                                        '600',
+                                                                    color: '#64748b',
+                                                                    marginBottom:
+                                                                        '8px',
+                                                                }}
+                                                            >
+                                                                Tệp đính kèm (
+                                                                {
+                                                                    post
+                                                                        .attachments
+                                                                        .length
+                                                                }
+                                                                ):
+                                                            </div>
+                                                            <div
+                                                                style={{
+                                                                    display:
+                                                                        'flex',
+                                                                    flexDirection:
+                                                                        'column',
+                                                                    gap: '8px',
+                                                                }}
+                                                            >
+                                                                {post.attachments.map(
+                                                                    (
+                                                                        file,
+                                                                        idx
+                                                                    ) => (
+                                                                        <a
+                                                                            key={
+                                                                                idx
+                                                                            }
+                                                                            href={
+                                                                                file.file_url
+                                                                            }
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            style={{
+                                                                                display:
+                                                                                    'flex',
+                                                                                alignItems:
+                                                                                    'center',
+                                                                                gap: '8px',
+                                                                                padding:
+                                                                                    '8px 12px',
+                                                                                borderRadius:
+                                                                                    '8px',
+                                                                                background:
+                                                                                    '#f8fafc',
+                                                                                border: '1px solid #e2e8f0',
+                                                                                color: '#2563eb',
+                                                                                textDecoration:
+                                                                                    'none',
+                                                                                fontSize:
+                                                                                    '13px',
+                                                                                fontWeight:
+                                                                                    '500',
+                                                                                width: 'fit-content',
+                                                                                transition:
+                                                                                    'background 0.2s',
+                                                                            }}
+                                                                        >
+                                                                            <svg
+                                                                                width="16"
+                                                                                height="16"
+                                                                                viewBox="0 0 24 24"
+                                                                                fill="none"
+                                                                                stroke="currentColor"
+                                                                                strokeWidth="2"
+                                                                                strokeLinecap="round"
+                                                                                strokeLinejoin="round"
+                                                                            >
+                                                                                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+                                                                            </svg>
+                                                                            <span>
+                                                                                {
+                                                                                    file.file_name
+                                                                                }
+                                                                            </span>
+                                                                            <span
+                                                                                style={{
+                                                                                    color: '#64748b',
+                                                                                    fontSize:
+                                                                                        '11px',
+                                                                                }}
+                                                                            >
+                                                                                (
+                                                                                {(
+                                                                                    file.file_size /
+                                                                                    1024
+                                                                                ).toFixed(
+                                                                                    1
+                                                                                )}{' '}
+                                                                                KB)
+                                                                            </span>
+                                                                        </a>
+                                                                    )
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </Card>
+                        </div>
+                        <div>
+                            <AssignmentCard
+                                assignments={upcomingAssignments}
+                                onShowOld={() => {}}
+                            />
+                        </div>
                     </div>
                 )
             case 'members':

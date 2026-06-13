@@ -23,7 +23,13 @@ import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import modalS from '@/pages/admin/classes/ClassDetailModal.module.css'
 
 // API & Types
-import { getClass } from '@/lib/classes'
+import {
+    getClass,
+    getClassPosts,
+    createClassPost,
+    deleteClassPost,
+} from '@/lib/classes'
+import Card from '@/components/common/card/Card'
 import { getMyClasses, listUsers } from '@/lib/users'
 import { createSubstitutionRequest } from '@/lib/substitutions'
 import { type ClassMember } from '@/components/common/card/MemberCard'
@@ -60,6 +66,72 @@ export default function TeacherClassDetailPage() {
     const [currentPage, setCurrentPage] = useState(0)
 
     const [issuingIds, setIssuingIds] = useState<Record<string, boolean>>({})
+
+    // States for feed / posting
+    const [postTitle, setPostTitle] = useState('')
+    const [postContent, setPostContent] = useState('')
+    const [postType, setPostType] = useState<'announcement' | 'material'>(
+        'announcement'
+    )
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+    const [isCreatingPost, setIsCreatingPost] = useState(false)
+
+    const {
+        data: postsData,
+        isLoading: postsLoading,
+        refetch: refetchPosts,
+    } = useQuery({
+        queryKey: ['class-posts', classId],
+        queryFn: () => getClassPosts(classId!, 1, 100),
+        enabled: !!classId,
+    })
+
+    const handleCreatePost = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!postTitle.trim()) {
+            alert('Vui lòng nhập tiêu đề', 'Thông báo')
+            return
+        }
+        setIsCreatingPost(true)
+        try {
+            const formData = new FormData()
+            formData.append('title', postTitle)
+            formData.append('content', postContent)
+            formData.append('post_type', postType)
+            selectedFiles.forEach((file) => {
+                formData.append('files', file)
+            })
+
+            await createClassPost(classId!, formData)
+            alert('Đăng tin / tài liệu thành công!', 'Thành công')
+            setPostTitle('')
+            setPostContent('')
+            setSelectedFiles([])
+            refetchPosts()
+        } catch (err: any) {
+            alert(
+                err.message || 'Không thể đăng bài viết. Vui lòng thử lại!',
+                'Thất bại'
+            )
+        } finally {
+            setIsCreatingPost(false)
+        }
+    }
+
+    const handleDeletePost = async (postId: string) => {
+        if (!confirm('Bạn có chắc chắn muốn xóa bài viết/tài liệu này không?'))
+            return
+        try {
+            await deleteClassPost(classId!, postId)
+            alert('Xóa bài viết/tài liệu thành công!', 'Thành công')
+            refetchPosts()
+        } catch (err: any) {
+            alert(
+                err.message || 'Không thể xóa bài viết. Vui lòng thử lại!',
+                'Thất bại'
+            )
+        }
+    }
 
     useEffect(() => {
         setCurrentPage(0)
@@ -200,6 +272,7 @@ export default function TeacherClassDetailPage() {
     const tabItems = useMemo<TabItem[]>(() => {
         const items: TabItem[] = [
             { label: 'Tổng quan', value: 'overview' },
+            { label: 'Bảng tin & Tài liệu', value: 'feed' },
             { label: 'Thành viên', value: 'members' },
             { label: 'Buổi học & Điểm danh', value: 'sessions' },
             { label: 'Lịch học (Khung)', value: 'schedule' },
@@ -316,6 +389,568 @@ export default function TeacherClassDetailPage() {
 
     const renderTabContent = () => {
         switch (activeTab) {
+            case 'feed':
+                return (
+                    <div
+                        style={{
+                            display: 'grid',
+                            gridTemplateColumns: '1fr 1fr',
+                            gap: '24px',
+                            width: '100%',
+                            maxWidth: '1200px',
+                            textAlign: 'left',
+                        }}
+                    >
+                        {/* Cột 1: Form Đăng bài */}
+                        <div
+                            style={{
+                                background: '#fff',
+                                padding: '24px',
+                                borderRadius: '16px',
+                                border: '1px solid #e2e8f0',
+                                boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
+                                height: 'fit-content',
+                            }}
+                        >
+                            <h3
+                                style={{
+                                    fontSize: '18px',
+                                    fontWeight: '700',
+                                    color: '#0f172a',
+                                    marginBottom: '20px',
+                                }}
+                            >
+                                Tạo thông báo / tài liệu mới
+                            </h3>
+                            <form
+                                onSubmit={handleCreatePost}
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '16px',
+                                }}
+                            >
+                                <div>
+                                    <label
+                                        style={{
+                                            fontSize: '13px',
+                                            fontWeight: '600',
+                                            color: '#475569',
+                                            display: 'block',
+                                            marginBottom: '6px',
+                                        }}
+                                    >
+                                        Loại bài đăng
+                                    </label>
+                                    <select
+                                        value={postType}
+                                        onChange={(e) =>
+                                            setPostType(
+                                                e.target.value as
+                                                    | 'announcement'
+                                                    | 'material'
+                                            )
+                                        }
+                                        style={{
+                                            width: '100%',
+                                            padding: '10px 14px',
+                                            borderRadius: '8px',
+                                            border: '1px solid #cbd5e1',
+                                            fontSize: '14px',
+                                            outline: 'none',
+                                        }}
+                                    >
+                                        <option value="announcement">
+                                            Thông báo
+                                        </option>
+                                        <option value="material">
+                                            Tài liệu học tập
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label
+                                        style={{
+                                            fontSize: '13px',
+                                            fontWeight: '600',
+                                            color: '#475569',
+                                            display: 'block',
+                                            marginBottom: '6px',
+                                        }}
+                                    >
+                                        Tiêu đề
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={postTitle}
+                                        onChange={(e) =>
+                                            setPostTitle(e.target.value)
+                                        }
+                                        placeholder="Ví dụ: Tài liệu Unit 5, Thông báo nghỉ học..."
+                                        style={{
+                                            width: '100%',
+                                            padding: '10px 14px',
+                                            borderRadius: '8px',
+                                            border: '1px solid #cbd5e1',
+                                            fontSize: '14px',
+                                            outline: 'none',
+                                        }}
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label
+                                        style={{
+                                            fontSize: '13px',
+                                            fontWeight: '600',
+                                            color: '#475569',
+                                            display: 'block',
+                                            marginBottom: '6px',
+                                        }}
+                                    >
+                                        Nội dung chi tiết
+                                    </label>
+                                    <textarea
+                                        value={postContent}
+                                        onChange={(e) =>
+                                            setPostContent(e.target.value)
+                                        }
+                                        placeholder="Nhập nội dung thông báo hoặc hướng dẫn làm bài..."
+                                        rows={4}
+                                        style={{
+                                            width: '100%',
+                                            padding: '10px 14px',
+                                            borderRadius: '8px',
+                                            border: '1px solid #cbd5e1',
+                                            fontSize: '14px',
+                                            outline: 'none',
+                                            resize: 'vertical',
+                                        }}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label
+                                        style={{
+                                            fontSize: '13px',
+                                            fontWeight: '600',
+                                            color: '#475569',
+                                            display: 'block',
+                                            marginBottom: '6px',
+                                        }}
+                                    >
+                                        Tệp đính kèm
+                                    </label>
+                                    <input
+                                        type="file"
+                                        multiple
+                                        onChange={(e) => {
+                                            if (e.target.files) {
+                                                setSelectedFiles(
+                                                    Array.from(e.target.files)
+                                                )
+                                            }
+                                        }}
+                                        style={{
+                                            display: 'block',
+                                            width: '100%',
+                                            fontSize: '14px',
+                                            color: '#64748b',
+                                        }}
+                                    />
+                                    {selectedFiles.length > 0 && (
+                                        <div
+                                            style={{
+                                                marginTop: '8px',
+                                                display: 'flex',
+                                                flexWrap: 'wrap',
+                                                gap: '6px',
+                                            }}
+                                        >
+                                            {selectedFiles.map((file, idx) => (
+                                                <span
+                                                    key={idx}
+                                                    style={{
+                                                        padding: '4px 8px',
+                                                        borderRadius: '6px',
+                                                        background: '#f1f5f9',
+                                                        border: '1px solid #e2e8f0',
+                                                        fontSize: '12px',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '4px',
+                                                    }}
+                                                >
+                                                    {file.name} (
+                                                    {(file.size / 1024).toFixed(
+                                                        1
+                                                    )}{' '}
+                                                    KB)
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={isCreatingPost}
+                                    style={{
+                                        padding: '12px',
+                                        borderRadius: '8px',
+                                        background:
+                                            'linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)',
+                                        color: '#fff',
+                                        border: 'none',
+                                        fontWeight: '600',
+                                        fontSize: '14px',
+                                        cursor: isCreatingPost
+                                            ? 'not-allowed'
+                                            : 'pointer',
+                                        opacity: isCreatingPost ? 0.7 : 1,
+                                        boxShadow:
+                                            '0 4px 12px rgba(79, 70, 229, 0.2)',
+                                        transition: 'all 0.2s',
+                                    }}
+                                >
+                                    {isCreatingPost
+                                        ? 'Đang đăng bài...'
+                                        : 'Đăng bài viết'}
+                                </button>
+                            </form>
+                        </div>
+
+                        {/* Cột 2: Danh sách bài đã đăng */}
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '16px',
+                            }}
+                        >
+                            <h3
+                                style={{
+                                    fontSize: '18px',
+                                    fontWeight: '700',
+                                    color: '#0f172a',
+                                }}
+                            >
+                                Lịch sử bảng tin
+                            </h3>
+                            {postsLoading ? (
+                                <div
+                                    style={{
+                                        textAlign: 'center',
+                                        padding: '20px',
+                                        color: '#666',
+                                    }}
+                                >
+                                    Đang tải danh sách...
+                                </div>
+                            ) : !postsData?.data ||
+                              postsData.data.length === 0 ? (
+                                <div
+                                    style={{
+                                        textAlign: 'center',
+                                        padding: '40px 20px',
+                                        color: '#888',
+                                        background: '#fff',
+                                        borderRadius: '12px',
+                                        border: '1px solid #e2e8f0',
+                                    }}
+                                >
+                                    Lớp học chưa có thông báo hoặc tài liệu nào.
+                                </div>
+                            ) : (
+                                postsData.data.map((post) => (
+                                    <div
+                                        key={post.id}
+                                        style={{
+                                            padding: '20px',
+                                            borderRadius: '12px',
+                                            border: '1px solid #eef2f6',
+                                            background: '#fff',
+                                            boxShadow:
+                                                '0 2px 8px rgba(0, 0, 0, 0.02)',
+                                        }}
+                                    >
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'flex-start',
+                                                marginBottom: '12px',
+                                            }}
+                                        >
+                                            <div
+                                                style={{
+                                                    display: 'flex',
+                                                    gap: '12px',
+                                                    alignItems: 'center',
+                                                }}
+                                            >
+                                                <div
+                                                    style={{
+                                                        width: '36px',
+                                                        height: '36px',
+                                                        borderRadius: '50%',
+                                                        background:
+                                                            'linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)',
+                                                        color: '#fff',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent:
+                                                            'center',
+                                                        fontWeight: 'bold',
+                                                        fontSize: '14px',
+                                                    }}
+                                                >
+                                                    {post.author?.full_name
+                                                        ?.charAt(0)
+                                                        .toUpperCase() || 'G'}
+                                                </div>
+                                                <div>
+                                                    <div
+                                                        style={{
+                                                            fontWeight: '600',
+                                                            color: '#1e293b',
+                                                            fontSize: '14px',
+                                                        }}
+                                                    >
+                                                        {post.author
+                                                            ?.full_name ||
+                                                            'Giảng viên'}
+                                                    </div>
+                                                    <div
+                                                        style={{
+                                                            fontSize: '11px',
+                                                            color: '#64748b',
+                                                        }}
+                                                    >
+                                                        {new Date(
+                                                            post.created_at
+                                                        ).toLocaleString(
+                                                            'vi-VN'
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div
+                                                style={{
+                                                    display: 'flex',
+                                                    gap: '8px',
+                                                    alignItems: 'center',
+                                                }}
+                                            >
+                                                <span
+                                                    style={{
+                                                        padding: '3px 8px',
+                                                        borderRadius: '12px',
+                                                        fontSize: '10px',
+                                                        fontWeight: '600',
+                                                        textTransform:
+                                                            'uppercase',
+                                                        background:
+                                                            post.post_type ===
+                                                            'material'
+                                                                ? '#e0f2fe'
+                                                                : '#fef3c7',
+                                                        color:
+                                                            post.post_type ===
+                                                            'material'
+                                                                ? '#0369a1'
+                                                                : '#b45309',
+                                                    }}
+                                                >
+                                                    {post.post_type ===
+                                                    'material'
+                                                        ? 'Tài liệu'
+                                                        : 'Thông báo'}
+                                                </span>
+                                                <button
+                                                    onClick={() =>
+                                                        handleDeletePost(
+                                                            post.id
+                                                        )
+                                                    }
+                                                    style={{
+                                                        background: 'none',
+                                                        border: 'none',
+                                                        color: '#ef4444',
+                                                        cursor: 'pointer',
+                                                        padding: '4px',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                    }}
+                                                    title="Xóa bài viết"
+                                                >
+                                                    <svg
+                                                        width="14"
+                                                        height="14"
+                                                        viewBox="0 0 24 24"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        strokeWidth="2"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                    >
+                                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                        <line
+                                                            x1="10"
+                                                            y1="11"
+                                                            x2="10"
+                                                            y2="17"
+                                                        ></line>
+                                                        <line
+                                                            x1="14"
+                                                            y1="11"
+                                                            x2="14"
+                                                            y2="17"
+                                                        ></line>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <h4
+                                            style={{
+                                                fontSize: '15px',
+                                                fontWeight: '700',
+                                                color: '#0f172a',
+                                                marginBottom: '8px',
+                                            }}
+                                        >
+                                            {post.title}
+                                        </h4>
+
+                                        {post.content && (
+                                            <p
+                                                style={{
+                                                    color: '#334155',
+                                                    fontSize: '13px',
+                                                    lineHeight: '1.6',
+                                                    whiteSpace: 'pre-wrap',
+                                                    marginBottom: '12px',
+                                                }}
+                                            >
+                                                {post.content}
+                                            </p>
+                                        )}
+
+                                        {post.attachments &&
+                                            post.attachments.length > 0 && (
+                                                <div
+                                                    style={{
+                                                        borderTop:
+                                                            '1px dashed #e2e8f0',
+                                                        paddingTop: '10px',
+                                                        marginTop: '10px',
+                                                    }}
+                                                >
+                                                    <div
+                                                        style={{
+                                                            fontSize: '11px',
+                                                            fontWeight: '600',
+                                                            color: '#64748b',
+                                                            marginBottom: '6px',
+                                                        }}
+                                                    >
+                                                        Tệp đính kèm (
+                                                        {
+                                                            post.attachments
+                                                                .length
+                                                        }
+                                                        ):
+                                                    </div>
+                                                    <div
+                                                        style={{
+                                                            display: 'flex',
+                                                            flexDirection:
+                                                                'column',
+                                                            gap: '6px',
+                                                        }}
+                                                    >
+                                                        {post.attachments.map(
+                                                            (file, idx) => (
+                                                                <a
+                                                                    key={idx}
+                                                                    href={
+                                                                        file.file_url
+                                                                    }
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    style={{
+                                                                        display:
+                                                                            'flex',
+                                                                        alignItems:
+                                                                            'center',
+                                                                        gap: '6px',
+                                                                        padding:
+                                                                            '6px 10px',
+                                                                        borderRadius:
+                                                                            '6px',
+                                                                        background:
+                                                                            '#f8fafc',
+                                                                        border: '1px solid #e2e8f0',
+                                                                        color: '#2563eb',
+                                                                        textDecoration:
+                                                                            'none',
+                                                                        fontSize:
+                                                                            '12px',
+                                                                        fontWeight:
+                                                                            '500',
+                                                                        width: 'fit-content',
+                                                                    }}
+                                                                >
+                                                                    <svg
+                                                                        width="14"
+                                                                        height="14"
+                                                                        viewBox="0 0 24 24"
+                                                                        fill="none"
+                                                                        stroke="currentColor"
+                                                                        strokeWidth="2"
+                                                                        strokeLinecap="round"
+                                                                        strokeLinejoin="round"
+                                                                    >
+                                                                        <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+                                                                    </svg>
+                                                                    <span>
+                                                                        {
+                                                                            file.file_name
+                                                                        }
+                                                                    </span>
+                                                                    <span
+                                                                        style={{
+                                                                            color: '#64748b',
+                                                                            fontSize:
+                                                                                '10px',
+                                                                        }}
+                                                                    >
+                                                                        (
+                                                                        {(
+                                                                            file.file_size /
+                                                                            1024
+                                                                        ).toFixed(
+                                                                            1
+                                                                        )}{' '}
+                                                                        KB)
+                                                                    </span>
+                                                                </a>
+                                                            )
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                )
+
             case 'overview':
                 return (
                     <div className={s.placeholderContent}>
