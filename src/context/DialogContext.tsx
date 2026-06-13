@@ -56,6 +56,7 @@ export const DialogProvider: React.FC<{ children: React.ReactNode }> = ({
                     confirmText: options.confirmText,
                     cancelText: options.cancelText,
                     type: options.type || 'confirm',
+                    renderConfirm: options.renderConfirm,
                 })
             }
             awaiter.current = resolve
@@ -103,14 +104,18 @@ export const DialogProvider: React.FC<{ children: React.ReactNode }> = ({
                     </div>
                 }
             >
-                <p
-                    style={{
-                        color: 'var(--text-secondary-light)',
-                        lineHeight: 1.5,
-                    }}
-                >
-                    {config.message}
-                </p>
+                {config.renderConfirm ? (
+                    config.renderConfirm()
+                ) : (
+                    <p
+                        style={{
+                            color: 'var(--text-secondary-light)',
+                            lineHeight: 1.5,
+                        }}
+                    >
+                        {config.message}
+                    </p>
+                )}
             </Modal>
         </DialogContext.Provider>
     )

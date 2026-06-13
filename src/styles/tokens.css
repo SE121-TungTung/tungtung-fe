@@ -132,6 +132,24 @@
     --primitive-space-30: 60px;
     --primitive-space-40: 80px;
 
+    /* Spacing aliases to support direct pixel-value variable naming */
+    --space-0: var(--primitive-space-0);
+    --space-2: var(--primitive-space-1);
+    --space-4: var(--primitive-space-2);
+    --space-6: var(--primitive-space-3);
+    --space-8: var(--primitive-space-4);
+    --space-10: var(--primitive-space-5);
+    --space-12: var(--primitive-space-6);
+    --space-16: var(--primitive-space-8);
+    --space-20: var(--primitive-space-10);
+    --space-24: var(--primitive-space-12);
+    --space-28: var(--primitive-space-14);
+    --space-32: var(--primitive-space-16);
+    --space-40: var(--primitive-space-20);
+    --space-48: var(--primitive-space-24);
+    --space-60: var(--primitive-space-30);
+    --space-80: var(--primitive-space-40);
+
     /* ------------------------------------------------------------------------
        PRIMITIVE: Border Radius
        ------------------------------------------------------------------------ */
@@ -143,6 +161,15 @@
     --primitive-radius-lg: 16px;
     --primitive-radius-xl: 24px;
     --primitive-radius-full: 9999px;
+
+    /* Radius aliases to support shorter variable naming */
+    --radius-none: var(--primitive-radius-none);
+    --radius-xs: var(--primitive-radius-xs);
+    --radius-sm: var(--primitive-radius-sm);
+    --radius-md: var(--primitive-radius-md);
+    --radius-lg: var(--primitive-radius-lg);
+    --radius-xl: var(--primitive-radius-xl);
+    --radius-full: var(--primitive-radius-full);
 
     /* ------------------------------------------------------------------------
        PRIMITIVE: Typography
@@ -261,6 +288,7 @@
     --color-brand-secondary: var(--primitive-crimson-500);
     --color-brand-secondary-500: var(--primitive-crimson-500);
     --color-brand-secondary-hover: var(--primitive-crimson-600);
+    --color-brand-secondary-600: var(--primitive-crimson-600);
 
     /* ------------------------------------------------------------------------
        SEMANTIC: Surface Colors
@@ -341,6 +369,7 @@
     --color-brand-primary-hover: var(--primitive-lapis-600);
     --color-brand-primary-active: var(--primitive-lapis-700);
     --color-brand-secondary-500: var(--primitive-crimson-500);
+    --color-brand-secondary-600: var(--primitive-crimson-600);
 
     /* Surface colors inverted */
     --color-surface-page: var(--primitive-lapis-100);

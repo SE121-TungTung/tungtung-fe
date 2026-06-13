@@ -68,6 +68,8 @@ export default function ProfilePage() {
                       target_band: targetBandValue
                           ? parseFloat(String(targetBandValue))
                           : null,
+                      expected_exam_date:
+                          values.preferences.expected_exam_date || null,
                   }
                 : undefined,
             avatar_file: values.avatarFile ?? undefined,

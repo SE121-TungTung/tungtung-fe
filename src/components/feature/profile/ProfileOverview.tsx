@@ -1,55 +1,84 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import s from './ProfileOverview.module.css'
 import { ProfileHeaderCard } from './ProfileHeaderCard'
 import type { Role, User } from '@/types/auth'
 import Card from '@/components/common/card/Card'
 import { TestHistoryItem, type TestAttempt } from './TestHistoryItem'
 import StatCard from '@/components/common/card/StatCard'
-import { useDialog } from '@/hooks/useDialog'
-
-const mockTestHistory: TestAttempt[] = [
-    {
-        id: 'att_1',
-        test_title: 'IELTS Mock Test #3 (Full)',
-        completed_at: '2025-10-28T10:30:00Z',
-        scores: {
-            listening: 8.0,
-            reading: 7.5,
-            writing: 6.5,
-            speaking: 7.0,
-            overall: 7.5,
-        },
-    },
-    {
-        id: 'att_2',
-        test_title: 'Reading Practice Test (Academic)',
-        completed_at: '2025-10-15T14:00:00Z',
-        scores: {
-            listening: 0,
-            reading: 8.0,
-            writing: 0,
-            speaking: 0,
-            overall: 8.0,
-        },
-    },
-]
+import { testApi } from '@/lib/test'
+import type { TestAttemptHistoryResponse } from '@/types/test.types'
 
 interface StudentStatsProps {
     user: User
 }
 
 const StudentStats: React.FC<StudentStatsProps> = ({ user }) => {
-    const { alert } = useDialog()
+    const navigate = useNavigate()
+    const [attempts, setAttempts] = useState<TestAttemptHistoryResponse[]>([])
+    const [loadingAttempts, setLoadingAttempts] = useState(true)
+
+    useEffect(() => {
+        let isMounted = true
+        setLoadingAttempts(true)
+        testApi
+            .listMyAttemptsHistory()
+            .then((data) => {
+                if (isMounted) {
+                    setAttempts(data)
+                }
+            })
+            .catch((err) => {
+                console.error('Failed to load attempt history:', err)
+            })
+            .finally(() => {
+                if (isMounted) {
+                    setLoadingAttempts(false)
+                }
+            })
+        return () => {
+            isMounted = false
+        }
+    }, [])
 
     // Read target band from user preferences (synced with backend)
     const targetBand = user?.preferences?.target_band
         ? parseFloat(user.preferences.target_band)
         : null
 
+    const expectedExamDate = user?.preferences?.expected_exam_date
+        ? (() => {
+              try {
+                  return new Date(
+                      user.preferences.expected_exam_date
+                  ).toLocaleDateString('vi-VN', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                  })
+              } catch {
+                  return user.preferences.expected_exam_date
+              }
+          })()
+        : 'Chưa đặt'
+
     // TODO: Replace with real data from API
     const completedLessons = 32
     const totalLessons = 50
     const progressPercent = (completedLessons / totalLessons) * 100
+
+    const mappedAttempts: TestAttempt[] = attempts.map((att) => ({
+        id: att.id,
+        test_title: att.test_title,
+        completed_at: att.submitted_at || att.started_at,
+        scores: {
+            listening: 0,
+            reading: 0,
+            writing: 0,
+            speaking: 0,
+            overall: att.score || 0,
+        },
+    }))
 
     return (
         <>
@@ -60,6 +89,15 @@ const StudentStats: React.FC<StudentStatsProps> = ({ user }) => {
                         title="Band mục tiêu"
                         value={targetBand ? targetBand.toFixed(1) : 'Chưa đặt'}
                         subtitle={targetBand ? 'IELTS' : 'Vào Hồ sơ để cài đặt'}
+                    />
+                    <StatCard
+                        title="Dự kiến thi"
+                        value={expectedExamDate}
+                        subtitle={
+                            user?.preferences?.expected_exam_date
+                                ? 'Ngày đi thi chính thức'
+                                : 'Vào Hồ sơ để cài đặt'
+                        }
                     />
                     <StatCard
                         title="Tiến độ khóa học"
@@ -73,13 +111,17 @@ const StudentStats: React.FC<StudentStatsProps> = ({ user }) => {
             {/* 2. Lịch sử thi */}
             <Card title="Lịch sử thi" variant="flat" mode="light">
                 <ul className={s.historyList}>
-                    {mockTestHistory.length > 0 ? (
-                        mockTestHistory.map((attempt) => (
+                    {loadingAttempts ? (
+                        <li className={s.placeholder}>
+                            Đang tải lịch sử thi...
+                        </li>
+                    ) : mappedAttempts.length > 0 ? (
+                        mappedAttempts.map((attempt) => (
                             <TestHistoryItem
                                 key={attempt.id}
                                 attempt={attempt}
                                 onViewDetails={(id) =>
-                                    alert(`Xem chi tiết thi ${id}`)
+                                    navigate(`/student/tests/results/${id}`)
                                 }
                             />
                         ))

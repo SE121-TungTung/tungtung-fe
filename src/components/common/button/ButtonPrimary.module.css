@@ -11,8 +11,8 @@
     --btn-neutral-fg: var(--color-text-primary, #0b1520);
     --btn-neutral-border: var(--border-strong-light, rgba(0, 0, 0, 0.12));
 
-    --btn-success-bg: var(--color-green-500);
-    --btn-success-bg-hover: var(--color-green-600);
+    --btn-success-bg: #22c55e;
+    --btn-success-bg-hover: #16a34a;
     --btn-success-fg: #fff;
 
     --btn-danger-bg: var(--color-status-danger);
