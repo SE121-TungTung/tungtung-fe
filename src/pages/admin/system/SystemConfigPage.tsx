@@ -6,11 +6,57 @@ import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import ButtonGhost from '@/components/common/button/ButtonGhost'
 import Card from '@/components/common/card/Card'
 import { useDialog } from '@/hooks/useDialog'
+import { broadcastNotification } from '@/lib/notifications'
 import s from './SystemConfigPage.module.css'
 
 export default function SystemConfigPage() {
     const { alert: showAlert } = useDialog()
     const queryClient = useQueryClient()
+
+    // States for system broadcast
+    const [targetType, setTargetType] = useState<'all' | 'role'>('all')
+    const [targetRole, setTargetRole] = useState<
+        'student' | 'teacher' | 'admin' | 'center_admin'
+    >('student')
+    const [broadcastTitle, setBroadcastTitle] = useState('')
+    const [broadcastContent, setBroadcastContent] = useState('')
+    const [broadcastPriority, setBroadcastPriority] = useState<
+        'low' | 'normal' | 'high' | 'urgent'
+    >('normal')
+    const [isSendingBroadcast, setIsSendingBroadcast] = useState(false)
+
+    const handleSendBroadcast = async () => {
+        if (!broadcastTitle.trim()) {
+            showAlert('Vui lòng nhập tiêu đề thông báo.', 'Lỗi')
+            return
+        }
+        if (!broadcastContent.trim()) {
+            showAlert('Vui lòng nhập nội dung thông báo.', 'Lỗi')
+            return
+        }
+
+        setIsSendingBroadcast(true)
+        try {
+            await broadcastNotification({
+                target_type: targetType,
+                target_role: targetType === 'role' ? targetRole : undefined,
+                title: broadcastTitle,
+                content: broadcastContent,
+                priority: broadcastPriority,
+            })
+            showAlert('Gửi thông báo hệ thống thành công!', 'Thành công')
+            setBroadcastTitle('')
+            setBroadcastContent('')
+        } catch (err: any) {
+            showAlert(
+                err.message ||
+                    'Không thể gửi thông báo hệ thống. Vui lòng thử lại!',
+                'Thất bại'
+            )
+        } finally {
+            setIsSendingBroadcast(false)
+        }
+    }
 
     // Fetch config
     const {
@@ -300,6 +346,190 @@ export default function SystemConfigPage() {
                             ) : (
                                 'Lưu thay đổi'
                             )}
+                        </ButtonPrimary>
+                    </div>
+                </Card>
+
+                <Card className={s.configCard} style={{ marginTop: '24px' }}>
+                    <div className={s.cardHeader}>
+                        <h2 className={s.cardTitle}>
+                            Gửi thông báo hệ thống (Broadcast)
+                        </h2>
+                        <p className={s.cardDescription}>
+                            Gửi thông báo tức thì đến toàn bộ người dùng hoặc
+                            các nhóm vai trò cụ thể trong toàn bộ hệ thống.
+                        </p>
+                    </div>
+
+                    <div className={s.formGroup}>
+                        <label className={s.fieldLabel}>
+                            Đối tượng nhận thông báo
+                        </label>
+                        <div
+                            style={{
+                                display: 'flex',
+                                gap: '16px',
+                                marginTop: '8px',
+                            }}
+                        >
+                            <label
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    cursor: 'pointer',
+                                    fontSize: '14px',
+                                }}
+                            >
+                                <input
+                                    type="radio"
+                                    name="targetType"
+                                    value="all"
+                                    checked={targetType === 'all'}
+                                    onChange={() => setTargetType('all')}
+                                />
+                                Toàn bộ người dùng
+                            </label>
+                            <label
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    cursor: 'pointer',
+                                    fontSize: '14px',
+                                }}
+                            >
+                                <input
+                                    type="radio"
+                                    name="targetType"
+                                    value="role"
+                                    checked={targetType === 'role'}
+                                    onChange={() => setTargetType('role')}
+                                />
+                                Theo vai trò (Role)
+                            </label>
+                        </div>
+                    </div>
+
+                    {targetType === 'role' && (
+                        <div className={s.formGroup}>
+                            <label className={s.fieldLabel}>
+                                Chọn vai trò nhận
+                            </label>
+                            <select
+                                value={targetRole}
+                                onChange={(e) =>
+                                    setTargetRole(e.target.value as any)
+                                }
+                                style={{
+                                    width: '100%',
+                                    padding: '10px 14px',
+                                    borderRadius: '8px',
+                                    border: '1px solid var(--color-border-default)',
+                                    fontSize: '14px',
+                                    outline: 'none',
+                                    backgroundColor:
+                                        'var(--color-surface-page)',
+                                    color: 'var(--color-text-primary)',
+                                }}
+                            >
+                                <option value="student">
+                                    Học viên (Student)
+                                </option>
+                                <option value="teacher">
+                                    Giảng viên (Teacher)
+                                </option>
+                                <option value="admin">
+                                    Quản trị hệ thống (Admin)
+                                </option>
+                                <option value="center_admin">
+                                    Quản trị trung tâm (Center Admin)
+                                </option>
+                            </select>
+                        </div>
+                    )}
+
+                    <div className={s.formGroup}>
+                        <label className={s.fieldLabel}>
+                            Tiêu đề thông báo
+                        </label>
+                        <input
+                            type="text"
+                            className={s.textInput}
+                            value={broadcastTitle}
+                            onChange={(e) => setBroadcastTitle(e.target.value)}
+                            placeholder="Ví dụ: Bảo trì hệ thống định kỳ..."
+                            style={{ width: '100%', marginTop: '4px' }}
+                            required
+                        />
+                    </div>
+
+                    <div className={s.formGroup}>
+                        <label className={s.fieldLabel}>
+                            Nội dung thông báo
+                        </label>
+                        <textarea
+                            value={broadcastContent}
+                            onChange={(e) =>
+                                setBroadcastContent(e.target.value)
+                            }
+                            placeholder="Nhập nội dung thông báo chi tiết..."
+                            rows={4}
+                            style={{
+                                width: '100%',
+                                padding: '10px 14px',
+                                borderRadius: '8px',
+                                border: '1px solid var(--color-border-default)',
+                                fontSize: '14px',
+                                outline: 'none',
+                                resize: 'vertical',
+                                marginTop: '4px',
+                                backgroundColor: 'var(--color-surface-page)',
+                                color: 'var(--color-text-primary)',
+                            }}
+                            required
+                        />
+                    </div>
+
+                    <div className={s.formGroup}>
+                        <label className={s.fieldLabel}>Độ ưu tiên</label>
+                        <select
+                            value={broadcastPriority}
+                            onChange={(e) =>
+                                setBroadcastPriority(e.target.value as any)
+                            }
+                            style={{
+                                width: '100%',
+                                padding: '10px 14px',
+                                borderRadius: '8px',
+                                border: '1px solid var(--color-border-default)',
+                                fontSize: '14px',
+                                outline: 'none',
+                                backgroundColor: 'var(--color-surface-page)',
+                                color: 'var(--color-text-primary)',
+                            }}
+                        >
+                            <option value="low">Thấp</option>
+                            <option value="normal">Bình thường</option>
+                            <option value="high">Cao</option>
+                            <option value="urgent">Khẩn cấp</option>
+                        </select>
+                    </div>
+
+                    <div className={s.actions}>
+                        <ButtonPrimary
+                            onClick={handleSendBroadcast}
+                            disabled={isSendingBroadcast}
+                            style={{
+                                background:
+                                    'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                                border: 'none',
+                                color: '#fff',
+                            }}
+                        >
+                            {isSendingBroadcast
+                                ? 'Đang gửi...'
+                                : 'Gửi thông báo hệ thống'}
                         </ButtonPrimary>
                     </div>
                 </Card>
