@@ -81,9 +81,9 @@ export default function ExamCard({
                 <div className={s.metaItem}>
                     <img src={ClockIcon} alt="duration" />
                     <span>
-                        {'timeLimitMinutes' in exam
+                        {'timeLimitMinutes' in exam && exam.timeLimitMinutes
                             ? `${exam.timeLimitMinutes} phút`
-                            : `${'durationMinutes' in exam ? exam.durationMinutes : 'N/A'} phút`}
+                            : `${'durationMinutes' in exam && exam.durationMinutes ? exam.durationMinutes : 'N/A'} phút`}
                     </span>
                 </div>
                 <div className={s.metaItem}>

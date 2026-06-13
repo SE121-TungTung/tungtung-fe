@@ -162,7 +162,7 @@ export default function ListeningTestPage() {
         if (await confirm('Are you sure you want to submit?')) {
             await submit(answers)
         }
-    }, [answers, submit])
+    }, [answers, submit, confirm])
 
     if (isLoading) return <div className={s.loadingContainer}>Loading...</div>
     if (!sections.length) return <div>No content.</div>

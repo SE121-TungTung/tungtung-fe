@@ -71,6 +71,22 @@ export function useTestSubmit({
                 const err = error as Error
                 console.error('Submit failed:', err)
 
+                const isAlreadySubmitted =
+                    err.message?.toLowerCase().includes('already submitted') ||
+                    err.message?.toLowerCase().includes('expired')
+
+                if (isAlreadySubmitted) {
+                    if (clearStorage) {
+                        localStorage.removeItem(`testAnswers_${attemptId}`)
+                        localStorage.removeItem(`attempt_${attemptId}`)
+                    }
+                    onSuccess?.()
+                    if (redirectToResults) {
+                        navigate(`/student/tests/results/${attemptId}`)
+                    }
+                    return
+                }
+
                 // Call error callback
                 onError?.(err)
 

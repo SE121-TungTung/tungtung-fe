@@ -93,9 +93,9 @@ export default function ExamListCard({
                 : { label: 'N/A', color: 'gray' }
 
         const duration =
-            'timeLimitMinutes' in exam
+            'timeLimitMinutes' in exam && exam.timeLimitMinutes
                 ? exam.timeLimitMinutes
-                : 'durationMinutes' in exam
+                : 'durationMinutes' in exam && exam.durationMinutes
                   ? exam.durationMinutes
                   : 0
 

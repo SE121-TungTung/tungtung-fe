@@ -76,7 +76,10 @@ export const SpeakingQuestion = ({
                 setLocalAudioUrl(url)
 
                 // Upload to backend
-                const duration = Math.floor(recordingTime / 1000)
+                const duration = Math.max(
+                    1,
+                    Math.floor((Date.now() - startTimeRef.current) / 1000)
+                )
                 if (onUpload) {
                     try {
                         await onUpload(questionId, blob, duration)
@@ -94,14 +97,14 @@ export const SpeakingQuestion = ({
             startTimeRef.current = Date.now()
 
             // Start timer
-            timerRef.current = setInterval(() => {
+            timerRef.current = window.setInterval(() => {
                 setRecordingTime(Date.now() - startTimeRef.current)
             }, 100)
         } catch (error) {
             console.error('Failed to start recording:', error)
             alert('Could not access microphone. Please check permissions.')
         }
-    }, [questionId, onUpload, recordingTime])
+    }, [questionId, onUpload])
 
     // ============================================
     // STOP RECORDING
@@ -179,7 +182,8 @@ export const SpeakingQuestion = ({
                         </div>
                         <ButtonPrimary
                             onClick={stopRecording}
-                            variant="gradient"
+                            tone="danger"
+                            variant="solid"
                         >
                             ⏹ Stop
                         </ButtonPrimary>

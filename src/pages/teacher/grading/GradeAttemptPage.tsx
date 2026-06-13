@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { testApi } from '@/lib/test'
 import { AttemptStatus } from '@/types/test.types'
@@ -34,11 +34,7 @@ export default function GradeAttemptPage() {
     const [gradeData, setGradeData] = useState<GradeData>({})
     const [overallFeedback, setOverallFeedback] = useState('')
 
-    useEffect(() => {
-        loadAttempt()
-    }, [attemptId])
-
-    const loadAttempt = async () => {
+    const loadAttempt = useCallback(async () => {
         if (!attemptId) return
 
         setLoading(true)
@@ -69,7 +65,11 @@ export default function GradeAttemptPage() {
         } finally {
             setLoading(false)
         }
-    }
+    }, [attemptId, alert, navigate])
+
+    useEffect(() => {
+        loadAttempt()
+    }, [attemptId, loadAttempt])
 
     const updateQuestionGrade = (
         questionId: string,
@@ -234,7 +234,7 @@ export default function GradeAttemptPage() {
                                 onClick={handleSubmitGrading}
                                 loading={submitting}
                                 size="lg"
-                                variant="glass"
+                                variant="solid"
                             >
                                 Hoàn tất chấm điểm
                             </ButtonPrimary>

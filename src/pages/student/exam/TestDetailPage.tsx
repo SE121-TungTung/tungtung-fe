@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import s from './TestDetailPage.module.css'
 
@@ -64,7 +64,7 @@ export default function TestDetailPage() {
         navigate(`/teacher/grading/${testId}`)
     }
 
-    const loadTest = async () => {
+    const loadTest = useCallback(async () => {
         if (!testId) return
 
         setLoading(true)
@@ -78,9 +78,9 @@ export default function TestDetailPage() {
         } finally {
             setLoading(false)
         }
-    }
+    }, [testId])
 
-    const loadAttempts = async () => {
+    const loadAttempts = useCallback(async () => {
         if (!testId) return
 
         try {
@@ -92,14 +92,14 @@ export default function TestDetailPage() {
         } finally {
             setLoadingAttempts(false)
         }
-    }
+    }, [testId])
 
     useEffect(() => {
         if (testId) {
             loadTest()
             loadAttempts()
         }
-    }, [testId])
+    }, [testId, loadTest, loadAttempts])
 
     const getStatusBadge = (status: TestStatus) => {
         const statusConfig = {

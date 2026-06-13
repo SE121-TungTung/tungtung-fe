@@ -814,6 +814,16 @@ export interface TestAttemptSummaryResponse {
     submitted_at: string | null
 }
 
+export interface TestAttemptHistoryResponse {
+    id: string
+    test_id: string
+    test_title: string
+    status: string
+    score: number | null
+    started_at: string
+    submitted_at: string | null
+}
+
 /**
  * Grading request types
  */

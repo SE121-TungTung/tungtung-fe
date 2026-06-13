@@ -67,6 +67,7 @@ import {
     type PreUploadResponse,
     type GradeAttemptRequest,
     type TestAttemptSummaryResponse,
+    type TestAttemptHistoryResponse,
 } from '@/types/test.types'
 
 const BASE_URL = '/api/v1/tests'
@@ -1025,11 +1026,10 @@ export const testApi = {
     listTestAttemptsForTeacher: async (
         testId: string
     ): Promise<TestAttemptSummaryResponse[]> => {
-        const response = await api<TestAttemptSummaryResponse[]>(
-            `${BASE_URL}/${testId}/attempts`,
-            { method: 'GET' }
-        )
-        return response
+        const response = await api<any>(`${BASE_URL}/${testId}/attempts`, {
+            method: 'GET',
+        })
+        return Array.isArray(response) ? response : response?.data || []
     },
 
     /**
@@ -1041,6 +1041,18 @@ export const testApi = {
     ): Promise<TestAttemptSummaryResponse[]> => {
         const response = await api<TestAttemptSummaryResponse[]>(
             `${BASE_URL}/${testId}/my-attempts`,
+            { method: 'GET' }
+        )
+        return response
+    },
+
+    /**
+     * List all attempts history for the current student across all tests
+     * Endpoint: GET /tests/attempts/my-history
+     */
+    listMyAttemptsHistory: async (): Promise<TestAttemptHistoryResponse[]> => {
+        const response = await api<TestAttemptHistoryResponse[]>(
+            `${BASE_URL}/attempts/my-history`,
             { method: 'GET' }
         )
         return response

@@ -82,6 +82,10 @@ export default function TestTakerWrapper() {
         onSuccess: () => {
             clearHighlightsRef.current?.()
             clearAnswers()
+            if (attemptId) {
+                localStorage.removeItem(`speakingResults_${attemptId}`)
+                localStorage.removeItem(`speakingUploads_${attemptId}`)
+            }
             setTestFinished(true)
             navigate(`/student/tests/results/${attemptId}`)
         },
@@ -137,6 +141,19 @@ export default function TestTakerWrapper() {
 
         initData()
     }, [testId, attemptId])
+
+    // Load speaking results from localStorage on mount
+    useEffect(() => {
+        if (!attemptId) return
+        const saved = localStorage.getItem(`speakingResults_${attemptId}`)
+        if (saved) {
+            try {
+                setSpeakingResults(JSON.parse(saved))
+            } catch (err) {
+                console.error('Failed to parse saved speaking results:', err)
+            }
+        }
+    }, [attemptId])
 
     // --- HANDLERS ---
     const onAnswerChange = useCallback(
@@ -256,8 +273,14 @@ export default function TestTakerWrapper() {
     const handleSpeakingProgress = useCallback(
         (results: BatchSubmitSpeakingResponse) => {
             setSpeakingResults(results)
+            if (attemptId) {
+                localStorage.setItem(
+                    `speakingResults_${attemptId}`,
+                    JSON.stringify(results)
+                )
+            }
         },
-        []
+        [attemptId]
     )
 
     // --- RENDER SECTION VIEW ---
