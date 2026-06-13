@@ -1,7 +1,7 @@
 import { useSession } from '@/stores/session.store'
 import { refreshAccessToken } from './auth'
 
-const API =
+export const API =
     import.meta.env.VITE_API_URL ||
     'https://tungtung-be-production.up.railway.app'
 
@@ -10,7 +10,7 @@ const getStorage = () => {
     return localStorage
 }
 
-const getAccessToken = () => {
+export const getAccessToken = () => {
     const storage = getStorage()
     const token = storage.getItem('access_token')
     if (!token) return null
