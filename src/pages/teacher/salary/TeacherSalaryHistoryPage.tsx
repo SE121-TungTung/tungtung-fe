@@ -11,10 +11,7 @@ import { EmptyState } from '@/components/common/state/EmptyState'
 export default function TeacherSalaryHistoryPage() {
     const navigate = useNavigate()
     const [page, setPage] = useState(1)
-    const [period, setPeriod] = useState<string>(() => {
-        const d = new Date()
-        return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}`
-    })
+    const [period, setPeriod] = useState<string>('')
 
     const { data: history, isLoading } = useMySalaryHistory({
         period: period,
@@ -30,6 +27,11 @@ export default function TeacherSalaryHistoryPage() {
     }
 
     const items = history?.data || []
+
+    const handlePeriodChange = (val: string) => {
+        setPeriod(val)
+        setPage(1)
+    }
 
     return (
         <div
@@ -50,8 +52,9 @@ export default function TeacherSalaryHistoryPage() {
                     </h1>
                     <PeriodSelector
                         value={period}
-                        onChange={setPeriod}
+                        onChange={handlePeriodChange}
                         label="Lọc theo tháng"
+                        showAll
                     />
                 </div>
 

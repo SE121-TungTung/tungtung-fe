@@ -25,7 +25,10 @@ function StatusBadge({
 }) {
     const sUpper = status?.toUpperCase()
     const isSuccessOrPaid =
-        sUpper === 'SUCCESS' || sUpper === 'PAID' || sUpper === 'APPROVED'
+        sUpper === 'SUCCESS' ||
+        sUpper === 'PAID' ||
+        sUpper === 'APPROVED' ||
+        sUpper === 'PROCESSED'
     const isCancelled = sUpper === 'CANCELLED' || sUpper === 'REJECTED'
     const isPending = sUpper === 'PENDING'
 
@@ -36,7 +39,9 @@ function StatusBadge({
                     ? 'Đã thu'
                     : sUpper === 'APPROVED'
                       ? 'Đã duyệt'
-                      : 'Thành công'}
+                      : sUpper === 'PROCESSED'
+                        ? 'Đã hoàn tiền'
+                        : 'Thành công'}
             </span>
         )
     if (sUpper === 'FAILED')
@@ -123,21 +128,30 @@ export default function AdminInvoicePage() {
         data: invoicesRes,
         isLoading: isLoadingInvoices,
         isError: isErrorInvoices,
-    } = useInvoices({ page, limit: 15, status: statusFilter || undefined })
+    } = useInvoices(
+        { page, limit: 15, status: statusFilter || undefined },
+        { enabled: activeTab === 'invoices' }
+    )
 
     // 2. Fetch Payments
     const {
         data: paymentsRes,
         isLoading: isLoadingPayments,
         isError: isErrorPayments,
-    } = usePayments({ page, limit: 15, status: statusFilter || undefined })
+    } = usePayments(
+        { page, limit: 15, status: statusFilter || undefined },
+        { enabled: activeTab === 'payments' }
+    )
 
     // 3. Fetch Refunds
     const {
         data: refundsRes,
         isLoading: isLoadingRefunds,
         isError: isErrorRefunds,
-    } = useRefunds({ page, limit: 15, status: statusFilter || undefined })
+    } = useRefunds(
+        { page, limit: 15, status: statusFilter || undefined },
+        { enabled: activeTab === 'refunds' }
+    )
 
     const invoices = invoicesRes?.data || []
     const payments = paymentsRes?.data || []
@@ -474,6 +488,7 @@ export default function AdminInvoicePage() {
                             <option value="PENDING">Chờ duyệt</option>
                             <option value="APPROVED">Đã duyệt</option>
                             <option value="REJECTED">Từ chối</option>
+                            <option value="PROCESSED">Đã hoàn tiền</option>
                         </select>
                     )}
                 </div>

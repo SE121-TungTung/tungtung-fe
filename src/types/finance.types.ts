@@ -15,6 +15,59 @@ export type PaymentGateway =
     | 'MOMO'
     | 'CASH'
     | 'BANK_TRANSFER'
+    | 'INTERNAL_WALLET'
+    | 'internal_wallet'
+
+export type WalletTxType = 'credit' | 'debit'
+export type WalletRefType =
+    | 'tuition'
+    | 'salary'
+    | 'refund'
+    | 'top_up'
+    | 'withdrawal'
+export type WalletTxStatus = 'pending' | 'approved' | 'rejected'
+
+export interface WalletBalanceResponse {
+    user_id: string
+    wallet_balance: number
+}
+
+export interface WalletTransactionResponse {
+    id: string
+    user_id: string
+    type: WalletTxType
+    amount: number
+    balance_after: number
+    reference_type: WalletRefType
+    reference_id: string | null
+    status: WalletTxStatus
+    created_by: string | null
+    note: string | null
+    extra_metadata: Record<string, any> | null
+    created_at: string
+    updated_at: string
+    user_fullname?: string | null
+    user_email?: string | null
+}
+
+export interface WalletTopUpRequest {
+    amount: number
+    gateway: PaymentGateway
+    note?: string
+    reference_code?: string
+}
+
+export interface WalletWithdrawRequest {
+    amount: number
+    bank_name: string
+    account_number: string
+    account_name: string
+    note?: string
+}
+
+export interface WalletActionRequest {
+    note?: string
+}
 export type RefundStatus = 'PENDING' | 'APPROVED' | 'REJECTED'
 
 // ============================================================================

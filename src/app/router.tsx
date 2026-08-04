@@ -34,6 +34,7 @@ import AdminInvoicePage from '@/pages/admin/finance/AdminInvoicePage'
 import AdminFinanceReportPage from '@/pages/admin/finance/AdminFinanceReportPage'
 import StudentInvoicePage from '@/pages/student/finance/StudentInvoicePage'
 import PaymentCallbackPage from '@/pages/student/finance/PaymentCallbackPage'
+import WalletPage from '@/pages/finance/WalletPage'
 import TeacherClassPage from '@/pages/teacher/classes/TeacherClassPage'
 import TestTakerWrapper from '@/pages/student/exam/do/TestTakerWrapper'
 import AuditLogPage from '@/pages/admin/audit/AuditLogPage'
@@ -125,6 +126,10 @@ export const router = createBrowserRouter([
                     {
                         path: '/settings',
                         element: <SettingsPage />,
+                    },
+                    {
+                        path: '/finance/wallet',
+                        element: <WalletPage />,
                     },
                     {
                         path: '/messages',

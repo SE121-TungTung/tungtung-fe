@@ -16,6 +16,11 @@ import type {
     ExportJobCreate,
     ExportJobResponse,
     PaginatedResult,
+    WalletBalanceResponse,
+    WalletTransactionResponse,
+    WalletTopUpRequest,
+    WalletWithdrawRequest,
+    WalletActionRequest,
 } from '@/types/finance.types'
 
 const API_V1 = '/api/v1'
@@ -229,3 +234,73 @@ export const createExportJob = async (
 
 export const getExportJob = async (id: string): Promise<ExportJobResponse> =>
     api<ExportJobResponse>(`${API_V1}/reports/export-jobs/${id}`)
+
+// ============================================================================
+// Wallet
+// ============================================================================
+
+export const getMyWalletBalance = async (): Promise<WalletBalanceResponse> =>
+    api<WalletBalanceResponse>(`${API_V1}/wallet/me`)
+
+export const getMyWalletTransactions = async (
+    page: number = 1,
+    limit: number = 15
+): Promise<PaginatedResult<WalletTransactionResponse>> =>
+    rawFetch<WalletTransactionResponse>(
+        `${API_V1}/wallet/transactions/me?page=${page}&limit=${limit}`
+    )
+
+export const requestWalletTopUp = async (
+    payload: WalletTopUpRequest
+): Promise<WalletTransactionResponse> =>
+    api<WalletTransactionResponse>(`${API_V1}/wallet/topup/request`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+    })
+
+export const requestWalletWithdrawal = async (
+    payload: WalletWithdrawRequest
+): Promise<WalletTransactionResponse> =>
+    api<WalletTransactionResponse>(`${API_V1}/wallet/withdraw/request`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+    })
+
+export const adminGetWalletTransactions = async (params: {
+    status?: string
+    page?: number
+    limit?: number
+}): Promise<PaginatedResult<WalletTransactionResponse>> => {
+    const query = new URLSearchParams()
+    if (params.status) query.append('status', params.status)
+    if (params.page) query.append('page', params.page.toString())
+    if (params.limit) query.append('limit', params.limit.toString())
+
+    return rawFetch<WalletTransactionResponse>(
+        `${API_V1}/wallet/admin/transactions?${query.toString()}`
+    )
+}
+
+export const adminApproveWalletTransaction = async (
+    txId: string,
+    payload?: WalletActionRequest
+): Promise<WalletTransactionResponse> =>
+    api<WalletTransactionResponse>(
+        `${API_V1}/wallet/admin/transactions/${txId}/approve`,
+        {
+            method: 'POST',
+            body: payload ? JSON.stringify(payload) : undefined,
+        }
+    )
+
+export const adminRejectWalletTransaction = async (
+    txId: string,
+    payload?: WalletActionRequest
+): Promise<WalletTransactionResponse> =>
+    api<WalletTransactionResponse>(
+        `${API_V1}/wallet/admin/transactions/${txId}/reject`,
+        {
+            method: 'POST',
+            body: payload ? JSON.stringify(payload) : undefined,
+        }
+    )

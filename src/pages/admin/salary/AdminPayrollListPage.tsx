@@ -14,10 +14,7 @@ import { usePayrollRuns } from '@/hooks/domain/useKpi'
 
 export default function AdminPayrollListPage() {
     const navigate = useNavigate()
-    const [period, setPeriod] = useState<string>(() => {
-        const d = new Date()
-        return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}`
-    })
+    const [period, setPeriod] = useState<string>('')
     const [activeTab, setActiveTab] = useState('details')
 
     // The backend API for salaries still expects the "YYYY-MM" string format.
@@ -44,6 +41,11 @@ export default function AdminPayrollListPage() {
         { label: 'Bảng lương chi tiết', value: 'details' },
         { label: 'Lịch sử Đợt chạy', value: 'runs' },
     ]
+
+    const handlePeriodChange = (val: string) => {
+        setPeriod(val)
+        setPage(0)
+    }
 
     return (
         <div className={s.pageWrapperWithoutHeader}>
@@ -93,8 +95,9 @@ export default function AdminPayrollListPage() {
                                 <div style={{ maxWidth: 260 }}>
                                     <PeriodSelector
                                         value={period}
-                                        onChange={setPeriod}
+                                        onChange={handlePeriodChange}
                                         label="Lọc theo tháng"
+                                        showAll
                                     />
                                 </div>
                             </div>

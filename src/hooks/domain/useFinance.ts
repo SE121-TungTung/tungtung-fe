@@ -11,6 +11,9 @@ import type {
     RefundCreate,
     RefundStatusUpdate,
     ExportJobCreate,
+    WalletTopUpRequest,
+    WalletWithdrawRequest,
+    WalletActionRequest,
 } from '@/types/finance.types'
 
 // ============================================================================
@@ -35,16 +38,20 @@ export const useMyInvoices = (page: number = 1, limit: number = 20) =>
         placeholderData: keepPreviousData,
     })
 
-export const useInvoices = (params: {
-    status?: string
-    student_id?: string
-    page?: number
-    limit?: number
-}) =>
+export const useInvoices = (
+    params: {
+        status?: string
+        student_id?: string
+        page?: number
+        limit?: number
+    },
+    options?: { enabled?: boolean }
+) =>
     useQuery({
         queryKey: ['invoices', params],
         queryFn: () => financeApi.listInvoices(params),
         placeholderData: keepPreviousData,
+        ...options,
     })
 
 export const useInvoiceDetail = (id: string | undefined) =>
@@ -83,32 +90,40 @@ export const usePaymentReceipt = (paymentId: string | undefined) =>
         enabled: !!paymentId,
     })
 
-export const usePayments = (params: {
-    student_id?: string
-    status?: string
-    page?: number
-    limit?: number
-}) =>
+export const usePayments = (
+    params: {
+        student_id?: string
+        status?: string
+        page?: number
+        limit?: number
+    },
+    options?: { enabled?: boolean }
+) =>
     useQuery({
         queryKey: ['payments', params],
         queryFn: () => financeApi.listPayments(params),
         placeholderData: keepPreviousData,
+        ...options,
     })
 
 // ============================================================================
 // Refunds
 // ============================================================================
 
-export const useRefunds = (params: {
-    status?: string
-    student_id?: string
-    page?: number
-    limit?: number
-}) =>
+export const useRefunds = (
+    params: {
+        status?: string
+        student_id?: string
+        page?: number
+        limit?: number
+    },
+    options?: { enabled?: boolean }
+) =>
     useQuery({
         queryKey: ['refunds', params],
         queryFn: () => financeApi.listRefunds(params),
         placeholderData: keepPreviousData,
+        ...options,
     })
 
 export const useCalculateRefund = (enrollmentId: string | undefined) =>
@@ -199,3 +214,95 @@ export const useExportJob = (id: string | undefined) =>
             return 1000
         },
     })
+
+// ============================================================================
+// Wallet Hooks
+// ============================================================================
+
+export const useMyWalletBalance = () =>
+    useQuery({
+        queryKey: ['wallet-balance'],
+        queryFn: () => financeApi.getMyWalletBalance(),
+    })
+
+export const useMyWalletTransactions = (page: number = 1, limit: number = 15) =>
+    useQuery({
+        queryKey: ['wallet-transactions', page, limit],
+        queryFn: () => financeApi.getMyWalletTransactions(page, limit),
+        placeholderData: keepPreviousData,
+    })
+
+export const useRequestWalletTopUp = () => {
+    const qc = useQueryClient()
+    return useMutation({
+        mutationFn: (payload: WalletTopUpRequest) =>
+            financeApi.requestWalletTopUp(payload),
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ['wallet-transactions'] })
+            qc.invalidateQueries({ queryKey: ['wallet-balance'] })
+        },
+    })
+}
+
+export const useRequestWalletWithdrawal = () => {
+    const qc = useQueryClient()
+    return useMutation({
+        mutationFn: (payload: WalletWithdrawRequest) =>
+            financeApi.requestWalletWithdrawal(payload),
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ['wallet-transactions'] })
+            qc.invalidateQueries({ queryKey: ['wallet-balance'] })
+        },
+    })
+}
+
+export const useAdminWalletTransactions = (
+    params: {
+        status?: string
+        page?: number
+        limit?: number
+    },
+    options?: { enabled?: boolean }
+) =>
+    useQuery({
+        queryKey: ['admin-wallet-transactions', params],
+        queryFn: () => financeApi.adminGetWalletTransactions(params),
+        placeholderData: keepPreviousData,
+        ...options,
+    })
+
+export const useAdminApproveWalletTransaction = () => {
+    const qc = useQueryClient()
+    return useMutation({
+        mutationFn: ({
+            txId,
+            payload,
+        }: {
+            txId: string
+            payload?: WalletActionRequest
+        }) => financeApi.adminApproveWalletTransaction(txId, payload),
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ['admin-wallet-transactions'] })
+            qc.invalidateQueries({ queryKey: ['wallet-balance'] })
+            qc.invalidateQueries({ queryKey: ['wallet-transactions'] })
+        },
+    })
+}
+
+export const useAdminRejectWalletTransaction = () => {
+    const qc = useQueryClient()
+    return useMutation({
+        mutationFn: ({
+            txId,
+            payload,
+        }: {
+            txId: string
+            payload?: WalletActionRequest
+        }) => financeApi.adminRejectWalletTransaction(txId, payload),
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ['admin-wallet-transactions'] })
+            qc.invalidateQueries({ queryKey: ['wallet-balance'] })
+            qc.invalidateQueries({ queryKey: ['wallet-transactions'] })
+        },
+    })
+}

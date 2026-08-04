@@ -460,6 +460,9 @@ export const getSalaryDetail = async (id: string): Promise<Salary> =>
 export const approveSalary = async (id: string): Promise<Salary> =>
     api<Salary>(`${API_V1}/salaries/${id}/approve`, { method: 'POST' })
 
+export const paySalary = async (id: string): Promise<Salary> =>
+    api<Salary>(`${API_V1}/salaries/${id}/pay`, { method: 'POST' })
+
 export const addSalaryAdjustment = async (
     salaryId: string,
     payload: SalaryAdjustmentCreate

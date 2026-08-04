@@ -57,8 +57,19 @@ const studentNavItems: AppNavItem[] = [
     },
     {
         id: 'finance',
-        label: 'Tài chính / Hóa đơn',
-        href: '/student/finance/invoices',
+        label: 'Tài chính',
+        dropdownItems: [
+            {
+                id: 'invoices',
+                label: 'Hóa đơn học phí',
+                href: '/student/finance/invoices',
+            },
+            {
+                id: 'wallet',
+                label: 'Ví điện tử nội bộ',
+                href: '/finance/wallet',
+            },
+        ],
     },
 ]
 
@@ -118,6 +129,11 @@ const teacherNavItems: AppNavItem[] = [
                 id: 'salary',
                 label: 'Lịch sử lương',
                 href: '/teacher/salary',
+            },
+            {
+                id: 'wallet',
+                label: 'Ví điện tử nội bộ',
+                href: '/finance/wallet',
             },
         ],
     },
@@ -209,6 +225,11 @@ const adminNavItems: AppNavItem[] = [
                         id: 'finance-reports',
                         label: 'Báo cáo Tài chính',
                         href: '/admin/finance/reports',
+                    },
+                    {
+                        id: 'wallet-admin',
+                        label: 'Duyệt Ví điện tử',
+                        href: '/finance/wallet',
                     },
                 ],
             },

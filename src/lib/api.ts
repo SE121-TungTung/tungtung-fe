@@ -20,9 +20,9 @@ export const getAccessToken = () => {
         const exp = payload.exp * 1000
 
         if (Date.now() >= exp) {
-            console.warn('⚠️ Token expired, clearing...')
+            console.warn('⚠️ Access Token expired, needs refresh...')
             storage.removeItem('access_token')
-            storage.removeItem('refresh_token')
+            // Keep refresh_token intact for refresh flow!
             return null
         }
 
@@ -35,10 +35,18 @@ export const getAccessToken = () => {
 const getRefreshToken = () => getStorage().getItem('refresh_token')
 
 let isRefreshing = false
-let refreshSubscribers: ((token: string) => void)[] = []
+let refreshSubscribers: Array<{
+    resolve: (token: string) => void
+    reject: (error: any) => void
+}> = []
 
 const onRefreshed = (token: string) => {
-    refreshSubscribers.forEach((callback) => callback(token))
+    refreshSubscribers.forEach((sub) => sub.resolve(token))
+    refreshSubscribers = []
+}
+
+const onRefreshFailed = (error: any) => {
+    refreshSubscribers.forEach((sub) => sub.reject(error))
     refreshSubscribers = []
 }
 
@@ -158,17 +166,25 @@ export async function api<T>(
 
         if (!init._retry) {
             if (isRefreshing) {
-                return new Promise<T>((resolve) => {
-                    refreshSubscribers.push((newToken) => {
-                        const newHeaders = new Headers(headers)
-                        newHeaders.set('Authorization', `Bearer ${newToken}`)
-                        resolve(
-                            api<T>(path, {
-                                ...init,
-                                headers: newHeaders,
-                                _retry: true,
-                            })
-                        )
+                return new Promise<T>((resolve, reject) => {
+                    refreshSubscribers.push({
+                        resolve: (newToken: string) => {
+                            const newHeaders = new Headers(headers)
+                            newHeaders.set(
+                                'Authorization',
+                                `Bearer ${newToken}`
+                            )
+                            resolve(
+                                api<T>(path, {
+                                    ...init,
+                                    headers: newHeaders,
+                                    _retry: true,
+                                })
+                            )
+                        },
+                        reject: (err: any) => {
+                            reject(err)
+                        },
                     })
                 })
             }
@@ -195,8 +211,12 @@ export async function api<T>(
                 return api<T>(path, { ...init, headers: newHeaders })
             } catch (error) {
                 console.error('Refresh token failed', error)
+                onRefreshFailed(error)
                 useSession.getState().clear()
-                if (!window.location.pathname.includes('/login')) {
+                if (
+                    typeof window !== 'undefined' &&
+                    !window.location.pathname.includes('/login')
+                ) {
                     window.location.href = '/login'
                 }
                 throw error

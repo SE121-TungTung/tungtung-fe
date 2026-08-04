@@ -1,7 +1,11 @@
 import { useState } from 'react'
 import Card from '@/components/common/card/Card'
 import { EmptyState } from '@/components/common/state/EmptyState'
-import { useMyInvoices, useProcessPayment } from '@/hooks/domain/useFinance'
+import {
+    useMyInvoices,
+    useProcessPayment,
+    useMyWalletBalance,
+} from '@/hooks/domain/useFinance'
 import { useDialog } from '@/hooks/useDialog'
 import { api } from '@/lib/api'
 import { useQueryClient } from '@tanstack/react-query'
@@ -16,11 +20,18 @@ function PaymentModal({
     onClose: () => void
 }) {
     const { mutate: processPayment, isPending } = useProcessPayment()
+    const { data: wallet } = useMyWalletBalance()
+    const balance =
+        wallet?.wallet_balance !== undefined ? Number(wallet.wallet_balance) : 0
     const { alert, confirm } = useDialog()
     const queryClient = useQueryClient()
-    const [gateway, setGateway] = useState<PaymentGateway>('VNPAY')
+    const [gateway, setGateway] = useState<PaymentGateway>('INTERNAL_WALLET')
 
     const handlePay = () => {
+        if (gateway === 'INTERNAL_WALLET' && balance < invoice.final_amount) {
+            alert('Số dư ví không đủ. Vui lòng nạp thêm tiền.', 'Lỗi số dư')
+            return
+        }
         const idempotencyKey = crypto.randomUUID()
         processPayment(
             {
@@ -196,8 +207,16 @@ function PaymentModal({
                             color: 'var(--input-text)',
                         }}
                     >
-                        <option value="VNPAY">VNPay</option>
-                        <option value="MOMO">Ví MoMo</option>
+                        <option value="INTERNAL_WALLET">
+                            Ví điện tử nội bộ (Số dư: {balance.toLocaleString()}{' '}
+                            đ)
+                        </option>
+                        <option value="VNPAY" disabled>
+                            VNPay (Đã dừng hỗ trợ checkout trực tiếp)
+                        </option>
+                        <option value="MOMO" disabled>
+                            Ví MoMo (Đã dừng hỗ trợ checkout trực tiếp)
+                        </option>
                     </select>
                 </div>
 

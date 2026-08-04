@@ -467,6 +467,17 @@ export const useApproveSalary = () => {
     })
 }
 
+export const usePaySalary = () => {
+    const qc = useQueryClient()
+    return useMutation({
+        mutationFn: (id: string) => api.paySalary(id),
+        onSuccess: (_, id) => {
+            qc.invalidateQueries({ queryKey: ['salary-detail', id] })
+            qc.invalidateQueries({ queryKey: ['salaries'] })
+        },
+    })
+}
+
 export const useAddSalaryAdjustment = () => {
     const qc = useQueryClient()
     return useMutation({

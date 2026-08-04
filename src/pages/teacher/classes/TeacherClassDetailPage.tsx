@@ -118,8 +118,14 @@ export default function TeacherClassDetailPage() {
     }
 
     const handleDeletePost = async (postId: string) => {
-        if (!confirm('Bạn có chắc chắn muốn xóa bài viết/tài liệu này không?'))
-            return
+        const isConfirmed = await confirm({
+            title: 'Xác nhận xóa',
+            message: 'Bạn có chắc chắn muốn xóa bài viết/tài liệu này không?',
+            type: 'danger',
+            confirmText: 'Xóa',
+            cancelText: 'Hủy bỏ',
+        })
+        if (!isConfirmed) return
         try {
             await deleteClassPost(classId!, postId)
             alert('Xóa bài viết/tài liệu thành công!', 'Thành công')
@@ -136,7 +142,7 @@ export default function TeacherClassDetailPage() {
         setCurrentPage(0)
     }, [attendanceFilter, timeFilter])
 
-    const { alert } = useDialog()
+    const { alert, confirm } = useDialog()
     const queryClient = useQueryClient()
     const [selectedSessionForAttendance, setSelectedSessionForAttendance] =
         useState<string | null>(null)
