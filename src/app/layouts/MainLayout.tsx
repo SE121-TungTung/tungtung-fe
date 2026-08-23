@@ -1,12 +1,13 @@
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, Suspense } from 'react'
 import { useSession } from '@/stores/session.store'
 import { useUIStore } from '@/stores/ui.store'
 import NavigationMenu from '@/components/common/menu/NavigationMenu'
 import Chatbot from '@/components/feature/chatbot/Chatbot'
+import LoadingPage from '@/components/core/LoadingPage'
 import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
 import DefaultAvatar from '@/assets/avatar-placeholder.png'
 import type { Role } from '@/types/auth'
-import { useEffect, useMemo } from 'react'
 import s from './MainLayout.module.css'
 import RobotIcon from '@/assets/Robot.svg'
 import { useWebSocketConnection } from '@/hooks/useWebSocketConnection'
@@ -14,9 +15,8 @@ import { useWebSocketConnection } from '@/hooks/useWebSocketConnection'
 export const MainLayout = () => {
     const navigate = useNavigate()
     const location = useLocation()
-    const session = useSession((state) => state.user)
-    const sessionState = useSession()
-    const currentUserId = sessionState?.user?.id
+    const user = useSession((state) => state.user)
+    const currentUserId = user?.id
 
     const { isChatOpen, setChatOpen, theme } = useUIStore()
 
@@ -24,7 +24,7 @@ export const MainLayout = () => {
         document.documentElement.setAttribute('data-theme', theme)
     }, [theme])
 
-    const userRole = (session?.role as Role) || 'student'
+    const userRole = (user?.role as Role) || 'student'
     const currentPath = location.pathname
     const navItems = useMemo(
         () => getNavItems(userRole, currentPath, navigate),
@@ -56,7 +56,7 @@ export const MainLayout = () => {
                     rightSlotDropdownItems={userMenuItems}
                     rightSlot={
                         <img
-                            src={session?.avatarUrl || DefaultAvatar}
+                            src={user?.avatarUrl || DefaultAvatar}
                             alt="User"
                             className={s.avatar}
                         />
@@ -66,7 +66,9 @@ export const MainLayout = () => {
 
             {/* 2. Nội dung thay đổi của từng trang */}
             <main>
-                <Outlet />
+                <Suspense fallback={<LoadingPage title="Đang tải trang..." />}>
+                    <Outlet />
+                </Suspense>
             </main>
 
             {/* 3. Global Chatbot */}

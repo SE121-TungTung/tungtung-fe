@@ -115,7 +115,7 @@
     padding: 0;
     margin: 0;
     cursor: pointer;
-    opacity: 0.5;
+    opacity: 0.55;
     transition: opacity 0.2s ease;
 }
 .toggle:hover {
@@ -123,6 +123,39 @@
 }
 .toggle.suffix {
     right: var(--pad-x);
+}
+
+/* Dark mode: invert eye icon so it's visible on dark backgrounds */
+[data-theme='dark'] .toggleBtn img {
+    filter: invert(1) brightness(2);
+    opacity: 0.8;
+}
+[data-theme='dark'] .toggleBtn:hover img {
+    opacity: 1;
+}
+
+/* Dark mode: input border and background */
+[data-theme='dark'] .input {
+    --input-bg: rgba(15, 23, 42, 0.6);
+    --input-bd: rgba(255, 255, 255, 0.12);
+    --input-text: rgba(255, 255, 255, 0.92);
+    --input-placeholder: rgba(255, 255, 255, 0.35);
+    --input-icon: rgba(255, 255, 255, 0.5);
+    --label-color: rgba(255, 255, 255, 0.85);
+}
+
+[data-theme='dark'] .input:hover {
+    border-color: rgba(255, 255, 255, 0.22);
+}
+
+[data-theme='dark'] .input:focus {
+    border-color: var(--input-bd-focus);
+    box-shadow: 0 0 0 4px
+        color-mix(in srgb, var(--input-bd-focus) 20%, transparent);
+}
+
+[data-theme='dark'] .label {
+    color: rgba(255, 255, 255, 0.85);
 }
 
 .withPrefix .input {

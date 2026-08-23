@@ -1,0 +1,475 @@
+/* ============================================================================
+   WALLET MODULE CSS - Refactored Design Token & Clean Styles
+   ============================================================================ */
+
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.title {
+    font-size: 26px;
+    font-weight: 800;
+    margin: 0 0 4px 0;
+    background: linear-gradient(
+        135deg,
+        var(--color-brand-primary),
+        var(--color-brand-secondary)
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+    color: var(--color-text-secondary);
+    margin: 0;
+    font-size: 14px;
+}
+
+.tabControls {
+    display: flex;
+    gap: 8px;
+}
+
+.tabBtn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--color-border-soft);
+    background: transparent;
+    color: var(--color-text-primary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tabBtnActive {
+    border: none;
+    background: var(--color-brand-primary);
+    color: white;
+}
+
+.mainGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 24px;
+}
+
+.leftCol {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* Balance Card */
+.glassCard {
+    background: linear-gradient(
+        135deg,
+        var(--color-brand-primary),
+        var(--primitive-lapis-600, #175676)
+    );
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: white;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 220px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+    border-radius: 16px;
+}
+
+.cardGlowOrb {
+    position: absolute;
+    top: -20%;
+    right: -10%;
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.1) 0%,
+        transparent 70%
+    );
+    pointer-events: none;
+}
+
+.cardTopRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    z-index: 1;
+}
+
+.cardLabel {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    opacity: 0.8;
+}
+
+.cardBalance {
+    font-size: 32px;
+    font-weight: 800;
+    margin: 8px 0 0 0;
+    font-family: var(--primitive-font-mono);
+    letter-spacing: -0.03em;
+}
+
+.cardUnit {
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.cardBrandLogo {
+    font-size: 20px;
+    font-weight: 800;
+    font-style: italic;
+    opacity: 0.9;
+}
+
+.cardBottomRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    z-index: 1;
+}
+
+.cardUserLabel {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.7;
+    display: block;
+}
+
+.cardUserName {
+    font-size: 15px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.roleBadge {
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+/* Forms */
+.formCard {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.formTitle {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.formLabel {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.amountGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.amountPill {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid var(--color-border-soft);
+    background: var(--color-surface-raised);
+    color: var(--color-text-primary);
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+
+.amountPillActive {
+    border: 1.5px solid var(--color-brand-primary);
+    background: rgba(37, 99, 235, 0.1);
+    color: var(--color-brand-primary);
+}
+
+.inputField {
+    width: 100%;
+    padding: 10px;
+    border-radius: var(--input-radius, 6px);
+    border: 1px solid var(--input-border, var(--color-border-soft));
+    background: var(--input-bg, var(--color-surface-page));
+    color: var(--input-text, var(--color-text-primary));
+}
+
+.selectField {
+    width: 100%;
+    padding: 10px;
+    border-radius: var(--input-radius, 6px);
+    border: 1px solid var(--input-border, var(--color-border-soft));
+    background: var(--input-bg, var(--color-surface-page));
+    color: var(--input-text, var(--color-text-primary));
+}
+
+.submitBtnPrimary {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    background: var(--color-brand-primary);
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.submitBtnSecondary {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    background: var(--color-brand-secondary);
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.submitBtnDisabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* History & Tables */
+.cardHeader {
+    padding: 20px;
+    border-bottom: 1px solid var(--color-border-soft);
+}
+
+.tableWrapper {
+    overflow-x: auto;
+    min-height: 350px;
+    padding: 0 20px 20px 20px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    text-align: left;
+}
+
+.table th {
+    padding: 12px;
+    border-bottom: 2px solid var(--color-border-soft);
+    color: var(--color-text-secondary);
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+.table td {
+    padding: 12px;
+    border-bottom: 1px solid var(--color-border-soft);
+}
+
+.tableRow:hover {
+    background: var(--color-surface-raised);
+}
+
+.dateCell {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+}
+
+.amountCredit {
+    font-family: var(--primitive-font-mono);
+    font-weight: 700;
+    color: var(--color-status-success-dark, #02bc2a);
+}
+
+.amountDebit {
+    font-family: var(--primitive-font-mono);
+    font-weight: 700;
+    color: var(--color-status-danger, #ef4444);
+}
+
+.badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.badgeSuccess {
+    background: rgba(34, 197, 94, 0.15);
+    color: #16a34a;
+}
+
+.badgePending {
+    background: rgba(234, 179, 8, 0.15);
+    color: #ca8a04;
+}
+
+.badgeRejected {
+    background: rgba(239, 68, 68, 0.15);
+    color: #dc2626;
+}
+
+.noteCell {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    padding: 16px;
+    gap: 8px;
+    border-top: 1px solid var(--color-border-soft);
+}
+
+.paginationBtn {
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: 1px solid var(--color-border-soft);
+    background: transparent;
+    cursor: pointer;
+    color: var(--color-text-primary);
+}
+
+.paginationBtn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.paginationText {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* Admin Moderation */
+.adminFilterBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--color-surface-raised);
+    padding: 16px 20px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border-soft);
+}
+
+.filterBtnGroup {
+    display: flex;
+    gap: 8px;
+}
+
+.filterBtn {
+    padding: 6px 14px;
+    border-radius: 16px;
+    border: none;
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filterBtnActive {
+    background: var(--color-brand-primary);
+    color: white;
+}
+
+.actionCell {
+    display: flex;
+    gap: 8px;
+}
+
+.actionBtn {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.actionBtnApprove {
+    background: rgba(34, 197, 94, 0.15);
+    color: #16a34a;
+}
+
+.actionBtnApprove:hover {
+    background: #16a34a;
+    color: white;
+}
+
+.actionBtnReject {
+    background: rgba(239, 68, 68, 0.15);
+    color: #dc2626;
+}
+
+.actionBtnReject:hover {
+    background: #dc2626;
+    color: white;
+}
+
+.skeletonRow {
+    height: 48px;
+    margin: 12px 20px;
+    background: var(--color-surface-raised);
+    border-radius: 6px;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 0.3;
+    }
+    100% {
+        opacity: 0.6;
+    }
+}

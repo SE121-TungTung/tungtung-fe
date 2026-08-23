@@ -1,0 +1,213 @@
+/* ============================================================================
+   TEACHER CLASS DETAIL PAGE STYLES
+   Using design tokens system
+   ============================================================================ */
+
+.container {
+    padding: var(--space-6);
+    max-width: var(--container-max-width, 1200px);
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+}
+
+.headerLeft {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.backButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--space-2);
+    border-radius: var(--radius-md);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-secondary);
+    transition: var(--transition-colors);
+}
+
+.backButton:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text-primary);
+}
+
+.classTitle {
+    font-size: var(--primitive-text-2xl);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.classSubtitle {
+    font-size: var(--primitive-text-sm);
+    color: var(--color-text-muted);
+    margin: 4px 0 0 0;
+}
+
+/* Tabs */
+.tabsContainer {
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: var(--space-6);
+}
+
+/* Section Cards & Containers */
+.card {
+    background: var(--color-surface-card, #fff);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
+}
+
+.sectionTitle {
+    font-size: var(--primitive-text-lg);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0 0 var(--space-4) 0;
+}
+
+.enrollmentContainer {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    text-align: left;
+}
+
+.studentsListSection {
+    background: var(--color-surface-card, #fff);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Tables */
+.tableContainer {
+    width: 100%;
+    overflow-x: auto;
+    margin-top: var(--space-4);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+}
+
+.studentTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--primitive-text-sm);
+    text-align: left;
+}
+
+.studentTable th {
+    background: var(--color-surface-subtle, #f8fafc);
+    color: var(--color-text-secondary);
+    font-weight: 600;
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.studentTable td {
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-border-subtle, #f1f5f9);
+    color: var(--color-text-primary);
+    vertical-align: middle;
+}
+
+.studentTable tr:last-child td {
+    border-bottom: none;
+}
+
+.studentTable tr:hover td {
+    background: var(--color-surface-hover, #f8fafc);
+}
+
+.studentNameCol {
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.loadingText {
+    color: var(--color-text-muted);
+    font-size: var(--primitive-text-sm);
+    padding: var(--space-4) 0;
+}
+
+.emptyText {
+    color: var(--color-text-muted);
+    font-size: var(--primitive-text-sm);
+    padding: var(--space-8) 0;
+    text-align: center;
+}
+
+/* Feed Grid */
+.feedGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-6);
+    width: 100%;
+    max-width: 1200px;
+    text-align: left;
+}
+
+@media (max-width: 900px) {
+    .feedGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Overview Info Grid */
+.infoGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-6);
+}
+
+@media (max-width: 768px) {
+    .infoGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Stats */
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+}
+
+.statCard {
+    background: var(--color-surface-card, #fff);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.statLabel {
+    font-size: var(--primitive-text-xs);
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+}
+
+.statValue {
+    font-size: var(--primitive-text-2xl);
+    font-weight: 700;
+    color: var(--color-text-primary);
+}

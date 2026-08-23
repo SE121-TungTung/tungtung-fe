@@ -1,46 +1,35 @@
 import React from 'react'
-import s from './ButtonGhost.module.css'
+import Button, { type ButtonProps, type ButtonSize } from './Button'
 
 type Mode = 'light' | 'dark'
-type Size = 'sm' | 'md' | 'lg' | 'xl'
 
-export interface ButtonGhostProps
-    extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonGhostProps extends Omit<
+    ButtonProps,
+    'variant' | 'tone'
+> {
     mode?: Mode
-    size?: Size
+    size?: ButtonSize
     selected?: boolean
     leftIcon?: React.ReactNode
     rightIcon?: React.ReactNode
     block?: boolean
 }
 
-export default function ButtonGhost({
-    mode = 'light',
-    size = 'md',
-    selected,
-    leftIcon,
-    rightIcon,
-    block,
-    className = '',
-    children,
-    ...rest
-}: ButtonGhostProps) {
-    const cls = [
-        s.root,
-        s[mode],
-        s[size],
-        selected ? s.selected : '',
-        block ? s.block : '',
-        className,
-    ]
-        .filter(Boolean)
-        .join(' ')
-
+export const ButtonGhost = React.forwardRef<
+    HTMLButtonElement,
+    ButtonGhostProps
+>(({ mode = 'light', size = 'md', ...props }, ref) => {
     return (
-        <button className={cls} {...rest}>
-            {leftIcon && <span className={s.icon}>{leftIcon}</span>}
-            {children && <span className={s.label}>{children}</span>}
-            {rightIcon && <span className={s.icon}>{rightIcon}</span>}
-        </button>
+        <Button
+            ref={ref}
+            variant="ghost"
+            tone={mode === 'dark' ? 'brand' : 'neutral'}
+            size={size}
+            {...props}
+        />
     )
-}
+})
+
+ButtonGhost.displayName = 'ButtonGhost'
+
+export default ButtonGhost

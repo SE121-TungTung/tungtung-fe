@@ -3,11 +3,7 @@ import { api } from '@/lib/api'
 const ENROLLMENTS_API_URL = '/api/v1/classenrollments'
 
 export type EnrollmentStatus =
-    | 'active'
-    | 'completed'
-    | 'dropped'
-    | 'suspended'
-    | 'transferred'
+    'active' | 'completed' | 'dropped' | 'suspended' | 'transferred'
 
 export type ClassEnrollment = {
     id: string
@@ -26,6 +22,8 @@ export type ClassEnrollment = {
     student_name?: string
     class_name?: string
 }
+
+export type EnrollmentResponse = ClassEnrollment
 
 export interface ListEnrollmentsParams {
     class_id?: string

@@ -1,5 +1,5 @@
 /* ============================================================================
-   EDUCATIONAL BACKGROUND - Monochromatic Abstract
+   AUTH BACKGROUND - Sunlight Glow, Ambient Mesh & Crisp Dotted Grid
    ============================================================================ */
 
 .edu-bg-container {
@@ -8,37 +8,46 @@
     width: 100%;
     height: 100%;
     overflow: hidden;
-
-    /* Thiết lập các sắc độ dựa trên --theme-hue truyền từ TSX */
-    --c-main: hsl(var(--theme-hue), 85%, 60%);
-    --c-dark: hsl(var(--theme-hue), 85%, 45%);
-    --c-light: hsl(var(--theme-hue), 85%, 75%);
-    --c-bg: hsl(var(--theme-hue), 85%, 92%);
-    --c-pale: hsl(var(--theme-hue), 85%, 98%);
-
-    background: linear-gradient(135deg, #ffffff 0%, var(--c-pale) 100%);
-    /* Chuyển màu mượt mà khi state hue thay đổi */
-    transition:
-        background 2s ease-in-out,
-        --c-main 2s ease-in-out,
-        --c-dark 2s ease-in-out;
-}
-
-/* Kích hoạt chuyển mượt màu cho mọi svg path */
-.edu-svg-icon path,
-.edu-svg-icon circle,
-.edu-abs-shape path,
-.edu-abs-shape circle,
-.edu-abs-shape rect,
-.edu-abs-shape polygon,
-.edu-abs-shape line {
-    transition:
-        fill 2s ease-in-out,
-        stroke 2s ease-in-out;
+    pointer-events: none;
+    user-select: none;
+    background: linear-gradient(
+        135deg,
+        #f8fafc 0%,
+        #edf2f7 50%,
+        #d1dceaff 100%
+    );
+    transition: background 0.4s ease;
 }
 
 /* ============================================================================
-   GRADIENT MESH
+   SUNLIGHT BEAM (Warm diagonal light ray from top-left)
+   ============================================================================ */
+
+.edu-sunlight-beam {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    background:
+        radial-gradient(
+            ellipse 70% 55% at 10% 5%,
+            rgba(255, 230, 140, 0.55) 0%,
+            rgba(255, 200, 80, 0.28) 30%,
+            rgba(255, 160, 60, 0.1) 60%,
+            transparent 80%
+        ),
+        linear-gradient(
+            130deg,
+            rgba(255, 248, 200, 0.4) 0%,
+            rgba(255, 220, 130, 0.15) 25%,
+            transparent 55%
+        );
+}
+
+/* ============================================================================
+   GRADIENT MESH (Blurred ambient orbs)
    ============================================================================ */
 
 .edu-gradient-mesh {
@@ -46,8 +55,7 @@
     inset: 0;
     width: 100%;
     height: 100%;
-    filter: blur(80px);
-    opacity: 0.5;
+    filter: blur(70px);
     pointer-events: none;
     z-index: 0;
 }
@@ -55,143 +63,60 @@
 .edu-gradient-orb {
     position: absolute;
     border-radius: 50%;
-    background: radial-gradient(circle, var(--c-light) 0%, transparent 70%);
-    transition: background 2s ease-in-out;
+    pointer-events: none;
 }
 
-.edu-orb-1 {
+/* Sun Glow Orb – Top Left, warm golden */
+.edu-sun-orb {
+    width: 55vw;
+    height: 55vw;
+    max-width: 720px;
+    max-height: 720px;
+    top: -20%;
+    left: -12%;
+    background: radial-gradient(
+        circle,
+        rgba(255, 200, 60, 0.5) 0%,
+        rgba(251, 146, 60, 0.32) 40%,
+        rgba(225, 50, 80, 0.12) 65%,
+        transparent 80%
+    );
+}
+
+/* Brand Accent Orb – Center-Right, soft crimson/rose */
+.edu-accent-orb {
+    width: 42vw;
+    height: 42vw;
+    max-width: 580px;
+    max-height: 580px;
+    top: 20%;
+    right: 10%;
+    background: radial-gradient(
+        circle,
+        rgba(214, 40, 57, 0.22) 0%,
+        rgba(239, 100, 120, 0.12) 45%,
+        transparent 70%
+    );
+}
+
+/* Cool Depth Orb – Bottom-Right, lapis/cyan */
+.edu-cool-orb {
     width: 60vw;
     height: 60vw;
-    top: -10%;
-    left: -10%;
-    animation: float-orb 20s ease-in-out infinite alternate;
-}
-
-.edu-orb-2 {
-    width: 70vw;
-    height: 70vw;
-    bottom: -15%;
+    max-width: 820px;
+    max-height: 820px;
+    bottom: -22%;
     right: -10%;
-    animation: float-orb 25s ease-in-out infinite alternate-reverse;
-}
-
-@keyframes float-orb {
-    0% {
-        transform: translate(0, 0) scale(1);
-    }
-    100% {
-        transform: translate(100px, 50px) scale(1.1);
-    }
+    background: radial-gradient(
+        circle,
+        rgba(56, 189, 248, 0.28) 0%,
+        rgba(23, 86, 118, 0.18) 45%,
+        transparent 70%
+    );
 }
 
 /* ============================================================================
-   ABSTRACT GEOMETRIC SHAPES
-   ============================================================================ */
-
-.edu-abstract-container {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 1;
-}
-
-.edu-abs-shape {
-    position: absolute;
-}
-
-/* 1. Animation Tam giác tách rời */
-.abs-triangles {
-    width: 180px;
-    height: 180px;
-    top: 70%;
-    left: 80%;
-}
-
-.tri-1 {
-    animation: split-tri-1 6s ease-in-out infinite alternate;
-}
-.tri-2 {
-    animation: split-tri-2 6s ease-in-out infinite alternate;
-}
-
-@keyframes split-tri-1 {
-    0%,
-    10% {
-        transform: translate(0, 0) rotate(0deg);
-    }
-    100% {
-        transform: translate(-40px, 20px) rotate(-30deg);
-    }
-}
-
-@keyframes split-tri-2 {
-    0%,
-    10% {
-        transform: translate(0, 0) rotate(0deg);
-    }
-    100% {
-        transform: translate(40px, -20px) rotate(30deg);
-    }
-}
-
-/* 2. Vòng tròn lớn */
-.abs-ring-1 {
-    width: 350px;
-    height: 350px;
-    top: -5%;
-    left: 5%;
-    animation: spin-scale 30s ease-in-out infinite alternate;
-}
-
-/* 3. Dấu thập mờ ảo */
-.abs-cross-cluster {
-    width: 250px;
-    height: 250px;
-    bottom: 5%;
-    left: 10%;
-    animation: float-abstract 15s ease-in-out infinite alternate;
-}
-
-/* 4. Hình sọc chéo */
-.abs-striped-circle {
-    width: 200px;
-    height: 200px;
-    top: 15%;
-    right: 8%;
-    animation: spin-slow 40s linear infinite reverse;
-}
-
-@keyframes spin-slow {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-@keyframes spin-scale {
-    0% {
-        transform: rotate(0deg) scale(1);
-    }
-    100% {
-        transform: rotate(180deg) scale(1.2);
-    }
-}
-
-@keyframes float-abstract {
-    0% {
-        transform: translate(0, 0) rotate(0deg) scale(1);
-    }
-    100% {
-        transform: translate(40px, -30px) rotate(15deg) scale(1.1);
-    }
-}
-
-/* ============================================================================
-   DOTTED GRID OVERLAY
+   CRISP DOTTED GRID OVERLAY
    ============================================================================ */
 
 .edu-grid-overlay {
@@ -199,126 +124,113 @@
     inset: 0;
     width: 100%;
     height: 100%;
-    background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px);
-    background-size: 50px 50px;
-    opacity: 0.3;
+    /* Visible dots: dark, 2px, 28px grid */
+    background-image: radial-gradient(
+        circle,
+        rgba(30, 41, 59, 0.28) 1px,
+        transparent 1px
+    );
+    background-size: 28px 28px;
+    /* Fade out at edges */
+    -webkit-mask-image: radial-gradient(
+        ellipse 90% 80% at 50% 50%,
+        black 0%,
+        black 55%,
+        transparent 100%
+    );
+    mask-image: radial-gradient(
+        ellipse 90% 80% at 50% 50%,
+        black 0%,
+        black 55%,
+        transparent 100%
+    );
     pointer-events: none;
     z-index: 2;
 }
 
 /* ============================================================================
-   FLOATING 2.5D ICONS (Lơ lửng ngẫu nhiên, dừng khi hover)
+   DARK THEME
    ============================================================================ */
 
-.edu-icons-container {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 3;
-}
-
-.edu-static-wrapper {
-    position: absolute;
-}
-
-.edu-icon-floater {
-    width: 100%;
-    height: 100%;
-    /* Chuyển động lơ lửng phức tạp hơn */
-    animation: complex-float ease-in-out infinite;
-    pointer-events: auto; /* Cho phép tương tác hover */
-    cursor: pointer;
-    filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.05));
-    transition:
-        filter 0.3s ease,
-        scale 0.3s ease;
-}
-
-/* Ngừng animation hoàn toàn khi chuột chạm vào icon */
-.edu-icon-floater:hover {
-    animation-play-state: paused;
-    scale: 1.15;
-    filter: drop-shadow(0 25px 35px rgba(0, 0, 0, 0.12));
-}
-
-.edu-svg-icon {
-    width: 100%;
-    height: 100%;
-    stroke: none;
-}
-
-/* Quỹ đạo bay đa dạng thay vì chỉ lên/xuống */
-@keyframes complex-float {
-    0% {
-        translate: 0px 0px;
-    }
-    33% {
-        translate: 20px -30px;
-    }
-    66% {
-        translate: -15px -15px;
-    }
-    100% {
-        translate: 0px 0px;
-    }
-}
-
-/* ============================================================================
-   MOUSE PARTICLES
-   ============================================================================ */
-
-.edu-particle {
-    position: fixed;
-    pointer-events: none;
-    z-index: 10;
-    animation: particle-fall 10s linear forwards;
-}
-
-.edu-particle-circle {
-    border-radius: 50%;
-}
-
-.edu-particle-square {
-    border-radius: 4px;
-}
-
-.edu-particle-triangle {
-    width: 0;
-    height: 0;
-    background-color: transparent !important;
-}
-
-@keyframes particle-fall {
-    0% {
-        transform: translate(-50%, -50%) scale(0.3) rotate(0deg);
-        opacity: var(--start-opacity);
-    }
-    100% {
-        transform: translate(
-                calc(-50% + var(--drift-x, 0px)),
-                calc(-50% + 400px)
-            )
-            scale(0) rotate(360deg);
-        opacity: 0;
-    }
-}
-
-/* Dark theme overrides */
 [data-theme='dark'] .edu-bg-container {
-    --c-main: hsl(var(--theme-hue), 70%, 35%);
-    --c-dark: hsl(var(--theme-hue), 70%, 22%);
-    --c-light: hsl(var(--theme-hue), 70%, 50%);
-    --c-bg: hsl(var(--theme-hue), 70%, 15%);
-    --c-pale: hsl(var(--theme-hue), 70%, 8%);
-    background: linear-gradient(135deg, #090e1a 0%, var(--c-pale) 100%);
+    background: linear-gradient(135deg, #070b13 0%, #0d1527 50%, #080c18 100%);
+}
+
+[data-theme='dark'] .edu-sunlight-beam {
+    background:
+        radial-gradient(
+            ellipse 60% 50% at 10% 5%,
+            rgba(214, 40, 57, 0.2) 0%,
+            rgba(190, 24, 93, 0.1) 40%,
+            transparent 70%
+        ),
+        linear-gradient(130deg, rgba(225, 29, 72, 0.12) 0%, transparent 50%);
+}
+
+[data-theme='dark'] .edu-sun-orb {
+    background: radial-gradient(
+        circle,
+        rgba(225, 29, 72, 0.35) 0%,
+        rgba(190, 24, 93, 0.2) 45%,
+        transparent 70%
+    );
+}
+
+[data-theme='dark'] .edu-accent-orb {
+    background: radial-gradient(
+        circle,
+        rgba(168, 85, 247, 0.22) 0%,
+        rgba(225, 29, 72, 0.12) 45%,
+        transparent 70%
+    );
+}
+
+[data-theme='dark'] .edu-cool-orb {
+    background: radial-gradient(
+        circle,
+        rgba(14, 165, 233, 0.32) 0%,
+        rgba(23, 86, 118, 0.2) 45%,
+        transparent 70%
+    );
 }
 
 [data-theme='dark'] .edu-grid-overlay {
     background-image: radial-gradient(
-        rgba(255, 255, 255, 0.15) 1.5px,
-        transparent 1.5px
+        circle,
+        rgba(255, 255, 255, 0.22) 1px,
+        transparent 1px
     );
-    opacity: 0.4;
+    -webkit-mask-image: radial-gradient(
+        ellipse 90% 80% at 50% 50%,
+        black 0%,
+        black 55%,
+        transparent 100%
+    );
+    mask-image: radial-gradient(
+        ellipse 90% 80% at 50% 50%,
+        black 0%,
+        black 55%,
+        transparent 100%
+    );
+}
+
+/* ============================================================================
+   MONOCHROME THEME
+   ============================================================================ */
+
+[data-theme='monochrome'] .edu-bg-container {
+    background: var(--color-surface-page, #ffffff);
+}
+
+[data-theme='monochrome'] .edu-sunlight-beam,
+[data-theme='monochrome'] .edu-gradient-mesh {
+    display: none;
+}
+
+[data-theme='monochrome'] .edu-grid-overlay {
+    background-image: radial-gradient(
+        circle,
+        rgba(0, 0, 0, 0.12) 1px,
+        transparent 1px
+    );
 }

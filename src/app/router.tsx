@@ -1,74 +1,175 @@
 import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom'
+import { lazy, Suspense } from 'react'
 import { ProtectedRoute } from './ProtectedRoute'
-
-import { LoginPage } from '@/pages/auth/Login'
-import { ForgotPasswordPage } from '@/pages/auth/ForgotPassword'
-import OtpPage from '@/pages/auth/OtpPage'
-import NotificationPage from '@/pages/notifications/NotificationPage'
-import ProfilePage from '@/pages/profile/ProfilePage'
-import RoadmapPage from '@/pages/student/roadmap/RoadmapPage'
-import { UserManagementPage } from '@/pages/admin/users/UserManagementPage'
-
-import RoomManagementPage from '@/pages/admin/rooms/RoomManagementPage'
-import CourseManagementPage from '@/pages/admin/courses/CourseManagementPage'
-import ClassPage from '@/pages/student/class/Class'
-import LogoutPage from '@/pages/auth/Logout'
-import ClassManagementPage from '@/pages/admin/classes/ClassManagementPage'
-import MessagesPage from '@/pages/messages/MessagesPage'
-import ExamPracticePage from '@/pages/student/exam/ExamPracticePage'
-import ScheduleManagementPage from '@/pages/admin/schedule/ScheduleManagementPage'
-import ScheduleGeneratorPage from '@/pages/admin/schedule/ScheduleGeneratorPage'
-import GASchedulePage from '@/pages/admin/schedule/GASchedulePage'
-import ComingSoon from '@/components/core/ComingSoon'
-import { ResetPasswordPage } from '@/pages/auth/ResetPassword'
-import TestResultPage from '@/pages/student/exam/TestResultPage'
-import CreateTestPage from '@/pages/student/exam/CreateTestPage'
-import FirstLoginGuard from '@/components/feature/auth/FirstLoginGuard'
-import GeneralDashboard from '@/pages/Dashboard'
-import SettingsPage from '@/pages/settings/SettingsPage'
-import TestDetailPage from '@/pages/student/exam/TestDetailPage'
-import ChatbotUploadPage from '@/pages/admin/system/ChatbotUploadPage'
-import SystemConfigPage from '@/pages/admin/system/SystemConfigPage'
 import { MainLayout } from './layouts/MainLayout'
-import AdminInvoicePage from '@/pages/admin/finance/AdminInvoicePage'
-import AdminFinanceReportPage from '@/pages/admin/finance/AdminFinanceReportPage'
-import StudentInvoicePage from '@/pages/student/finance/StudentInvoicePage'
-import PaymentCallbackPage from '@/pages/student/finance/PaymentCallbackPage'
-import WalletPage from '@/pages/finance/WalletPage'
-import TeacherClassPage from '@/pages/teacher/classes/TeacherClassPage'
-import TestTakerWrapper from '@/pages/student/exam/do/TestTakerWrapper'
-import AuditLogPage from '@/pages/admin/audit/AuditLogPage'
-import TeacherClassDetailPage from '@/pages/teacher/classes/TeacherClassDetailPage'
-import TeacherSchedulePage from '@/pages/teacher/schedule/TeacherSchedulePage'
-import EditTestPage from '@/pages/student/exam/EditTestPage'
-import TeacherGradingPage from '@/pages/teacher/grading/TeacherGradingPage'
-import GradeAttemptPage from '@/pages/teacher/grading/GradeAttemptPage'
+import FirstLoginGuard from '@/components/feature/auth/FirstLoginGuard'
+import LoadingPage from '@/components/core/LoadingPage'
 import { useSession } from '@/stores/session.store'
 
-// KPI & Salary
+// Helper for standalone routes that need Suspense fallback
+const withSuspense = (Component: React.ComponentType) => (
+    <Suspense fallback={<LoadingPage title="Đang tải trang..." />}>
+        <Component />
+    </Suspense>
+)
 
-import AdminKpiOverviewPage from '@/pages/admin/kpi/AdminKpiOverviewPage'
-import AdminKpiCalculationPage from '@/pages/admin/kpi/AdminKpiCalculationPage'
-import AdminKpiRecordDetailPage from '@/pages/admin/kpi/AdminKpiRecordDetailPage'
-import AdminKpiTemplatePage from '@/pages/admin/kpi/AdminKpiTemplatePage'
-import AdminSupportCalcPage from '@/pages/admin/kpi/AdminSupportCalcPage'
-import AdminKpiDisputesPage from '@/pages/admin/kpi/AdminKpiDisputesPage'
-import AdminPayrollListPage from '@/pages/admin/salary/AdminPayrollListPage'
-import AdminPayrollRunPage from '@/pages/admin/salary/AdminPayrollRunPage'
-import AdminPayrollRunDetailPage from '@/pages/admin/salary/AdminPayrollRunDetailPage'
-import AdminSalaryDetailPage from '@/pages/admin/salary/AdminSalaryDetailPage'
+// ============================================================================
+// Lazy Loaded Pages (Code-Splitting)
+// ============================================================================
 
-import TeacherKpiDashboard from '@/pages/teacher/kpi/TeacherKpiDashboard'
-import TeacherSalaryHistoryPage from '@/pages/teacher/salary/TeacherSalaryHistoryPage'
-import TeacherSalaryDetailPage from '@/pages/teacher/salary/TeacherSalaryDetailPage'
+// Auth Pages
+const LoginPage = lazy(() =>
+    import('@/pages/auth/Login').then((m) => ({ default: m.LoginPage }))
+)
+const ForgotPasswordPage = lazy(() =>
+    import('@/pages/auth/ForgotPassword').then((m) => ({
+        default: m.ForgotPasswordPage,
+    }))
+)
+const ResetPasswordPage = lazy(() =>
+    import('@/pages/auth/ResetPassword').then((m) => ({
+        default: m.ResetPasswordPage,
+    }))
+)
+const OtpPage = lazy(() => import('@/pages/auth/OtpPage'))
+const LogoutPage = lazy(() => import('@/pages/auth/Logout'))
+
+// Core / Common Pages
+const GeneralDashboard = lazy(() => import('@/pages/Dashboard'))
+const ComingSoon = lazy(() => import('@/components/core/ComingSoon'))
+const NotificationPage = lazy(
+    () => import('@/pages/notifications/NotificationPage')
+)
+const ProfilePage = lazy(() => import('@/pages/profile/ProfilePage'))
+const SettingsPage = lazy(() => import('@/pages/settings/SettingsPage'))
+const MessagesPage = lazy(() => import('@/pages/messages/MessagesPage'))
+const WalletPage = lazy(() => import('@/pages/finance/WalletPage'))
+
+// Student Pages
+const ClassPage = lazy(() => import('@/pages/student/class/Class'))
+const RoadmapPage = lazy(() => import('@/pages/student/roadmap/RoadmapPage'))
+const ExamPracticePage = lazy(
+    () => import('@/pages/student/exam/ExamPracticePage')
+)
+const TestResultPage = lazy(() => import('@/pages/student/exam/TestResultPage'))
+const TestDetailPage = lazy(() => import('@/pages/student/exam/TestDetailPage'))
+const CreateTestPage = lazy(() => import('@/pages/student/exam/CreateTestPage'))
+const EditTestPage = lazy(() => import('@/pages/student/exam/EditTestPage'))
+const TestTakerWrapper = lazy(
+    () => import('@/pages/student/exam/do/TestTakerWrapper')
+)
+const StudentInvoicePage = lazy(
+    () => import('@/pages/student/finance/StudentInvoicePage')
+)
+const PaymentCallbackPage = lazy(
+    () => import('@/pages/student/finance/PaymentCallbackPage')
+)
+
+// Teacher Pages
+const TeacherClassPage = lazy(
+    () => import('@/pages/teacher/classes/TeacherClassPage')
+)
+const TeacherClassDetailPage = lazy(
+    () => import('@/pages/teacher/classes/TeacherClassDetailPage')
+)
+const TeacherSchedulePage = lazy(
+    () => import('@/pages/teacher/schedule/TeacherSchedulePage')
+)
+const TeacherGradingPage = lazy(
+    () => import('@/pages/teacher/grading/TeacherGradingPage')
+)
+const GradeAttemptPage = lazy(
+    () => import('@/pages/teacher/grading/GradeAttemptPage')
+)
+const TeacherKpiDashboard = lazy(
+    () => import('@/pages/teacher/kpi/TeacherKpiDashboard')
+)
+const TeacherSalaryHistoryPage = lazy(
+    () => import('@/pages/teacher/salary/TeacherSalaryHistoryPage')
+)
+const TeacherSalaryDetailPage = lazy(
+    () => import('@/pages/teacher/salary/TeacherSalaryDetailPage')
+)
+
+// Admin Pages
+const UserManagementPage = lazy(() =>
+    import('@/pages/admin/users/UserManagementPage').then((m) => ({
+        default: m.UserManagementPage,
+    }))
+)
+const RoomManagementPage = lazy(
+    () => import('@/pages/admin/rooms/RoomManagementPage')
+)
+const CourseManagementPage = lazy(
+    () => import('@/pages/admin/courses/CourseManagementPage')
+)
+const ClassManagementPage = lazy(
+    () => import('@/pages/admin/classes/ClassManagementPage')
+)
+const ScheduleManagementPage = lazy(
+    () => import('@/pages/admin/schedule/ScheduleManagementPage')
+)
+const ScheduleGeneratorPage = lazy(
+    () => import('@/pages/admin/schedule/ScheduleGeneratorPage')
+)
+const GASchedulePage = lazy(
+    () => import('@/pages/admin/schedule/GASchedulePage')
+)
+const AuditLogPage = lazy(() => import('@/pages/admin/audit/AuditLogPage'))
+const SystemConfigPage = lazy(
+    () => import('@/pages/admin/system/SystemConfigPage')
+)
+const ChatbotUploadPage = lazy(
+    () => import('@/pages/admin/system/ChatbotUploadPage')
+)
+const AdminInvoicePage = lazy(
+    () => import('@/pages/admin/finance/AdminInvoicePage')
+)
+const AdminFinanceReportPage = lazy(
+    () => import('@/pages/admin/finance/AdminFinanceReportPage')
+)
+const AdminKpiOverviewPage = lazy(
+    () => import('@/pages/admin/kpi/AdminKpiOverviewPage')
+)
+const AdminKpiCalculationPage = lazy(
+    () => import('@/pages/admin/kpi/AdminKpiCalculationPage')
+)
+const AdminKpiRecordDetailPage = lazy(
+    () => import('@/pages/admin/kpi/AdminKpiRecordDetailPage')
+)
+const AdminKpiTemplatePage = lazy(
+    () => import('@/pages/admin/kpi/AdminKpiTemplatePage')
+)
+const AdminSupportCalcPage = lazy(
+    () => import('@/pages/admin/kpi/AdminSupportCalcPage')
+)
+const AdminKpiDisputesPage = lazy(
+    () => import('@/pages/admin/kpi/AdminKpiDisputesPage')
+)
+const AdminPayrollListPage = lazy(
+    () => import('@/pages/admin/salary/AdminPayrollListPage')
+)
+const AdminPayrollRunPage = lazy(
+    () => import('@/pages/admin/salary/AdminPayrollRunPage')
+)
+const AdminPayrollRunDetailPage = lazy(
+    () => import('@/pages/admin/salary/AdminPayrollRunDetailPage')
+)
+const AdminSalaryDetailPage = lazy(
+    () => import('@/pages/admin/salary/AdminSalaryDetailPage')
+)
+
+// ============================================================================
+// Router Configuration
+// ============================================================================
 
 export const router = createBrowserRouter([
     {
         element: (
-            <>
+            <Suspense fallback={<LoadingPage title="Đang khởi tạo..." />}>
                 <FirstLoginGuard />
                 <Outlet />
-            </>
+            </Suspense>
         ),
         children: [
             {
@@ -83,35 +184,36 @@ export const router = createBrowserRouter([
                     )
                 })(),
             },
-            { path: '/login', element: <LoginPage /> },
-            { path: '/forgot-password', element: <ForgotPasswordPage /> },
-            { path: '/otp', element: <OtpPage /> },
-            { path: '/logout', element: <LogoutPage /> },
+            { path: '/login', element: withSuspense(LoginPage) },
+            {
+                path: '/forgot-password',
+                element: withSuspense(ForgotPasswordPage),
+            },
+            { path: '/otp', element: withSuspense(OtpPage) },
+            { path: '/logout', element: withSuspense(LogoutPage) },
             {
                 path: '/reset-password',
-                element: <ResetPasswordPage />,
+                element: withSuspense(ResetPasswordPage),
             },
 
             // General routes
-            { path: '/test', element: <ExamPracticePage /> },
+            { path: '/test', element: withSuspense(ExamPracticePage) },
             {
                 path: '/coming-soon',
-                element: <ComingSoon />,
+                element: withSuspense(ComingSoon),
             },
 
-            // No Nav
+            // Standalone test taker routes (no MainLayout)
             {
-                // Main test taking route
                 path: '/student/tests/:testId/take/:attemptId',
-                element: <TestTakerWrapper />,
+                element: withSuspense(TestTakerWrapper),
             },
             {
-                // Alternative route for backward compatibility
                 path: '/test/:testId/attempt/:attemptId',
-                element: <TestTakerWrapper />,
+                element: withSuspense(TestTakerWrapper),
             },
 
-            // Profile (accessible to all authenticated users)
+            // Authenticated routes with MainLayout
             {
                 element: (
                     <ProtectedRoute>
@@ -147,6 +249,7 @@ export const router = createBrowserRouter([
                         path: '/',
                         element: <Navigate to="/dashboard" replace />,
                     },
+
                     // Student routes
                     {
                         path: '/student',
@@ -250,7 +353,7 @@ export const router = createBrowserRouter([
                         path: '/teacher/tests',
                         element: (
                             <ProtectedRoute allowedRoles={['teacher']}>
-                                <ExamPracticePage />,
+                                <ExamPracticePage />
                             </ProtectedRoute>
                         ),
                     },
@@ -258,7 +361,7 @@ export const router = createBrowserRouter([
                         path: '/teacher/tests/create',
                         element: (
                             <ProtectedRoute allowedRoles={['teacher']}>
-                                <CreateTestPage />,
+                                <CreateTestPage />
                             </ProtectedRoute>
                         ),
                     },
@@ -266,7 +369,7 @@ export const router = createBrowserRouter([
                         path: '/teacher/tests/:testId/view',
                         element: (
                             <ProtectedRoute allowedRoles={['teacher']}>
-                                <TestDetailPage />,
+                                <TestDetailPage />
                             </ProtectedRoute>
                         ),
                     },
@@ -274,7 +377,7 @@ export const router = createBrowserRouter([
                         path: '/teacher/tests/:testId/edit',
                         element: (
                             <ProtectedRoute allowedRoles={['teacher']}>
-                                <EditTestPage />,
+                                <EditTestPage />
                             </ProtectedRoute>
                         ),
                     },
@@ -318,6 +421,7 @@ export const router = createBrowserRouter([
                             </ProtectedRoute>
                         ),
                     },
+
                     // Admin routes
                     {
                         path: '/admin',
@@ -329,7 +433,7 @@ export const router = createBrowserRouter([
                                     'system_admin',
                                 ]}
                             >
-                                <Navigate to="/dashboard" replace />{' '}
+                                <Navigate to="/dashboard" replace />
                             </ProtectedRoute>
                         ),
                     },
@@ -461,7 +565,6 @@ export const router = createBrowserRouter([
                             </ProtectedRoute>
                         ),
                     },
-
                     {
                         path: '/admin/kpi',
                         element: (

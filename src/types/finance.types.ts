@@ -1,10 +1,5 @@
 export type InvoiceStatus =
-    | 'PENDING'
-    | 'PAID'
-    | 'CANCELLED'
-    | 'pending'
-    | 'paid'
-    | 'cancelled'
+    'PENDING' | 'PAID' | 'CANCELLED' | 'pending' | 'paid' | 'cancelled'
 export type PaymentStatus = 'pending' | 'success' | 'failed' | 'cancelled'
 export type PaymentGateway =
     | 'vnpay'
@@ -20,11 +15,7 @@ export type PaymentGateway =
 
 export type WalletTxType = 'credit' | 'debit'
 export type WalletRefType =
-    | 'tuition'
-    | 'salary'
-    | 'refund'
-    | 'top_up'
-    | 'withdrawal'
+    'tuition' | 'salary' | 'refund' | 'top_up' | 'withdrawal'
 export type WalletTxStatus = 'pending' | 'approved' | 'rejected'
 
 export interface WalletBalanceResponse {
@@ -49,6 +40,8 @@ export interface WalletTransactionResponse {
     user_fullname?: string | null
     user_email?: string | null
 }
+
+export type WalletTransaction = WalletTransactionResponse
 
 export interface WalletTopUpRequest {
     amount: number
