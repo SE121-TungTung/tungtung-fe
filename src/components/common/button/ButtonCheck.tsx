@@ -1,9 +1,10 @@
-import PropTypes from 'prop-types'
 import React, { useId, useState } from 'react'
 import s from './ButtonCheck.module.css'
 
-interface Props
-    extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onChange'> {
+interface Props extends Omit<
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
+    'onChange'
+> {
     mode?: 'dark' | 'light'
     size?: 'large' | 'extra-large' | 'medium' | 'small'
     variant?: 'glass' | 'outline' | 'flat'
@@ -78,9 +79,4 @@ export const ButtonCheck = ({
     )
 }
 
-ButtonCheck.propTypes = {
-    mode: PropTypes.oneOf(['dark', 'light']),
-    size: PropTypes.oneOf(['large', 'extra-large', 'medium', 'small']),
-    style: PropTypes.oneOf(['glass', 'outline', 'flat']),
-}
 export default ButtonCheck

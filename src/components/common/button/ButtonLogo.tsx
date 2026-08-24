@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types'
 import { type JSX } from 'react'
 import FigmaLogo from '@/assets/react.svg'
 import s from './ButtonLogo.module.css'
@@ -28,9 +27,4 @@ export const ButtonLogo = ({
     )
 }
 
-ButtonLogo.propTypes = {
-    mode: PropTypes.oneOf(['dark', 'light']),
-    size: PropTypes.oneOf(['large', 'extra-large', 'medium', 'small']),
-    style: PropTypes.oneOf(['glass', 'outline', 'flat']),
-    polygon: PropTypes.string,
-}
+export default ButtonLogo

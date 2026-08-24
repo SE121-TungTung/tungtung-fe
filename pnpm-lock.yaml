@@ -78,9 +78,6 @@ importers:
       '@types/node':
         specifier: ^24.10.4
         version: 24.13.3
-      '@types/prop-types':
-        specifier: ^15.7.15
-        version: 15.7.15
       '@types/react':
         specifier: ^19.1.14
         version: 19.2.18
@@ -1024,9 +1021,6 @@ packages:
 
   '@types/node@24.13.3':
     resolution: {integrity: sha512-Dh8vAsV36ig5wa9OX4pXvMc9D3Veibfw2wix0CUwYODLD8nkj9UsLjASr49nPg+2eKzxhBV+v7L8pXvT4e639Q==}
-
-  '@types/prop-types@15.7.15':
-    resolution: {integrity: sha512-F6bEyamV9jKGAFBEmlQnesRPGOQqS2+Uwi0Em15xenOxHaf2hv6L8YCVn3rPdPJOiJfPiCnLIRyvwVaqMY3MIw==}
 
   '@types/react-dom@19.2.4':
     resolution: {integrity: sha512-Bsc+QHgp+P/F02XDzNCY9jnZNCUuLki36KT7VKrTXXLdHf+vHMNZnW1rVu5DNW/rCK+fya3DATySbLM4yhtKUw==}
@@ -3893,8 +3887,6 @@ snapshots:
   '@types/node@24.13.3':
     dependencies:
       undici-types: 7.18.2
-
-  '@types/prop-types@15.7.15': {}
 
   '@types/react-dom@19.2.4(@types/react@19.2.18)':
     dependencies:
