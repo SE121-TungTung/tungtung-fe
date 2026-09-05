@@ -34,6 +34,37 @@ export default defineConfig({
             },
         },
     },
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks(id) {
+                    const normalizedId = id.replace(/\\/g, '/')
+                    if (normalizedId.includes('node_modules/')) {
+                        if (normalizedId.includes('/three/')) {
+                            return 'vendor-three'
+                        }
+                        if (
+                            normalizedId.includes('/framer-motion/') ||
+                            normalizedId.includes('/gsap/')
+                        ) {
+                            return 'vendor-animation'
+                        }
+                        if (
+                            normalizedId.includes('/react/') ||
+                            normalizedId.includes('/react-dom/') ||
+                            normalizedId.includes('/react-router/') ||
+                            normalizedId.includes('/react-router-dom/')
+                        ) {
+                            return 'vendor-react'
+                        }
+                        if (normalizedId.includes('/@tanstack/')) {
+                            return 'vendor-query'
+                        }
+                    }
+                },
+            },
+        },
+    },
     test: {
         environment: 'jsdom',
         globals: true,
