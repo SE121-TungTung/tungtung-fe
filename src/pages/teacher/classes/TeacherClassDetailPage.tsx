@@ -2,12 +2,11 @@ import React, { useState, useMemo, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
-import s from '@/pages/student/class/Class.module.css'
-
 // Common Components
 import TabMenu, { type TabItem } from '@/components/common/menu/TabMenu'
 import ButtonGhost from '@/components/common/button/ButtonGhost'
 import BackIcon from '@/assets/arrow-left.svg'
+import s from './TeacherClassDetail.module.css'
 
 // API & Helpers
 import {

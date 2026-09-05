@@ -1,4 +1,4 @@
-import s from '../../admin/users/UserManagementPage.module.css'
+import s from './TeacherSalary.module.css'
 import { useParams } from 'react-router-dom'
 import { SalaryBreakdownPanel } from '@/components/common/card/SalaryBreakdownPanel'
 import { useSalaryDetail } from '@/hooks/domain/useKpi'
@@ -14,10 +14,7 @@ export default function TeacherSalaryDetailPage() {
         return <div style={{ padding: '24px' }}>Đang tải phiếu lương...</div>
 
     return (
-        <div
-            className={s.pageWrapperWithoutHeader}
-            style={{ maxWidth: '800px', margin: '0 auto' }}
-        >
+        <div className={s.detailContainer}>
             <main className={s.mainContent}>
                 {salary ? (
                     <SalaryBreakdownPanel data={salary} readOnly={true} />

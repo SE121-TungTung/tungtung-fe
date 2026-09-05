@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { type Class, type ClassStatus } from '@/lib/classes'
-import s from '@/pages/admin/classes/ClassTable.module.css'
+import s from './TeacherClassTable.module.css'
 import {
     StatusBadge,
     type StatusBadgeVariant,
@@ -47,19 +47,13 @@ export default function TeacherClassTable({ classes, isLoading }: Props) {
             <tbody>
                 {isLoading ? (
                     <tr>
-                        <td
-                            colSpan={6}
-                            style={{ textAlign: 'center', padding: '40px' }}
-                        >
+                        <td colSpan={6} className={s.stateMessage}>
                             Đang tải dữ liệu lớp học...
                         </td>
                     </tr>
                 ) : classes.length === 0 ? (
                     <tr>
-                        <td
-                            colSpan={6}
-                            style={{ textAlign: 'center', padding: '40px' }}
-                        >
+                        <td colSpan={6} className={s.stateMessage}>
                             Bạn chưa được phân công lớp nào.
                         </td>
                     </tr>
@@ -71,50 +65,27 @@ export default function TeacherClassTable({ classes, isLoading }: Props) {
                             <tr
                                 key={c.id}
                                 onClick={() => handleRowClick(c.id)}
-                                style={{ cursor: 'pointer' }}
                                 title="Nhấn để xem chi tiết"
                                 className={s.tableRow}
                             >
                                 <td>
-                                    <div
-                                        style={{
-                                            fontWeight: 600,
-                                            color: 'var(--text-primary-light)',
-                                        }}
-                                    >
-                                        {c.name}
-                                    </div>
+                                    <div className={s.className}>{c.name}</div>
                                 </td>
                                 <td>{c.course.name}</td>
                                 <td>
-                                    <span
-                                        style={{
-                                            backgroundColor: '#f1f5f9',
-                                            padding: '4px 8px',
-                                            borderRadius: '6px',
-                                            fontWeight: 500,
-                                            fontSize: '12px',
-                                        }}
-                                    >
+                                    <span className={s.roomBadge}>
                                         {c.room.name}
                                     </span>
                                 </td>
                                 <td>
-                                    <div
-                                        style={{
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            gap: 2,
-                                            fontSize: 13,
-                                        }}
-                                    >
+                                    <div className={s.dateColumn}>
                                         <span>
                                             BĐ:{' '}
                                             {new Date(
                                                 c.startDate
                                             ).toLocaleDateString('vi-VN')}
                                         </span>
-                                        <span style={{ color: '#888' }}>
+                                        <span className={s.dateEnd}>
                                             KT:{' '}
                                             {new Date(
                                                 c.endDate

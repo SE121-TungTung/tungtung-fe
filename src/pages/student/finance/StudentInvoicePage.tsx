@@ -9,7 +9,7 @@ import {
 import { useDialog } from '@/hooks/useDialog'
 import { api } from '@/lib/api'
 import { useQueryClient } from '@tanstack/react-query'
-import s from '../../admin/finance/Finance.module.css'
+import s from './StudentInvoice.module.css'
 import type { InvoiceResponse, PaymentGateway } from '@/types/finance.types'
 
 function PaymentModal({

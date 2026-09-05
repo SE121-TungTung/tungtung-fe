@@ -1,0 +1,133 @@
+.tableCard {
+    width: 100%;
+    overflow: hidden;
+}
+
+.tableWrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.table thead tr {
+    background: var(--color-surface-raised, #f8fafc);
+    border-bottom: 2px solid var(--color-border-soft, #e2e8f0);
+}
+
+.table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-secondary, #64748b);
+    white-space: nowrap;
+}
+
+.table th:first-child {
+    border-radius: 8px 0 0 0;
+}
+
+.table th:last-child {
+    border-radius: 0 8px 0 0;
+}
+
+.tableRow {
+    border-bottom: 1px solid var(--color-border-soft, #e2e8f0);
+    transition: background 0.15s ease;
+}
+
+.tableRow:hover {
+    background: var(--color-surface-hover, rgba(0, 0, 0, 0.02));
+}
+
+.table td {
+    padding: 16px;
+    vertical-align: middle;
+}
+
+.tdName {
+    font-weight: 600;
+    color: var(--color-brand-primary, #2563eb);
+}
+
+.tdNum {
+    font-family: var(--primitive-font-mono, monospace);
+}
+
+.tdAmount {
+    font-family: var(--primitive-font-mono, monospace);
+    font-weight: 600;
+    color: var(--color-status-success-dark, #02bc2a);
+}
+
+.actionCell {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* Badges */
+.badge {
+    padding: 4px 12px;
+    border-radius: var(--badge-radius, 9999px);
+    font-size: var(--badge-font-size, 12px);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+}
+
+.badgePending {
+    background: var(--color-status-warning-bg, #fef3c7);
+    color: var(--color-status-warning-dark, #b45309);
+}
+
+.badgePaid,
+.badgeSuccess {
+    background: var(--color-status-success-bg, #dcfce7);
+    color: var(--color-status-success-dark, #15803d);
+}
+
+.badgeCancelled,
+.badgeFailed,
+.badgeRejected {
+    background: var(--color-status-danger-bg, #fee2e2);
+    color: var(--color-status-danger, #b91c1c);
+}
+
+.loadingWrapper {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.skeletonRow {
+    height: 48px;
+    width: 100%;
+    background: var(--skeleton-base, #e2e8f0);
+    border-radius: 8px;
+    animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.6;
+    }
+}

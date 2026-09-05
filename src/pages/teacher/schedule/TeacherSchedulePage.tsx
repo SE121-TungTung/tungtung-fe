@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react'
-import s from '@/pages/admin/schedule/Schedule.module.css'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import { scheduleApi } from '@/lib/schedule'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -22,6 +21,7 @@ import ViewModeSelector, {
 } from '@/components/feature/schedule/ViewModeSelector'
 import TimeGridView from '@/components/feature/schedule/views/TimeGridView'
 import ScheduleListView from '@/components/feature/schedule/views/ScheduleListView'
+import s from './TeacherSchedulePage.module.css'
 
 export default function TeacherSchedulePage() {
     const { alert } = useDialog()

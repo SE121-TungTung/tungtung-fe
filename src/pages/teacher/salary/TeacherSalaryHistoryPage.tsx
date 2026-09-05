@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import s from '../../admin/users/UserManagementPage.module.css'
+import s from './TeacherSalary.module.css'
 import Card from '@/components/common/card/Card'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import { PeriodSelector } from '@/components/common/input/PeriodSelector'
@@ -8,6 +8,7 @@ import { useMySalaryHistory } from '@/hooks/domain/useKpi'
 import Pagination from '@/components/common/menu/Pagination'
 import { StatusBadge } from '@/components/common/typography/StatusBadge'
 import { EmptyState } from '@/components/common/state/EmptyState'
+
 export default function TeacherSalaryHistoryPage() {
     const navigate = useNavigate()
     const [page, setPage] = useState(1)
@@ -34,22 +35,10 @@ export default function TeacherSalaryHistoryPage() {
     }
 
     return (
-        <div
-            className={s.pageWrapperWithoutHeader}
-            style={{ maxWidth: '1000px', margin: '0 auto' }}
-        >
+        <div className={s.pageContainer}>
             <main className={s.mainContent}>
-                <div
-                    style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-start',
-                        marginBottom: '24px',
-                    }}
-                >
-                    <h1 className={s.pageTitle} style={{ marginBottom: 0 }}>
-                        Lịch sử Lương
-                    </h1>
+                <div className={s.headerRow}>
+                    <h1 className={s.pageTitle}>Lịch sử Lương</h1>
                     <PeriodSelector
                         value={period}
                         onChange={handlePeriodChange}
@@ -60,167 +49,74 @@ export default function TeacherSalaryHistoryPage() {
 
                 <Card variant="outline" className={s.tableCard}>
                     {isLoading ? (
-                        <div style={{ padding: '24px' }}>Đang tải...</div>
+                        <div className={s.loadingBox}>Đang tải...</div>
                     ) : items.length > 0 ? (
                         <>
-                            <table
-                                style={{
-                                    width: '100%',
-                                    borderCollapse: 'collapse',
-                                    textAlign: 'left',
-                                }}
-                            >
+                            <table className={s.table}>
                                 <thead>
                                     <tr>
-                                        <th
-                                            style={{
-                                                padding: '12px',
-                                                borderBottom:
-                                                    '1px solid var(--color-border-soft)',
-                                            }}
-                                        >
-                                            Kỳ lương
-                                        </th>
-                                        <th
-                                            style={{
-                                                padding: '12px',
-                                                borderBottom:
-                                                    '1px solid var(--color-border-soft)',
-                                            }}
-                                        >
-                                            Hợp đồng
-                                        </th>
-                                        <th
-                                            style={{
-                                                padding: '12px',
-                                                borderBottom:
-                                                    '1px solid var(--color-border-soft)',
-                                            }}
-                                        >
-                                            Lương cứng
-                                        </th>
-                                        <th
-                                            style={{
-                                                padding: '12px',
-                                                borderBottom:
-                                                    '1px solid var(--color-border-soft)',
-                                            }}
-                                        >
-                                            Thưởng KPI
-                                        </th>
-                                        <th
-                                            style={{
-                                                padding: '12px',
-                                                borderBottom:
-                                                    '1px solid var(--color-border-soft)',
-                                            }}
-                                        >
-                                            Thực nhận
-                                        </th>
-                                        <th
-                                            style={{
-                                                padding: '12px',
-                                                borderBottom:
-                                                    '1px solid var(--color-border-soft)',
-                                            }}
-                                        >
-                                            Trạng thái
-                                        </th>
-                                        <th
-                                            style={{
-                                                padding: '12px',
-                                                borderBottom:
-                                                    '1px solid var(--color-border-soft)',
-                                            }}
-                                        />
+                                        <th className={s.th}>Kỳ lương</th>
+                                        <th className={s.th}>Hợp đồng</th>
+                                        <th className={s.th}>Lương cứng</th>
+                                        <th className={s.th}>Thưởng KPI</th>
+                                        <th className={s.th}>Thực nhận</th>
+                                        <th className={s.th}>Trạng thái</th>
+                                        <th className={s.th} />
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {history?.data?.map((s: any) => (
-                                        <tr key={s.id}>
-                                            <td
-                                                style={{
-                                                    padding: '12px',
-                                                    borderBottom:
-                                                        '1px solid var(--color-border-soft)',
-                                                }}
-                                            >
-                                                {s.period}
+                                    {history?.data?.map((item: any) => (
+                                        <tr key={item.id}>
+                                            <td className={s.td}>
+                                                {item.period}
+                                            </td>
+                                            <td className={s.td}>
+                                                {item.contract_type}
+                                            </td>
+                                            <td className={s.td}>
+                                                {formatVND(
+                                                    item.base_salary_calc
+                                                )}
                                             </td>
                                             <td
+                                                className={s.td}
                                                 style={{
-                                                    padding: '12px',
-                                                    borderBottom:
-                                                        '1px solid var(--color-border-soft)',
-                                                }}
-                                            >
-                                                {s.contract_type}
-                                            </td>
-                                            <td
-                                                style={{
-                                                    padding: '12px',
-                                                    borderBottom:
-                                                        '1px solid var(--color-border-soft)',
-                                                }}
-                                            >
-                                                {formatVND(s.base_salary_calc)}
-                                            </td>
-                                            <td
-                                                style={{
-                                                    padding: '12px',
-                                                    borderBottom:
-                                                        '1px solid var(--color-border-soft)',
                                                     color: 'var(--color-brand-primary)',
                                                 }}
                                             >
-                                                +{formatVND(s.kpi_bonus_calc)}
+                                                +
+                                                {formatVND(item.kpi_bonus_calc)}
                                             </td>
                                             <td
-                                                style={{
-                                                    padding: '12px',
-                                                    borderBottom:
-                                                        '1px solid var(--color-border-soft)',
-                                                    fontWeight: 'bold',
-                                                }}
+                                                className={`${s.td} ${s.tdBold}`}
                                             >
-                                                {formatVND(s.net_salary)}
+                                                {formatVND(item.net_salary)}
                                             </td>
-                                            <td
-                                                style={{
-                                                    padding: '12px',
-                                                    borderBottom:
-                                                        '1px solid var(--color-border-soft)',
-                                                }}
-                                            >
+                                            <td className={s.td}>
                                                 <StatusBadge
                                                     variant={
-                                                        s.status ===
+                                                        item.status ===
                                                             'APPROVED' ||
-                                                        s.status === 'PAID'
+                                                        item.status === 'PAID'
                                                             ? 'success'
                                                             : 'warning'
                                                     }
                                                     label={
-                                                        s.status === 'APPROVED'
+                                                        item.status ===
+                                                        'APPROVED'
                                                             ? 'Đã duyệt'
-                                                            : s.status ===
+                                                            : item.status ===
                                                                 'PAID'
                                                               ? 'Đã TT'
                                                               : 'Đang xử lý'
                                                     }
                                                 />
                                             </td>
-                                            <td
-                                                style={{
-                                                    padding: '12px',
-                                                    borderBottom:
-                                                        '1px solid var(--color-border-soft)',
-                                                }}
-                                            >
+                                            <td className={s.td}>
                                                 <ButtonPrimary
                                                     onClick={() =>
                                                         navigate(
-                                                            `/teacher/salary/${s.id}`
+                                                            `/teacher/salary/${item.id}`
                                                         )
                                                     }
                                                 >
@@ -234,13 +130,7 @@ export default function TeacherSalaryHistoryPage() {
                             {history &&
                                 history.meta &&
                                 history.meta.total_pages > 1 && (
-                                    <div
-                                        style={{
-                                            padding: '16px',
-                                            display: 'flex',
-                                            justifyContent: 'center',
-                                        }}
-                                    >
+                                    <div className={s.paginationRow}>
                                         <Pagination
                                             currentPage={page}
                                             totalPages={
