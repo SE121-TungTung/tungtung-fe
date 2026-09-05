@@ -12,19 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup pnpm & Node.js 24 (LTS)
+        uses: pnpm/setup@v1
         with:
-          version: 9
-          run_install: false
-
-      - name: Setup Node.js 22 (LTS)
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: 'pnpm'
+          version: 11
+          runtime: node@24
+          cache: true
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
