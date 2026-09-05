@@ -125,63 +125,64 @@
 .actionsCell {
     display: flex;
     justify-content: flex-end;
+    align-items: center;
     gap: var(--primitive-space-2);
     padding-right: var(--primitive-space-6);
 }
 
-.actionsHeader {
-    text-align: right;
-    padding-right: var(--primitive-space-6);
+.actionsCell button {
+    color: var(--color-text-secondary);
+    transition:
+        color 0.2s ease,
+        background-color 0.2s ease;
 }
 
-.actionButton {
-    padding: var(--primitive-space-2);
-    border-radius: var(--primitive-radius-md);
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
+.actionsCell button:hover:not(:disabled) {
+    color: var(--color-text-primary);
+    background-color: var(--color-surface-raised);
 }
 
-.actionButton img {
+.actionsCell button:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.actionsCell button svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+/* Fallback if img tag is used */
+.actionsCell img {
     width: 18px;
     height: 18px;
-    opacity: 0.6;
-    transition: opacity 0.2s ease;
+    opacity: 0.7;
+    transition:
+        opacity 0.2s ease,
+        filter 0.2s ease;
 }
 
-.actionButton:hover:not(:disabled) {
-    background-color: var(--color-surface-raised);
-    transform: translateY(-2px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+:global([data-theme='dark']) .actionsCell img,
+[data-theme='dark'] .actionsCell img {
+    filter: invert(1) brightness(1.8);
+    opacity: 0.8;
 }
 
-.actionButton:hover:not(:disabled) img {
-    opacity: 1;
-}
-
-.actionButton:active:not(:disabled) {
-    transform: translateY(0);
-}
-
-.actionButton:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
+.actionsCell .dangerButton,
+.dangerButton {
+    color: var(--color-text-secondary);
 }
 
 .dangerButton:hover:not(:disabled) {
     background-color: var(--color-status-danger-bg) !important;
+    color: var(--color-status-danger) !important;
 }
 
 .dangerButton:hover:not(:disabled) img {
     filter: brightness(0) saturate(100%) invert(38%) sepia(95%) saturate(2871%)
-        hue-rotate(338deg) brightness(96%) contrast(92%);
-    opacity: 1;
+        hue-rotate(338deg) brightness(96%) contrast(92%) !important;
+    opacity: 1 !important;
 }
 
 /* Table loading state */

@@ -6,8 +6,6 @@ import {
 } from '@/components/common/typography/StatusBadge'
 import { usePermissions } from '@/hooks/usePermissions'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
-import IconEdit from '@/assets/Edit Pen.svg'
-import IconDelete from '@/assets/Trash Bin.svg'
 import Skeleton from '@/components/effect/Skeleton'
 
 const roomTypeDisplayNames: Record<RoomType, string> = {
@@ -177,7 +175,19 @@ export default function RoomTable({
                                                     : 'Không có quyền sửa'
                                             }
                                         >
-                                            <img src={IconEdit} alt="Sửa" />
+                                            <svg
+                                                width="20"
+                                                height="20"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            >
+                                                <path d="M20 12V21C20 21.55 19.55 22 19 22H3C2.45 22 2 21.55 2 21V5C2 4.45 2.45 4 3 4H12" />
+                                                <path d="M19.15 2.38L9.24 12.29L8 16L11.71 14.76L21.62 4.85C22.07 4.4 22.13 3.71 21.74 3.32L20.68 2.26C20.29 1.87 19.6 1.92 19.15 2.38Z" />
+                                            </svg>
                                         </ButtonPrimary>
                                         <ButtonPrimary
                                             variant="ghost"
@@ -192,7 +202,23 @@ export default function RoomTable({
                                             }
                                             className={s.dangerButton}
                                         >
-                                            <img src={IconDelete} alt="Xóa" />
+                                            <svg
+                                                width="20"
+                                                height="20"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            >
+                                                <path d="M16.13 22H7.87C7.37 22 6.95 21.63 6.88 21.14L5 8H19L17.12 21.14C17.05 21.63 16.63 22 16.13 22Z" />
+                                                <path d="M3.5 8H20.5" />
+                                                <path d="M10 12V18" />
+                                                <path d="M14 12V18" />
+                                                <path d="M16 5H8L9.7 2.45C9.89 2.17 10.2 2 10.54 2H13.47C13.8 2 14.12 2.17 14.3 2.45L16 5Z" />
+                                                <path d="M3 5H21" />
+                                            </svg>
                                         </ButtonPrimary>
                                     </div>
                                 </td>
