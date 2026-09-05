@@ -84,15 +84,40 @@ async function parseBody<T>(res: Response): Promise<T> {
     }
 }
 
+export class ApiError extends Error {
+    status: number
+    code?: string
+    details?: any
+
+    constructor(message: string, status: number, code?: string, details?: any) {
+        super(message)
+        this.name = 'ApiError'
+        this.status = status
+        this.code = code
+        this.details = details
+    }
+}
+
 async function parseError(res: Response): Promise<never> {
     let msg = 'Đã có lỗi, vui lòng thử lại'
+    let code: string | undefined
+    let details: any = null
+
     try {
         const ct = res.headers.get('content-type') || ''
         if (ct.includes('application/json')) {
             const data = await res.json()
             console.error('Backend error:', data)
 
-            if (Array.isArray(data?.detail)) {
+            // TungTung BE standard ErrorResponse: { success: false, error: { code, message, details } }
+            if (data?.error && typeof data.error === 'object') {
+                code = data.error.code
+                msg = data.error.message || msg
+                details = data.error.details ?? null
+            } else if (Array.isArray(data?.detail)) {
+                // FastAPI validation error fallback: { detail: [{ loc, msg }] }
+                code = 'VALIDATION_ERROR'
+                details = data.detail
                 msg = data.detail
                     .map((d: any) => `${(d.loc || []).join('.')} → ${d.msg}`)
                     .join('\n')
@@ -107,9 +132,8 @@ async function parseError(res: Response): Promise<never> {
     } catch {
         /* ignore */
     }
-    const error = new Error(msg) as Error & { status?: number }
-    error.status = res.status
-    throw error
+
+    throw new ApiError(msg, res.status, code, details)
 }
 
 interface ExtendedRequestInit extends RequestInit {
