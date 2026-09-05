@@ -54,7 +54,7 @@ export default function TeacherKpiDashboard() {
             queryClient.invalidateQueries({ queryKey: ['substitutions'] })
             queryClient.invalidateQueries({ queryKey: ['schedule'] })
         },
-        onError: (err: any) => {
+        onError: (err: Error) => {
             alert(err?.message || 'Có lỗi xảy ra khi đồng ý.')
         },
     })
@@ -66,7 +66,7 @@ export default function TeacherKpiDashboard() {
             queryClient.invalidateQueries({ queryKey: ['substitutions'] })
             queryClient.invalidateQueries({ queryKey: ['schedule'] })
         },
-        onError: (err: any) => {
+        onError: (err: Error) => {
             alert(err?.message || 'Có lỗi xảy ra khi từ chối.')
         },
     })

@@ -1,7 +1,8 @@
+import type { KpiDispute } from '@/types/kpi.types'
 import s from './KpiDisputesTable.module.css'
 
 interface KpiDisputesTableProps {
-    disputes: any[]
+    disputes: KpiDispute[]
 }
 
 export default function KpiDisputesTable({ disputes }: KpiDisputesTableProps) {
@@ -22,7 +23,7 @@ export default function KpiDisputesTable({ disputes }: KpiDisputesTableProps) {
                         </tr>
                     </thead>
                     <tbody>
-                        {disputes.map((disp: any) => (
+                        {disputes.map((disp) => (
                             <tr key={disp.id} className={s.tableBodyRow}>
                                 <td className={s.tdDate}>
                                     {new Date(
