@@ -1,0 +1,156 @@
+.newsLayout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+    align-items: stretch;
+    width: 100%;
+    min-height: 500px;
+}
+
+.postsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 16px;
+}
+
+.loadingText {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+}
+
+.emptyText {
+    text-align: center;
+    padding: 40px 20px;
+    color: #888;
+}
+
+.postCard {
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #eef2f6;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    transition: all 0.2s ease-in-out;
+}
+
+.postHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.authorRow {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.authorAvatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.authorName {
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.postDate {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.typeBadge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.badgeMaterial {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.badgeNotice {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.postTitle {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 8px;
+}
+
+.postContent {
+    color: #334155;
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    margin-bottom: 16px;
+}
+
+.attachmentsSection {
+    border-top: 1px dashed #e2e8f0;
+    padding-top: 12px;
+    margin-top: 12px;
+}
+
+.attachmentsLabel {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 8px;
+}
+
+.attachmentsList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.attachmentLink {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #2563eb;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    width: fit-content;
+    transition: background 0.2s;
+}
+
+.attachmentLink:hover {
+    background: #eff6ff;
+}
+
+.fileSize {
+    color: #64748b;
+    font-size: 11px;
+}
+
+@media (max-width: 1024px) {
+    .newsLayout {
+        grid-template-columns: 1fr;
+        min-height: auto;
+    }
+}
