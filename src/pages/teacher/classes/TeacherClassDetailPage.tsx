@@ -18,6 +18,10 @@ import {
     getClassPosts,
     createClassPost,
     deleteClassPost,
+    updateClassPost,
+    pinClassPost,
+    type ClassPost,
+    type MaterialCategory,
 } from '@/lib/classes'
 import { getMyClasses, listUsers } from '@/lib/users'
 import { type ClassMember } from '@/components/common/card/MemberCard'
@@ -40,6 +44,10 @@ import { ClassReportsTab } from './tabs/ClassReportsTab'
 import { SubstitutionRequestModal } from './modals/SubstitutionRequestModal'
 import { AttendanceModal } from './modals/AttendanceModal'
 import { QrCodeModal } from './modals/QrCodeModal'
+import PinLimitModal from './modals/PinLimitModal'
+import EditPostModal from './modals/EditPostModal'
+
+import { queryKeys } from '@/lib/queryKeys'
 
 const getSessionStartEnd = (session: any) => {
     if (!session.session_date || !session.start_time || !session.end_time) {
@@ -73,8 +81,18 @@ export default function TeacherClassDetailPage() {
     const [postType, setPostType] = useState<'announcement' | 'material'>(
         'announcement'
     )
+    const [materialCategory, setMaterialCategory] = useState<
+        MaterialCategory | ''
+    >('')
     const [selectedFiles, setSelectedFiles] = useState<File[]>([])
     const [isCreatingPost, setIsCreatingPost] = useState(false)
+
+    // Post modals
+    const [editingPost, setEditingPost] = useState<ClassPost | null>(null)
+    const [pinLimitPost, setPinLimitPost] = useState<ClassPost | null>(null)
+    const [pendingPinPostId, setPendingPinPostId] = useState<string | null>(
+        null
+    )
 
     // Modal states
     const [selectedSessionForAttendance, setSelectedSessionForAttendance] =
@@ -99,7 +117,7 @@ export default function TeacherClassDetailPage() {
         isLoading: postsLoading,
         refetch: refetchPosts,
     } = useQuery({
-        queryKey: ['class-posts', classId],
+        queryKey: queryKeys.classes.posts(classId!),
         queryFn: () => getClassPosts(classId!, 1, 100),
         enabled: !!classId,
     })
@@ -189,13 +207,99 @@ export default function TeacherClassDetailPage() {
         try {
             await deleteClassPost(classId!, postId)
             alert('Xóa bài viết/tài liệu thành công!', 'Thành công')
-            refetchPosts()
+            queryClient.invalidateQueries({
+                queryKey: queryKeys.classes.posts(classId!),
+            })
         } catch (err: any) {
             alert(
                 err.message || 'Không thể xóa bài viết. Vui lòng thử lại!',
                 'Thất bại'
             )
         }
+    }
+
+    // Mutation: Chỉnh sửa bài
+    const updatePostMutation = useMutation({
+        mutationFn: ({
+            postId,
+            formData,
+        }: {
+            postId: string
+            formData: FormData
+        }) => updateClassPost(classId!, postId, formData),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: queryKeys.classes.posts(classId!),
+            })
+            setEditingPost(null)
+            alert('Cập nhật bài viết thành công!', 'Thành công')
+        },
+        onError: (err: any) => {
+            alert(
+                err?.message ||
+                    'Không thể cập nhật bài viết. Vui lòng thử lại!',
+                'Thất bại'
+            )
+        },
+    })
+
+    // Mutation: Ghim / Bỏ ghim bài
+    const pinPostMutation = useMutation({
+        mutationFn: ({
+            postId,
+            pin,
+            forceUnpinOldest = false,
+        }: {
+            postId: string
+            pin: boolean
+            forceUnpinOldest?: boolean
+        }) => pinClassPost(classId!, postId, pin, forceUnpinOldest),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: queryKeys.classes.posts(classId!),
+            })
+            setPinLimitPost(null)
+            setPendingPinPostId(null)
+        },
+        onError: (err: any) => {
+            if (err?.code === 'POST_PIN_LIMIT_EXCEEDED') {
+                // Tìm bài ghim cũ nhất từ danh sách hiện tại
+                const posts: ClassPost[] = postsData?.data ?? []
+                const pinned = posts
+                    .filter((p) => p.is_pinned && p.pinned_at)
+                    .sort(
+                        (a, b) =>
+                            new Date(a.pinned_at!).getTime() -
+                            new Date(b.pinned_at!).getTime()
+                    )
+                setPinLimitPost(pinned[0] ?? null)
+                // Giữ lại postId đang chờ ghim
+            } else {
+                alert(
+                    err?.message ||
+                        'Không thể ghim bài viết. Vui lòng thử lại!',
+                    'Thất bại'
+                )
+            }
+        },
+    })
+
+    const handlePinPost = (post: ClassPost) => {
+        setPendingPinPostId(post.id)
+        pinPostMutation.mutate({ postId: post.id, pin: !post.is_pinned })
+    }
+
+    const handleConfirmUnpin = () => {
+        if (!pendingPinPostId) return
+        pinPostMutation.mutate({
+            postId: pendingPinPostId,
+            pin: true,
+            forceUnpinOldest: true,
+        })
+    }
+
+    const handleEditPost = (post: ClassPost) => {
+        setEditingPost(post)
     }
 
     const generateQrMutation = useMutation({
@@ -454,19 +558,26 @@ export default function TeacherClassDetailPage() {
 
                     {activeTab === 'feed' && (
                         <ClassPostsFeedTab
+                            posts={postsData?.data ?? []}
                             postsLoading={postsLoading}
-                            postsData={postsData}
                             postType={postType}
                             setPostType={setPostType}
                             postTitle={postTitle}
                             setPostTitle={setPostTitle}
                             postContent={postContent}
                             setPostContent={setPostContent}
+                            materialCategory={materialCategory}
+                            setMaterialCategory={setMaterialCategory}
                             selectedFiles={selectedFiles}
                             setSelectedFiles={setSelectedFiles}
                             isCreatingPost={isCreatingPost}
                             handleCreatePost={handleCreatePost}
                             handleDeletePost={handleDeletePost}
+                            handlePinPost={handlePinPost}
+                            handleEditPost={handleEditPost}
+                            currentUserId={String(
+                                classDetail?.teacher?.id ?? ''
+                            )}
                         />
                     )}
 
@@ -638,6 +749,33 @@ export default function TeacherClassDetailPage() {
                     </div>
                 </div>
             )}
+
+            {/* ═══ Pin Limit Modal ══════════════════════════════════════════ */}
+            <PinLimitModal
+                isOpen={!!pinLimitPost}
+                oldestPinnedPost={pinLimitPost}
+                isLoading={pinPostMutation.isPending}
+                onClose={() => {
+                    setPinLimitPost(null)
+                    setPendingPinPostId(null)
+                }}
+                onConfirmUnpin={handleConfirmUnpin}
+            />
+
+            {/* ═══ Edit Post Modal ══════════════════════════════════════════ */}
+            <EditPostModal
+                isOpen={!!editingPost}
+                post={editingPost}
+                isLoading={updatePostMutation.isPending}
+                onClose={() => setEditingPost(null)}
+                onSubmit={(formData) => {
+                    if (!editingPost) return
+                    updatePostMutation.mutate({
+                        postId: editingPost.id,
+                        formData,
+                    })
+                }}
+            />
         </div>
     )
 }

@@ -227,11 +227,26 @@ export async function getTeacherClasses(): Promise<Class[]> {
     return rawItems.map(mapClass)
 }
 
+// ─── Class Posts ──────────────────────────────────────────────────────────────
+
 export interface ClassPostAttachment {
     file_name: string
     file_url: string
     file_size: number
     mime_type: string
+}
+
+/** Phân loại tài liệu học tập — map 1-1 với MaterialCategory enum phía BE */
+export type MaterialCategory =
+    'lecture_slide' | 'exercise' | 'reference' | 'audio' | 'video' | 'other'
+
+export const MATERIAL_CATEGORY_LABELS: Record<MaterialCategory, string> = {
+    lecture_slide: 'Slide bài giảng',
+    exercise: 'Bài tập',
+    reference: 'Tài liệu tham khảo',
+    audio: 'Audio',
+    video: 'Video',
+    other: 'Khác',
 }
 
 export interface ClassPost {
@@ -241,7 +256,15 @@ export interface ClassPost {
     title: string
     content?: string
     post_type: 'announcement' | 'material'
+    /** Phân loại tài liệu — chỉ có khi post_type = 'material' */
+    material_category?: MaterialCategory
     attachments: ClassPostAttachment[]
+    /** Bài đang được ghim (tối đa 3 bài / lớp) */
+    is_pinned: boolean
+    pinned_at?: string
+    is_comment_locked: boolean
+    /** True nếu bài viết đã từng được chỉnh sửa */
+    is_edited: boolean
     created_at: string
     updated_at: string
     author?: {
@@ -252,28 +275,28 @@ export interface ClassPost {
     }
 }
 
+/**
+ * Lấy danh sách bài viết của lớp.
+ * Hỗ trợ filter theo post_type: 'announcement' | 'material'
+ * Bài ghim luôn đứng đầu (BE đã sort).
+ */
 export async function getClassPosts(
     classId: string,
     page = 1,
-    limit = 20
+    limit = 20,
+    postType?: 'announcement' | 'material'
 ): Promise<{ data: ClassPost[]; total: number }> {
-    const res = await api<any>(
-        `/api/v1/classes/${classId}/posts?page=${page}&limit=${limit}`,
-        {
-            method: 'GET',
-        }
-    )
+    let url = `/api/v1/classes/${classId}/posts?page=${page}&limit=${limit}`
+    if (postType) url += `&post_type=${postType}`
 
-    // Normalize response structure from backend pagination
+    const res = await api<any>(url, { method: 'GET' })
+
     const items = res?.data ?? res?.items ?? (Array.isArray(res) ? res : [])
     const total = res?.total ?? items.length
-
-    return {
-        data: items,
-        total: total,
-    }
+    return { data: items, total }
 }
 
+/** Tạo bài viết mới (cả Announcement và Material đều hỗ trợ đính kèm file). */
 export async function createClassPost(
     classId: string,
     formData: FormData
@@ -284,6 +307,41 @@ export async function createClassPost(
     })
 }
 
+/** Chỉnh sửa nội dung bài viết. Chỉ tác giả (hoặc Admin) được phép. */
+export async function updateClassPost(
+    classId: string,
+    postId: string,
+    formData: FormData
+): Promise<ClassPost> {
+    return await api<ClassPost>(`/api/v1/classes/${classId}/posts/${postId}`, {
+        method: 'PUT',
+        body: formData,
+    })
+}
+
+/**
+ * Ghim hoặc bỏ ghim bài viết.
+ *
+ * @param forceUnpinOldest - Nếu true và đang ở giới hạn 3 bài ghim,
+ *   tự động bỏ ghim bài cũ nhất rồi ghim bài này
+ *   (dùng sau khi user confirm PinLimitModal).
+ */
+export async function pinClassPost(
+    classId: string,
+    postId: string,
+    pin: boolean,
+    forceUnpinOldest = false
+): Promise<ClassPost> {
+    return await api<ClassPost>(
+        `/api/v1/classes/${classId}/posts/${postId}/pin`,
+        {
+            method: 'PATCH',
+            body: JSON.stringify({ pin, force_unpin_oldest: forceUnpinOldest }),
+        }
+    )
+}
+
+/** Soft-delete bài viết (dữ liệu vẫn còn trong DB). */
 export async function deleteClassPost(
     classId: string,
     postId: string

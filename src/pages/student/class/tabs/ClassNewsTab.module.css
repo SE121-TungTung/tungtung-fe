@@ -148,6 +148,89 @@
     font-size: 11px;
 }
 
+/* ─── Pinned Post ─────────────────────────────────────────────────────────── */
+
+.pinnedPostCard {
+    border-left: 3px solid #f59e0b;
+    background: #fffdf7;
+}
+
+.pinnedBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #b45309;
+    background: #fef3c7;
+    padding: 2px 8px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+/* ─── Edited Label ────────────────────────────────────────────────────────── */
+
+.editedLabel {
+    font-size: 11px;
+    color: #94a3b8;
+    font-style: italic;
+}
+
+/* ─── Material Category Badge ─────────────────────────────────────────────── */
+
+.categoryBadge {
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 600;
+    background: #f0fdf4;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+    margin-left: 4px;
+}
+
+/* ─── Filter Tabs ─────────────────────────────────────────────────────────── */
+
+.filterRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 16px 4px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.filterTabs {
+    display: flex;
+    gap: 4px;
+    background: #f1f5f9;
+    padding: 3px;
+    border-radius: 10px;
+}
+
+.filterTab {
+    padding: 5px 12px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    font-size: 12px;
+    font-weight: 500;
+    color: #64748b;
+    cursor: pointer;
+    transition:
+        background 0.15s,
+        color 0.15s;
+}
+
+.filterTabActive {
+    background: #ffffff;
+    color: #4f46e5;
+    font-weight: 600;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
 @media (max-width: 1024px) {
     .newsLayout {
         grid-template-columns: 1fr;
