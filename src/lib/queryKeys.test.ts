@@ -34,6 +34,13 @@ describe('Query Key Factory', () => {
             'classes',
             'posts',
             'cls-1',
+            'all',
+        ])
+        expect(queryKeys.classes.posts('cls-1', 'material')).toEqual([
+            'classes',
+            'posts',
+            'cls-1',
+            'material',
         ])
         expect(queryKeys.classes.attendance('cls-1', 'session-10')).toEqual([
             'classes',
