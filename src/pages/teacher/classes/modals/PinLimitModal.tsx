@@ -1,4 +1,3 @@
-import React from 'react'
 import type { ClassPost } from '@/lib/classes'
 import s from './PostModals.module.css'
 
