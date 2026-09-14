@@ -178,7 +178,6 @@ interface CommentItemProps {
     teacherId?: string
     isLocked: boolean
     isReply?: boolean
-    onReply?: (commentId: string) => void
 }
 
 function CommentItem({
@@ -190,7 +189,6 @@ function CommentItem({
     teacherId,
     isLocked,
     isReply = false,
-    onReply,
 }: CommentItemProps) {
     const queryClient = useQueryClient()
     const [isEditing, setIsEditing] = useState(false)

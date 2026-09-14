@@ -5,6 +5,9 @@ import Card from '@/components/common/card/Card'
 import { getClassPosts, MATERIAL_CATEGORY_LABELS } from '@/lib/classes'
 import type { ClassPost } from '@/lib/classes'
 import { queryKeys } from '@/lib/queryKeys'
+import { useSession } from '@/stores/session.store'
+import { ReactionBar } from '@/pages/teacher/classes/components/ReactionBar'
+import { CommentSection } from '@/pages/teacher/classes/components/CommentSection'
 
 interface ClassNewsTabProps {
     classId?: string
@@ -14,6 +17,7 @@ type PostFilter = 'all' | 'announcement' | 'material'
 
 export default function ClassNewsTab({ classId }: ClassNewsTabProps) {
     const [filter, setFilter] = useState<PostFilter>('all')
+    const { user } = useSession()
 
     const { data: postsData, isLoading: postsLoading } = useQuery({
         queryKey: queryKeys.classes.posts(classId ?? ''),
@@ -26,6 +30,9 @@ export default function ClassNewsTab({ classId }: ClassNewsTabProps) {
         filter === 'all'
             ? allPosts
             : allPosts.filter((p) => p.post_type === filter)
+
+    const currentUserId = user?.id ?? ''
+    const currentUserRole = user?.role ?? 'student'
 
     return (
         <div className={s.newsLayout}>
@@ -207,6 +214,41 @@ export default function ClassNewsTab({ classId }: ClassNewsTabProps) {
                                                 )}
                                             </div>
                                         </div>
+                                    )}
+
+                                    {/* ─── Phase 2: Reaction Bar ─── */}
+                                    {classId && (
+                                        <div className={s.postFooter}>
+                                            <ReactionBar
+                                                classId={classId}
+                                                postId={post.id}
+                                                summary={
+                                                    post.reactions_summary ?? {
+                                                        like: 0,
+                                                        heart: 0,
+                                                        understood: 0,
+                                                        user_reactions: [],
+                                                    }
+                                                }
+                                                isInteractive={!!currentUserId}
+                                            />
+                                        </div>
+                                    )}
+
+                                    {/* ─── Phase 2: Comment Section ─── */}
+                                    {classId && (
+                                        <CommentSection
+                                            classId={classId}
+                                            postId={post.id}
+                                            currentUserId={currentUserId}
+                                            currentUserRole={currentUserRole}
+                                            isCommentLocked={
+                                                post.is_comment_locked
+                                            }
+                                            commentCount={
+                                                post.comment_count ?? 0
+                                            }
+                                        />
                                     )}
                                 </div>
                             ))
