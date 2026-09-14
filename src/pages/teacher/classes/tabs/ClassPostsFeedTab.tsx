@@ -5,6 +5,7 @@ import { MATERIAL_CATEGORY_LABELS, lockPostComments } from '@/lib/classes'
 import { queryKeys } from '@/lib/queryKeys'
 import { ReactionBar } from '../components/ReactionBar'
 import { CommentSection } from '../components/CommentSection'
+import { ViewersModal } from '../components/ViewersModal'
 import s from '../TeacherClassDetail.module.css'
 import fs from './ClassPostsFeedTab.module.css'
 
@@ -105,11 +106,18 @@ export const ClassPostsFeedTab: React.FC<ClassPostsFeedTabProps> = ({
     currentUserRole = 'teacher',
 }) => {
     const [filter, setFilter] = useState<PostFilter>('all')
+    const [selectedPostForViewers, setSelectedPostForViewers] = useState<{
+        id: string
+        title: string
+    } | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     // Client-side filter (BE cũng filter, đây là UX nhanh hơn)
     const filteredPosts =
         filter === 'all' ? posts : posts.filter((p) => p.post_type === filter)
+
+    const pinnedPosts = filteredPosts.filter((p) => p.is_pinned)
+    const regularPosts = filteredPosts.filter((p) => !p.is_pinned)
 
     // Client-side file validation before submit
     const hasBlockedFile = selectedFiles.some((f) => {
@@ -348,21 +356,79 @@ export const ClassPostsFeedTab: React.FC<ClassPostsFeedTabProps> = ({
                             : `Không có bài ${filter === 'announcement' ? 'thông báo' : 'tài liệu'} nào.`}
                     </div>
                 ) : (
-                    filteredPosts.map((post) => (
-                        <PostCard
-                            key={post.id}
-                            post={post}
-                            classId={classId}
-                            currentUserId={currentUserId}
-                            currentUserRole={currentUserRole}
-                            teacherId={teacherId}
-                            onDelete={() => handleDeletePost(post.id)}
-                            onPin={() => handlePinPost(post)}
-                            onEdit={() => handleEditPost(post)}
-                        />
-                    ))
+                    <>
+                        {/* ─── Bài viết đã ghim (tối đa 3 bài) ─── */}
+                        {pinnedPosts.length > 0 && (
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '12px',
+                                }}
+                            >
+                                <div className={fs.pinnedSectionHeader}>
+                                    <span>📌</span>
+                                    <span>
+                                        Bài viết đã ghim ({pinnedPosts.length}
+                                        /3)
+                                    </span>
+                                </div>
+                                {pinnedPosts.map((post) => (
+                                    <PostCard
+                                        key={post.id}
+                                        post={post}
+                                        classId={classId}
+                                        currentUserId={currentUserId}
+                                        currentUserRole={currentUserRole}
+                                        teacherId={teacherId}
+                                        onDelete={() =>
+                                            handleDeletePost(post.id)
+                                        }
+                                        onPin={() => handlePinPost(post)}
+                                        onEdit={() => handleEditPost(post)}
+                                        onOpenViewers={() =>
+                                            setSelectedPostForViewers({
+                                                id: post.id,
+                                                title: post.title,
+                                            })
+                                        }
+                                    />
+                                ))}
+                            </div>
+                        )}
+
+                        {/* ─── Danh sách bài viết thông thường ─── */}
+                        {regularPosts.map((post) => (
+                            <PostCard
+                                key={post.id}
+                                post={post}
+                                classId={classId}
+                                currentUserId={currentUserId}
+                                currentUserRole={currentUserRole}
+                                teacherId={teacherId}
+                                onDelete={() => handleDeletePost(post.id)}
+                                onPin={() => handlePinPost(post)}
+                                onEdit={() => handleEditPost(post)}
+                                onOpenViewers={() =>
+                                    setSelectedPostForViewers({
+                                        id: post.id,
+                                        title: post.title,
+                                    })
+                                }
+                            />
+                        ))}
+                    </>
                 )}
             </div>
+
+            {/* ═══ Modal Thống kê người đã xem ═══════════════════════════ */}
+            <ViewersModal
+                isOpen={Boolean(selectedPostForViewers)}
+                onClose={() => setSelectedPostForViewers(null)}
+                classId={classId}
+                postId={selectedPostForViewers?.id ?? null}
+                postTitle={selectedPostForViewers?.title}
+            />
         </div>
     )
 }
@@ -378,6 +444,7 @@ interface PostCardProps {
     onDelete: () => void
     onPin: () => void
     onEdit: () => void
+    onOpenViewers: () => void
 }
 
 function PostCard({
@@ -389,6 +456,7 @@ function PostCard({
     onDelete,
     onPin,
     onEdit,
+    onOpenViewers,
 }: PostCardProps) {
     const queryClient = useQueryClient()
     const isAuthor = post.author_id === currentUserId
@@ -457,6 +525,34 @@ function PostCard({
                         <span className={fs.categoryBadge}>
                             {MATERIAL_CATEGORY_LABELS[post.material_category]}
                         </span>
+                    )}
+
+                    {/* Nút xem thống kê người đã xem (GV / TA / Admin) */}
+                    {isStaff && (
+                        <button
+                            type="button"
+                            className={fs.viewersBtn}
+                            onClick={onOpenViewers}
+                            title="Xem danh sách học viên đã xem"
+                            aria-label="Xem danh sách học viên đã xem"
+                        >
+                            <span className={fs.viewersIcon}>
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    width="13"
+                                    height="13"
+                                >
+                                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                </svg>
+                            </span>
+                            <span>{post.view_count ?? 0} đã xem</span>
+                        </button>
                     )}
 
                     {/* Ghim / bỏ ghim */}

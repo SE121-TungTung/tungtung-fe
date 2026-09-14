@@ -276,6 +276,32 @@ export interface ClassPost {
     // ─── Phase 2: Comments & Reactions ──────────────────────────────────────
     comment_count?: number
     reactions_summary?: ReactionsSummary | null
+    // ─── Phase 3: View Tracking ──────────────────────────────────────────────
+    view_count?: number
+}
+
+export interface RecordViewResponse {
+    post_id: string
+    viewed: boolean
+    viewed_at?: string | null
+    view_count: number
+}
+
+export interface ViewerInfo {
+    user_id: string
+    name: string
+    email: string
+    avatar_url?: string | null
+    viewed_at?: string | null
+}
+
+export interface ViewersSummaryResponse {
+    post_id: string
+    total_students: number
+    viewed_count: number
+    not_viewed_count: number
+    viewers: ViewerInfo[]
+    non_viewers: ViewerInfo[]
 }
 
 /**
@@ -479,5 +505,26 @@ export async function deletePostComment(
     await api(
         `/api/v1/classes/${classId}/posts/${postId}/comments/${commentId}`,
         { method: 'DELETE' }
+    )
+}
+
+/** Ghi nhận lượt xem bài viết của học viên (idempotent). */
+export async function recordPostView(
+    classId: string,
+    postId: string
+): Promise<RecordViewResponse> {
+    return await api<RecordViewResponse>(
+        `/api/v1/classes/${classId}/posts/${postId}/view`,
+        { method: 'POST' }
+    )
+}
+
+/** Lấy báo cáo học viên đã xem / chưa xem (GV / TA / Admin). */
+export async function getPostViewers(
+    classId: string,
+    postId: string
+): Promise<ViewersSummaryResponse> {
+    return await api<ViewersSummaryResponse>(
+        `/api/v1/classes/${classId}/posts/${postId}/views`
     )
 }
