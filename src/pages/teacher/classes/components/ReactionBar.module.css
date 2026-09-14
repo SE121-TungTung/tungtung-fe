@@ -1,0 +1,85 @@
+/* ReactionBar.module.css — Reaction buttons with SVG icons */
+
+.reactionBar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.reactionBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1.5px solid transparent;
+    background: transparent;
+    color: var(--text-secondary, #64748b);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease,
+        color 0.15s ease,
+        transform 0.1s ease;
+    white-space: nowrap;
+    user-select: none;
+    line-height: 1;
+}
+
+.reactionBtn:hover:not(:disabled) {
+    background: rgba(100, 116, 139, 0.08);
+    border-color: rgba(100, 116, 139, 0.25);
+}
+
+.reactionBtn:active:not(:disabled) {
+    transform: scale(0.93);
+}
+
+.reactionBtn:disabled {
+    cursor: default;
+    opacity: 0.7;
+}
+
+/* Active state: border and background tinted with active color */
+.reactionBtn.active {
+    border-color: var(--active-color, #3b82f6);
+    background: color-mix(
+        in srgb,
+        var(--active-color, #3b82f6) 10%,
+        transparent
+    );
+    color: var(--active-color, #3b82f6);
+}
+
+.reactionIcon {
+    display: flex;
+    align-items: center;
+    transition: transform 0.15s ease;
+}
+
+.reactionBtn:hover:not(:disabled) .reactionIcon {
+    transform: scale(1.15);
+}
+
+.reactionBtn.active .reactionIcon {
+    transform: scale(1.05);
+}
+
+.reactionCount {
+    font-weight: 600;
+    min-width: 10px;
+    text-align: center;
+}
+
+.reactionLabel {
+    font-size: 11.5px;
+}
+
+@media (max-width: 480px) {
+    .reactionLabel {
+        display: none;
+    }
+}

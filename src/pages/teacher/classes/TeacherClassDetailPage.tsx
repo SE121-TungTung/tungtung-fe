@@ -578,6 +578,9 @@ export default function TeacherClassDetailPage() {
                             currentUserId={String(
                                 classDetail?.teacher?.id ?? ''
                             )}
+                            classId={classId ?? ''}
+                            teacherId={String(classDetail?.teacher?.id ?? '')}
+                            currentUserRole="teacher"
                         />
                     )}
 

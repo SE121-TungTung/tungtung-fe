@@ -1,6 +1,10 @@
 import React, { useState, useRef } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { ClassPost, MaterialCategory } from '@/lib/classes'
-import { MATERIAL_CATEGORY_LABELS } from '@/lib/classes'
+import { MATERIAL_CATEGORY_LABELS, lockPostComments } from '@/lib/classes'
+import { queryKeys } from '@/lib/queryKeys'
+import { ReactionBar } from '../components/ReactionBar'
+import { CommentSection } from '../components/CommentSection'
 import s from '../TeacherClassDetail.module.css'
 import fs from './ClassPostsFeedTab.module.css'
 
@@ -52,6 +56,12 @@ interface ClassPostsFeedTabProps {
     handlePinPost: (post: ClassPost) => void
     handleEditPost: (post: ClassPost) => void
     currentUserId: string
+    /** ID lớp học — cần cho comment và reaction APIs */
+    classId: string
+    /** ID giáo viên chủ nhiệm lớp */
+    teacherId?: string
+    /** Role của current user — dùng để kiểm tra quyền */
+    currentUserRole?: string
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -90,6 +100,9 @@ export const ClassPostsFeedTab: React.FC<ClassPostsFeedTabProps> = ({
     handlePinPost,
     handleEditPost,
     currentUserId,
+    classId,
+    teacherId,
+    currentUserRole = 'teacher',
 }) => {
     const [filter, setFilter] = useState<PostFilter>('all')
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -339,7 +352,10 @@ export const ClassPostsFeedTab: React.FC<ClassPostsFeedTabProps> = ({
                         <PostCard
                             key={post.id}
                             post={post}
+                            classId={classId}
                             currentUserId={currentUserId}
+                            currentUserRole={currentUserRole}
+                            teacherId={teacherId}
                             onDelete={() => handleDeletePost(post.id)}
                             onPin={() => handlePinPost(post)}
                             onEdit={() => handleEditPost(post)}
@@ -355,7 +371,10 @@ export const ClassPostsFeedTab: React.FC<ClassPostsFeedTabProps> = ({
 
 interface PostCardProps {
     post: ClassPost
+    classId: string
     currentUserId: string
+    currentUserRole: string
+    teacherId?: string
     onDelete: () => void
     onPin: () => void
     onEdit: () => void
@@ -363,12 +382,32 @@ interface PostCardProps {
 
 function PostCard({
     post,
+    classId,
     currentUserId,
+    currentUserRole,
+    teacherId,
     onDelete,
     onPin,
     onEdit,
 }: PostCardProps) {
+    const queryClient = useQueryClient()
     const isAuthor = post.author_id === currentUserId
+    const isStaff =
+        currentUserRole === 'center_admin' ||
+        currentUserRole === 'system_admin' ||
+        currentUserId === teacherId
+    const canLock = isStaff || isAuthor
+
+    // Optimistic lock toggle
+    const lockMutation = useMutation({
+        mutationFn: (locked: boolean) =>
+            lockPostComments(classId, post.id, locked),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: queryKeys.classes.posts(classId),
+            })
+        },
+    })
 
     return (
         <div
@@ -514,6 +553,100 @@ function PostCard({
                     </div>
                 </div>
             )}
+
+            {/* ─── Phase 2: Footer — Reaction Bar + Lock button ─── */}
+            <div className={fs.postFooter}>
+                <ReactionBar
+                    classId={classId}
+                    postId={post.id}
+                    summary={
+                        post.reactions_summary ?? {
+                            like: 0,
+                            heart: 0,
+                            understood: 0,
+                            user_reactions: [],
+                        }
+                    }
+                    isInteractive={true}
+                />
+                {canLock && (
+                    <button
+                        type="button"
+                        className={`${fs.lockBtn} ${post.is_comment_locked ? fs.lockActive : ''}`}
+                        onClick={() =>
+                            lockMutation.mutate(!post.is_comment_locked)
+                        }
+                        disabled={lockMutation.isPending}
+                        title={
+                            post.is_comment_locked
+                                ? 'Mở khóa bình luận'
+                                : 'Khóa bình luận'
+                        }
+                        aria-label={
+                            post.is_comment_locked
+                                ? 'Mở khóa bình luận'
+                                : 'Khóa bình luận'
+                        }
+                    >
+                        {post.is_comment_locked ? (
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                                width="14"
+                                height="14"
+                            >
+                                <rect
+                                    x="3"
+                                    y="11"
+                                    width="18"
+                                    height="11"
+                                    rx="2"
+                                    ry="2"
+                                />
+                                <path
+                                    d="M7 11V7a5 5 0 0 1 10 0v4"
+                                    stroke="currentColor"
+                                    fill="none"
+                                    strokeWidth="2"
+                                />
+                            </svg>
+                        ) : (
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                width="14"
+                                height="14"
+                            >
+                                <rect
+                                    x="3"
+                                    y="11"
+                                    width="18"
+                                    height="11"
+                                    rx="2"
+                                    ry="2"
+                                />
+                                <path d="M7 11V7a5 5 0 0 1 9.9-1" />
+                            </svg>
+                        )}
+                        {post.is_comment_locked
+                            ? 'Mở bình luận'
+                            : 'Khóa bình luận'}
+                    </button>
+                )}
+            </div>
+
+            {/* ─── Phase 2: Comment Section ─── */}
+            <CommentSection
+                classId={classId}
+                postId={post.id}
+                currentUserId={currentUserId}
+                currentUserRole={currentUserRole}
+                teacherId={teacherId}
+                isCommentLocked={post.is_comment_locked}
+                commentCount={post.comment_count ?? 0}
+            />
         </div>
     )
 }

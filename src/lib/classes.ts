@@ -273,6 +273,9 @@ export interface ClassPost {
         role: string
         avatar_url?: string | null
     }
+    // ─── Phase 2: Comments & Reactions ──────────────────────────────────────
+    comment_count?: number
+    reactions_summary?: ReactionsSummary | null
 }
 
 /**
@@ -349,4 +352,132 @@ export async function deleteClassPost(
     await api(`/api/v1/classes/${classId}/posts/${postId}`, {
         method: 'DELETE',
     })
+}
+
+// ─── Phase 2: Reactions ───────────────────────────────────────────────────────
+
+export type ReactionType = 'like' | 'heart' | 'understood'
+
+export interface ReactionsSummary {
+    like: number
+    heart: number
+    understood: number
+    /** Các reaction mà current_user đang active trên bài viết này */
+    user_reactions: ReactionType[]
+}
+
+export interface ReactionToggleResponse {
+    action: 'added' | 'removed'
+    reaction_type: ReactionType
+    summary: ReactionsSummary
+}
+
+/** Toggle reaction trên bài viết. Click lần 1 = thêm, lần 2 = bỏ (cùng type). */
+export async function togglePostReaction(
+    classId: string,
+    postId: string,
+    reactionType: ReactionType
+): Promise<ReactionToggleResponse> {
+    return await api<ReactionToggleResponse>(
+        `/api/v1/classes/${classId}/posts/${postId}/reactions`,
+        {
+            method: 'POST',
+            body: JSON.stringify({ reaction_type: reactionType }),
+        }
+    )
+}
+
+/** Khóa / mở bình luận cho bài viết. Chỉ GV/TA/Admin được phép. */
+export async function lockPostComments(
+    classId: string,
+    postId: string,
+    isLocked: boolean
+): Promise<ClassPost> {
+    return await api<ClassPost>(
+        `/api/v1/classes/${classId}/posts/${postId}/lock-comments`,
+        {
+            method: 'PATCH',
+            body: JSON.stringify({ is_comment_locked: isLocked }),
+        }
+    )
+}
+
+// ─── Phase 2: Comments ────────────────────────────────────────────────────────
+
+export interface CommentAuthor {
+    id: string
+    full_name: string
+    role: string
+    avatar_url?: string | null
+}
+
+export interface ClassPostComment {
+    id: string
+    post_id: string
+    author_id: string
+    author?: CommentAuthor
+    parent_comment_id?: string | null
+    content: string
+    is_edited: boolean
+    created_at: string
+    updated_at: string
+    /** Replies (chỉ có ở top-level comments — lồng tối đa 1 cấp) */
+    replies: ClassPostComment[]
+}
+
+/** Lấy danh sách bình luận của 1 bài viết (top-level + replies). */
+export async function getPostComments(
+    classId: string,
+    postId: string,
+    page = 1,
+    limit = 50
+): Promise<{ data: ClassPostComment[]; total: number }> {
+    const url = `/api/v1/classes/${classId}/posts/${postId}/comments?page=${page}&limit=${limit}`
+    const res = await api<any>(url, { method: 'GET' })
+    const items = res?.data ?? res?.items ?? (Array.isArray(res) ? res : [])
+    const total = res?.total ?? items.length
+    return { data: items, total }
+}
+
+/** Tạo bình luận mới hoặc reply. */
+export async function createPostComment(
+    classId: string,
+    postId: string,
+    data: { content: string; parent_comment_id?: string | null }
+): Promise<ClassPostComment> {
+    return await api<ClassPostComment>(
+        `/api/v1/classes/${classId}/posts/${postId}/comments`,
+        {
+            method: 'POST',
+            body: JSON.stringify(data),
+        }
+    )
+}
+
+/** Chỉnh sửa nội dung bình luận. Chỉ tác giả được phép. */
+export async function updatePostComment(
+    classId: string,
+    postId: string,
+    commentId: string,
+    data: { content: string }
+): Promise<ClassPostComment> {
+    return await api<ClassPostComment>(
+        `/api/v1/classes/${classId}/posts/${postId}/comments/${commentId}`,
+        {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        }
+    )
+}
+
+/** Xóa mềm bình luận. */
+export async function deletePostComment(
+    classId: string,
+    postId: string,
+    commentId: string
+): Promise<void> {
+    await api(
+        `/api/v1/classes/${classId}/posts/${postId}/comments/${commentId}`,
+        { method: 'DELETE' }
+    )
 }
