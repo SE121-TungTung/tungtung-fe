@@ -249,6 +249,16 @@ export const MATERIAL_CATEGORY_LABELS: Record<MaterialCategory, string> = {
     other: 'Khác',
 }
 
+/** Bản đồ màu cho từng danh mục — dùng cho filter tags trong Kho Học Liệu. */
+export const MATERIAL_CATEGORY_COLORS: Record<MaterialCategory, string> = {
+    lecture_slide: '#f59e0b', // Amber — Slide
+    exercise: '#22c55e', // Green — Bài tập
+    reference: '#8b5cf6', // Violet — Tài liệu tham khảo
+    audio: '#3b82f6', // Blue — Audio
+    video: '#ef4444', // Red — Video
+    other: '#6b7280', // Gray — Khác
+}
+
 export interface ClassPost {
     id: string
     class_id: string
@@ -527,4 +537,33 @@ export async function getPostViewers(
     return await api<ViewersSummaryResponse>(
         `/api/v1/classes/${classId}/posts/${postId}/views`
     )
+}
+
+// ─── Phase Final: Material Library ────────────────────────────────────────────
+
+export interface GetMaterialsParams {
+    classId: string
+    page?: number
+    limit?: number
+    materialCategory?: MaterialCategory
+    search?: string
+}
+
+/** Lấy danh sách tài liệu của lớp (Kho Học Liệu). */
+export async function getClassMaterials(
+    params: GetMaterialsParams
+): Promise<{ data: ClassPost[]; total: number }> {
+    const { classId, page = 1, limit = 50, materialCategory, search } = params
+    const qp = new URLSearchParams()
+    qp.append('page', String(page))
+    qp.append('limit', String(limit))
+    if (materialCategory) qp.append('material_category', materialCategory)
+    if (search) qp.append('search', search)
+
+    const res = await api<any>(
+        `/api/v1/classes/${classId}/materials?${qp.toString()}`
+    )
+    const items = res?.data ?? res?.items ?? (Array.isArray(res) ? res : [])
+    const total = res?.total ?? res?.meta?.total ?? items.length
+    return { data: items, total }
 }

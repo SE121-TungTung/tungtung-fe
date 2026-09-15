@@ -39,6 +39,7 @@ import { ClassMembersTab } from './tabs/ClassMembersTab'
 import { ClassScheduleTab } from './tabs/ClassScheduleTab'
 import { ClassCertificatesTab } from './tabs/ClassCertificatesTab'
 import { ClassReportsTab } from './tabs/ClassReportsTab'
+import { ClassMaterialsLibraryTab } from './tabs/ClassMaterialsLibraryTab'
 
 // Modals
 import { SubstitutionRequestModal } from './modals/SubstitutionRequestModal'
@@ -386,6 +387,7 @@ export default function TeacherClassDetailPage() {
         const items: TabItem[] = [
             { label: 'Tổng quan', value: 'overview' },
             { label: 'Bảng tin & Tài liệu', value: 'feed' },
+            { label: 'Kho học liệu', value: 'materials' },
             { label: 'Thành viên', value: 'members' },
             { label: 'Buổi học & Điểm danh', value: 'sessions' },
             { label: 'Lịch học (Khung)', value: 'schedule' },
@@ -582,6 +584,10 @@ export default function TeacherClassDetailPage() {
                             teacherId={String(classDetail?.teacher?.id ?? '')}
                             currentUserRole="teacher"
                         />
+                    )}
+
+                    {activeTab === 'materials' && (
+                        <ClassMaterialsLibraryTab classId={classId ?? ''} />
                     )}
 
                     {activeTab === 'members' && (

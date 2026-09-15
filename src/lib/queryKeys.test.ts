@@ -69,6 +69,16 @@ describe('Query Key Factory', () => {
             'cls-1',
             'session-10',
         ])
+        expect(queryKeys.classes.materials('cls-1')).toEqual([
+            'classes',
+            'materials',
+            'cls-1',
+            'all',
+            '',
+        ])
+        expect(
+            queryKeys.classes.materials('cls-1', 'exercise', 'homework')
+        ).toEqual(['classes', 'materials', 'cls-1', 'exercise', 'homework'])
     })
 
     it('generates parameterized schedule keys', () => {
