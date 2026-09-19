@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect, memo } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import s from './Chatbot.module.css'
 import { chatbotApi } from '@/lib/chatbot'
+import { publicApi } from '@/lib/public'
+import { useSession } from '@/stores/session.store'
 import CloseIcon from '@/assets/X Mark.svg'
 import SendIcon from '@/assets/Send Paper Plane.svg'
 import ResetIcon from '@/assets/Refresh History.svg'
@@ -68,8 +70,14 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
 
+    const user = useSession((state) => state.user)
+    const isGuestStudent = user?.role === 'guest_student'
+
     const chatMutation = useMutation({
         mutationFn: async (payload: { message: string; history: any[] }) => {
+            if (isGuestStudent) {
+                return publicApi.chatbotAsk(payload.message, payload.history)
+            }
             return chatbotApi.askBot(payload.message, payload.history)
         },
         onSuccess: (data) => {
@@ -78,14 +86,24 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                 { text: data.reply, sender: 'bot' },
             ])
         },
-        onError: () => {
-            setMessages((prev) => [
-                ...prev,
-                {
-                    text: 'Xin lỗi, tôi đang gặp sự cố kết nối. Vui lòng thử lại sau.',
-                    sender: 'bot',
-                },
-            ])
+        onError: (error: any) => {
+            if (error.status === 429 || error.message?.includes('429')) {
+                setMessages((prev) => [
+                    ...prev,
+                    {
+                        text: 'Bạn đã hết lượt hỏi hôm nay. Vui lòng liên hệ trung tâm để nâng cấp khóa học!',
+                        sender: 'bot',
+                    },
+                ])
+            } else {
+                setMessages((prev) => [
+                    ...prev,
+                    {
+                        text: 'Xin lỗi, tôi đang gặp sự cố kết nối. Vui lòng thử lại sau.',
+                        sender: 'bot',
+                    },
+                ])
+            }
         },
     })
 

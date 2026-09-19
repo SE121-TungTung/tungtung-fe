@@ -58,6 +58,11 @@ import TeacherKpiDashboard from '@/pages/teacher/kpi/TeacherKpiDashboard'
 import TeacherSalaryHistoryPage from '@/pages/teacher/salary/TeacherSalaryHistoryPage'
 import TeacherSalaryDetailPage from '@/pages/teacher/salary/TeacherSalaryDetailPage'
 
+import GuestTestListPage from '@/pages/public/GuestTestListPage'
+import GuestTestTakerWrapper from '@/pages/public/GuestTestTakerWrapper'
+import GuestTestResultPage from '@/pages/public/GuestTestResultPage'
+import PublicHomePage from '@/pages/public/PublicHomePage'
+
 export const router = createBrowserRouter([
     {
         element: (
@@ -75,7 +80,7 @@ export const router = createBrowserRouter([
                     return isAuthenticated ? (
                         <Navigate to="/dashboard" replace />
                     ) : (
-                        <Navigate to="/login" replace />
+                        <PublicHomePage />
                     )
                 })(),
             },
@@ -105,6 +110,17 @@ export const router = createBrowserRouter([
                 // Alternative route for backward compatibility
                 path: '/test/:testId/attempt/:attemptId',
                 element: <TestTakerWrapper />,
+            },
+
+            // Guest routes
+            { path: '/public/tests', element: <GuestTestListPage /> },
+            {
+                path: '/public/tests/:testId/take/:attemptId',
+                element: <GuestTestTakerWrapper />,
+            },
+            {
+                path: '/public/tests/results/:attemptId',
+                element: <GuestTestResultPage />,
             },
 
             // Profile (accessible to all authenticated users)

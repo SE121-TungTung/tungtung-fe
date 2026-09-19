@@ -81,3 +81,21 @@ export const confirmPasswordReset = (body: PasswordResetConfirmPayload) =>
         method: 'POST',
         body: JSON.stringify(body),
     })
+
+export type DualHookPayload = {
+    guest_session_id: string
+    full_name: string
+    email: string
+    phone: string
+    intent?: string
+}
+
+export const submitDualHook = async (body: DualHookPayload) => {
+    const res = await api<
+        { success: boolean; data: LoginResponse } | LoginResponse
+    >('/api/v1/auth/dual-hook', {
+        method: 'POST',
+        body: JSON.stringify(body),
+    })
+    return ('data' in res && 'success' in res ? res.data : res) as LoginResponse
+}

@@ -20,10 +20,8 @@ const getAccessToken = () => {
         const exp = payload.exp * 1000
 
         if (Date.now() >= exp) {
-            console.warn('⚠️ Token expired, clearing...')
-            storage.removeItem('access_token')
-            storage.removeItem('refresh_token')
-            return null
+            console.warn('⚠️ Token expired locally')
+            // Don't clear tokens here, let the backend return 401 so the refresh logic kicks in
         }
 
         return token

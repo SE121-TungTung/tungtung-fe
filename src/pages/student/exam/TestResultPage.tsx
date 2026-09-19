@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { testApi, getAttemptStatusInfo } from '@/lib/test'
 import type { AttemptDetail } from '@/types/test.types'
 import { AttemptStatus } from '@/types/test.types'
+import { useSession } from '@/stores/session.store'
 
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import ButtonGhost from '@/components/common/button/ButtonGhost'
@@ -17,6 +18,9 @@ export default function TestResultPage() {
     const [result, setResult] = useState<AttemptDetail | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+
+    const user = useSession((state) => state.user)
+    const isGuestStudent = user?.role === 'guest_student'
 
     useEffect(() => {
         if (!attemptId) {
@@ -188,10 +192,58 @@ export default function TestResultPage() {
 
                             {detail.aiFeedback && (
                                 <div className={s.feedbackBox}>
-                                    <strong>Nhận xét:</strong>
-                                    <p className={s.feedbackText}>
-                                        {detail.aiFeedback}
-                                    </p>
+                                    <strong>Nhận xét từ AI:</strong>
+                                    {isGuestStudent ? (
+                                        <div style={{ position: 'relative' }}>
+                                            <div
+                                                style={{
+                                                    filter: 'blur(5px)',
+                                                    userSelect: 'none',
+                                                    pointerEvents: 'none',
+                                                    opacity: 0.6,
+                                                }}
+                                            >
+                                                <p className={s.feedbackText}>
+                                                    {detail.aiFeedback}
+                                                </p>
+                                            </div>
+                                            <div
+                                                style={{
+                                                    position: 'absolute',
+                                                    top: '50%',
+                                                    left: '50%',
+                                                    transform:
+                                                        'translate(-50%, -50%)',
+                                                    textAlign: 'center',
+                                                    width: '100%',
+                                                }}
+                                            >
+                                                <p
+                                                    style={{
+                                                        fontWeight: 'bold',
+                                                        marginBottom: '10px',
+                                                        color: '#dc2626',
+                                                    }}
+                                                >
+                                                    Tính năng Premium
+                                                </p>
+                                                <ButtonPrimary
+                                                    onClick={() =>
+                                                        window.open(
+                                                            'https://m.me/tungtung',
+                                                            '_blank'
+                                                        )
+                                                    }
+                                                >
+                                                    Nâng cấp để xem chi tiết
+                                                </ButtonPrimary>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <p className={s.feedbackText}>
+                                            {detail.aiFeedback}
+                                        </p>
+                                    )}
                                 </div>
                             )}
                         </div>

@@ -3,6 +3,7 @@ import { getMe } from '@/lib/users'
 import StudentDashboard from '@/pages/student/dashboard/Dashboard'
 import TeacherDashboard from '@/pages/teacher/dashboard/TeacherDashboard'
 import AdminDashboard from '@/pages/admin/dashboard/AdminDashboard'
+import GuestStudentDashboard from '@/pages/student/dashboard/GuestStudentDashboard'
 import LoadingPage from '@/components/core/LoadingPage'
 
 export default function GeneralDashboard() {
@@ -18,6 +19,10 @@ export default function GeneralDashboard() {
     if (!userData) return null
 
     switch (userData.role?.toLowerCase()) {
+        case 'guest_student':
+            // Import lazily or statically. We can just add the import at the top.
+            return <GuestStudentDashboard />
+
         case 'student':
             return <StudentDashboard />
 

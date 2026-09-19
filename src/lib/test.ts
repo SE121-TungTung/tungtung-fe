@@ -441,7 +441,9 @@ function mapSubmitResult(dto: BackendSubmitAttemptResponse): SubmitResult {
         gradedBy: dto.graded_by,
         aiFeedback: dto.ai_feedback,
         teacherFeedback: dto.teacher_feedback,
-        questionResults: dto.question_results.map(mapQuestionResult),
+        questionResults: dto.question_results
+            ? dto.question_results.map(mapQuestionResult)
+            : [],
     }
 }
 
@@ -749,6 +751,56 @@ export const testApi = {
     },
 
     /**
+     * List public tests for guests
+     * Endpoint: GET /tests/public
+     */
+    listPublicTests: async (
+        params?: ListStudentTestsParams
+    ): Promise<{
+        total: number
+        skip: number
+        limit: number
+        tests: StudentTestListItem[]
+    }> => {
+        try {
+            const query = new URLSearchParams()
+            if (params?.skip !== undefined)
+                query.append('skip', String(params.skip))
+            if (params?.limit !== undefined)
+                query.append('limit', String(params.limit))
+            if (params?.skill) query.append('skill', params.skill)
+
+            const queryString = query.toString()
+            const url = queryString
+                ? `${BASE_URL}/public?${queryString}`
+                : `${BASE_URL}/public`
+
+            const response = await api<any>(url, { method: 'GET' })
+
+            if (Array.isArray(response)) {
+                return {
+                    total: response.length,
+                    skip: params?.skip || 0,
+                    limit: params?.limit || response.length,
+                    tests: response.map(mapStudentTestListItem),
+                }
+            }
+
+            return {
+                total: response.total || 0,
+                skip: response.skip || 0,
+                limit: response.limit || 0,
+                tests: (response.tests || response.items || []).map(
+                    mapStudentTestListItem
+                ),
+            }
+        } catch (error) {
+            console.error('Error fetching public tests:', error)
+            throw error
+        }
+    },
+
+    /**
      * Get test detail (Student view - no correct answers)
      * Endpoint: GET /tests/{test_id}
      *
@@ -862,6 +914,20 @@ export const testApi = {
                 method: 'POST',
                 body: JSON.stringify(payload),
             }
+        )
+        return mapSubmitResult(response)
+    },
+
+    /**
+     * Get a guest test attempt summary
+     */
+    getGuestAttemptSummary: async (
+        attemptId: string,
+        guestSessionId: string
+    ): Promise<SubmitResult> => {
+        const response = await api<BackendSubmitAttemptResponse>(
+            `${BASE_URL}/attempts/guest/${attemptId}?guest_session_id=${guestSessionId}`,
+            { method: 'GET' }
         )
         return mapSubmitResult(response)
     },
