@@ -1,16 +1,22 @@
 export type Role =
     | 'student'
     | 'teacher'
+    | 'ta'
     | 'office_admin'
     | 'center_admin'
     | 'system_admin'
+    | 'guest'
+    | 'guest_student'
 
 export const ALL_ROLES: Role[] = [
     'student',
     'teacher',
+    'ta',
     'office_admin',
     'center_admin',
     'system_admin',
+    'guest',
+    'guest_student',
 ]
 
 export type UserStatus =
@@ -74,6 +80,7 @@ export interface User {
     updatedAt: string
     isFirstLogin: boolean
     emergencyContact?: EmergencyContact | null
+    preferences?: Record<string, any> | null
 }
 
 // --- PAYLOADS ---
@@ -121,11 +128,14 @@ export interface ListUsersParams {
 }
 
 export interface ListUsersResponse {
-    users: BackendUser[]
-    total: number
-    page: number
-    size: number
-    pages: number
+    success: boolean
+    data: BackendUser[]
+    meta?: {
+        page: number
+        limit: number
+        total: number
+        total_pages: number
+    }
 }
 
 export interface StudentOverviewStats {
@@ -172,6 +182,8 @@ export interface ClassSession {
     end_time: string
     status: string
     room_id?: string | null
+    attendance_taken?: boolean
+    student_checked_in?: boolean | null
 }
 
 export interface MyClassUser {

@@ -4,22 +4,26 @@ import { useQueryClient } from '@tanstack/react-query'
 // Components
 import ClassTable from './ClassTable'
 import { ClassFormModal } from './ClassFormModal'
+import { ClassDetailModal } from './ClassDetailModal'
 import InputField from '@/components/common/input/InputField'
 import { SelectField } from '@/components/common/input/SelectField'
-import { Button } from '@/components/core/Button'
+import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import Card from '@/components/common/card/Card'
 import Pagination from '@/components/common/menu/Pagination'
 
 // Assets & Styles
 import s from './ClassManagementPage.module.css'
-import IconPlus from '@/assets/Plus Thin.svg'
 import IconSearch from '@/assets/Lens.svg'
 
 // Hooks & Types
 import { usePermissions } from '@/hooks/usePermissions'
 import { useTableParams } from '@/hooks/useTableParams'
 import { useDialog } from '@/hooks/useDialog'
-import { useClasses, useDeleteClass } from '@/hooks/domain/useClasses'
+import {
+    useClasses,
+    useDeleteClass,
+    useUpdateClass,
+} from '@/hooks/domain/useClasses'
 import { type Class, type ClassStatus } from '@/lib/classes'
 
 // Options Constants
@@ -30,6 +34,9 @@ const CLASS_STATUS_OPTIONS = [
     { label: 'Đã hoàn thành', value: 'completed' },
     { label: 'Đã hủy', value: 'cancelled' },
     { label: 'Dời ngày', value: 'postponed' },
+    { label: 'Nháp (DRAFT)', value: 'draft' },
+    { label: 'Mở đăng ký (OPEN)', value: 'open' },
+    { label: 'Đang học (ONGOING)', value: 'ongoing' },
 ]
 
 const SORT_BY_OPTIONS = [
@@ -57,6 +64,11 @@ export default function ClassManagementPage() {
 
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [editingClass, setEditingClass] = useState<Class | null>(null)
+    const [detailingClass, setDetailingClass] = useState<Class | null>(null)
+
+    const handleOpenDetailModal = (c: Class) => {
+        setDetailingClass(c)
+    }
 
     // 1. Setup Table Logic
     const {
@@ -85,8 +97,9 @@ export default function ClassManagementPage() {
         sortBy: apiParams.sortBy,
     })
 
-    // 3. Delete Hook
+    // 3. Delete & Update Hooks
     const { mutateAsync: deleteClassMutate } = useDeleteClass()
+    const { mutateAsync: updateClassMutate } = useUpdateClass()
 
     // Handlers
     const handleOpenCreateModal = () => {
@@ -112,6 +125,31 @@ export default function ClassManagementPage() {
             await deleteClassMutate(classItem.id)
         } catch (err: any) {
             await alert(`Không thể xóa lớp học: ${err.message}`, 'Lỗi')
+        }
+    }
+
+    const handleUpdateStatus = async (
+        classItem: Class,
+        newStatus: ClassStatus
+    ) => {
+        const actionText = newStatus === 'open' ? 'mở đăng ký cho' : 'bắt đầu'
+        const confirmed = await confirm(
+            `Bạn có chắc chắn muốn ${actionText} lớp học "${classItem.name}"?`
+        )
+        if (!confirmed) return
+
+        try {
+            await updateClassMutate({
+                id: classItem.id,
+                body: {
+                    status: newStatus,
+                },
+            })
+        } catch (err: any) {
+            await alert(
+                `Không thể cập nhật trạng thái lớp học: ${err.message}`,
+                'Lỗi'
+            )
         }
     }
 
@@ -171,17 +209,9 @@ export default function ClassManagementPage() {
                     </div>
 
                     {canCreateClass && (
-                        <Button
-                            variant="primary"
-                            onClick={handleOpenCreateModal}
-                        >
-                            <img
-                                src={IconPlus}
-                                alt=""
-                                className={s.buttonIcon}
-                            />
+                        <ButtonPrimary onClick={handleOpenCreateModal}>
                             Tạo lớp học
-                        </Button>
+                        </ButtonPrimary>
                     )}
                 </Card>
 
@@ -191,6 +221,8 @@ export default function ClassManagementPage() {
                         classes={classesData?.items || []}
                         onEditClass={handleOpenEditModal}
                         onDeleteClass={handleDeleteClass}
+                        onUpdateStatus={handleUpdateStatus}
+                        onViewDetail={handleOpenDetailModal}
                         isLoading={isLoading || isFetching}
                     />
 
@@ -220,6 +252,13 @@ export default function ClassManagementPage() {
                 onSaved={() => {
                     qc.invalidateQueries({ queryKey: ['classes'] })
                 }}
+            />
+
+            {/* DETAIL & ENROLLMENT MODAL */}
+            <ClassDetailModal
+                isOpen={!!detailingClass}
+                onClose={() => setDetailingClass(null)}
+                classItem={detailingClass}
             />
         </div>
     )

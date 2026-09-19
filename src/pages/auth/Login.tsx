@@ -6,16 +6,14 @@ import { login } from '@/lib/auth'
 import { useSession } from '@/stores/session.store'
 import { Link, useNavigate } from 'react-router-dom'
 import { homePathByRole } from '@/utils/role'
-import s from '@/pages/auth/Login.module.css'
 import { useState } from 'react'
-import { TextHorizontal } from '@/components/common/text/TextHorizontal'
-import ChatSquare from '@/assets/Chat Square Exclamation.svg'
 import InputField from '@/components/common/input/InputField'
-import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
+import Button from '@/components/common/button/Button'
 import TextCheck from '@/components/common/text/TextCheck'
 import FieldMessage from '@/components/common/typography/FieldMessage'
 import FormCard from '@/components/common/form/FormCard'
-import LiquidEther from '@/components/effect/LiquidEther'
+import AuthLayout from './AuthLayout'
+import s from './Login.module.css'
 import { getMe } from '@/lib/users'
 
 const emailMsgId = 'email-msg'
@@ -30,7 +28,9 @@ export function LoginPage() {
     const {
         register,
         handleSubmit,
-        formState: { errors },
+        watch,
+        setValue,
+        formState: { errors, isSubmitting },
     } = useForm<LoginValues>({
         resolver: zodResolver(loginSchema),
         defaultValues: { remember: true },
@@ -38,12 +38,17 @@ export function LoginPage() {
 
     const mutation = useMutation({
         mutationFn: login,
-        onSuccess: async (data) => {
+        onSuccess: async (data, variables) => {
             // Clear any previous errors
             setApiError(undefined)
 
             // Save tokens
-            loginStore(data.access_token, data.refresh_token)
+            const isRemember = !!variables.remember
+            console.log(
+                'Login successful, tokens received. Remember:',
+                isRemember
+            )
+            loginStore(data.access_token, data.refresh_token, isRemember)
 
             if (data.is_first_login) {
                 localStorage.setItem('is_first_login', 'true')
@@ -115,161 +120,100 @@ export function LoginPage() {
     }
 
     return (
-        <div>
-            <div className={s.bg} aria-hidden="true">
-                <LiquidEther
-                    colors={['#5227FF', '#FF9FFC', '#B19EEF']}
-                    mouseForce={20}
-                    cursorSize={100}
-                    isViscous={true}
-                    viscous={30}
-                    iterationsViscous={32}
-                    iterationsPoisson={32}
-                    resolution={0.5}
-                    isBounce={false}
-                    autoDemo={true}
-                    autoSpeed={0.5}
-                    autoIntensity={2.2}
-                    takeoverDuration={0.25}
-                    autoResumeDelay={1000}
-                    autoRampDuration={0.6}
+        <AuthLayout
+            headingPrimary="Đăng nhập"
+            headingSecondary="để truy cập"
+            headingTertiary="TungTung"
+        >
+            <FormCard
+                onSubmit={handleSubmit(onSubmit)}
+                actionsAlign="stretch"
+                actions={
+                    <Button
+                        type="submit"
+                        tone="brand"
+                        variant="gradient"
+                        size="lg"
+                        shape="rounded"
+                        glow
+                        loading={isSubmitting || mutation.isPending}
+                        disabled={isSubmitting || mutation.isPending}
+                    >
+                        Đăng nhập
+                    </Button>
+                }
+            >
+                {/* Email Field */}
+                <InputField
+                    label="Email"
+                    type="email"
+                    placeholder="Nhập email của bạn"
+                    mode="light"
+                    aria-describedby={errors.email ? emailMsgId : undefined}
+                    {...register('email', {
+                        required: 'Email không hợp lệ',
+                    })}
                 />
-            </div>
-            <div className={s.wrap}>
-                <div className={s.info}>
-                    <div style={{ width: '298px' }}>
-                        <h1 className={s.h1}>
-                            Đăng nhập{' '}
-                            <span className={s.h1_inside}>để truy cập</span>{' '}
-                            TungTung
-                        </h1>
-                    </div>
-                    <div className="frame">
-                        <TextHorizontal
-                            className="text-horizontal-instance"
-                            icon={
-                                <img
-                                    src={ChatSquare}
-                                    className="chat-square"
-                                    alt="chat icon"
-                                />
-                            }
-                            iconStyle="glass"
-                            description="Website quản lý trung tâm Anh ngữ số 1 Việt Nam, cung cấp hệ sinh thái đa dạng cho người dạy lẫn người học."
-                            ctaText="Tìm hiểu thêm"
-                            onClick={() =>
-                                window.open(
-                                    'https://tungtung-fe.vercel.app',
-                                    '_blank'
-                                )
-                            }
-                        />
-                    </div>
+                {errors.email && (
+                    <FieldMessage
+                        tone="error"
+                        variant="chip"
+                        messageId={emailMsgId}
+                    >
+                        {errors.email.message || 'Email không hợp lệ'}
+                    </FieldMessage>
+                )}
+
+                <div style={{ height: 'var(--primitive-space-8)' }} />
+
+                {/* Password Field */}
+                <InputField
+                    label="Mật khẩu"
+                    type="password"
+                    enablePasswordToggle={true}
+                    placeholder="Nhập mật khẩu"
+                    mode="dark"
+                    aria-describedby={errors.password ? passMsgId : undefined}
+                    {...register('password')}
+                />
+                {errors.password && (
+                    <FieldMessage
+                        tone="error"
+                        variant="chip"
+                        messageId={passMsgId}
+                    >
+                        {errors.password.message || 'Vui lòng nhập mật khẩu'}
+                    </FieldMessage>
+                )}
+
+                <div style={{ height: 'var(--primitive-space-8)' }} />
+
+                {/* Remember & Forgot Password Row */}
+                <div className={s.rememberRow}>
+                    <TextCheck
+                        className={s.rememberCheck}
+                        variant="glass"
+                        size="sm"
+                        checked={watch('remember')}
+                        onCheckedChange={(val) =>
+                            setValue('remember', val, { shouldDirty: true })
+                        }
+                    >
+                        Ghi nhớ đăng nhập
+                    </TextCheck>
+
+                    <Link to="/forgot-password" className={s.forgotLink}>
+                        Quên mật khẩu?
+                    </Link>
                 </div>
 
-                <FormCard
-                    onSubmit={handleSubmit(onSubmit)}
-                    actionsAlign="stretch"
-                    actions={
-                        <ButtonPrimary
-                            type="submit"
-                            variant="glass"
-                            shape="rounded"
-                            loading={mutation.isPending}
-                            disabled={mutation.isPending}
-                        >
-                            Đăng nhập
-                        </ButtonPrimary>
-                    }
-                >
-                    <InputField
-                        label="Email"
-                        type="email"
-                        placeholder="Nhập email"
-                        mode="dark"
-                        aria-describedby={errors.email ? emailMsgId : undefined}
-                        {...register('email', {
-                            required: 'Email không hợp lệ',
-                        })}
-                    />
-                    {errors.email && (
-                        <FieldMessage
-                            tone="error"
-                            variant="chip"
-                            messageId={emailMsgId}
-                        >
-                            {errors.email.message || 'Email không hợp lệ'}
-                        </FieldMessage>
-                    )}
-
-                    <div style={{ height: 20 }} />
-
-                    <InputField
-                        label="Password"
-                        type="password"
-                        enablePasswordToggle={true}
-                        placeholder="Nhập password"
-                        mode="dark"
-                        aria-describedby={
-                            errors.password ? passMsgId : undefined
-                        }
-                        {...register('password', {
-                            minLength: {
-                                value: 8,
-                                message: 'Tối thiểu 8 ký tự',
-                            },
-                        })}
-                    />
-                    {errors.password && (
-                        <FieldMessage
-                            tone="warning"
-                            variant="chip"
-                            messageId={passMsgId}
-                        >
-                            {errors.password.message ||
-                                'Mật khẩu tối thiểu 8 ký tự'}
-                        </FieldMessage>
-                    )}
-
-                    <div style={{ height: 20 }} />
-
-                    <div className={`${s.row} ${s.rowCompact}`}>
-                        <TextCheck
-                            className={s.remember}
-                            variant="glass"
-                            size="sm"
-                            inputProps={register('remember')}
-                            defaultChecked
-                        >
-                            Ghi nhớ đăng nhập
-                        </TextCheck>
-
-                        <Link to="/forgot-password" className={s.forgot}>
-                            Quên mật khẩu?
-                        </Link>
-                    </div>
-
-                    {/* API Error Display */}
-                    {apiError && (
-                        <div
-                            className={s.error}
-                            role="alert"
-                            style={{
-                                marginTop: '16px',
-                                padding: '12px 14px',
-                                background: 'rgba(255, 77, 79, 0.15)',
-                                border: '1px solid rgba(255, 77, 79, 0.3)',
-                                borderRadius: '8px',
-                                color: '#ff9aa2',
-                                fontSize: '14px',
-                                lineHeight: '1.5',
-                            }}
-                        >
-                            {apiError}
-                        </div>
-                    )}
-                </FormCard>
-            </div>
-        </div>
+                {/* API Error Message */}
+                {apiError && (
+                    <FieldMessage tone="error" variant="chip">
+                        {apiError}
+                    </FieldMessage>
+                )}
+            </FormCard>
+        </AuthLayout>
     )
 }

@@ -3,20 +3,20 @@
     border-collapse: separate;
     border-spacing: 0;
     background: inherit;
-    font-size: var(--font-size-sm);
+    font-size: var(--primitive-text-sm);
 }
 
 .table th,
 .table td {
-    padding: var(--space-16) var(--space-20);
+    padding: var(--primitive-space-6) var(--primitive-space-8);
     text-align: left;
     vertical-align: middle;
 }
 
 .table th {
-    background: var(--color-bg-muted);
+    background: var(--color-surface-raised);
     color: var(--color-text-secondary);
-    font-size: var(--font-size-xs);
+    font-size: var(--primitive-text-xs);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.8px;
@@ -24,15 +24,15 @@
     top: 0;
     z-index: 10;
     white-space: nowrap;
-    border-bottom: 1px solid var(--boder-soft-dark);
+    border-bottom: 1px solid var(--color-border-soft);
 }
 
 .table thead tr th:first-child {
-    padding-left: var(--space-24);
+    padding-left: var(--primitive-space-6);
 }
 
 .table tbody tr td:first-child {
-    padding-left: var(--space-24);
+    padding-left: var(--primitive-space-6);
 }
 
 .table tbody tr {
@@ -41,7 +41,7 @@
 }
 
 .table tbody tr:hover {
-    background-color: var(--palette-columbia-blue-800);
+    background-color: var(--primitive-blue-800);
     transform: translateY(-1px);
 }
 
@@ -75,21 +75,21 @@
 .userInfo {
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
+    gap: var(--primitive-space-1);
     min-width: 0;
 }
 
 .userName {
     font-weight: 600;
     color: var(--color-text-primary);
-    font-size: var(--font-size-sm);
+    font-size: var(--primitive-text-sm);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .userEmail {
-    font-size: var(--font-size-xs);
+    font-size: var(--primitive-text-xs);
     color: var(--color-text-secondary);
     white-space: nowrap;
     overflow: hidden;
@@ -99,17 +99,17 @@
 .contactCell {
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
-    font-size: var(--font-size-sm);
+    gap: var(--primitive-space-1);
+    font-size: var(--primitive-text-sm);
     color: var(--color-text-secondary);
 }
 
 .statusBadge {
     display: inline-flex;
     align-items: center;
-    padding: var(--space-4) var(--space-12);
-    border-radius: var(--radius-full);
-    font-size: var(--font-size-xs);
+    padding: var(--primitive-space-1) var(--primitive-space-4);
+    border-radius: var(--primitive-radius-full);
+    font-size: var(--primitive-text-xs);
     font-weight: 600;
     letter-spacing: 0.3px;
     transition: all 0.2s ease;
@@ -125,63 +125,64 @@
 .actionsCell {
     display: flex;
     justify-content: flex-end;
-    gap: var(--space-8);
-    padding-right: var(--space-24);
-}
-
-.actionsHeader {
-    text-align: right;
-    padding-right: var(--space-24);
-}
-
-.actionButton {
-    padding: var(--space-8);
-    border-radius: var(--radius-md);
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    display: flex;
     align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
+    gap: var(--primitive-space-2);
+    padding-right: var(--primitive-space-6);
 }
 
-.actionButton img {
-    width: 18px;
-    height: 18px;
-    opacity: 0.6;
-    transition: opacity 0.2s ease;
+.actionsCell button {
+    color: var(--color-text-secondary);
+    transition:
+        color 0.2s ease,
+        background-color 0.2s ease;
 }
 
-.actionButton:hover:not(:disabled) {
-    background-color: var(--color-bg-deep);
-    transform: translateY(-2px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+.actionsCell button:hover:not(:disabled) {
+    color: var(--color-text-primary);
+    background-color: var(--color-surface-raised);
 }
 
-.actionButton:hover:not(:disabled) img {
-    opacity: 1;
-}
-
-.actionButton:active:not(:disabled) {
-    transform: translateY(0);
-}
-
-.actionButton:disabled {
-    opacity: 0.3;
+.actionsCell button:disabled {
+    opacity: 0.35;
     cursor: not-allowed;
 }
 
+.actionsCell button svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+/* Fallback if img tag is used */
+.actionsCell img {
+    width: 18px;
+    height: 18px;
+    opacity: 0.7;
+    transition:
+        opacity 0.2s ease,
+        filter 0.2s ease;
+}
+
+:global([data-theme='dark']) .actionsCell img,
+[data-theme='dark'] .actionsCell img {
+    filter: invert(1) brightness(1.8);
+    opacity: 0.8;
+}
+
+.actionsCell .dangerButton,
+.dangerButton {
+    color: var(--color-text-secondary);
+}
+
 .dangerButton:hover:not(:disabled) {
-    background-color: rgba(239, 68, 68, 0.1) !important;
+    background-color: var(--color-status-danger-bg) !important;
+    color: var(--color-status-danger) !important;
 }
 
 .dangerButton:hover:not(:disabled) img {
     filter: brightness(0) saturate(100%) invert(38%) sepia(95%) saturate(2871%)
-        hue-rotate(338deg) brightness(96%) contrast(92%);
-    opacity: 1;
+        hue-rotate(338deg) brightness(96%) contrast(92%) !important;
+    opacity: 1 !important;
 }
 
 /* Table loading state */
@@ -192,7 +193,7 @@
 
 /* Empty state */
 .emptyState {
-    padding: var(--space-80) var(--space-40);
+    padding: var(--primitive-space-20) var(--primitive-space-10);
     text-align: center;
     color: var(--color-text-secondary);
 }
@@ -201,29 +202,20 @@
     width: 120px;
     height: 120px;
     opacity: 0.3;
-    margin-bottom: var(--space-16);
+    margin-bottom: var(--primitive-space-4);
 }
 
 /* Responsive adjustments */
 @media (max-width: 1024px) {
     .table th,
     .table td {
-        padding: var(--space-12) var(--space-16);
-    }
-
-    .userCell {
-        min-width: 200px;
-    }
-
-    .avatar {
-        width: 36px;
-        height: 36px;
+        padding: var(--primitive-space-3) var(--primitive-space-4);
     }
 }
 
 @media (max-width: 768px) {
     .table {
-        font-size: var(--font-size-xs);
+        font-size: var(--primitive-text-xs);
     }
 
     .table th {
@@ -231,13 +223,13 @@
     }
 
     .actionsCell {
-        gap: var(--space-4);
+        gap: var(--primitive-space-1);
     }
 
     .actionButton {
         width: 32px;
         height: 32px;
-        padding: var(--space-6);
+        padding: var(--primitive-space-1);
     }
 
     .actionButton img {

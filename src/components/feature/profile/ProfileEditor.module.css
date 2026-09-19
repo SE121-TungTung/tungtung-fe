@@ -54,7 +54,7 @@
     border-radius: 8px; /* Bo góc mềm hơn */
     font-size: 14px;
     font-weight: 500;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     cursor: pointer;
     transition: all 0.2s;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -174,4 +174,25 @@
     .avatarControls {
         align-items: center;
     }
+}
+
+.selectField {
+    width: 100%;
+    height: 40px;
+    padding: 0 12px;
+    background-color: var(--color-bg-soft);
+    border: 1px solid var(--color-border-soft);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--color-text-primary);
+    transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
+    outline: none;
+}
+
+.selectField:focus {
+    border-color: var(--color-brand-primary-500);
+    box-shadow: 0 0 0 2px rgba(var(--color-brand-primary-rgb), 0.15);
 }

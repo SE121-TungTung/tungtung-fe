@@ -1,0 +1,33 @@
+.pageWrapperWithoutHeader {
+    width: 100%;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.mainContent {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.pageTitle {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--color-text-primary, #1e293b);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+.dateDisplay {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-text-primary, #1e293b);
+    min-width: 180px;
+}

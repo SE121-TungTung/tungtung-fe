@@ -8,6 +8,15 @@ export type CourseLevel =
     | 'advanced'
     | 'proficiency'
 export type CourseStatus = 'active' | 'inactive' | 'archived'
+export type CourseType =
+    | 'general_english'
+    | 'ielts'
+    | 'toeic'
+    | 'toefl'
+    | 'business'
+    | 'conversation'
+    | 'grammar'
+    | 'writing'
 
 export type BackendCourse = {
     id: string
@@ -17,6 +26,13 @@ export type BackendCourse = {
     duration_hours: number
     level: CourseLevel
     status: CourseStatus
+    course_type: CourseType
+    max_students: number
+    min_students: number
+    currency: string
+    syllabus?: any | null
+    learning_objectives?: string[] | null
+    prerequisites?: string[] | null
     created_at: string
     updated_at: string
 }
@@ -29,6 +45,13 @@ export type Course = {
     durationHours: number
     level: CourseLevel
     status: CourseStatus
+    courseType: CourseType
+    maxStudents: number
+    minStudents: number
+    currency: string
+    syllabus?: any | null
+    learningObjectives?: string[] | null
+    prerequisites?: string[] | null
     createdAt: string
     updatedAt: string
 }
@@ -41,6 +64,13 @@ const mapCourse = (c: BackendCourse): Course => ({
     durationHours: c.duration_hours,
     level: c.level,
     status: c.status,
+    courseType: c.course_type,
+    maxStudents: c.max_students,
+    minStudents: c.min_students,
+    currency: c.currency,
+    syllabus: c.syllabus ?? null,
+    learningObjectives: c.learning_objectives ?? [],
+    prerequisites: c.prerequisites ?? [],
     createdAt: c.created_at,
     updatedAt: c.updated_at,
 })
@@ -74,34 +104,58 @@ export const listCourses = async (
         page = 1,
         limit = 10,
         sortBy,
-        sortOrder,
-        includeDeleted = false,
+        sortOrder = 'desc',
+        level,
+        status,
     } = p
 
     const qs = new URLSearchParams()
-    qs.set('skip', String(Math.max(0, (page - 1) * limit)))
-    qs.set('limit', String(limit))
+    qs.set('skip', '0')
+    qs.set('limit', '1000')
     if (search) qs.set('search', search)
-    if (sortBy) qs.set('sort_by', sortBy)
-    if (sortOrder) qs.set('sort_order', sortOrder)
-    if (includeDeleted) qs.set('include_deleted', 'true')
 
     const url = `${COURSES_API_URL}${qs.toString() ? `?${qs.toString()}` : ''}`
-    const res = await api<any>(url, {
-        method: 'GET',
-    })
-    const raw = res.items ?? res.rooms ?? (Array.isArray(res) ? res : [])
+    const res = await api<any>(url, { method: 'GET' })
+
+    const raw = res.data ?? res.items ?? (Array.isArray(res) ? res : [])
+    let items = raw.map(mapCourse)
+
+    if (level) {
+        items = items.filter((c: Course) => c.level === level)
+    }
+    if (status) {
+        items = items.filter((c: Course) => c.status === status)
+    }
+
+    if (sortBy) {
+        items.sort((a: any, b: any) => {
+            const field =
+                sortBy === 'created_at'
+                    ? 'createdAt'
+                    : sortBy === 'fee_amount'
+                      ? 'feeAmount'
+                      : sortBy === 'duration_hours'
+                        ? 'durationHours'
+                        : sortBy
+
+            const valA = a[field]
+            const valB = b[field]
+
+            if (sortOrder === 'asc') return valA > valB ? 1 : -1
+            return valA < valB ? 1 : -1
+        })
+    }
+
+    const total = items.length
+    const startIndex = (page - 1) * limit
+    const paginatedItems = items.slice(startIndex, startIndex + limit)
+
     return {
-        items: raw.map(mapCourse),
-        total: res.total ?? raw.length,
-        page: res.page ?? page,
-        size: res.size ?? limit,
-        pages:
-            res.pages ??
-            Math.max(
-                1,
-                Math.ceil((res.total ?? raw.length) / (res.size ?? limit))
-            ),
+        items: paginatedItems,
+        total,
+        page,
+        size: limit,
+        pages: Math.ceil(total / limit),
     }
 }
 
@@ -112,6 +166,13 @@ export type CreateCourseDto = {
     duration_hours: number
     level: CourseLevel
     status: CourseStatus
+    course_type: CourseType
+    max_students: number
+    min_students: number
+    currency: string
+    syllabus?: any | null
+    learning_objectives?: string[] | null
+    prerequisites?: string[] | null
 }
 
 export async function createCourse(body: CreateCourseDto): Promise<Course> {

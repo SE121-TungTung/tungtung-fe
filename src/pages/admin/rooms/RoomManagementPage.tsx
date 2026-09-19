@@ -6,13 +6,12 @@ import RoomTable from './RoomTable'
 import { RoomFormModal } from './RoomFormModal'
 import InputField from '@/components/common/input/InputField'
 import { SelectField } from '@/components/common/input/SelectField'
-import { Button } from '@/components/core/Button'
+import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import Card from '@/components/common/card/Card'
 import Pagination from '@/components/common/menu/Pagination'
 
 // Assets & Styles
 import s from './RoomManagementPage.module.css'
-import IconPlus from '@/assets/Plus Thin.svg'
 import IconSearch from '@/assets/Lens.svg'
 
 // Hooks & Types
@@ -99,9 +98,10 @@ export default function RoomManagementPage() {
         ...apiParams,
         roomType: (apiParams.roomType as RoomType) || undefined,
         status: (apiParams.status as RoomStatus) || undefined,
-        capacity:
+        minCapacity:
             apiParams.capacity === '' ? undefined : Number(apiParams.capacity),
         sortBy: apiParams.sortBy as ListRoomsParams['sortBy'],
+        sortDir: sort.order as 'asc' | 'desc',
     })
 
     // 3. Delete Hook
@@ -224,17 +224,9 @@ export default function RoomManagementPage() {
                     </div>
 
                     {canCreateRoom && (
-                        <Button
-                            variant="primary"
-                            onClick={handleOpenCreateModal}
-                        >
-                            <img
-                                src={IconPlus}
-                                alt=""
-                                className={s.buttonIcon}
-                            />
+                        <ButtonPrimary onClick={handleOpenCreateModal}>
                             Tạo phòng
-                        </Button>
+                        </ButtonPrimary>
                     )}
                 </Card>
 

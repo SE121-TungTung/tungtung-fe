@@ -1,8 +1,8 @@
 .container {
     padding: 20px;
-    background: var(--surface-raised-light);
+    background: var(--color-surface-raised);
     border-radius: 12px;
-    border: 1px solid var(--boder-soft-light);
+    border: 1px solid var(--color-border-soft);
 }
 
 .row {
@@ -21,29 +21,29 @@
 .label {
     font-size: 13px;
     font-weight: 600;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
 }
 
 .input,
 .select {
     padding: 8px 12px;
     font-size: 14px;
-    border: 1px solid var(--boder-soft-light);
+    border: 1px solid var(--color-border-soft);
     border-radius: 8px;
-    background: var(--surface-page-light);
-    color: var(--text-primary-light);
+    background: var(--color-surface-page);
+    color: var(--color-text-primary);
     transition: all 0.2s ease;
 }
 
 .input:focus,
 .select:focus {
     outline: none;
-    border-color: var(--brand-primary-500-light);
+    border-color: var(--color-brand-primary-500);
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .input::placeholder {
-    color: var(--text-tertiary-light);
+    color: var(--color-text-tertiary);
 }
 
 .actions {

@@ -1,0 +1,235 @@
+export type InvoiceStatus =
+    'PENDING' | 'PAID' | 'CANCELLED' | 'pending' | 'paid' | 'cancelled'
+export type PaymentStatus = 'pending' | 'success' | 'failed' | 'cancelled'
+export type PaymentGateway =
+    | 'vnpay'
+    | 'momo'
+    | 'cash'
+    | 'bank_transfer'
+    | 'VNPAY'
+    | 'MOMO'
+    | 'CASH'
+    | 'BANK_TRANSFER'
+    | 'INTERNAL_WALLET'
+    | 'internal_wallet'
+
+export type WalletTxType = 'credit' | 'debit'
+export type WalletRefType =
+    'tuition' | 'salary' | 'refund' | 'top_up' | 'withdrawal'
+export type WalletTxStatus = 'pending' | 'approved' | 'rejected'
+
+export interface WalletBalanceResponse {
+    user_id: string
+    wallet_balance: number
+}
+
+export interface WalletTransactionResponse {
+    id: string
+    user_id: string
+    type: WalletTxType
+    amount: number
+    balance_after: number
+    reference_type: WalletRefType
+    reference_id: string | null
+    status: WalletTxStatus
+    created_by: string | null
+    note: string | null
+    extra_metadata: Record<string, any> | null
+    created_at: string
+    updated_at: string
+    user_fullname?: string | null
+    user_email?: string | null
+}
+
+export type WalletTransaction = WalletTransactionResponse
+
+export interface WalletTopUpRequest {
+    amount: number
+    gateway: PaymentGateway
+    note?: string
+    reference_code?: string
+}
+
+export interface WalletWithdrawRequest {
+    amount: number
+    bank_name: string
+    account_number: string
+    account_name: string
+    note?: string
+}
+
+export interface WalletActionRequest {
+    note?: string
+}
+export type RefundStatus = 'PENDING' | 'APPROVED' | 'REJECTED'
+
+// ============================================================================
+// Invoices
+// ============================================================================
+export interface InvoiceResponse {
+    id: string
+    student_id: string
+    student_name?: string
+    enrollment_id: string
+    course_id?: string
+    course_name?: string
+    original_amount: number
+    discount_amount: number
+    final_amount: number
+    status: InvoiceStatus
+    due_date: string | null
+    note: string | null
+    created_at: string
+    updated_at: string
+}
+
+export interface InvoiceCreate {
+    enrollment_id: string
+    discount_amount?: number
+    note?: string
+}
+
+// ============================================================================
+// Payments
+// ============================================================================
+export interface PaymentResponse {
+    id: string
+    invoice_id: string
+    student_id: string
+    amount: number
+    payment_method: PaymentGateway
+    gateway: PaymentGateway
+    gateway_transaction_id: string | null
+    status: PaymentStatus
+    payment_url: string | null
+    created_at: string
+    updated_at: string
+}
+
+export interface PaymentCreate {
+    invoice_id: string
+    amount: number
+    gateway: PaymentGateway
+    return_url?: string // Dùng cho web redirect
+}
+
+export interface ReceiptResponse {
+    receipt_url: string
+    generated_at: string
+}
+
+// ============================================================================
+// Refunds
+// ============================================================================
+export interface RefundCalculationResponse {
+    sessions_total: number
+    sessions_attended: number
+    sessions_remaining: number
+    original_fee: number
+    refundable_amount: number
+}
+
+export interface RefundResponse {
+    id: string
+    enrollment_id: string
+    student_name?: string
+    course_name?: string
+    status: RefundStatus
+    requested_amount: number
+    approved_amount: number | null
+    reason: string
+    rejection_reason: string | null
+    requested_by: string
+    created_at: string
+}
+
+export interface RefundCreate {
+    enrollment_id: string
+    requested_amount: number
+    reason: string
+}
+
+export interface RefundStatusUpdate {
+    status: 'APPROVED' | 'REJECTED'
+    approved_amount?: number
+    rejection_reason?: string
+}
+
+// ============================================================================
+// Reports
+// ============================================================================
+export interface RevenueReportBreakdown {
+    course_id: string
+    course_name: string
+    total_revenue: number
+    total_invoices: number
+}
+
+export interface RevenueReportResponse {
+    total_revenue: number
+    total_invoices: number
+    avg_payment_value: number
+    breakdown_by_course: RevenueReportBreakdown[]
+    date_from?: string | null
+    date_to?: string | null
+}
+
+export interface ExpensesReportBreakdown {
+    category: string
+    total: number
+}
+
+export interface ExpensesReportResponse {
+    cost_type: string
+    total_expenses: number
+    breakdown_by_category: ExpensesReportBreakdown[]
+    date_from?: string | null
+    date_to?: string | null
+}
+
+export interface ProfitReportResponse {
+    total_revenue: number
+    total_expenses: number
+    profit: number
+    profit_margin: number
+}
+
+export interface DebtListResponse {
+    invoice_id: string
+    student_id: string
+    student_name: string
+    phone: string | null
+    course_name: string | null
+    debt_amount: number
+    due_date: string | null
+    days_overdue: number
+}
+
+export interface ExportJobCreate {
+    report_type: 'revenue' | 'expenses' | 'profit' | 'debts'
+    filters?: {
+        date_from?: string
+        date_to?: string
+        [key: string]: any
+    }
+}
+
+export interface ExportJobResponse {
+    id: string
+    report_type: 'revenue' | 'expenses' | 'profit' | 'debts'
+    status: 'pending' | 'processing' | 'completed' | 'failed'
+    file_url?: string
+    error_message?: string | null
+}
+
+export interface PaginationMeta {
+    page: number
+    limit: number
+    total: number
+    total_pages: number
+}
+
+export interface PaginatedResult<T> {
+    data: T[]
+    meta: PaginationMeta
+}

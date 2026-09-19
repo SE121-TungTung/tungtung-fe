@@ -5,7 +5,7 @@
 .questionText {
     font-size: 14px;
     margin-bottom: 8px;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     line-height: 1.6;
     display: flex; /* Để input nằm cùng dòng */
     align-items: center;
@@ -16,7 +16,7 @@
 .inputField {
     padding: 6px 10px;
     border: 1px solid #ccc;
-    border-radius: var(--radius-sm);
+    border-radius: var(--primitive-radius-sm);
     font-size: 14px;
     min-width: 150px; /* Chiều rộng tối thiểu */
     max-width: 250px; /* Chiều rộng tối đa */
@@ -25,7 +25,7 @@
 
 .inputField:focus {
     outline: none;
-    border-color: var(--brand-primary-light);
+    border-color: var(--color-brand-primary);
     box-shadow: 0 0 0 2px
-        color-mix(in srgb, var(--brand-primary-light) 20%, transparent);
+        color-mix(in srgb, var(--color-brand-primary) 20%, transparent);
 }

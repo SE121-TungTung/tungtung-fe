@@ -22,7 +22,7 @@
 }
 
 .text {
-    color: #ffffffb2;
+    color: var(--color-text-primary);
     font-family: var(--caption-regular-font-family);
     font-size: var(--caption-regular-font-size);
     font-style: var(--caption-regular-font-style);

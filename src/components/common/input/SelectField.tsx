@@ -23,6 +23,8 @@ interface SelectFieldProps
     uiSize?: Size
     mode?: Mode
     fullWidth?: boolean
+    placeholder?: string
+    placeholderDisabled?: boolean
 }
 
 export const SelectField: React.FC<SelectFieldProps> = ({
@@ -36,6 +38,8 @@ export const SelectField: React.FC<SelectFieldProps> = ({
     mode = 'light',
     fullWidth = true,
     className = '',
+    placeholder = '-- Chọn --',
+    placeholderDisabled = true,
     ...props
 }) => {
     const autoId = useId()
@@ -68,9 +72,11 @@ export const SelectField: React.FC<SelectFieldProps> = ({
                     {...props}
                     aria-invalid={!!error}
                 >
-                    <option value="" disabled>
-                        -- Chọn --
-                    </option>
+                    {placeholder && (
+                        <option value="" disabled={placeholderDisabled}>
+                            {placeholder}
+                        </option>
+                    )}
                     {options.map((option) => (
                         <option key={option.value} value={option.value}>
                             {option.label}

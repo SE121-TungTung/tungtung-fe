@@ -1,12 +1,12 @@
 .badge {
     display: inline-flex;
     align-items: center;
-    gap: var(--space-8);
-    padding: 2px var(--space-8);
-    border-radius: var(--radius-md);
-    font-size: var(--caption-medium-font-size);
-    font-weight: var(--caption-medium-font-weight);
-    line-height: 1.2;
+    gap: var(--primitive-space-2);
+    padding: var(--badge-padding-y) var(--badge-padding-x);
+    border-radius: var(--badge-radius);
+    font-size: var(--badge-font-size);
+    font-weight: var(--primitive-font-semibold);
+    line-height: var(--primitive-leading-none);
     text-align: center;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -23,36 +23,36 @@
 
 /* Success (active) */
 .success {
-    color: var(--text-on-primary-light);
-    background-color: var(--status-success-500-dark);
+    color: var(--color-status-success);
+    background-color: var(--color-status-success-bg);
 }
 .success::before {
-    background-color: var(--status-success-500-light);
+    background-color: var(--color-status-success);
 }
 
 /* Warning (pending_activation) */
 .warning {
-    color: var(--text-on-primary-light);
-    background-color: var(--status-warning-500-dark);
+    color: var(--color-status-warning);
+    background-color: var(--color-status-warning-bg);
 }
 .warning::before {
-    background-color: var(--status-warning-500-light);
+    background-color: var(--color-status-warning);
 }
 
 /* Danger (suspended) */
 .danger {
-    color: var(--text-on-primary-light);
-    background-color: var(--status-danger-500-dark);
+    color: var(--color-status-danger);
+    background-color: var(--color-status-danger-bg);
 }
 .danger::before {
-    background-color: var(--status-danger-500-light);
+    background-color: var(--color-status-danger);
 }
 
 /* Neutral (inactive) */
 .neutral {
-    color: var(--text-on-primary-light);
-    background-color: var(--status-info-500-dark);
+    color: var(--color-status-neutral);
+    background-color: var(--color-status-neutral-bg);
 }
 .neutral::before {
-    background-color: var(--status-info-500-light);
+    background-color: var(--color-status-neutral);
 }

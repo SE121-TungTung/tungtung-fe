@@ -1,0 +1,247 @@
+/* PostModals.module.css
+ * Styles dùng chung cho EditPostModal và PinLimitModal
+ */
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9000;
+    padding: 16px;
+    animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.modal {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.18),
+        0 4px 16px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 520px;
+    overflow: hidden;
+    animation: slideUp 0.2s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(12px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* ─── Header ──────────────────────────────────────────────────────────────── */
+
+.modalHeader {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.warningIcon,
+.editIcon {
+    font-size: 22px;
+    line-height: 1;
+}
+
+.modalTitle {
+    font-size: 17px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+
+/* ─── Body ────────────────────────────────────────────────────────────────── */
+
+.modalBody {
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.modalText {
+    font-size: 14px;
+    color: #334155;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* PinLimitModal — oldest pinned card */
+.oldestPinCard {
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 10px;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.oldestPinLabel {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #c2410c;
+    letter-spacing: 0.04em;
+}
+
+.oldestPinTitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+}
+
+.oldestPinMeta {
+    font-size: 11px;
+    color: #78716c;
+}
+
+/* ─── Form Fields ─────────────────────────────────────────────────────────── */
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.formLabel {
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.required {
+    color: #ef4444;
+}
+
+.formInput,
+.formSelect,
+.formTextarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #1e293b;
+    background: #ffffff;
+    transition:
+        border-color 0.15s,
+        box-shadow 0.15s;
+    box-sizing: border-box;
+    outline: none;
+    font-family: inherit;
+}
+
+.formInput:focus,
+.formSelect:focus,
+.formTextarea:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+.inputError {
+    border-color: #f87171 !important;
+}
+
+.formTextarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.errorMsg {
+    font-size: 12px;
+    color: #ef4444;
+}
+
+.checkboxLabel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #334155;
+    cursor: pointer;
+}
+
+.checkbox {
+    width: 16px;
+    height: 16px;
+    accent-color: #6366f1;
+    cursor: pointer;
+}
+
+/* ─── Footer ──────────────────────────────────────────────────────────────── */
+
+.modalFooter {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px 20px;
+    border-top: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.btnCancel {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1.5px solid #cbd5e1;
+    background: #ffffff;
+    color: #475569;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        background 0.15s,
+        border-color 0.15s;
+}
+
+.btnCancel:hover:not(:disabled) {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+}
+
+.btnConfirm {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        opacity 0.15s,
+        box-shadow 0.15s;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+}
+
+.btnConfirm:hover:not(:disabled) {
+    opacity: 0.92;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+}
+
+.btnCancel:disabled,
+.btnConfirm:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}

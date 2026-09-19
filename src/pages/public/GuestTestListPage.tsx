@@ -1,0 +1,340 @@
+import { useState, useMemo, useCallback, useEffect } from 'react'
+import s from '../student/exam/ExamPracticePage.module.css'
+
+import TextType from '@/components/common/text/TextType'
+import SegmentedControl, {
+    type SegItem,
+} from '@/components/common/menu/SegmentedControl'
+import InputField from '@/components/common/input/InputField'
+import SkillCard from '@/components/common/card/SkillCard'
+import ExamListCard from '../student/exam/ExamListCard'
+
+import SearchIcon from '@/assets/Action Eye Tracking.svg'
+import ListeningIcon from '@/assets/Action Ear Normal.svg'
+import ReadingIcon from '@/assets/Book Open.svg'
+import WritingIcon from '@/assets/Edit Pen.svg'
+import SpeakingIcon from '@/assets/Microphone.svg'
+import BackIcon from '@/assets/arrow-left.svg'
+
+import { useGuestSession } from '@/stores/guestSession.store'
+
+import { testApi } from '@/lib/test'
+import type { StudentTestListItem, TestListItem } from '@/types/test.types'
+import { SkillArea } from '@/types/test.types'
+import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
+import ExamGrid from '@/components/feature/exams/ExamGrid'
+import ButtonGhost from '@/components/common/button/ButtonGhost'
+import { useNavigate } from 'react-router-dom'
+import { useDialog } from '@/hooks/useDialog'
+import PublicHeader from './PublicHeader'
+
+const contentModeItems: SegItem[] = [
+    { label: 'Theo Kỹ năng', value: 'skill' },
+    { label: 'Tất cả bài thi', value: 'all' },
+]
+
+const displayModeItems: SegItem[] = [
+    { label: 'Lưới', value: 'grid' },
+    { label: 'Danh sách', value: 'list' },
+]
+
+const skills = [
+    {
+        name: 'Nghe',
+        value: SkillArea.LISTENING,
+        icon: <img src={ListeningIcon} alt="Listening" />,
+    },
+    {
+        name: 'Đọc',
+        value: SkillArea.READING,
+        icon: <img src={ReadingIcon} alt="Reading" />,
+    },
+    {
+        name: 'Viết',
+        value: SkillArea.WRITING,
+        icon: <img src={WritingIcon} alt="Writing" />,
+    },
+    {
+        name: 'Nói',
+        value: SkillArea.SPEAKING,
+        icon: <img src={SpeakingIcon} alt="Speaking" />,
+    },
+]
+
+export default function GuestTestListPage() {
+    const { getGuestSessionId } = useGuestSession()
+    const navigate = useNavigate()
+    const { alert } = useDialog()
+
+    const [contentMode, setContentMode] = useState<'skill' | 'all'>('skill')
+    const [displayMode, setDisplayMode] = useState<'grid' | 'list'>('grid')
+    const [selectedSkill, setSelectedSkill] = useState<SkillArea | null>(null)
+
+    const [searchTerm, setSearchTerm] = useState('')
+    const [showGradientName, setShowGradientName] = useState(false)
+
+    // API state
+    const [tests, setTests] = useState<TestListItem[] | StudentTestListItem[]>(
+        []
+    )
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+
+    const loadTests = async () => {
+        setLoading(true)
+        setError(null)
+        try {
+            const data = await testApi.listPublicTests({
+                limit: 100,
+            })
+            if (Array.isArray(data)) {
+                setTests(data)
+            } else if (data && Array.isArray(data.tests)) {
+                setTests(data.tests)
+            } else if (data && Array.isArray(data.items)) {
+                setTests(data.items)
+            } else {
+                console.warn('Unexpected API response structure:', data)
+                setTests([])
+            }
+        } catch (err: any) {
+            console.error('Failed to load tests:', err)
+            setError(err.message || 'Không thể tải danh sách bài thi')
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        loadTests()
+    }, [])
+
+    const handleGreetingComplete = useCallback(() => {
+        setShowGradientName(true)
+    }, [])
+
+    const handleSelectSkill = (skillValue: SkillArea) => {
+        setSelectedSkill(skillValue)
+        setSearchTerm('')
+    }
+
+    const handleBackFromList = () => {
+        setSelectedSkill(null)
+        setSearchTerm('')
+    }
+
+    const handleExamClick = async (examId: string) => {
+        try {
+            const guestSessionId = getGuestSessionId()
+            const attempt = await testApi.startGuestAttempt(
+                examId,
+                guestSessionId
+            )
+            localStorage.setItem(
+                `guest_attempt_${attempt.attemptId}`,
+                JSON.stringify(attempt)
+            )
+            navigate(`/public/tests/${examId}/take/${attempt.attemptId}`)
+        } catch (error: any) {
+            console.error('Failed to start exam:', error)
+            alert(error.message || 'Không thể bắt đầu bài thi')
+        }
+    }
+
+    const handleGradingClick = (examId: string) => {
+        navigate(`/teacher/grading/${examId}`)
+    }
+
+    const filteredExams = useMemo(() => {
+        let examsToShow = tests
+
+        if (contentMode === 'skill' && selectedSkill) {
+            examsToShow = tests.filter((test) => {
+                if ('skill' in test) {
+                    return test.skill === selectedSkill
+                }
+                return false
+            })
+        }
+
+        if (searchTerm.trim()) {
+            examsToShow = examsToShow.filter((test) =>
+                test.title.toLowerCase().includes(searchTerm.toLowerCase())
+            )
+        }
+
+        return examsToShow
+    }, [tests, searchTerm, selectedSkill, contentMode])
+
+    const renderContent = () => {
+        if (loading) {
+            return (
+                <div className={s.examListContainer}>
+                    <div className={s.loadingState}>Đang tải danh sách...</div>
+                </div>
+            )
+        }
+
+        if (error) {
+            return (
+                <div className={s.examListContainer}>
+                    <div className={s.errorState}>
+                        <p>⚠️ {error}</p>
+                        <ButtonPrimary onClick={loadTests}>
+                            Thử lại
+                        </ButtonPrimary>
+                    </div>
+                </div>
+            )
+        }
+
+        if (contentMode === 'skill') {
+            if (selectedSkill === null) {
+                return (
+                    <div className={s.skillGrid}>
+                        {skills.map((skill) => (
+                            <SkillCard
+                                key={skill.value}
+                                skillName={skill.name}
+                                icon={skill.icon}
+                                onClick={() => handleSelectSkill(skill.value)}
+                            />
+                        ))}
+                    </div>
+                )
+            }
+
+            const skillInfo = skills.find((s) => s.value === selectedSkill)
+            const title = `Bài thi kỹ năng: ${skillInfo?.name || ''}`
+
+            if (displayMode === 'grid') {
+                return (
+                    <div className={s.examSection}>
+                        <div className={s.sectionHeader}>
+                            <h2 className={s.sectionTitle}>{title}</h2>
+                            <ButtonGhost
+                                size="sm"
+                                mode="light"
+                                leftIcon={<img src={BackIcon} alt="back" />}
+                                onClick={handleBackFromList}
+                            >
+                                Quay lại
+                            </ButtonGhost>
+                        </div>
+                        <ExamGrid
+                            exams={filteredExams}
+                            onExamClick={handleExamClick}
+                            userRole="student"
+                        />
+                    </div>
+                )
+            } else {
+                return (
+                    <ExamListCard
+                        title={title}
+                        exams={filteredExams}
+                        onBackClick={handleBackFromList}
+                        onExamClick={handleExamClick}
+                        isLoading={false}
+                        viewMode="list"
+                        userRole="student"
+                    />
+                )
+            }
+        }
+
+        if (displayMode === 'grid') {
+            return (
+                <div className={s.examSection}>
+                    <h2 className={s.sectionTitle}>Tất cả bài thi</h2>
+                    <ExamGrid
+                        exams={filteredExams}
+                        onExamClick={handleExamClick}
+                        userRole="student"
+                    />
+                </div>
+            )
+        } else {
+            return (
+                <ExamListCard
+                    title="Tất cả bài thi"
+                    exams={filteredExams}
+                    onExamClick={handleExamClick}
+                    isLoading={false}
+                    viewMode="list"
+                    userRole="student"
+                />
+            )
+        }
+    }
+
+    return (
+        <>
+            <PublicHeader />
+            <div className={s.pageWrapperWithoutHeader}>
+                <main className={s.mainContent}>
+                <h1 className={s.pageTitle}>
+                    <TextType
+                        text="Luyện thi "
+                        typingSpeed={50}
+                        loop={false}
+                        showCursor={!showGradientName}
+                        onSentenceComplete={handleGreetingComplete}
+                    />
+                    {showGradientName && (
+                        <TextType
+                            as="span"
+                            className={s.gradientText}
+                            text="IELTS"
+                            typingSpeed={70}
+                            loop={false}
+                        />
+                    )}
+                </h1>
+
+                <div className={s.controlsBar}>
+                    {(selectedSkill !== null || contentMode === 'all') && (
+                        <div className={s.searchWrapper}>
+                            <InputField
+                                placeholder="Tìm kiếm bài thi..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                leftIcon={<img src={SearchIcon} alt="search" />}
+                                variant="soft"
+                                mode="light"
+                                uiSize="sm"
+                            />
+                        </div>
+                    )}
+
+                    <div className={s.viewControls}>
+                        <SegmentedControl
+                            items={contentModeItems}
+                            value={contentMode}
+                            onChange={(value) => {
+                                setContentMode(value as 'skill' | 'all')
+                                setSelectedSkill(null)
+                                setSearchTerm('')
+                            }}
+                            size="sm"
+                        />
+
+                        {(selectedSkill !== null || contentMode === 'all') && (
+                            <SegmentedControl
+                                items={displayModeItems}
+                                value={displayMode}
+                                onChange={(value) =>
+                                    setDisplayMode(value as 'grid' | 'list')
+                                }
+                                size="sm"
+                            />
+                        )}
+                    </div>
+                </div>
+
+                <div className={s.contentArea}>{renderContent()}</div>
+            </main>
+        </div>
+        </>
+    )
+}

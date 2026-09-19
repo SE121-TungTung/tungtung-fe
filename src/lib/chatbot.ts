@@ -1,5 +1,12 @@
 import { api } from './api'
 
+export interface PaginationResponse<T> {
+    data: T[]
+    total: number
+    page: number
+    limit: number
+}
+
 const BASE_URL = '/api/v1/chatbot'
 
 export interface ChatbotResponse {
@@ -13,15 +20,92 @@ export interface UploadResponse {
     message: string
 }
 
+export type DocStatus = 'processing' | 'completed' | 'failed'
+
+export interface ChatbotDocument {
+    id: string
+    doc_id: string | null
+    filename: string
+    category: string
+    status: DocStatus
+    error_message: string | null
+    uploaded_by_name: string
+    created_at: string
+    updated_at: string
+}
+
 export const chatbotApi = {
-    uploadDocument: async (file: File): Promise<UploadResponse> => {
+    uploadDocument: async (
+        file: File,
+        docCategory: string = 'business'
+    ): Promise<ChatbotDocument> => {
         const formData = new FormData()
         formData.append('file', file)
+        formData.append('doc_category', docCategory)
 
-        return api<UploadResponse>(`${BASE_URL}/admin/upload-doc`, {
+        return api<ChatbotDocument>(`${BASE_URL}/admin/upload-doc`, {
             method: 'POST',
             body: formData,
         })
+    },
+
+    getDocuments: async (params?: {
+        page?: number
+        limit?: number
+        category?: string
+    }) => {
+        const searchParams = new URLSearchParams()
+        if (params?.page) searchParams.append('page', params.page.toString())
+        if (params?.limit) searchParams.append('limit', params.limit.toString())
+        if (params?.category) searchParams.append('category', params.category)
+
+        const qs = searchParams.toString()
+        const url = `${BASE_URL}/admin/documents${qs ? `?${qs}` : ''}`
+        return api<PaginationResponse<ChatbotDocument>>(url, {
+            method: 'GET',
+        })
+    },
+
+    getDocumentStatus: async (docDbId: string): Promise<ChatbotDocument> => {
+        return api<ChatbotDocument>(
+            `${BASE_URL}/admin/documents/${docDbId}/status`,
+            { method: 'GET' }
+        )
+    },
+
+    deleteDocument: async (docId: string) => {
+        return api<string>(`${BASE_URL}/admin/documents/${docId}`, {
+            method: 'DELETE',
+        })
+    },
+
+    updateDocument: async (
+        docId: string,
+        file: File
+    ): Promise<ChatbotDocument> => {
+        const formData = new FormData()
+        formData.append('file', file)
+
+        return api<ChatbotDocument>(`${BASE_URL}/admin/documents/${docId}`, {
+            method: 'PUT',
+            body: formData,
+        })
+    },
+
+    retryUpload: async (
+        docDbId: string,
+        file: File
+    ): Promise<ChatbotDocument> => {
+        const formData = new FormData()
+        formData.append('file', file)
+
+        return api<ChatbotDocument>(
+            `${BASE_URL}/admin/documents/${docDbId}/retry`,
+            {
+                method: 'POST',
+                body: formData,
+            }
+        )
     },
 
     askBot: async (message: string, history: any[] = []) => {

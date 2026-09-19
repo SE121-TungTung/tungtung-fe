@@ -15,9 +15,34 @@ export async function getNotifications(
     qs.set('skip', String(skip))
     qs.set('limit', String(limit))
 
-    return api<NotificationListResponse>(`${BASE_URL}/?${qs.toString()}`, {
+    // api() auto-unwraps {success, data} but returns the full object when 'meta' key exists.
+    // BE now returns {success, data: Notification[], message, meta: null}
+    const res = await api<any>(`${BASE_URL}/?${qs.toString()}`, {
         method: 'GET',
     })
+
+    // Handle both old shape {notifications, total} and new shape {data: [...], meta: {total}}
+    if (Array.isArray(res?.data)) {
+        return {
+            data: res.data,
+            notifications: res.data,
+            total: res.meta?.total ?? res.data.length,
+            meta: res.meta,
+        }
+    }
+    // Legacy
+    if (Array.isArray(res?.notifications)) {
+        return {
+            data: res.notifications,
+            notifications: res.notifications,
+            total: res.total ?? 0,
+        }
+    }
+    // Fallback: api() already unwrapped, res IS the array
+    if (Array.isArray(res)) {
+        return { data: res, notifications: res, total: res.length }
+    }
+    return { data: [], notifications: [], total: 0 }
 }
 
 export async function getUnreadCount(): Promise<number> {
@@ -41,5 +66,29 @@ export async function markAllAsRead(): Promise<{
 }> {
     return api<{ message: string; count: number }>(`${BASE_URL}/read-all`, {
         method: 'PUT',
+    })
+}
+
+export interface BroadcastPayload {
+    target_type: 'all' | 'role' | 'specific_users'
+    target_role?: 'student' | 'teacher' | 'admin' | 'center_admin' | ''
+    title: string
+    content: string
+    priority: 'low' | 'normal' | 'high' | 'urgent'
+}
+
+export async function broadcastNotification(
+    payload: BroadcastPayload
+): Promise<any> {
+    return api<any>(`${BASE_URL}/broadcast`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            ...payload,
+            target_role: payload.target_role || undefined,
+            channels: ['in_app'],
+        }),
     })
 }

@@ -29,10 +29,14 @@ export interface AuditLogResponse {
 }
 
 export interface AuditLogListResponse {
-    total: number
-    skip: number
-    limit: number
-    items: AuditLogResponse[]
+    success: boolean
+    data: AuditLogResponse[]
+    meta: {
+        page: number
+        limit: number
+        total: number
+        total_pages: number
+    }
 }
 
 export interface AuditLogFilters {

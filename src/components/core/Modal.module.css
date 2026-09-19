@@ -4,7 +4,7 @@
     background-color: var(--surface-overlay-dark, rgba(0, 0, 0, 0.6));
     display: grid;
     place-items: center;
-    z-index: var(--z-index-modal, 50);
+    z-index: var(--z-index-modal, 10000);
     animation: fadeIn 0.15s ease-out;
     padding: 20px;
 }

@@ -5,12 +5,11 @@ import CourseTable from './CourseTable'
 import { CourseFormModal } from './CourseFormModal'
 import InputField from '@/components/common/input/InputField'
 import { SelectField } from '@/components/common/input/SelectField'
-import { Button } from '@/components/core/Button'
+import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import Card from '@/components/common/card/Card'
 import Pagination from '@/components/common/menu/Pagination'
 
 import s from './CourseManagementPage.module.css'
-import IconPlus from '@/assets/Plus Thin.svg'
 import IconSearch from '@/assets/Lens.svg'
 
 import { usePermissions } from '@/hooks/usePermissions'
@@ -92,6 +91,7 @@ export default function CourseManagementPage() {
         level: (apiParams.level as CourseLevel) || undefined,
         status: (apiParams.status as CourseStatus) || undefined,
         sortBy: apiParams.sortBy as ListCoursesParams['sortBy'],
+        sortOrder: sort.order as 'asc' | 'desc',
     })
 
     const { mutateAsync: deleteCourseMutate } = useDeleteCourse()
@@ -193,17 +193,9 @@ export default function CourseManagementPage() {
                     </div>
 
                     {canCreateCourse && (
-                        <Button
-                            variant="primary"
-                            onClick={handleOpenCreateModal}
-                        >
-                            <img
-                                src={IconPlus}
-                                alt=""
-                                className={s.buttonIcon}
-                            />
+                        <ButtonPrimary onClick={handleOpenCreateModal}>
                             Tạo khóa học
-                        </Button>
+                        </ButtonPrimary>
                     )}
                 </Card>
 

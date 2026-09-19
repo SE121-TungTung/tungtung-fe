@@ -3,19 +3,19 @@
     flex-direction: column;
     height: 100%;
     overflow: hidden;
-    background-color: var(--surface-page-light);
     position: relative;
+    background-color: var(--color-surface-page);
 }
 
 .header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--space-16) var(--space-20);
-    border-bottom: 1px solid var(--boder-soft-light);
-    background-color: var(--surface-card-light);
+    padding: var(--primitive-space-16) var(--primitive-space-20);
+    border-bottom: 1px solid var(--color-border-soft);
+    background-color: var(--color-surface-card);
     flex-shrink: 0;
-    gap: var(--space-12);
+    gap: var(--primitive-space-12);
     min-height: 68px;
     box-sizing: border-box;
 }
@@ -23,7 +23,7 @@
 .headerLeft {
     display: flex;
     align-items: center;
-    gap: var(--space-12);
+    gap: var(--primitive-space-12);
     flex: 1;
     min-width: 0;
 }
@@ -31,16 +31,43 @@
 .headerInfo {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+    gap: var(--primitive-space-2);
     min-width: 0;
     flex: 1;
+}
+
+.avatarWrapper {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.avatarImg {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.onlineBadge {
+    position: absolute;
+    bottom: 1px;
+    right: 1px;
+    width: 14px;
+    height: 14px;
+    background-color: var(--color-status-success, #22c55e);
+    border: 3px solid #fff;
+    border-radius: 50%;
+}
+.item.active .onlineBadge {
+    border-color: var(--color-brand-accent);
 }
 
 .chatName {
     font-weight: 600;
     font-size: 16px;
     line-height: 1.3;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -50,14 +77,14 @@
 .chatStatus {
     font-size: 13px;
     line-height: 1.3;
-    color: var(--text-secondary-light);
     margin: 0;
+    color: var(--color-text-secondary);
 }
 
 .headerActions {
     display: flex;
     align-items: center;
-    gap: var(--space-8);
+    gap: var(--primitive-space-8);
     flex-shrink: 0;
 }
 
@@ -71,7 +98,7 @@
     height: 44px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid var(--boder-soft-light);
+    border: 2px solid var(--color-border-soft);
     flex-shrink: 0;
 }
 
@@ -81,8 +108,8 @@
     right: 0;
     width: 12px;
     height: 12px;
-    background-color: var(--status-success-500-light);
-    border: 2px solid var(--surface-card-light);
+    background-color: var(--color-status-success);
+    border: 2px solid var(--color-surface-card);
     border-radius: 50%;
 }
 
@@ -96,7 +123,7 @@
         display: inline-flex;
     }
     .header {
-        padding: var(--space-12) var(--space-16);
+        padding: var(--primitive-space-12) var(--primitive-space-16);
         min-height: 60px;
     }
     .headerAvatar {
@@ -108,10 +135,10 @@
 .messageList {
     flex: 1;
     overflow-y: auto;
-    padding: var(--space-20);
+    padding: var(--primitive-space-20);
     display: flex;
     flex-direction: column;
-    gap: var(--space-8);
+    gap: var(--primitive-space-8);
     min-height: 0;
 }
 
@@ -124,24 +151,24 @@
 }
 
 .messageList::-webkit-scrollbar-thumb {
-    background: var(--boder-soft-light);
-    border-radius: var(--radius-full);
+    background: var(--color-border-soft);
+    border-radius: var(--primitive-radius-full);
 }
 
 .messageList::-webkit-scrollbar-thumb:hover {
-    background: var(--boder-strong-light);
+    background: var(--color-border-strong);
 }
 
 .loadingContainer {
     display: flex;
     flex-direction: column;
-    gap: var(--space-16);
-    padding: var(--space-20);
+    gap: var(--primitive-space-16);
+    padding: var(--primitive-space-20);
 }
 
 .skeletonMessage {
     display: flex;
-    gap: var(--space-12);
+    gap: var(--primitive-space-12);
     align-items: flex-start;
 }
 
@@ -155,9 +182,9 @@
     border-radius: 50%;
     background: linear-gradient(
         90deg,
-        var(--surface-raised-light) 0%,
-        var(--boder-soft-light) 50%,
-        var(--surface-raised-light) 100%
+        var(--color-surface-raised) 0%,
+        var(--color-border-soft) 50%,
+        var(--color-surface-raised) 100%
     );
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
@@ -166,12 +193,12 @@
 
 .skeletonBubble {
     height: 40px;
-    border-radius: var(--radius-lg);
+    border-radius: var(--primitive-radius-lg);
     background: linear-gradient(
         90deg,
-        var(--surface-raised-light) 0%,
-        var(--boder-soft-light) 50%,
-        var(--surface-raised-light) 100%
+        var(--color-surface-raised) 0%,
+        var(--color-border-soft) 50%,
+        var(--color-surface-raised) 100%
     );
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
@@ -204,8 +231,8 @@
     align-items: center;
     justify-content: center;
     height: 100%;
-    gap: var(--space-12);
-    color: var(--text-muted-light);
+    gap: var(--primitive-space-12);
+    color: var(--color-text-muted);
 }
 
 .emptyIcon {
@@ -215,9 +242,9 @@
 }
 
 .footer {
-    padding: var(--space-16) var(--space-20);
-    border-top: 1px solid var(--boder-soft-light);
-    background-color: var(--surface-card-light);
+    padding: var(--primitive-space-16) var(--primitive-space-20);
+    border-top: 1px solid var(--color-border-soft);
+    background-color: var(--color-surface-card);
     flex-shrink: 0;
     min-height: 76px;
     box-sizing: border-box;
@@ -232,8 +259,8 @@
 }
 
 .dateSeparator span {
-    background-color: rgba(0, 0, 0, 0.05);
-    color: var(--text-secondary-light);
+    background-color: var(--color-surface-raised);
+    color: var(--color-text-secondary);
     font-size: 12px;
     font-weight: 500;
     padding: 4px 12px;
@@ -245,11 +272,11 @@
     text-align: center;
     margin: 16px 0;
     padding: 8px 16px;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     font-size: 13px;
     font-style: italic;
-    background: rgba(0, 0, 0, 0.03);
-    border-radius: var(--radius-md);
+    background: var(--color-surface-raised);
+    border-radius: var(--primitive-radius-md);
     max-width: 80%;
     margin-left: auto;
     margin-right: auto;
@@ -257,17 +284,17 @@
 
 @media (max-width: 800px) {
     .messageList {
-        padding: var(--space-16);
+        padding: var(--primitive-space-16);
     }
     .footer {
-        padding: var(--space-12) var(--space-16);
+        padding: var(--primitive-space-12) var(--primitive-space-16);
     }
 }
 
 .highlighted {
     animation: highlightPulse 0.5s ease-out;
     background: rgba(255, 200, 0, 0.2);
-    border-radius: var(--radius-md);
+    border-radius: var(--primitive-radius-md);
 }
 
 @keyframes highlightPulse {

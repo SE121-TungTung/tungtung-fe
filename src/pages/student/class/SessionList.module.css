@@ -34,13 +34,13 @@
 }
 
 .empty {
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     opacity: 0.8;
     font-size: 14px;
     text-align: center;
     padding: 40px 20px;
     background: rgba(0, 0, 0, 0.02);
-    border-radius: var(--radius-md);
+    border-radius: var(--primitive-radius-md);
     flex: 1;
     display: grid;
     place-items: center;

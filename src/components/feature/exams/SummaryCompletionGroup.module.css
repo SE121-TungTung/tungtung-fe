@@ -1,7 +1,7 @@
 .summaryText {
     font-size: 14px;
     line-height: 2; /* Tăng dãn dòng để dễ đọc và điền */
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
 }
 
 .summaryText strong {
@@ -14,7 +14,7 @@
 .inputField {
     padding: 4px 8px;
     border: 1px solid #ccc;
-    border-radius: var(--radius-sm);
+    border-radius: var(--primitive-radius-sm);
     font-size: 14px;
     min-width: 140px;
     margin: 0 4px; /* Khoảng cách với text */
@@ -26,7 +26,33 @@
 
 .inputField:focus {
     outline: none;
-    border-color: var(--brand-primary-light);
+    border-color: var(--color-brand-primary);
     box-shadow: 0 0 0 2px
-        color-mix(in srgb, var(--brand-primary-light) 20%, transparent);
+        color-mix(in srgb, var(--color-brand-primary) 20%, transparent);
+}
+
+.answerFields {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed #ddd;
+}
+
+.answerItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.answerLabel {
+    width: 20px;
+    font-weight: 600;
+}
+
+.inputField {
+    flex: 1;
+    height: 32px;
+    padding: 4px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }

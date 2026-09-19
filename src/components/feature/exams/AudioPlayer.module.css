@@ -19,7 +19,7 @@
 .noAudio {
     text-align: center;
     padding: 60px 20px;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     font-size: 15px;
 }
 
@@ -54,7 +54,7 @@
 .timeLabel {
     font-size: 13px;
     font-weight: 500;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     min-width: 45px;
 }
 
@@ -69,8 +69,8 @@
     outline: none;
 
     background-image: linear-gradient(
-        var(--brand-primary-500-light),
-        var(--brand-primary-500-dark)
+        var(--color-brand-primary-500),
+        var(--color-brand-primary-500)
     );
     background-repeat: no-repeat;
 }
@@ -81,7 +81,7 @@
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    background: var(--brand-primary-500-light);
+    background: var(--color-brand-primary-500);
     cursor: pointer;
 }
 
@@ -89,7 +89,7 @@
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    background: var(--brand-primary-500-light);
+    background: var(--color-brand-primary-500);
     cursor: pointer;
     border: none;
 }
@@ -109,7 +109,7 @@
     height: 56px;
     border-radius: 50%;
     border: none;
-    background: var(--brand-primary-500-light);
+    background: var(--color-brand-primary-500);
     color: white;
     font-size: 24px;
     cursor: pointer;
@@ -121,7 +121,7 @@
 }
 
 .playButton:hover {
-    background: var(--brand-primary-600-light);
+    background: var(--color-brand-primary-600);
     transform: scale(1.05);
 }
 
@@ -139,7 +139,7 @@
 .speedControl label {
     font-size: 13px;
     font-weight: 500;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
 }
 
 .speedButton {
@@ -150,7 +150,7 @@
     font-size: 13px;
     cursor: pointer;
     transition: all 0.2s ease;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
 }
 
 .speedButton:hover {
@@ -158,9 +158,9 @@
 }
 
 .speedButton.active {
-    background: var(--brand-primary-500-light);
+    background: var(--color-brand-primary-500);
     color: white;
-    border-color: var(--brand-primary-500-light);
+    border-color: var(--color-brand-primary-500);
 }
 
 /* Volume Control */
@@ -185,8 +185,8 @@
     outline: none;
 
     background-image: linear-gradient(
-        var(--brand-primary-500-light),
-        var(--brand-primary-500-light)
+        var(--color-brand-primary-500),
+        var(--color-brand-primary-500)
     );
     background-repeat: no-repeat;
 }
@@ -197,7 +197,7 @@
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    background: var(--brand-primary-500-light);
+    background: var(--color-brand-primary-500);
     cursor: pointer;
 }
 
@@ -205,7 +205,7 @@
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    background: var(--brand-primary-light);
+    background: var(--color-brand-primary);
     cursor: pointer;
     border: none;
 }
@@ -232,7 +232,7 @@
     border-radius: var(--radius-md);
     font-size: 14px;
     line-height: 1.7;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     white-space: pre-wrap;
     max-height: 200px;
     overflow-y: auto;

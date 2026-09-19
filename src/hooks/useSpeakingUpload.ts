@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { testApi } from '@/lib/test'
 
 // Types
@@ -34,6 +34,33 @@ export const useSpeakingUpload = (attemptId: string) => {
     const [uploadState, setUploadState] = useState<UploadState>({})
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [submitError, setSubmitError] = useState<string | null>(null)
+
+    const STORAGE_PREFIX = 'speakingUploads_'
+
+    // Load saved state on mount
+    useEffect(() => {
+        if (!attemptId) return
+        const storageKey = `${STORAGE_PREFIX}${attemptId}`
+        const saved = localStorage.getItem(storageKey)
+        if (saved) {
+            try {
+                setUploadState(JSON.parse(saved))
+            } catch (err) {
+                console.error('Failed to parse saved speaking uploads:', err)
+            }
+        }
+    }, [attemptId])
+
+    // Save state when uploadState changes
+    useEffect(() => {
+        if (!attemptId) return
+        const storageKey = `${STORAGE_PREFIX}${attemptId}`
+        if (Object.keys(uploadState).length === 0) {
+            localStorage.removeItem(storageKey)
+        } else {
+            localStorage.setItem(storageKey, JSON.stringify(uploadState))
+        }
+    }, [uploadState, attemptId])
 
     // ============================================
     // STEP 1: PRE-UPLOAD SINGLE AUDIO
@@ -173,7 +200,10 @@ export const useSpeakingUpload = (attemptId: string) => {
     const clearUploads = useCallback(() => {
         setUploadState({})
         setSubmitError(null)
-    }, [])
+        if (attemptId) {
+            localStorage.removeItem(`${STORAGE_PREFIX}${attemptId}`)
+        }
+    }, [attemptId])
 
     // Retry failed upload
     const retryUpload = useCallback((questionId: string) => {

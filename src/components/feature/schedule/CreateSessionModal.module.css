@@ -20,7 +20,7 @@
 .label {
     font-size: 14px;
     font-weight: 500;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
 }
 
 .slotGrid {
@@ -31,10 +31,10 @@
 
 .slotButton {
     padding: 8px 12px;
-    border: 1px solid var(--boder-soft-light);
+    border: 1px solid var(--color-border-soft);
     border-radius: var(--radius-sm);
     background-color: #fff;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
@@ -42,14 +42,14 @@
 }
 
 .slotButton:hover {
-    background-color: var(--surface-raised-light);
-    border-color: var(--boder-hard-light);
+    background-color: var(--color-surface-raised);
+    border-color: var(--color-boder-hard);
 }
 
 .slotButton.selected {
-    background-color: var(--brand-primary-500-light);
+    background-color: var(--color-brand-primary-500);
     color: #fff;
-    border-color: var(--brand-primary-500-light);
+    border-color: var(--color-brand-primary-500);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -58,12 +58,12 @@
     justify-content: flex-end;
     gap: 12px;
     margin-top: 16px;
-    border-top: 1px solid var(--boder-soft-light);
+    border-top: 1px solid var(--color-border-soft);
     padding-top: 16px;
 }
 
 .errorMessage {
-    color: var(--status-danger-500-light);
+    color: var(--color-status-danger-500);
     font-size: 13px;
     margin-top: 4px;
 }

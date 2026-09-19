@@ -10,7 +10,7 @@
 .pageTitle {
     font-size: clamp(2rem, 4vw, 2.75rem);
     font-weight: 700;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     letter-spacing: -0.03em;
     line-height: 1.2;
     text-align: center;
@@ -36,7 +36,7 @@
 
 .emptyState p {
     font-size: 16px;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     margin: 0;
 }
 
@@ -56,32 +56,32 @@
 }
 
 .table thead {
-    background: var(--surface-raised-light);
-    border-bottom: 2px solid var(--boder-soft-light);
+    background: var(--color-surface-raised);
+    border-bottom: 2px solid var(--color-border-soft);
 }
 
 .table thead th {
     padding: 16px 12px;
     text-align: left;
     font-weight: 600;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     font-size: 13px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .table tbody tr {
-    border-bottom: 1px solid var(--boder-soft-light);
+    border-bottom: 1px solid var(--color-border-soft);
     transition: background-color 0.2s ease;
 }
 
 .table tbody tr:hover {
-    background: var(--surface-hover-light);
+    background: var(--color-surface-hover);
 }
 
 .table tbody td {
     padding: 16px 12px;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     vertical-align: middle;
 }
 
@@ -93,14 +93,14 @@
 
 .tableName {
     font-weight: 600;
-    color: var(--brand-primary-500-light);
+    color: var(--color-brand-primary-500);
 }
 
 .userId,
 .ipAddress {
     font-family: 'Fira Code', monospace;
     font-size: 12px;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
 }
 
 .actionBadge {
@@ -136,7 +136,7 @@
 
 .detailBtn {
     padding: 6px 16px;
-    background: var(--brand-primary-500-light);
+    background: var(--color-brand-primary-500);
     color: white;
     border: none;
     border-radius: 8px;
@@ -147,7 +147,7 @@
 }
 
 .detailBtn:hover {
-    background: var(--brand-primary-600-light);
+    background: var(--color-brand-primary-600);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }

@@ -18,41 +18,29 @@ export default function SummaryCompletionGroup({
     onAnswerChange,
     registerRef,
 }: SummaryCompletionGroupProps) {
-    // Summary: instructions chứa text với (1), (2)... để điền
-    // Hoặc render list các câu hỏi với input
-
     return (
         <div className={s.summaryContainer}>
-            {/* Hiển thị instructions như paragraph */}
-            {group.instructions && (
-                <div
-                    className={s.summaryText}
-                    dangerouslySetInnerHTML={{ __html: group.instructions }}
-                />
-            )}
-
-            {/* Hoặc render từng câu hỏi */}
-            <div className={s.answerFields}>
-                {group.questions.map((q) => (
-                    <div
-                        key={q.id}
-                        className={s.answerItem}
-                        ref={(el) => registerRef(q.id, el)}
-                    >
-                        <label htmlFor={`sum-${q.id}`}>
-                            <strong>{q.orderNumber}.</strong>
-                        </label>
-                        <input
-                            id={`sum-${q.id}`}
-                            type="text"
-                            className={s.inputField}
-                            value={answers[q.id] || ''}
-                            onChange={(e) =>
-                                onAnswerChange(q.id, e.target.value)
-                            }
-                        />
-                    </div>
-                ))}
+            <div className={s.summaryContainer}>
+                {/* Answer box */}
+                <div className={s.answerFields}>
+                    {group.questions.map((q, idx) => (
+                        <div
+                            key={q.id}
+                            className={s.answerItem}
+                            ref={(el) => registerRef(q.id, el)}
+                        >
+                            <label className={s.answerLabel}>{idx + 1}.</label>
+                            <input
+                                type="text"
+                                className={s.inputField}
+                                value={answers[q.id] || ''}
+                                onChange={(e) =>
+                                    onAnswerChange(q.id, e.target.value)
+                                }
+                            />
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     )

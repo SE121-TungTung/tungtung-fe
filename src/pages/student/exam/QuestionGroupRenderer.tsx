@@ -16,6 +16,13 @@ import {
     type TestSection,
     QuestionType,
 } from '@/types/test.types'
+import SummaryCompletionGroup from '@/components/feature/exams/SummaryCompletionGroup'
+import MatchingQuestion from '@/components/feature/exams/MatchingQuestion'
+import MatchingHeadingsQuestion from '@/components/feature/exams/MatchingHeadingsQuestion'
+import YesNoNotGivenQuestion from '@/components/feature/exams/YesNoNotGivenQuestion'
+import DiagramLabelingQuestion from '@/components/feature/exams/DiagramLabelingQuestion'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 // Enhanced Types
 export interface EnhancedQuestion extends Question {
@@ -50,11 +57,67 @@ interface UniversalQuestionRendererProps {
 export const UniversalQuestionRenderer =
     React.memo<UniversalQuestionRendererProps>(
         ({ group, answers, onAnswerChange, registerRef, onUploadSpeaking }) => {
+            if (!group.questions.length) return null
+
+            const groupType: QuestionType = group.questionType
+
+            if (
+                groupType === QuestionType.SUMMARY_COMPLETION ||
+                groupType === QuestionType.NOTE_COMPLETION
+            ) {
+                return (
+                    <SummaryCompletionGroup
+                        key={group.id}
+                        group={group}
+                        answers={answers}
+                        onAnswerChange={onAnswerChange}
+                        registerRef={registerRef}
+                    />
+                )
+            }
+
+            if (
+                groupType === QuestionType.MATCHING_INFORMATION ||
+                groupType === QuestionType.MATCHING_FEATURES
+            ) {
+                return (
+                    <MatchingQuestion
+                        key={group.id}
+                        group={group}
+                        answers={answers}
+                        onAnswerChange={onAnswerChange}
+                        registerRef={registerRef}
+                    />
+                )
+            }
+
+            if (groupType === QuestionType.MATCHING_HEADINGS) {
+                return (
+                    <MatchingHeadingsQuestion
+                        key={group.id}
+                        group={group}
+                        answers={answers}
+                        onAnswerChange={onAnswerChange}
+                        registerRef={registerRef}
+                    />
+                )
+            }
+
+            if (groupType === QuestionType.DIAGRAM_LABELING) {
+                return (
+                    <DiagramLabelingQuestion
+                        key={group.id}
+                        group={group}
+                        answers={answers}
+                        onAnswerChange={onAnswerChange}
+                        registerRef={registerRef}
+                    />
+                )
+            }
             return (
                 <>
                     {group.questions.map((q) => {
                         const commonProps = {
-                            key: q.id,
                             question: { ...q, number: q.globalNumber } as any,
                             registerRef: registerRef,
                         }
@@ -63,6 +126,19 @@ export const UniversalQuestionRenderer =
                             case QuestionType.TRUE_FALSE_NOT_GIVEN:
                                 return (
                                     <TrueFalseNotGivenQuestion
+                                        key={q.id}
+                                        {...commonProps}
+                                        selectedValue={answers[q.id] || null}
+                                        onChange={(v) =>
+                                            onAnswerChange(q.id, v)
+                                        }
+                                    />
+                                )
+
+                            case QuestionType.YES_NO_NOT_GIVEN:
+                                return (
+                                    <YesNoNotGivenQuestion
+                                        key={q.id}
                                         {...commonProps}
                                         selectedValue={answers[q.id] || null}
                                         onChange={(v) =>
@@ -74,6 +150,7 @@ export const UniversalQuestionRenderer =
                             case QuestionType.MULTIPLE_CHOICE:
                                 return (
                                     <MultipleChoiceQuestion
+                                        key={q.id}
                                         {...commonProps}
                                         selectedValue={
                                             answers[q.id]
@@ -90,6 +167,7 @@ export const UniversalQuestionRenderer =
                             case QuestionType.SENTENCE_COMPLETION:
                                 return (
                                     <SentenceCompletionQuestion
+                                        key={q.id}
                                         {...commonProps}
                                         value={answers[q.id] || ''}
                                         onChange={(v) =>
@@ -196,8 +274,21 @@ export const QuestionGroupRenderer = React.memo<QuestionGroupRendererProps>(
                             >
                                 {/* Group Instructions */}
                                 {group.instructions && (
-                                    <div className={s.questionInstruction}>
-                                        {group.instructions}
+                                    <div
+                                        className={
+                                            group.questionType ===
+                                                QuestionType.SUMMARY_COMPLETION ||
+                                            group.questionType ===
+                                                QuestionType.NOTE_COMPLETION
+                                                ? s.summaryInstruction
+                                                : s.questionInstruction
+                                        }
+                                    >
+                                        <ReactMarkdown
+                                            remarkPlugins={[remarkGfm]}
+                                        >
+                                            {group.instructions}
+                                        </ReactMarkdown>
                                     </div>
                                 )}
 

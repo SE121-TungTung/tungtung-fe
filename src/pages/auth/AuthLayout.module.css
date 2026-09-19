@@ -1,0 +1,346 @@
+/* ============================================================================
+   AUTH LAYOUT - Reusable template for auth pages
+   ============================================================================ */
+
+.container {
+    position: relative;
+    min-height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+}
+
+/* ============================================================================
+   THEME TOGGLE (Top Right Corner)
+   ============================================================================ */
+
+.themeToggleWrapper {
+    position: fixed;
+    top: clamp(16px, 2.5vw, 28px);
+    right: clamp(16px, 2.5vw, 32px);
+    z-index: 100;
+}
+
+.themeToggleBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: var(--primitive-radius-full, 9999px);
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: var(--primitive-font-sans);
+    font-size: 13px;
+    font-weight: var(--primitive-font-semibold, 600);
+}
+
+.themeToggleBtn:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.98);
+    border-color: rgba(15, 23, 42, 0.2);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.themeToggleBtn:active {
+    transform: translateY(0);
+}
+
+.themeIconWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-brand-primary);
+    transition: transform 0.2s ease;
+}
+
+.themeToggleBtn:hover .themeIconWrapper {
+    transform: rotate(15deg);
+}
+
+.themeToggleText {
+    user-select: none;
+}
+
+/* Dark Mode Theme Toggle Button */
+[data-theme='dark'] .themeToggleBtn {
+    background: rgba(15, 23, 42, 0.8);
+    border-color: rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme='dark'] .themeToggleBtn:hover {
+    background: rgba(15, 23, 42, 0.95);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme='dark'] .themeIconWrapper {
+    color: #facc15; /* Warm golden sun in dark mode */
+}
+
+/* ============================================================================
+   BACKGROUND LAYER
+   ============================================================================ */
+
+.background {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    touch-action: none;
+    pointer-events: none;
+}
+
+/* Main Content Wrapper */
+.wrapper {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: clamp(40px, 8vw, 120px);
+    min-height: 100vh;
+    width: 100%;
+    padding: var(--primitive-space-12) clamp(24px, 6vw, 80px);
+    pointer-events: none;
+}
+
+.wrapper > * {
+    pointer-events: auto;
+}
+
+/* ============================================================================
+   INFO SECTION (Left side)
+   ============================================================================ */
+
+.infoSection {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: var(--primitive-space-20);
+    max-width: 540px;
+}
+
+.headingContainer {
+    width: 100%;
+    max-width: 480px;
+}
+
+.heading {
+    font-family: var(--primitive-font-sans);
+    font-size: clamp(36px, 5vw, 60px);
+    font-weight: var(--primitive-font-bold);
+    line-height: var(--primitive-leading-tight);
+    letter-spacing: -0.04em;
+    margin: 0;
+
+    /* Gradient text effect */
+    background: var(--bg-brand-gradient);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.headingSecondary {
+    /* Clear text color for secondary heading - high contrast in light mode */
+    background: none;
+    -webkit-background-clip: initial;
+    background-clip: initial;
+    -webkit-text-fill-color: var(--color-text-primary);
+    color: var(--color-text-primary);
+}
+
+.infoCard {
+    width: 100%;
+    max-width: 480px;
+}
+
+.infoIcon {
+    width: 24px;
+    height: 24px;
+    display: block;
+}
+
+/* ============================================================================
+   FORM SECTION (Right side)
+   ============================================================================ */
+
+.formSection {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 520px;
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
+
+/* Tablet (landscape & portrait) */
+@media (max-width: 1024px) {
+    .wrapper {
+        gap: var(--primitive-space-16);
+        padding: var(--primitive-space-12) var(--primitive-space-8);
+    }
+
+    .infoSection {
+        gap: var(--primitive-space-12);
+        max-width: 460px;
+    }
+
+    .heading {
+        font-size: clamp(32px, 6vw, 48px);
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .themeToggleWrapper {
+        top: 14px;
+        right: 14px;
+    }
+
+    .themeToggleText {
+        display: none;
+    }
+
+    .themeToggleBtn {
+        padding: 8px;
+        border-radius: 50%;
+    }
+
+    .wrapper {
+        flex-direction: column;
+        gap: var(--primitive-space-12);
+        padding: var(--primitive-space-8) var(--primitive-space-6);
+        justify-content: flex-start;
+        padding-top: var(--primitive-space-16);
+    }
+
+    .infoSection {
+        width: 100%;
+        max-width: 100%;
+        align-items: center;
+        text-align: center;
+        order: 2;
+        gap: var(--primitive-space-8);
+    }
+
+    .headingContainer {
+        max-width: 100%;
+    }
+
+    .heading {
+        font-size: clamp(28px, 7vw, 42px);
+        letter-spacing: -0.02em;
+    }
+
+    .infoCard {
+        max-width: 100%;
+    }
+
+    .formSection {
+        width: 100%;
+        max-width: 100%;
+        order: 1;
+    }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+    .wrapper {
+        gap: var(--primitive-space-8);
+        padding: var(--primitive-space-6) var(--primitive-space-4);
+        padding-top: var(--primitive-space-12);
+    }
+
+    .infoSection {
+        gap: var(--primitive-space-6);
+    }
+
+    .heading {
+        font-size: clamp(24px, 8vw, 32px);
+    }
+}
+
+/* Hide info section on mobile (optional) */
+.hideOnMobile {
+    @media (max-width: 768px) {
+        display: none;
+    }
+}
+
+/* ============================================================================
+   DARK MODE ADJUSTMENTS
+   ============================================================================ */
+
+[data-theme='dark'] .heading {
+    background: var(--bg-brand-gradient);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+[data-theme='dark'] .headingSecondary {
+    -webkit-text-fill-color: rgba(255, 255, 255, 0.95);
+    color: rgba(255, 255, 255, 0.95);
+}
+
+[data-theme='dark'] .infoIcon {
+    filter: invert(1) brightness(2);
+}
+
+/* ============================================================================
+   ACCESSIBILITY
+   ============================================================================ */
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .wrapper {
+        animation: none;
+    }
+
+    .background * {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    .themeToggleBtn {
+        transition: none;
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .heading {
+        background: none;
+        -webkit-background-clip: initial;
+        background-clip: initial;
+        -webkit-text-fill-color: initial;
+        color: var(--color-text-primary);
+    }
+
+    .headingSecondary {
+        font-weight: var(--primitive-font-bold);
+    }
+}
+
+/* Focus visible for keyboard navigation */
+.wrapper:focus-within {
+    outline: none;
+}
+
+.themeToggleBtn:focus-visible {
+    outline: 2px solid var(--color-brand-primary);
+    outline-offset: 2px;
+}

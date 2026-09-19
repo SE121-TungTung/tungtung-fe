@@ -217,7 +217,8 @@
     );
 }
 
-.dark {
+.dark,
+[data-theme='dark'] .button-logo {
     --bg: rgba(20, 20, 24, 0.55);
     --bg-hover: rgba(22, 22, 26, 0.65);
     --bg-active: rgba(18, 18, 22, 0.5);
@@ -228,13 +229,49 @@
     --shadow-active: 0 4px 14px rgba(0, 0, 0, 0.55);
 }
 
-.dark.glass {
+.dark.glass,
+[data-theme='dark'] .button-logo.glass {
     backdrop-filter: blur(14px) saturate(120%);
     -webkit-backdrop-filter: blur(14px) saturate(120%);
 }
 
-.light {
-    /* Styles for light mode button, if needed */
+.light,
+.button-logo.light,
+[data-theme='light'] .button-logo {
+    --bg: rgba(255, 255, 255, 0.45);
+    --bg-hover: rgba(255, 255, 255, 0.65);
+    --bg-active: rgba(255, 255, 255, 0.35);
+    --stroke: rgba(255, 255, 255, 0.85);
+    --inner-hi: rgba(255, 255, 255, 0.95);
+    --shadow:
+        0 8px 32px 0 rgba(31, 38, 135, 0.08), 0 2px 8px 0 rgba(0, 0, 0, 0.04);
+    --shadow-hover:
+        0 12px 36px 0 rgba(31, 38, 135, 0.12), 0 4px 12px 0 rgba(0, 0, 0, 0.06);
+    --shadow-active: 0 4px 16px 0 rgba(31, 38, 135, 0.08);
+}
+
+.button-logo.glass.light,
+.light.glass,
+[data-theme='light'] .button-logo.glass {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.55) 0%,
+        rgba(255, 255, 255, 0.2) 100%
+    );
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+}
+
+.button-logo.glass.light:hover,
+.light.glass:hover,
+[data-theme='light'] .button-logo.glass:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.75) 0%,
+        rgba(255, 255, 255, 0.35) 100%
+    );
+    border-color: rgba(255, 255, 255, 0.9);
 }
 
 .button-logo.shine::after {

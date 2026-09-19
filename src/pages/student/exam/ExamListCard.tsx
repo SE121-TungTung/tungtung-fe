@@ -1,5 +1,6 @@
 import Card from '@/components/common/card/Card'
 import ButtonGhost from '@/components/common/button/ButtonGhost'
+import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import s from './ExamListCard.module.css'
 import type { TestListItem, StudentTestListItem } from '@/types/test.types'
 import { getSkillAreaLabel, getDifficultyInfo } from '@/lib/test'
@@ -15,6 +16,8 @@ interface ExamListCardProps {
     exams: (TestListItem | StudentTestListItem)[]
     onBackClick?: () => void
     onExamClick: (examId: string) => void
+    onGradingClick?: (examId: string) => void // ✅ NEW: Handler cho nút chấm điểm
+    onHistoryClick?: (examId: string) => void
     isLoading?: boolean
     viewMode?: 'list' | 'compact'
     userRole:
@@ -30,6 +33,8 @@ export default function ExamListCard({
     exams,
     onBackClick,
     onExamClick,
+    onGradingClick,
+    onHistoryClick,
     isLoading = false,
     viewMode = 'list',
     userRole,
@@ -56,7 +61,7 @@ export default function ExamListCard({
                     />
                     <Skeleton width={60} height={20} />
                 </div>
-                <Skeleton variant="text" count={2} />{' '}
+                <Skeleton variant="text" count={2} />
                 <Skeleton width="80%" height={16} style={{ marginTop: 8 }} />
                 <div
                     className={s.examMeta}
@@ -75,7 +80,11 @@ export default function ExamListCard({
         const studentExam = isStudentView ? (exam as StudentTestListItem) : null
         const canAttempt = studentExam?.canAttempt ?? true
 
-        // Get metadata
+        const isTeacherView = userRole === 'teacher'
+        const testExam = !isStudentView ? (exam as TestListItem) : null
+        const hasPendingAttempts =
+            testExam?.pendingAttemptsCount && testExam.pendingAttemptsCount > 0
+
         const skillLabel =
             'skill' in exam ? getSkillAreaLabel(exam.skill) : 'N/A'
         const difficultyInfo =
@@ -84,21 +93,23 @@ export default function ExamListCard({
                 : { label: 'N/A', color: 'gray' }
 
         const duration =
-            'timeLimitMinutes' in exam
+            'timeLimitMinutes' in exam && exam.timeLimitMinutes
                 ? exam.timeLimitMinutes
-                : 'durationMinutes' in exam
+                : 'durationMinutes' in exam && exam.durationMinutes
                   ? exam.durationMinutes
                   : 0
 
         return (
             <li
                 key={exam.id}
-                className={`${s.examItem} ${!canAttempt ? s.disabled : ''}`}
-                onClick={canAttempt ? () => onExamClick(exam.id) : undefined}
+                className={`${s.examItem} ${!canAttempt && isStudentView ? s.disabled : ''}`}
                 role="button"
-                tabIndex={canAttempt ? 0 : -1}
+                tabIndex={0}
             >
-                <div className={s.examMain}>
+                <div
+                    className={s.examMain}
+                    onClick={() => onExamClick(exam.id)}
+                >
                     <div className={s.examHeader}>
                         <h4 className={s.examTitle}>{exam.title}</h4>
                         <span
@@ -110,6 +121,12 @@ export default function ExamListCard({
                         >
                             {difficultyInfo.label}
                         </span>
+
+                        {isTeacherView && hasPendingAttempts && (
+                            <span className={s.pendingBadge}>
+                                🔔 {testExam.pendingAttemptsCount} bài chờ chấm
+                            </span>
+                        )}
                     </div>
 
                     {exam.description && viewMode === 'list' && (
@@ -137,30 +154,80 @@ export default function ExamListCard({
                                     {studentExam.maxAttempts}
                                 </strong>
                             </span>
-                            {studentExam.latestAttemptScore !== null && (
-                                <span className={s.score}>
-                                    <img src={CheckIcon} alt="score" />
-                                    Điểm:{' '}
-                                    <strong>
-                                        {studentExam.latestAttemptScore.toFixed(
-                                            1
-                                        )}
-                                    </strong>
-                                </span>
-                            )}
+                            {studentExam.latestAttemptScore !== undefined &&
+                                studentExam.latestAttemptScore !== null && (
+                                    <span className={s.score}>
+                                        <img src={CheckIcon} alt="score" />
+                                        Điểm:{' '}
+                                        <strong>
+                                            {Number(
+                                                studentExam.latestAttemptScore
+                                            ).toFixed(1)}
+                                        </strong>
+                                    </span>
+                                )}
                         </div>
                     )}
                 </div>
 
                 <div className={s.examAction}>
-                    {canAttempt ? (
-                        <span className={s.ctaText}>
-                            {userRole === 'student' ? 'Làm bài' : 'Xem'}
-                            <span className={s.arrow}>→</span>
-                        </span>
-                    ) : (
-                        <span className={s.disabledText}>Hết lượt</span>
-                    )}
+                    {isTeacherView && onGradingClick ? (
+                        <div className={s.teacherActions}>
+                            <ButtonGhost
+                                size="sm"
+                                mode="light"
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    onExamClick(exam.id)
+                                }}
+                            >
+                                Xem chi tiết
+                            </ButtonGhost>
+                            {testExam?.totalAttemptsCount &&
+                                testExam.totalAttemptsCount > 0 && (
+                                    <ButtonPrimary
+                                        size="sm"
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            onGradingClick(exam.id)
+                                        }}
+                                    >
+                                        Chấm điểm
+                                        {hasPendingAttempts &&
+                                            ` (${testExam.pendingAttemptsCount})`}
+                                    </ButtonPrimary>
+                                )}
+                        </div>
+                    ) : isStudentView ? (
+                        /* Student view */
+                        <div
+                            className={s.studentActions}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {studentExam &&
+                                studentExam.attemptsCount > 0 &&
+                                onHistoryClick && (
+                                    <ButtonGhost
+                                        size="sm"
+                                        mode="light"
+                                        onClick={() => onHistoryClick(exam.id)}
+                                        style={{ marginRight: 8 }}
+                                    >
+                                        Lịch sử
+                                    </ButtonGhost>
+                                )}
+                            {canAttempt ? (
+                                <ButtonPrimary
+                                    size="sm"
+                                    onClick={() => onExamClick(exam.id)}
+                                >
+                                    Làm bài
+                                </ButtonPrimary>
+                            ) : (
+                                <span className={s.disabledText}>Hết lượt</span>
+                            )}
+                        </div>
+                    ) : null}
                 </div>
             </li>
         )

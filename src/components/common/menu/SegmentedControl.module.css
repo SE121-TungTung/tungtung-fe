@@ -1,8 +1,7 @@
 .root {
-    --radius: var(--radius-pill, 999px);
-
-    --h: 36px;
-    --px: 4px;
+    --radius: var(--primitive-radius-full, 999px);
+    --h: 32px;
+    --px: 10px;
     --fs: 13px;
 
     --fg: var(--Text-primary, #0b1520);

@@ -4,6 +4,7 @@ import type { Role } from '@/types/auth.ts'
 import type { NavigateFunction } from 'react-router-dom'
 import IconLogout from '@/assets/Action Dislike.svg'
 import { UnreadBadge } from '@/components/feature/messages/UnreadBadge'
+import { ThemeSwitcher } from '@/components/common/theme/ThemeSwitcher'
 
 type ExtendedSideMenuItem = SideMenuItem & {
     allowedRoles?: Role[]
@@ -29,7 +30,7 @@ const studyMenuItems: ExtendedSideMenuItem[] = [
     {
         id: 'roadmap',
         label: 'Lộ trình',
-        href: '/coming-soon',
+        href: '/student/roadmap',
     },
 ]
 
@@ -54,6 +55,22 @@ const studentNavItems: AppNavItem[] = [
         label: 'Tin nhắn',
         href: '/messages',
     },
+    {
+        id: 'finance',
+        label: 'Tài chính',
+        dropdownItems: [
+            {
+                id: 'invoices',
+                label: 'Hóa đơn học phí',
+                href: '/student/finance/invoices',
+            },
+            {
+                id: 'wallet',
+                label: 'Ví điện tử nội bộ',
+                href: '/finance/wallet',
+            },
+        ],
+    },
 ]
 
 const teacherNavItems: AppNavItem[] = [
@@ -63,9 +80,20 @@ const teacherNavItems: AppNavItem[] = [
         href: '/dashboard',
     },
     {
-        id: 'classes',
-        label: 'Các lớp dạy',
-        href: '/teacher/classes',
+        id: 'teaching',
+        label: 'Giảng dạy',
+        dropdownItems: [
+            {
+                id: 'classes',
+                label: 'Các lớp dạy',
+                href: '/teacher/classes',
+            },
+            {
+                id: 'schedule',
+                label: 'Lịch dạy của tôi',
+                href: '/teacher/schedule',
+            },
+        ],
     },
     {
         id: 'exams',
@@ -87,6 +115,27 @@ const teacherNavItems: AppNavItem[] = [
         id: 'messages',
         label: 'Tin nhắn',
         href: '/messages',
+    },
+    {
+        id: 'personal',
+        label: 'Cá nhân',
+        dropdownItems: [
+            {
+                id: 'kpi',
+                label: 'KPI của tôi',
+                href: '/teacher/kpi',
+            },
+            {
+                id: 'salary',
+                label: 'Lịch sử lương',
+                href: '/teacher/salary',
+            },
+            {
+                id: 'wallet',
+                label: 'Ví điện tử nội bộ',
+                href: '/finance/wallet',
+            },
+        ],
     },
 ]
 
@@ -128,14 +177,61 @@ const adminNavItems: AppNavItem[] = [
                 href: '/admin/schedule',
             },
             {
-                id: 'kpi',
-                label: 'Quản lý KPI',
-                href: '/coming-soon',
+                id: 'schedule-ga',
+                label: 'Xếp TKB (GA)',
+                href: '/admin/schedule/ga',
             },
             {
-                id: 'salary',
-                label: 'Quản lý Lương',
-                href: '/coming-soon',
+                id: 'kpi-payroll',
+                label: 'KPI & Lương',
+                subItems: [
+                    {
+                        id: 'kpi',
+                        label: 'Quản lý KPI',
+                        href: '/admin/kpi',
+                    },
+                    {
+                        id: 'kpi-templates',
+                        label: 'Template KPI',
+                        href: '/admin/kpi/templates',
+                    },
+                    {
+                        id: 'kpi-support-calc',
+                        label: 'Hỗ trợ tính A1/A2',
+                        href: '/admin/kpi/support-calc',
+                    },
+                    {
+                        id: 'kpi-disputes',
+                        label: 'Khiếu nại KPI',
+                        href: '/admin/kpi/disputes',
+                    },
+                    {
+                        id: 'salary',
+                        label: 'Quản lý Lương',
+                        href: '/admin/payroll',
+                    },
+                ],
+            },
+            {
+                id: 'finance',
+                label: 'Tài chính',
+                subItems: [
+                    {
+                        id: 'invoices',
+                        label: 'Quản lý Tài chính',
+                        href: '/admin/finance/invoices',
+                    },
+                    {
+                        id: 'finance-reports',
+                        label: 'Báo cáo Tài chính',
+                        href: '/admin/finance/reports',
+                    },
+                    {
+                        id: 'wallet-admin',
+                        label: 'Duyệt Ví điện tử',
+                        href: '/finance/wallet',
+                    },
+                ],
             },
         ],
     },
@@ -144,6 +240,12 @@ const adminNavItems: AppNavItem[] = [
         label: 'Hệ thống',
         allowedRoles: ['office_admin', 'center_admin', 'system_admin'],
         dropdownItems: [
+            {
+                id: 'system-settings',
+                label: 'Cấu hình',
+                href: '/admin/system',
+                allowedRoles: ['system_admin', 'center_admin'],
+            },
             {
                 id: 'chatbot-documents',
                 label: 'Tài liệu Chatbot',
@@ -169,6 +271,11 @@ const adminNavItems: AppNavItem[] = [
 
 const commonUserMenu: ExtendedSideMenuItem[] = [
     {
+        id: 'theme-switcher',
+        label: <ThemeSwitcher />,
+        onClick: (e) => e?.stopPropagation(), // Prevent close popup
+    },
+    {
         id: 'profile',
         label: 'Hồ sơ',
         href: '/profile',
@@ -176,7 +283,7 @@ const commonUserMenu: ExtendedSideMenuItem[] = [
     {
         id: 'settings',
         label: 'Cài đặt',
-        href: '/coming-soon',
+        href: '/settings',
     },
     {
         id: 'help',
@@ -219,19 +326,26 @@ export const getNavItems = (
     return navs.map((item): NavItem => {
         const { dropdownItems, rightIcon, ...restOfItem } = item
 
+        const mapSubItem = (sub: ExtendedSideMenuItem): SideMenuItem => {
+            const { href, subItems, ...restOfSub } =
+                sub as ExtendedSideMenuItem & {
+                    subItems?: ExtendedSideMenuItem[]
+                }
+            return {
+                ...restOfSub,
+                href,
+                ...(href ? { onClick: () => navigate(href) } : {}),
+                ...(subItems ? { subItems: subItems.map(mapSubItem) } : {}),
+            } as any
+        }
+
         const finalDropdownItems = (
             dropdownItems as ExtendedSideMenuItem[] | undefined
         )
             ?.filter(
                 (sub) => !sub.allowedRoles || sub.allowedRoles.includes(role)
             )
-            .map((sub) => {
-                const { href, ...restOfSub } = sub
-                return {
-                    ...restOfSub,
-                    onClick: () => href && navigate(href),
-                }
-            })
+            .map(mapSubItem)
 
         return {
             ...restOfItem,

@@ -2,6 +2,7 @@ import React, { type JSX } from 'react'
 import ArrowRight from '@/assets/Arrow Right.svg'
 import { ButtonLogo } from '@/components/common/button/ButtonLogo'
 import s from './TextHorizontal.module.css'
+import Button from '../button/Button'
 
 interface Props {
     className?: string
@@ -10,7 +11,8 @@ interface Props {
     title?: React.ReactNode
     description?: React.ReactNode
     ctaText?: string
-    onClick?: () => void
+    onCtaClick?: () => void
+    onClick?: () => void | Promise<void>
     mode?: 'light' | 'dark'
 }
 
@@ -21,19 +23,15 @@ export const TextHorizontal = ({
     title,
     description,
     ctaText,
+    onCtaClick,
     onClick,
     mode = 'dark',
 }: Props): JSX.Element => {
-    const isClickable = !!onClick
-    const clickableClass = isClickable ? s.clickable : ''
-
     return (
         <div
-            className={`${s.textHorizontal} ${s[mode]} ${clickableClass} ${className}`}
+            className={`${s.textHorizontal} ${s[mode]} ${className} ${onClick ? s.clickable : ''}`}
             data-colors-mode="dark"
             onClick={onClick}
-            role={isClickable ? 'button' : undefined}
-            tabIndex={isClickable ? 0 : undefined}
         >
             {icon && (
                 <ButtonLogo
@@ -51,22 +49,23 @@ export const TextHorizontal = ({
             </div>
 
             {ctaText && (
-                <div className={s.ctaButton}>
+                <Button
+                    className={s.ctaButton}
+                    onClick={onCtaClick}
+                    variant="glass"
+                    size="md"
+                    glow
+                    tone="brand"
+                    rightIcon={
+                        <img
+                            src={ArrowRight}
+                            alt="arrow"
+                            className={s.arrowIcon}
+                        />
+                    }
+                >
                     <span className={s.ctaText}>{ctaText}</span>
-                    <img
-                        src={ArrowRight}
-                        className={s.arrowRight}
-                        alt="arrow"
-                    />
-                </div>
-            )}
-
-            {!ctaText && onClick && (
-                <img
-                    src={ArrowRight}
-                    className={s.arrowRightBase}
-                    alt="arrow"
-                />
+                </Button>
             )}
         </div>
     )

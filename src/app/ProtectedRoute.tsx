@@ -13,8 +13,7 @@ interface ProtectedRouteProps {
 const getToken = () => {
     return (
         localStorage.getItem('access_token') ??
-        localStorage.getItem('token') ??
-        sessionStorage.getItem('token')
+        sessionStorage.getItem('access_token')
     )
 }
 
@@ -45,7 +44,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
             } catch (error) {
                 console.error('Auth check failed:', error)
                 localStorage.removeItem('access_token')
-                localStorage.removeItem('token')
+                sessionStorage.removeItem('access_token')
             } finally {
                 setIsChecking(false)
             }

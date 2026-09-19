@@ -66,11 +66,9 @@ export default function FirstLoginPasswordModal({
                 onSuccess?.()
             }
         },
-        onError: (err: any) => {
+        onError: (err: Error) => {
             setApiError(
-                err?.detail ||
-                    err?.message ||
-                    'Không thể đổi mật khẩu. Vui lòng kiểm tra mật khẩu hiện tại.'
+                err.message || 'Không thể đổi mật khẩu. Vui lòng thử lại.'
             )
         },
     })
@@ -121,24 +119,29 @@ export default function FirstLoginPasswordModal({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: '20px',
-                background: 'rgba(0, 0, 0, 0.75)',
+                padding: '24px 16px',
+                background: 'var(--modal-backdrop)',
                 backdropFilter: 'blur(12px)',
+                overflowY: 'auto',
             }}
         >
             {/* Modal Content */}
             <div
+                className="first-login-modal"
                 style={{
                     position: 'relative',
-                    maxWidth: '500px',
+                    maxWidth: '480px',
                     width: '100%',
+                    maxHeight: 'min(90vh, 680px)',
+                    overflowY: 'auto',
+                    margin: 'auto',
                     background:
-                        'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.08) 100%)',
+                        'color-mix(in srgb, var(--modal-bg) 85%, transparent)',
                     backdropFilter: 'blur(24px)',
-                    border: '1px solid rgba(255, 255, 255, 0.18)',
-                    borderRadius: '24px',
-                    padding: '40px',
-                    boxShadow: '0 24px 72px rgba(0, 0, 0, 0.5)',
+                    border: '1px solid var(--color-border-soft)',
+                    borderRadius: 'var(--modal-radius, 24px)',
+                    padding: '32px 28px',
+                    boxShadow: 'var(--modal-shadow)',
                     animation: 'modalSlideIn 0.4s ease-out',
                 }}
                 role="dialog"
@@ -150,25 +153,25 @@ export default function FirstLoginPasswordModal({
                     style={{
                         display: 'flex',
                         justifyContent: 'center',
-                        marginBottom: '24px',
+                        marginBottom: '16px',
                     }}
                 >
                     <div
                         style={{
-                            width: '64px',
-                            height: '64px',
+                            width: '56px',
+                            height: '56px',
                             borderRadius: '50%',
                             background:
                                 'linear-gradient(135deg, #faad14 0%, #ffc53d 100%)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            boxShadow: '0 8px 24px rgba(250, 173, 20, 0.4)',
+                            boxShadow: '0 6px 20px rgba(250, 173, 20, 0.35)',
                         }}
                     >
                         <svg
-                            width="32"
-                            height="32"
+                            width="28"
+                            height="28"
                             viewBox="0 0 24 24"
                             fill="none"
                             xmlns="http://www.w3.org/2000/svg"
@@ -188,10 +191,10 @@ export default function FirstLoginPasswordModal({
                 <h2
                     id="first-login-title"
                     style={{
-                        margin: '0 0 8px 0',
-                        fontSize: '26px',
+                        margin: '0 0 6px 0',
+                        fontSize: '22px',
                         fontWeight: 600,
-                        color: '#fff',
+                        color: 'var(--color-text-primary)',
                         textAlign: 'center',
                         letterSpacing: '-0.5px',
                     }}
@@ -202,11 +205,11 @@ export default function FirstLoginPasswordModal({
                 {/* Description */}
                 <p
                     style={{
-                        margin: '0 0 28px 0',
-                        fontSize: '14px',
-                        color: 'rgba(255, 255, 255, 0.75)',
+                        margin: '0 0 20px 0',
+                        fontSize: '13.5px',
+                        color: 'var(--color-text-secondary)',
                         textAlign: 'center',
-                        lineHeight: 1.6,
+                        lineHeight: 1.5,
                     }}
                 >
                     Đây là lần đầu tiên bạn đăng nhập. Vui lòng đổi mật khẩu để
@@ -216,13 +219,12 @@ export default function FirstLoginPasswordModal({
                 {/* Form */}
                 <form onSubmit={handleSubmit(onSubmit)}>
                     {/* Current Password */}
-                    <div style={{ marginBottom: '16px' }}>
+                    <div style={{ marginBottom: '14px' }}>
                         <InputField
                             label="Mật khẩu hiện tại"
                             type="password"
                             enablePasswordToggle={true}
                             placeholder="Nhập mật khẩu hiện tại"
-                            mode="dark"
                             {...register('currentPassword')}
                         />
                         {errors.currentPassword && (
@@ -233,13 +235,12 @@ export default function FirstLoginPasswordModal({
                     </div>
 
                     {/* New Password */}
-                    <div style={{ marginBottom: '16px' }}>
+                    <div style={{ marginBottom: '14px' }}>
                         <InputField
                             label="Mật khẩu mới"
                             type="password"
                             enablePasswordToggle={true}
                             placeholder="Nhập mật khẩu mới"
-                            mode="dark"
                             {...register('newPassword')}
                         />
 
@@ -256,7 +257,7 @@ export default function FirstLoginPasswordModal({
                                     <span
                                         style={{
                                             fontSize: 11,
-                                            color: 'rgba(255,255,255,0.6)',
+                                            color: 'var(--color-text-muted)',
                                         }}
                                     >
                                         Độ mạnh:
@@ -275,7 +276,7 @@ export default function FirstLoginPasswordModal({
                                     style={{
                                         width: '100%',
                                         height: 3,
-                                        background: 'rgba(255,255,255,0.1)',
+                                        background: 'var(--color-border-soft)',
                                         borderRadius: 2,
                                         overflow: 'hidden',
                                     }}
@@ -300,13 +301,12 @@ export default function FirstLoginPasswordModal({
                     </div>
 
                     {/* Confirm Password */}
-                    <div style={{ marginBottom: '20px' }}>
+                    <div style={{ marginBottom: '14px' }}>
                         <InputField
                             label="Xác nhận mật khẩu mới"
                             type="password"
                             enablePasswordToggle={true}
                             placeholder="Nhập lại mật khẩu mới"
-                            mode="dark"
                             {...register('confirmPassword')}
                         />
                         {errors.confirmPassword && (
@@ -319,18 +319,18 @@ export default function FirstLoginPasswordModal({
                     {/* Requirements Box */}
                     <div
                         style={{
-                            marginBottom: '24px',
-                            padding: '12px 14px',
-                            background: 'rgba(255,255,255,0.06)',
+                            marginBottom: '18px',
+                            padding: '10px 14px',
+                            background: 'var(--color-surface-raised)',
                             borderRadius: '10px',
-                            border: '1px solid rgba(255,255,255,0.12)',
+                            border: '1px solid var(--color-border-soft)',
                         }}
                     >
                         <div
                             style={{
                                 fontSize: 12,
-                                color: 'rgba(255,255,255,0.85)',
-                                marginBottom: 8,
+                                color: 'var(--color-text-primary)',
+                                marginBottom: 6,
                                 fontWeight: 500,
                             }}
                         >
@@ -341,8 +341,8 @@ export default function FirstLoginPasswordModal({
                                 margin: 0,
                                 paddingLeft: 18,
                                 fontSize: 11,
-                                color: 'rgba(255,255,255,0.65)',
-                                lineHeight: 1.7,
+                                color: 'var(--color-text-secondary)',
+                                lineHeight: 1.6,
                             }}
                         >
                             <li
@@ -393,27 +393,52 @@ export default function FirstLoginPasswordModal({
                         <div
                             style={{
                                 marginBottom: '16px',
-                                padding: '10px 12px',
-                                background: 'rgba(255, 77, 79, 0.15)',
-                                border: '1px solid rgba(255, 77, 79, 0.3)',
-                                borderRadius: '8px',
-                                color: '#ff9aa2',
+                                padding: '11px 14px',
+                                background: 'var(--color-status-danger-bg)',
+                                border: '1px solid var(--color-status-danger)',
+                                borderRadius: '10px',
+                                color: 'var(--color-status-danger)',
                                 fontSize: '13px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px',
+                                lineHeight: 1.5,
                             }}
                             role="alert"
                         >
-                            {apiError}
+                            <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                style={{ flexShrink: 0 }}
+                            >
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="12" y1="8" x2="12" y2="12" />
+                                <line x1="12" y1="16" x2="12.01" y2="16" />
+                            </svg>
+                            <span>{apiError}</span>
                         </div>
                     )}
 
                     {/* Submit Button */}
                     <ButtonPrimary
                         type="submit"
-                        variant="glass"
+                        variant="solid"
+                        size="lg"
                         shape="rounded"
                         loading={mut.isPending}
                         disabled={mut.isPending}
-                        style={{ width: '100%' }}
+                        style={{
+                            width: '100%',
+                            minHeight: '48px',
+                            fontSize: '15px',
+                            fontWeight: 600,
+                        }}
                     >
                         {mut.isPending
                             ? 'Đang đổi mật khẩu...'
@@ -426,7 +451,7 @@ export default function FirstLoginPasswordModal({
                             marginTop: '16px',
                             marginBottom: 0,
                             fontSize: '12px',
-                            color: 'rgba(255, 255, 255, 0.5)',
+                            color: 'var(--color-text-muted)',
                             textAlign: 'center',
                             lineHeight: 1.5,
                         }}
@@ -436,17 +461,30 @@ export default function FirstLoginPasswordModal({
                 </form>
             </div>
 
-            {/* Animation */}
+            {/* Animation & Custom Scrollbar */}
             <style>{`
                 @keyframes modalSlideIn {
                     from {
                         opacity: 0;
-                        transform: translateY(-30px) scale(0.92);
+                        transform: translateY(-24px) scale(0.95);
                     }
                     to {
                         opacity: 1;
                         transform: translateY(0) scale(1);
                     }
+                }
+                .first-login-modal::-webkit-scrollbar {
+                    width: 6px;
+                }
+                .first-login-modal::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                .first-login-modal::-webkit-scrollbar-thumb {
+                    background: var(--color-border-soft);
+                    border-radius: 3px;
+                }
+                .first-login-modal::-webkit-scrollbar-thumb:hover {
+                    background: var(--color-text-muted);
                 }
             `}</style>
         </div>

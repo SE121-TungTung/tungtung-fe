@@ -1,7 +1,7 @@
 .toolbar {
     position: absolute;
     background-color: #333;
-    border-radius: var(--radius-sm);
+    border-radius: var(--primitive-radius-sm);
     padding: 4px 8px;
     display: flex;
     gap: 6px;

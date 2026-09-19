@@ -51,7 +51,7 @@
 }
 .iconBtn:hover {
     opacity: 1;
-    background-color: var(--surface-raised-light);
+    background-color: var(--color-surface-raised);
 }
 .iconBtn img {
     width: 22px;
@@ -66,19 +66,22 @@
     flex-shrink: 0;
     display: grid;
     place-items: center;
-    background-color: var(--brand-primary-500-light) !important;
     transition: all 0.2s;
+    background-color: var(--color-brand-primary) !important;
 }
 
 .sendButton:not(:disabled) {
-    background-color: var(--brand-primary-500-light);
+    background-color: var(--color-brand-primary);
     color: #fff;
     box-shadow: 0 2px 5px rgba(37, 99, 235, 0.3);
 }
 
 .sendButton:disabled {
-    background-color: var(--surface-raised-light) !important;
+    background-color: var(--color-surface-raised) !important;
     cursor: not-allowed;
+}
+.sendButton:not(:disabled):hover {
+    background-color: var(--color-brand-primary);
 }
 
 .sendButton img {

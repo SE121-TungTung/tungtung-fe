@@ -1,14 +1,14 @@
 .root {
     --nav-h: clamp(44px, 6vw, 56px);
-    --radius: var(--radius-pill, 9999px);
+    --radius: var(--primitive-radius-full, 9999px);
     --pad-x: clamp(8px, 1.2vw, 14px);
     --pad-y: clamp(6px, 0.9vw, 10px);
     --gap: clamp(10px, 2vw, 24px);
 
-    --fg: var(--text-primary-light);
-    --bg: var(--container-border-light, rgba(255, 255, 255, 0.6));
-    --bd: var(--border-default, rgba(0, 0, 0, 0.12));
-    --hover: var(--state-hover, rgba(0, 0, 0, 0.06));
+    --fg: var(--color-text-primary);
+    --bg: var(--color-surface-card);
+    --bd: var(--color-border-soft);
+    --hover: var(--color-surface-raised);
     --elev: var(
         --Shadow-2,
         0 10px 24px rgba(0, 0, 0, 0.12),
@@ -26,7 +26,7 @@
     box-shadow:
         0 10px 24px rgba(0, 0, 0, 0.12),
         0 4px 8px rgba(0, 0, 0, 0.08);
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     overflow: visible;
 }
 
@@ -51,7 +51,7 @@
     justify-content: space-between;
     gap: 8px;
     list-style: none;
-    margin: 0 clamp(16px, 8vw, 100px);
+    margin: 0 clamp(8px, 2.5vw, 24px);
     padding: 0;
     width: 100%;
     overflow-x: auto;
@@ -114,9 +114,9 @@
     position: absolute;
     inset: 0;
     z-index: -1;
-    background: #fff;
+    background: var(--color-surface-card, #fff);
     border-radius: inherit;
-    border: 3px solid var(--boder-soft-light);
+    border: 3px solid var(--color-border-soft);
 }
 
 .icon {
@@ -319,7 +319,7 @@
     margin-bottom: 32px;
     height: var(--nav-h);
     flex-shrink: 0;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
 }
 
 .mobileMenuList {
@@ -336,7 +336,7 @@
     padding: 16px;
     font-size: 1rem;
     font-weight: 600;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     border-radius: 12px;
     text-decoration: none;
     background: transparent;
@@ -399,15 +399,21 @@
     transform: scale(0.97);
 }
 
-/* Tablet: Hide some items, show hamburger if cramped */
-@media (max-width: 1024px) {
+/* Tablet & Laptop: Make items more compact to fit without overflow */
+@media (max-width: 1200px) {
     .menu {
-        margin: 0 clamp(12px, 4vw, 48px);
+        margin: 0 clamp(4px, 1.5vw, 12px);
+        gap: 4px;
+    }
+    .item {
+        --px: clamp(6px, 1vw, 10px);
+        font-size: 13px;
+        gap: 4px;
     }
 }
 
-/* Mobile: Full hamburger menu */
-@media (max-width: 768px) {
+/* Tablet smaller & Mobile: Full hamburger menu */
+@media (max-width: 1024px) {
     .menu {
         display: none;
     }

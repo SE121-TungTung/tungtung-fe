@@ -15,7 +15,7 @@
 .questionText {
     font-size: 15px;
     font-weight: 600;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     margin: 0;
     flex: 1;
 }
@@ -34,7 +34,7 @@
     font-family: inherit;
     font-size: 15px;
     line-height: 1.7;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     resize: vertical;
     min-height: 300px;
     transition: border-color 0.2s ease;
@@ -42,5 +42,5 @@
 
 .essayTextarea:focus {
     outline: none;
-    border-color: var(--brand-primary-500-light);
+    border-color: var(--color-brand-primary-500);
 }

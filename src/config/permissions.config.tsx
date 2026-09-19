@@ -23,13 +23,28 @@ export type Permission =
     | 'class:create'
     | 'class:update'
     | 'class:delete'
+    //KPI & Salary permissions
+    | 'kpi:read'
+    | 'kpi:manage'
+    | 'salary:read'
+    | 'salary:approve'
+    | 'salary:adjust'
+    | 'payroll:run'
 
 /**
  * Ánh xạ từ Role sang mảng các Permissions
  */
 const ROLES: Record<Role, Permission[]> = {
     student: ['user:read', 'room:read', 'course:read', 'class:read'],
-    teacher: ['user:read', 'room:read', 'course:read', 'class:read'],
+    ta: ['user:read', 'room:read', 'course:read', 'class:read'],
+    teacher: [
+        'user:read',
+        'room:read',
+        'course:read',
+        'class:read',
+        'kpi:read',
+        'salary:read',
+    ],
 
     office_admin: [
         'user:read',
@@ -42,6 +57,8 @@ const ROLES: Record<Role, Permission[]> = {
         'class:read',
         'class:create',
         'class:update',
+        'kpi:read',
+        'salary:read',
     ],
     center_admin: [
         'user:read',
@@ -50,9 +67,6 @@ const ROLES: Record<Role, Permission[]> = {
         'user:update',
         'user:delete',
         'user:lock',
-        'room:read',
-        'room:create',
-        'room:update',
         'room:read',
         'room:create',
         'room:update',
@@ -65,6 +79,12 @@ const ROLES: Record<Role, Permission[]> = {
         'class:create',
         'class:update',
         'class:delete',
+        'kpi:read',
+        'kpi:manage',
+        'salary:read',
+        'salary:approve',
+        'salary:adjust',
+        'payroll:run',
     ],
     system_admin: [
         'user:read',
@@ -86,6 +106,12 @@ const ROLES: Record<Role, Permission[]> = {
         'class:create',
         'class:update',
         'class:delete',
+        'kpi:read',
+        'kpi:manage',
+        'salary:read',
+        'salary:approve',
+        'salary:adjust',
+        'payroll:run',
     ],
 }
 

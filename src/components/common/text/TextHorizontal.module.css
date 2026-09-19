@@ -16,25 +16,12 @@
 }
 
 .light {
-    --text-primary: var(--text-primary-light);
-    --text-secondary: var(--text-secondary-light);
+    --text-primary: var(--color-text-primary);
+    --text-secondary: var(--color-text-secondary);
 }
 .dark {
-    --text-primary: var(--text-primary-dark);
-    --text-secondary: var(--text-secondary-dark);
-}
-
-.clickable {
-    cursor: pointer;
-}
-
-.clickable:hover {
-    background-color: rgba(0, 0, 0, 0.04);
-    transform: translateY(-2px);
-}
-
-.dark.clickable:hover {
-    background-color: rgba(255, 255, 255, 0.05);
+    --text-primary: var(--color-text-primary);
+    --text-secondary: var(--color-text-secondary);
 }
 
 @media (min-width: 768px) {
@@ -70,12 +57,16 @@
     display: inline-flex;
     flex-shrink: 0;
     align-items: center;
-    gap: 8px;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 6px;
-    padding: 6px 12px;
-    background: transparent;
-    transition: all 0.2s;
+    gap: 12px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition:
+        background 0.15s,
+        border-color 0.15s;
+}
+
+.clickable {
+    cursor: pointer;
 }
 
 .clickable:hover .ctaButton {
@@ -87,6 +78,27 @@
     font-size: 13px;
     font-weight: 500;
     color: var(--text-primary);
+}
+
+.arrowIcon {
+    width: 14px;
+    height: 14px;
+    display: inline-block;
+    vertical-align: middle;
+    transition:
+        filter 0.2s ease,
+        transform 0.2s ease;
+}
+
+[data-theme='dark'] .arrowIcon,
+.dark .arrowIcon,
+[data-theme='dark'] .ctaButton img,
+.dark .ctaButton img {
+    filter: invert(1) brightness(2);
+}
+
+.clickable:hover .arrowIcon {
+    transform: translateX(2px);
 }
 
 .arrowRight {

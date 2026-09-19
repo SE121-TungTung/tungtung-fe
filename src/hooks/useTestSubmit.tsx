@@ -6,12 +6,14 @@ import { useDialog } from './useDialog'
 
 interface UseTestSubmitOptions {
     attemptId: string
+    guestSessionId?: string
     onSuccess?: () => void
     onError?: (error: Error) => void
 }
 
 export function useTestSubmit({
     attemptId,
+    guestSessionId,
     onSuccess,
     onError,
 }: UseTestSubmitOptions) {
@@ -52,12 +54,23 @@ export function useTestSubmit({
                 })
 
                 // Submit to API
-                await testApi.submitAttempt(attemptId, { responses })
+                if (guestSessionId) {
+                    await testApi.submitGuestAttempt(
+                        attemptId,
+                        { responses },
+                        guestSessionId
+                    )
+                } else {
+                    await testApi.submitAttempt(attemptId, { responses })
+                }
 
                 // Clear localStorage if requested
                 if (clearStorage) {
                     localStorage.removeItem(`testAnswers_${attemptId}`)
                     localStorage.removeItem(`attempt_${attemptId}`)
+                    if (guestSessionId) {
+                        localStorage.removeItem(`guest_attempt_${attemptId}`)
+                    }
                 }
 
                 // Call success callback
@@ -65,11 +78,31 @@ export function useTestSubmit({
 
                 // Navigate to results
                 if (redirectToResults) {
-                    navigate(`/student/tests/results/${attemptId}`)
+                    if (guestSessionId) {
+                        navigate(`/public/tests/results/${attemptId}`)
+                    } else {
+                        navigate(`/student/tests/results/${attemptId}`)
+                    }
                 }
             } catch (error) {
                 const err = error as Error
                 console.error('Submit failed:', err)
+
+                const isAlreadySubmitted =
+                    err.message?.toLowerCase().includes('already submitted') ||
+                    err.message?.toLowerCase().includes('expired')
+
+                if (isAlreadySubmitted) {
+                    if (clearStorage) {
+                        localStorage.removeItem(`testAnswers_${attemptId}`)
+                        localStorage.removeItem(`attempt_${attemptId}`)
+                    }
+                    onSuccess?.()
+                    if (redirectToResults) {
+                        navigate(`/student/tests/results/${attemptId}`)
+                    }
+                    return
+                }
 
                 // Call error callback
                 onError?.(err)

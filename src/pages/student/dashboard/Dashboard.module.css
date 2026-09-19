@@ -2,7 +2,49 @@
     width: 100%;
     display: flex;
     flex-direction: column;
-    align-items: center;
+}
+
+.header {
+    margin-bottom: 40px;
+    position: relative;
+    z-index: 10;
+    width: 70%;
+    align-self: center;
+}
+
+.avatarWrapper {
+    position: relative;
+}
+
+.avatarButton {
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
+
+.avatarButton[data-active='true'] {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(100, 150, 255, 0.5);
+    border-color: var(--color-brand-primary-hover);
+}
+.avatarButton[data-active='true']::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    background: var(--bg-avatar-gradient);
+    z-index: -1;
 }
 
 .menusContainer {
@@ -49,7 +91,7 @@
     font-size: clamp(2.2rem, 5vw, 3rem);
     font-weight: 700;
     text-align: center;
-    color: var(--text-primary-light);
+    color: var(--color-text-primary);
     letter-spacing: -0.04em;
     margin: 0 auto 40px;
     overflow: visible;
@@ -59,12 +101,7 @@
 }
 
 .gradientText {
-    background: linear-gradient(
-        111deg,
-        var(--brand-secondary-500-light) 0%,
-        #ef325f 49.15%,
-        var(--brand-primary-500-light) 100%
-    );
+    background: var(--bg-brand-gradient);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -90,22 +127,294 @@
 
 .statsGrid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 16px;
+}
+
+.tipsList {
+    width: 100%;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.courseSuggestionCard {
+    margin-bottom: 16px;
+    background: #eef2ff;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid #c7d2fe;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+:global([data-theme='dark']) .courseSuggestionCard {
+    background: #1e1b4b;
+    border-color: #312e81;
+}
+
+.courseSuggestionHeader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.courseSuggestionIcon {
+    width: 20px;
+    height: 20px;
+}
+
+:global([data-theme='dark']) .courseSuggestionIcon {
+    filter: invert(1) brightness(2);
+}
+
+.courseSuggestionTitle {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #3730a3;
+}
+
+:global([data-theme='dark']) .courseSuggestionTitle {
+    color: #e0e7ff;
+}
+
+.courseSuggestionText {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #4f46e5;
+}
+
+:global([data-theme='dark']) .courseSuggestionText {
+    color: #a5b4fc;
+}
+
+.courseName {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1e1b4b;
+}
+
+:global([data-theme='dark']) .courseName {
+    color: #f8fafc;
+}
+
+.courseTarget {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: #6366f1;
+}
+
+:global([data-theme='dark']) .courseTarget {
+    color: #818cf8;
+}
+
+.tipsSectionHeader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    margin-bottom: 16px;
+}
+
+.tipsSectionIcon {
+    width: 22px;
+    height: 22px;
+}
+
+:global([data-theme='dark']) .tipsSectionIcon {
+    filter: invert(1) brightness(2);
+}
+
+.skillGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.skillHeader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-secondary);
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--color-border-soft, rgba(0, 0, 0, 0.06));
+}
+
+:global([data-theme='dark']) .skillHeader {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.skillIcon {
+    width: 16px;
+    height: 16px;
+}
+
+:global([data-theme='dark']) .skillIcon {
+    filter: invert(1) brightness(2);
+}
+
+.skillTipsUl {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.skillTipLi {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    padding: 10px 14px;
+    background-color: var(--color-bg-card, rgba(0, 0, 0, 0.02));
+    border-left: 4px solid var(--color-brand-primary, #3182ce);
+    border-radius: 0 8px 8px 0;
+    color: var(--color-text-secondary);
+    transition: all 0.2s ease;
+}
+
+.skillTipLi:hover {
+    transform: translateX(4px);
+    background-color: var(--color-bg-card-hover, rgba(0, 0, 0, 0.04));
+}
+
+:global([data-theme='dark']) .skillTipLi {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+:global([data-theme='dark']) .skillTipLi:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.skillTipLi[data-skill='reading'] {
+    border-left-color: #3b82f6;
+}
+.skillTipLi[data-skill='listening'] {
+    border-left-color: #10b981;
+}
+.skillTipLi[data-skill='writing'] {
+    border-left-color: #f59e0b;
+}
+.skillTipLi[data-skill='speaking'] {
+    border-left-color: #ef4444;
+}
+.skillTipLi[data-skill='overall'] {
+    border-left-color: #8b5cf6;
+}
+
+/* Legacy flat tips (backward compat) */
+.tipsTitle {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--color-text-primary);
+}
+
+.tipsUl {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tipLi {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    padding: 10px 14px;
+    background-color: var(--color-bg-card, rgba(0, 0, 0, 0.02));
+    border-left: 4px solid var(--color-brand-primary, #3182ce);
+    border-radius: 0 8px 8px 0;
+    color: var(--color-text-secondary);
+    transition: all 0.2s ease;
+}
+
+.tipLi:hover {
+    transform: translateX(4px);
+    background-color: var(--color-bg-card-hover, rgba(0, 0, 0, 0.04));
+}
+
+:global([data-theme='dark']) .tipLi {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+:global([data-theme='dark']) .tipLi:hover {
+    background-color: rgba(255, 255, 255, 0.06);
 }
 
 .suggestionBody {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 32px;
-    align-items: flex-end;
+    align-items: flex-start;
 }
 
 .suggestionTip {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 4px 12px 4px 0;
+    max-height: 320px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.suggestionTip::-webkit-scrollbar {
+    width: 6px;
+}
+.suggestionTip::-webkit-scrollbar-track {
+    background: transparent;
+}
+.suggestionTip::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+}
+.suggestionTip::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+:global([data-theme='dark']) .suggestionTip::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+}
+:global([data-theme='dark']) .suggestionTip::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.fab {
+    position: fixed;
+    bottom: 40px;
+    right: 40px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    background: var(--bg-brand-gradient);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
+    z-index: 40;
+}
+
+.fab:hover {
+    transform: scale(1.1);
+}
+
+.fab img {
+    width: 28px;
+    height: 28px;
+    filter: invert(1) brightness(2);
 }
 
 /* Responsive */

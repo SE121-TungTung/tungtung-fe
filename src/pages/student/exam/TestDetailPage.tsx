@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import s from './TestDetailPage.module.css'
 
@@ -12,7 +12,10 @@ import {
     getDifficultyInfo,
     getQuestionTypeLabel,
 } from '@/lib/test'
-import type { TestTeacher } from '@/types/test.types'
+import type {
+    TestAttemptSummaryResponse,
+    TestTeacher,
+} from '@/types/test.types'
 import { TestStatus, QuestionType } from '@/types/test.types'
 import Skeleton from '@/components/effect/Skeleton'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
@@ -27,6 +30,12 @@ export default function TestDetailPage() {
     const [test, setTest] = useState<TestTeacher | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+
+    const [attempts, setAttempts] = useState<TestAttemptSummaryResponse[]>([])
+    const [loadingAttempts, setLoadingAttempts] = useState(true)
+
+    const pendingCount = attempts.filter((a) => a.status === 'submitted').length
+    const totalCount = attempts.length
 
     const [isPublishing, setIsPublishing] = useState(false)
     const handlePublish = async () => {
@@ -51,7 +60,11 @@ export default function TestDetailPage() {
         }
     }
 
-    const loadTest = async () => {
+    const handleGrading = () => {
+        navigate(`/teacher/grading/${testId}`)
+    }
+
+    const loadTest = useCallback(async () => {
         if (!testId) return
 
         setLoading(true)
@@ -65,13 +78,28 @@ export default function TestDetailPage() {
         } finally {
             setLoading(false)
         }
-    }
+    }, [testId])
+
+    const loadAttempts = useCallback(async () => {
+        if (!testId) return
+
+        try {
+            setLoadingAttempts(true)
+            const data = await testApi.listTestAttemptsForTeacher(testId)
+            setAttempts(data)
+        } catch (error: any) {
+            console.error('Failed to load attempts:', error)
+        } finally {
+            setLoadingAttempts(false)
+        }
+    }, [testId])
 
     useEffect(() => {
         if (testId) {
             loadTest()
+            loadAttempts()
         }
-    }, [testId])
+    }, [testId, loadTest, loadAttempts])
 
     const getStatusBadge = (status: TestStatus) => {
         const statusConfig = {
@@ -216,6 +244,16 @@ export default function TestDetailPage() {
                                     Xuất bản
                                 </ButtonPrimary>
                             )}
+
+                            {totalCount > 0 && (
+                                <ButtonPrimary
+                                    onClick={handleGrading}
+                                    variant="outline"
+                                >
+                                    Chấm điểm
+                                    {pendingCount > 0 && ` (${pendingCount})`}
+                                </ButtonPrimary>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -262,6 +300,69 @@ export default function TestDetailPage() {
                                 </p>
                             </div>
                         </div>
+                    </Card>
+                )}
+
+                {/* ATTEMPTS STATS CARD */}
+                {!loadingAttempts && totalCount > 0 && (
+                    <Card title="📊 Thống kê bài làm" variant="outline">
+                        <div className={s.statsGrid}>
+                            <div className={s.statCard}>
+                                <span className={s.statValue}>
+                                    {totalCount}
+                                </span>
+                                <span className={s.statLabel}>
+                                    Tổng bài nộp
+                                </span>
+                            </div>
+
+                            <div className={s.statCard}>
+                                <span className={`${s.statValue} ${s.pending}`}>
+                                    {pendingCount}
+                                </span>
+                                <span className={s.statLabel}>Chờ chấm</span>
+                            </div>
+
+                            <div className={s.statCard}>
+                                <span className={`${s.statValue} ${s.graded}`}>
+                                    {
+                                        attempts.filter(
+                                            (a) => a.status === 'graded'
+                                        ).length
+                                    }
+                                </span>
+                                <span className={s.statLabel}>Đã chấm</span>
+                            </div>
+
+                            <div className={s.statCard}>
+                                <span
+                                    className={`${s.statValue} ${s.inProgress}`}
+                                >
+                                    {
+                                        attempts.filter(
+                                            (a) => a.status === 'in_progress'
+                                        ).length
+                                    }
+                                </span>
+                                <span className={s.statLabel}>Đang làm</span>
+                            </div>
+                        </div>
+
+                        {pendingCount > 0 && (
+                            <div className={s.pendingAlert}>
+                                <span className={s.alertIcon}>🔔</span>
+                                <span className={s.alertText}>
+                                    Có <strong>{pendingCount}</strong> bài đang
+                                    chờ chấm điểm
+                                </span>
+                                <ButtonPrimary
+                                    size="sm"
+                                    onClick={handleGrading}
+                                >
+                                    Chấm ngay →
+                                </ButtonPrimary>
+                            </div>
+                        )}
                     </Card>
                 )}
 

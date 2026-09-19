@@ -1,0 +1,536 @@
+/* ClassPostsFeedTab.module.css */
+
+/* ─── Create Form ─────────────────────────────────────────────────────────── */
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.required {
+    color: #ef4444;
+}
+
+.select,
+.input {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1.5px solid #cbd5e1;
+    font-size: 14px;
+    color: #1e293b;
+    background: #fff;
+    outline: none;
+    transition:
+        border-color 0.15s,
+        box-shadow 0.15s;
+    box-sizing: border-box;
+}
+
+.select:focus,
+.input:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1.5px solid #cbd5e1;
+    font-size: 14px;
+    color: #1e293b;
+    background: #fff;
+    outline: none;
+    resize: vertical;
+    transition:
+        border-color 0.15s,
+        box-shadow 0.15s;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.textarea:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* ─── File Upload ─────────────────────────────────────────────────────────── */
+
+.fileInputHidden {
+    display: none;
+}
+
+.fileLabel {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1.5px dashed #94a3b8;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+        border-color 0.15s,
+        background 0.15s;
+    width: fit-content;
+}
+
+.fileLabel:hover {
+    border-color: #6366f1;
+    background: #eef2ff;
+    color: #4f46e5;
+}
+
+.fileList {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.fileChip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    font-size: 12px;
+}
+
+.fileChipError {
+    background: #fff1f2;
+    border-color: #fca5a5;
+}
+
+.fileName {
+    flex: 1;
+    color: #334155;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fileSize {
+    color: #94a3b8;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.removeFile {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 0 2px;
+    line-height: 1;
+    transition: color 0.15s;
+}
+
+.removeFile:hover {
+    color: #ef4444;
+}
+
+.fileError {
+    font-size: 12px;
+    color: #ef4444;
+}
+
+.submitBtn {
+    padding: 12px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    color: #fff;
+    border: none;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition:
+        opacity 0.2s,
+        box-shadow 0.2s;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+}
+
+.submitBtn:hover:not(:disabled) {
+    opacity: 0.9;
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35);
+}
+
+.submitBtn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* ─── Post List Header ────────────────────────────────────────────────────── */
+
+.listHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.filterTabs {
+    display: flex;
+    gap: 4px;
+    background: #f1f5f9;
+    padding: 3px;
+    border-radius: 10px;
+}
+
+.filterTab {
+    padding: 5px 12px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    font-size: 12px;
+    font-weight: 500;
+    color: #64748b;
+    cursor: pointer;
+    transition:
+        background 0.15s,
+        color 0.15s;
+}
+
+.filterTab:hover {
+    color: #475569;
+}
+
+.filterTabActive {
+    background: #ffffff;
+    color: #4f46e5;
+    font-weight: 600;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.loadingText {
+    text-align: center;
+    padding: 24px;
+    color: #64748b;
+    font-size: 14px;
+}
+
+/* ─── Post Card ───────────────────────────────────────────────────────────── */
+
+.pinnedCard {
+    border-left: 3px solid #f59e0b !important;
+    background: #fffdf7 !important;
+}
+
+.pinnedBanner {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #b45309;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 12px;
+    padding: 4px 10px;
+    background: #fef3c7;
+    border-radius: 6px;
+    width: fit-content;
+}
+
+.postHeaderRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.authorRow {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.authorName {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 14px;
+}
+
+.postMeta {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 2px;
+}
+
+.editedLabel {
+    color: #94a3b8;
+    font-style: italic;
+}
+
+.actionsRow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+/* ─── Badges ──────────────────────────────────────────────────────────────── */
+
+.typeBadge {
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.badgeMaterial {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.badgeAnnouncement {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.categoryBadge {
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 600;
+    background: #f0fdf4;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+
+/* ─── Action Buttons ──────────────────────────────────────────────────────── */
+
+.iconBtn {
+    background: none;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    color: #94a3b8;
+    transition:
+        background 0.15s,
+        color 0.15s;
+    padding: 0;
+}
+
+.iconBtn:hover {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.pinActive {
+    color: #f59e0b;
+}
+
+.pinActive:hover {
+    background: #fef9c3;
+    color: #b45309;
+}
+
+.deleteBtn:hover {
+    background: #fff1f2;
+    color: #ef4444;
+}
+
+/* ─── Post Content ────────────────────────────────────────────────────────── */
+
+.postTitle {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 8px;
+}
+
+.postContent {
+    color: #334155;
+    font-size: 13px;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    margin: 0 0 12px;
+}
+
+/* ─── Attachments ─────────────────────────────────────────────────────────── */
+
+.attachmentsSection {
+    border-top: 1px dashed #e2e8f0;
+    padding-top: 10px;
+    margin-top: 10px;
+}
+
+.attachmentsLabel {
+    font-size: 11px;
+    font-weight: 600;
+    color: #94a3b8;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.attachmentsList {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.attachmentLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #2563eb;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 500;
+    width: fit-content;
+    transition:
+        background 0.15s,
+        border-color 0.15s;
+}
+
+.attachmentLink:hover {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+}
+
+/* ─── Phase 2: Post Footer ───────────────────────────────────────────────── */
+
+.postFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.lockBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1.5px solid #e2e8f0;
+    background: transparent;
+    color: #64748b;
+    font-size: 11.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+        background 0.15s,
+        border-color 0.15s,
+        color 0.15s;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.lockBtn:hover:not(:disabled) {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    color: #475569;
+}
+
+.lockBtn.lockActive {
+    background: rgba(245, 158, 11, 0.08);
+    border-color: rgba(245, 158, 11, 0.4);
+    color: #92400e;
+}
+
+.lockBtn.lockActive:hover:not(:disabled) {
+    background: rgba(245, 158, 11, 0.15);
+}
+
+.lockBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ─── Phase 3: Pinned Section & Viewers Button ────────────────────────────── */
+
+.pinnedSectionHeader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: #fffbeb;
+    border: 1px solid #fef3c7;
+    border-radius: 8px;
+    color: #92400e;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.viewersBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.viewersBtn:hover {
+    background: #eff6ff;
+    border-color: #93c5fd;
+    color: #1d4ed8;
+}
+
+.viewersIcon {
+    display: flex;
+    align-items: center;
+}

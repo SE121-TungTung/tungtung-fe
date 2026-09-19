@@ -4,18 +4,28 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
-import s from '@/pages/auth/Login.module.css'
-import { TextHorizontal } from '@/components/common/text/TextHorizontal'
-import ChatSquare from '@/assets/Chat Square Exclamation.svg'
-import ArrowIcon from '@/assets/arrow-left.svg'
-import ButtonGhost from '@/components/common/button/ButtonGhost'
-import InputField from '@/components/common/input/InputField'
-import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
+import AuthLayout from './AuthLayout'
 import FormCard from '@/components/common/form/FormCard'
+import Button from '@/components/common/button/Button'
+import InputField from '@/components/common/input/InputField'
 import FieldMessage from '@/components/common/typography/FieldMessage'
-import LiquidEther from '@/components/effect/LiquidEther'
-import { confirmPasswordReset } from '@/lib/auth'
 import SuccessModal from '@/components/core/SuccessModal'
+import PasswordStrengthIndicator from '@/components/common/password/PasswordStrengthIndicator'
+import PasswordRequirements from '@/components/common/password/PasswordRequirement'
+import { confirmPasswordReset } from '@/lib/auth'
+import ArrowIcon from '@/assets/arrow-left.svg'
+
+/**
+ * ResetPasswordPage Component
+ *
+ * Allows users to set a new password using OTP token
+ *
+ * Features:
+ * - Password strength indicator
+ * - Real-time validation feedback
+ * - Password requirements checklist
+ * - Success modal with redirect
+ */
 
 // Validation schema
 const schema = z
@@ -75,6 +85,7 @@ export function ResetPasswordPage() {
             setApiError('Mã OTP không hợp lệ. Vui lòng thử lại.')
             return
         }
+        setApiError(undefined)
         mut.mutate(v)
     }
 
@@ -83,115 +94,57 @@ export function ResetPasswordPage() {
         navigate('/login', { replace: true })
     }
 
-    // Password strength indicator
-    const getPasswordStrength = (pwd: string) => {
-        if (!pwd) return { label: '', percent: 0, color: '' }
-
-        let strength = 0
-        if (pwd.length >= 8) strength += 25
-        if (/[A-Z]/.test(pwd)) strength += 25
-        if (/[a-z]/.test(pwd)) strength += 25
-        if (/[0-9]/.test(pwd)) strength += 25
-
-        if (strength <= 25)
-            return { label: 'Yếu', percent: 25, color: '#ff4d4f' }
-        if (strength <= 50)
-            return { label: 'Trung bình', percent: 50, color: '#faad14' }
-        if (strength <= 75)
-            return { label: 'Khá', percent: 75, color: '#52c41a' }
-        return { label: 'Mạnh', percent: 100, color: '#52c41a' }
-    }
-
-    const strength = getPasswordStrength(password)
-
     return (
-        <div>
-            <div className={s.bg} aria-hidden="true">
-                <LiquidEther
-                    colors={['#5227FF', '#FF9FFC', '#B19EEF']}
-                    mouseForce={20}
-                    cursorSize={100}
-                    isViscous={true}
-                    viscous={30}
-                    iterationsViscous={32}
-                    iterationsPoisson={32}
-                    resolution={0.5}
-                    isBounce={false}
-                    autoDemo={true}
-                    autoSpeed={0.5}
-                    autoIntensity={2.2}
-                    takeoverDuration={0.25}
-                    autoResumeDelay={1000}
-                    autoRampDuration={0.6}
-                />
-            </div>
-
-            <div className={s.wrap}>
-                <div className={s.info}>
-                    <div style={{ width: 298 }}>
-                        <h1 className={s.h1}>
-                            Đặt lại{' '}
-                            <span className={s.h1_inside}>mật khẩu mới</span>
-                        </h1>
-                    </div>
-                    <div className="frame">
-                        <TextHorizontal
-                            className="text-horizontal-instance"
-                            icon={
-                                <img
-                                    src={ChatSquare}
-                                    className="chat-square"
-                                    alt="chat icon"
-                                />
-                            }
-                            iconStyle="glass"
-                            description="Website quản lý trung tâm Anh ngữ số 1 Việt Nam, cung cấp hệ sinh thái đa dạng cho người dạy lẫn người học."
-                            ctaText="Tìm hiểu thêm"
-                            onClick={() =>
-                                window.open(
-                                    'https://tungtung-fe.vercel.app',
-                                    '_blank'
-                                )
-                            }
-                        />
-                    </div>
-                </div>
-
+        <>
+            <AuthLayout
+                headingPrimary="Đặt lại"
+                headingSecondary="mật khẩu"
+                headingTertiary="mới"
+            >
                 <FormCard
                     onSubmit={handleSubmit(onSubmit)}
                     actionsAlign="stretch"
                     actions={
-                        <ButtonPrimary
+                        <Button
                             type="submit"
-                            variant="glass"
+                            tone="brand"
+                            variant="gradient"
+                            size="lg"
                             shape="rounded"
+                            glow
                             loading={isSubmitting || mut.isPending}
                             disabled={isSubmitting || mut.isPending}
                         >
                             Đặt lại mật khẩu
-                        </ButtonPrimary>
+                        </Button>
                     }
                 >
-                    <div className={s.row} style={{ margin: '-8px 0 4px' }}>
-                        <ButtonGhost
+                    {/* Back Button */}
+                    <div style={{ marginBottom: 'var(--primitive-space-6)' }}>
+                        <Button
+                            variant="ghost"
                             size="sm"
-                            mode="dark"
-                            leftIcon={<img src={ArrowIcon} alt="back" />}
+                            leftIcon={<img src={ArrowIcon} alt="" />}
                             onClick={() => navigate('/login')}
+                            type="button"
                         >
-                            Trở về Login
-                        </ButtonGhost>
+                            Trở về đăng nhập
+                        </Button>
                     </div>
 
+                    {/* Email Info */}
                     {email && (
-                        <FieldMessage tone="info" variant="text">
-                            Đặt lại mật khẩu cho: <strong>{email}</strong>
-                        </FieldMessage>
+                        <>
+                            <FieldMessage tone="info" variant="chip">
+                                Đặt lại mật khẩu cho: <strong>{email}</strong>
+                            </FieldMessage>
+                            <div
+                                style={{ height: 'var(--primitive-space-4)' }}
+                            />
+                        </>
                     )}
 
-                    <div style={{ height: 12 }} />
-
-                    {/* New Password */}
+                    {/* New Password Field */}
                     <InputField
                         label="Mật khẩu mới"
                         type="password"
@@ -205,53 +158,7 @@ export function ResetPasswordPage() {
                     />
 
                     {/* Password Strength Indicator */}
-                    {password && (
-                        <div style={{ marginTop: 8 }}>
-                            <div
-                                style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    marginBottom: 4,
-                                }}
-                            >
-                                <span
-                                    style={{
-                                        fontSize: 12,
-                                        color: 'rgba(255,255,255,0.7)',
-                                    }}
-                                >
-                                    Độ mạnh mật khẩu:
-                                </span>
-                                <span
-                                    style={{
-                                        fontSize: 12,
-                                        color: strength.color,
-                                        fontWeight: 600,
-                                    }}
-                                >
-                                    {strength.label}
-                                </span>
-                            </div>
-                            <div
-                                style={{
-                                    width: '100%',
-                                    height: 4,
-                                    background: 'rgba(255,255,255,0.1)',
-                                    borderRadius: 2,
-                                    overflow: 'hidden',
-                                }}
-                            >
-                                <div
-                                    style={{
-                                        width: `${strength.percent}%`,
-                                        height: '100%',
-                                        background: strength.color,
-                                        transition: 'all 0.3s ease',
-                                    }}
-                                />
-                            </div>
-                        </div>
-                    )}
+                    <PasswordStrengthIndicator password={password || ''} />
 
                     {errors.password && (
                         <FieldMessage
@@ -263,9 +170,9 @@ export function ResetPasswordPage() {
                         </FieldMessage>
                     )}
 
-                    <div style={{ height: 16 }} />
+                    <div style={{ height: 'var(--primitive-space-8)' }} />
 
-                    {/* Confirm Password */}
+                    {/* Confirm Password Field */}
                     <InputField
                         label="Xác nhận mật khẩu"
                         type="password"
@@ -290,84 +197,16 @@ export function ResetPasswordPage() {
                     )}
 
                     {/* Password Requirements */}
-                    <div
-                        style={{
-                            marginTop: 12,
-                            padding: 12,
-                            background: 'rgba(255,255,255,0.05)',
-                            borderRadius: 8,
-                            border: '1px solid rgba(255,255,255,0.1)',
-                        }}
-                    >
-                        <div
-                            style={{
-                                fontSize: 13,
-                                color: 'rgba(255,255,255,0.9)',
-                                marginBottom: 8,
-                                fontWeight: 500,
-                            }}
-                        >
-                            Yêu cầu mật khẩu:
-                        </div>
-                        <ul
-                            style={{
-                                margin: 0,
-                                paddingLeft: 20,
-                                fontSize: 12,
-                                color: 'rgba(255,255,255,0.7)',
-                                lineHeight: 1.8,
-                            }}
-                        >
-                            <li
-                                style={{
-                                    color:
-                                        password && password.length >= 8
-                                            ? '#52c41a'
-                                            : 'inherit',
-                                }}
-                            >
-                                Tối thiểu 8 ký tự
-                            </li>
-                            <li
-                                style={{
-                                    color:
-                                        password && /[A-Z]/.test(password)
-                                            ? '#52c41a'
-                                            : 'inherit',
-                                }}
-                            >
-                                Ít nhất 1 chữ hoa (A-Z)
-                            </li>
-                            <li
-                                style={{
-                                    color:
-                                        password && /[a-z]/.test(password)
-                                            ? '#52c41a'
-                                            : 'inherit',
-                                }}
-                            >
-                                Ít nhất 1 chữ thường (a-z)
-                            </li>
-                            <li
-                                style={{
-                                    color:
-                                        password && /[0-9]/.test(password)
-                                            ? '#52c41a'
-                                            : 'inherit',
-                                }}
-                            >
-                                Ít nhất 1 chữ số (0-9)
-                            </li>
-                        </ul>
-                    </div>
+                    <PasswordRequirements password={password || ''} />
 
+                    {/* API Error */}
                     {apiError && (
-                        <div className={s.error} role="alert">
+                        <FieldMessage tone="error" variant="chip">
                             {apiError}
-                        </div>
+                        </FieldMessage>
                     )}
                 </FormCard>
-            </div>
+            </AuthLayout>
 
             {/* Success Modal */}
             {showSuccessModal && (
@@ -378,6 +217,6 @@ export function ResetPasswordPage() {
                     buttonText="Đăng nhập ngay"
                 />
             )}
-        </div>
+        </>
     )
 }

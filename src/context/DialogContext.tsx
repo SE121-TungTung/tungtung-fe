@@ -4,6 +4,11 @@ import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import ButtonGhost from '@/components/common/button/ButtonGhost'
 import { DialogContext, type DialogOptions } from './dialog.constants'
 
+// eslint-disable-next-line react-refresh/only-export-components
+export let globalAlert: (message: string, title?: string) => Promise<void> = () => Promise.resolve()
+// eslint-disable-next-line react-refresh/only-export-components
+export let globalConfirm: (options: DialogOptions | string) => Promise<boolean> = () => Promise.resolve(false)
+
 export const DialogProvider: React.FC<{ children: React.ReactNode }> = ({
     children,
 }) => {
@@ -56,12 +61,16 @@ export const DialogProvider: React.FC<{ children: React.ReactNode }> = ({
                     confirmText: options.confirmText,
                     cancelText: options.cancelText,
                     type: options.type || 'confirm',
+                    renderConfirm: options.renderConfirm,
                 })
             }
             awaiter.current = resolve
             setIsOpen(true)
         })
     }, [])
+
+    globalAlert = alert
+    globalConfirm = confirm
 
     return (
         <DialogContext.Provider value={{ alert, confirm }}>
@@ -103,14 +112,18 @@ export const DialogProvider: React.FC<{ children: React.ReactNode }> = ({
                     </div>
                 }
             >
-                <p
-                    style={{
-                        color: 'var(--text-secondary-light)',
-                        lineHeight: 1.5,
-                    }}
-                >
-                    {config.message}
-                </p>
+                {config.renderConfirm ? (
+                    config.renderConfirm()
+                ) : (
+                    <p
+                        style={{
+                            color: 'var(--text-secondary-light)',
+                            lineHeight: 1.5,
+                        }}
+                    >
+                        {config.message}
+                    </p>
+                )}
             </Modal>
         </DialogContext.Provider>
     )

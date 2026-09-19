@@ -15,7 +15,18 @@ import TemplateImg from '@/assets/banner-placeholder.png'
 import { TextHorizontal } from '@/components/common/text/TextHorizontal'
 import TextType from '@/components/common/text/TextType'
 
+// AI Recommendation Icons
+import BookOpenIcon from '@/assets/Book Open.svg'
+import HeadphoneIcon from '@/assets/Headphone.svg'
+import PenIcon from '@/assets/Pen.svg'
+import MicrophoneIcon from '@/assets/Microphone.svg'
+import CheckBadgeIcon from '@/assets/Check Badge.svg'
+import IdeaIcon from '@/assets/Light Bulb Idea.svg'
+import RobotIcon from '@/assets/Robot.svg'
+import BookReaderIcon from '@/assets/Book Reader.svg'
+
 import { getMe, getUserOverview, getMyClasses } from '@/lib/users'
+import { getTodayRecommendation } from '@/lib/recommendations'
 import type { StudentOverviewStats } from '@/types/user.types'
 import type { Lesson } from '@/components/common/typography/LessonItem'
 
@@ -38,6 +49,12 @@ export default function StudentDashboard() {
         queryFn: () => getMyClasses(),
     })
 
+    // 4. Fetch AI Recommendation
+    const { data: recData, isLoading: recLoading } = useQuery({
+        queryKey: ['today-recommendation'],
+        queryFn: () => getTodayRecommendation(),
+    })
+
     const fullName = userData
         ? `${userData.firstName} ${userData.lastName}`
         : ''
@@ -45,7 +62,7 @@ export default function StudentDashboard() {
     const greetingTexts = useMemo(() => {
         if (!userData) return ['Đang tải dữ liệu...']
         return [
-            `Chào mừng quay trở lại, ${userData.firstName}!`,
+            `Chào mừng quay trở lại, ${userData.firstName} ${userData.lastName}!`,
             'Hôm nay bạn muốn học kỹ năng gì?',
             'Cùng hoàn thành mục tiêu ngày hôm nay nhé!',
         ]
@@ -53,7 +70,8 @@ export default function StudentDashboard() {
 
     const todaySessions = useMemo(() => {
         if (!myClasses) return []
-        const today = new Date().toISOString().split('T')[0]
+        const now = new Date()
+        const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
 
         const formattedSessions: Lesson[] = []
 
@@ -160,6 +178,25 @@ export default function StudentDashboard() {
                                 />
                             </>
                         )}
+                        {recLoading ? (
+                            <Skeleton height={140} variant="rect" count={1} />
+                        ) : (
+                            <StatCard
+                                title="Điểm dự kiến (AI)"
+                                subtitle="Dự đoán band score dựa trên kết quả thi"
+                                value={
+                                    recData?.predicted_band !== undefined &&
+                                    recData?.predicted_band !== null
+                                        ? recData.predicted_band.toString()
+                                        : 'N/A'
+                                }
+                                unit={
+                                    recData?.predicted_cefr
+                                        ? ` (${recData.predicted_cefr})`
+                                        : ''
+                                }
+                            />
+                        )}
                     </div>
                 </Card>
 
@@ -177,7 +214,7 @@ export default function StudentDashboard() {
                     >
                         <div className={s.suggestionBody}>
                             <div className={s.suggestionTip}>
-                                {statsLoading ? (
+                                {recLoading ? (
                                     <div style={{ width: '100%' }}>
                                         <Skeleton
                                             height={20}
@@ -187,38 +224,461 @@ export default function StudentDashboard() {
                                         <Skeleton height={60} variant="rect" />
                                     </div>
                                 ) : (
-                                    <TextHorizontal
-                                        icon={<img src={ChatIcon} alt="tip" />}
-                                        title="Mẹo học tập"
-                                        description="Bạn đã hoàn thành bài thi gần nhất với điểm số khá cao. Hãy thử sức với các bài tập khó hơn nhé!"
-                                        mode="light"
-                                    />
+                                    <div className={s.tipsList}>
+                                        {recData?.nudge && (
+                                            <div
+                                                style={{ marginBottom: '16px' }}
+                                            >
+                                                <TextHorizontal
+                                                    icon={
+                                                        <img
+                                                            src={RobotIcon}
+                                                            alt="AI"
+                                                            style={{
+                                                                width: '20px',
+                                                                height: '20px',
+                                                            }}
+                                                        />
+                                                    }
+                                                    title="AI khích lệ"
+                                                    description={
+                                                        recData.nudge.message
+                                                    }
+                                                    mode="light"
+                                                />
+                                            </div>
+                                        )}
+                                        {recData?.recommendation_data
+                                            ?.suggested_course && (
+                                            <div
+                                                className={
+                                                    s.courseSuggestionCard
+                                                }
+                                            >
+                                                <div
+                                                    className={
+                                                        s.courseSuggestionHeader
+                                                    }
+                                                >
+                                                    <img
+                                                        src={BookReaderIcon}
+                                                        alt="Course"
+                                                        className={
+                                                            s.courseSuggestionIcon
+                                                        }
+                                                    />
+                                                    <h4
+                                                        className={
+                                                            s.courseSuggestionTitle
+                                                        }
+                                                    >
+                                                        Gợi ý Khóa học Tiếp theo
+                                                    </h4>
+                                                </div>
+                                                <p
+                                                    className={
+                                                        s.courseSuggestionText
+                                                    }
+                                                >
+                                                    Dựa trên dự đoán band{' '}
+                                                    <strong>
+                                                        {recData.predicted_band}
+                                                    </strong>
+                                                    , bạn đã đủ điều kiện tham
+                                                    gia:
+                                                </p>
+                                                <strong
+                                                    className={s.courseName}
+                                                >
+                                                    {
+                                                        recData
+                                                            .recommendation_data
+                                                            .suggested_course
+                                                            .name
+                                                    }
+                                                </strong>
+                                                <p className={s.courseTarget}>
+                                                    Mục tiêu khóa học: Band{' '}
+                                                    {
+                                                        recData
+                                                            .recommendation_data
+                                                            .suggested_course
+                                                            .target_band
+                                                    }
+                                                </p>
+                                            </div>
+                                        )}
+                                        {(() => {
+                                            const tips =
+                                                recData?.recommendation_data
+                                                    ?.tips
+                                            // New structured format: { reading: [...], listening: [...], ... }
+                                            const isStructured =
+                                                tips &&
+                                                typeof tips === 'object' &&
+                                                !Array.isArray(tips)
+
+                                            if (isStructured) {
+                                                const skillConfig = [
+                                                    {
+                                                        key: 'reading',
+                                                        label: 'Reading',
+                                                        icon: BookOpenIcon,
+                                                    },
+                                                    {
+                                                        key: 'listening',
+                                                        label: 'Listening',
+                                                        icon: HeadphoneIcon,
+                                                    },
+                                                    {
+                                                        key: 'writing',
+                                                        label: 'Writing',
+                                                        icon: PenIcon,
+                                                    },
+                                                    {
+                                                        key: 'speaking',
+                                                        label: 'Speaking',
+                                                        icon: MicrophoneIcon,
+                                                    },
+                                                    {
+                                                        key: 'overall',
+                                                        label: 'Tổng hợp',
+                                                        icon: CheckBadgeIcon,
+                                                    },
+                                                ]
+
+                                                const hasAnyTips =
+                                                    skillConfig.some(
+                                                        (sk) =>
+                                                            (
+                                                                tips as Record<
+                                                                    string,
+                                                                    string[]
+                                                                >
+                                                            )[sk.key]?.length >
+                                                            0
+                                                    )
+
+                                                if (!hasAnyTips) {
+                                                    return (
+                                                        <TextHorizontal
+                                                            icon={
+                                                                <img
+                                                                    src={
+                                                                        ChatIcon
+                                                                    }
+                                                                    alt="tip"
+                                                                />
+                                                            }
+                                                            title="Mẹo học tập"
+                                                            description="Bạn chưa có đủ lịch sử bài thi để AI phân tích. Hãy hoàn thành các bài test để nhận gợi ý nhé!"
+                                                            mode="light"
+                                                        />
+                                                    )
+                                                }
+
+                                                return (
+                                                    <>
+                                                        <div
+                                                            className={
+                                                                s.tipsSectionHeader
+                                                            }
+                                                        >
+                                                            <img
+                                                                src={IdeaIcon}
+                                                                alt="AI Suggestions"
+                                                                className={
+                                                                    s.tipsSectionIcon
+                                                                }
+                                                            />
+                                                            <h4
+                                                                className={
+                                                                    s.tipsTitle
+                                                                }
+                                                            >
+                                                                Gợi ý từ AI theo
+                                                                kỹ năng
+                                                            </h4>
+                                                        </div>
+                                                        {skillConfig.map(
+                                                            (sk) => {
+                                                                const skillTips =
+                                                                    (
+                                                                        tips as Record<
+                                                                            string,
+                                                                            string[]
+                                                                        >
+                                                                    )[sk.key]
+                                                                if (
+                                                                    !skillTips ||
+                                                                    skillTips.length ===
+                                                                        0
+                                                                )
+                                                                    return null
+                                                                return (
+                                                                    <div
+                                                                        key={
+                                                                            sk.key
+                                                                        }
+                                                                        className={
+                                                                            s.skillGroup
+                                                                        }
+                                                                    >
+                                                                        <div
+                                                                            className={
+                                                                                s.skillHeader
+                                                                            }
+                                                                        >
+                                                                            <img
+                                                                                src={
+                                                                                    sk.icon
+                                                                                }
+                                                                                alt={
+                                                                                    sk.label
+                                                                                }
+                                                                                className={
+                                                                                    s.skillIcon
+                                                                                }
+                                                                            />
+                                                                            {
+                                                                                sk.label
+                                                                            }
+                                                                        </div>
+                                                                        <ul
+                                                                            className={
+                                                                                s.skillTipsUl
+                                                                            }
+                                                                        >
+                                                                            {skillTips.map(
+                                                                                (
+                                                                                    tip: string,
+                                                                                    idx: number
+                                                                                ) => (
+                                                                                    <li
+                                                                                        key={
+                                                                                            idx
+                                                                                        }
+                                                                                        className={
+                                                                                            s.skillTipLi
+                                                                                        }
+                                                                                        data-skill={
+                                                                                            sk.key
+                                                                                        }
+                                                                                    >
+                                                                                        {
+                                                                                            tip
+                                                                                        }
+                                                                                    </li>
+                                                                                )
+                                                                            )}
+                                                                        </ul>
+                                                                    </div>
+                                                                )
+                                                            }
+                                                        )}
+                                                    </>
+                                                )
+                                            }
+
+                                            // Legacy flat array format
+                                            if (
+                                                Array.isArray(tips) &&
+                                                tips.length > 0
+                                            ) {
+                                                return (
+                                                    <>
+                                                        <div
+                                                            className={
+                                                                s.tipsSectionHeader
+                                                            }
+                                                        >
+                                                            <img
+                                                                src={IdeaIcon}
+                                                                alt="AI Suggestions"
+                                                                className={
+                                                                    s.tipsSectionIcon
+                                                                }
+                                                            />
+                                                            <h4
+                                                                className={
+                                                                    s.tipsTitle
+                                                                }
+                                                            >
+                                                                Mẹo học tập từ
+                                                                AI
+                                                            </h4>
+                                                        </div>
+                                                        <ul
+                                                            className={s.tipsUl}
+                                                        >
+                                                            {tips.map(
+                                                                (
+                                                                    tip: string,
+                                                                    idx: number
+                                                                ) => (
+                                                                    <li
+                                                                        key={
+                                                                            idx
+                                                                        }
+                                                                        className={
+                                                                            s.tipLi
+                                                                        }
+                                                                    >
+                                                                        {tip}
+                                                                    </li>
+                                                                )
+                                                            )}
+                                                        </ul>
+                                                    </>
+                                                )
+                                            }
+
+                                            return (
+                                                <TextHorizontal
+                                                    icon={
+                                                        <img
+                                                            src={ChatIcon}
+                                                            alt="tip"
+                                                        />
+                                                    }
+                                                    title="Mẹo học tập"
+                                                    description="Bạn chưa có đủ lịch sử bài thi để AI phân tích. Hãy hoàn thành các bài test để nhận gợi ý nhé!"
+                                                    mode="light"
+                                                />
+                                            )
+                                        })()}
+                                    </div>
                                 )}
                             </div>
 
-                            <TemplateCard
-                                image={TemplateImg}
-                                tag={
-                                    <>
+                            {recLoading ? (
+                                <Skeleton height={200} variant="rect" />
+                            ) : recData?.recommendation_data?.materials &&
+                              recData.recommendation_data.materials.length >
+                                  0 ? (
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: '16px',
+                                    }}
+                                >
+                                    <h4
+                                        style={{
+                                            margin: 0,
+                                            fontSize: '16px',
+                                            color: '#1e293b',
+                                        }}
+                                    >
+                                        📚 Tài liệu luyện tập gợi ý (RAG):
+                                    </h4>
+                                    {recData.recommendation_data.materials.map(
+                                        (mat: any, idx: number) => (
+                                            <TemplateCard
+                                                key={idx}
+                                                image={TemplateImg}
+                                                tag={
+                                                    <>
+                                                        <img
+                                                            src={ChatIcon}
+                                                            width={14}
+                                                            alt="tag"
+                                                        />
+                                                        <span>
+                                                            {mat.source ||
+                                                                'Tài liệu hệ thống'}
+                                                        </span>
+                                                    </>
+                                                }
+                                                title={mat.title}
+                                                excerpt={`Tài liệu được AI trích xuất phù hợp với kỹ năng ${recData.weakest_skill || 'đang yếu'} của bạn. Độ phù hợp: ${mat.relevance_score * 100}%`}
+                                                ctaText="Xem tài liệu"
+                                                ctaIcon={
+                                                    <img
+                                                        src={YoutubeIcon}
+                                                        width={14}
+                                                        alt="cta"
+                                                    />
+                                                }
+                                            />
+                                        )
+                                    )}
+                                </div>
+                            ) : recData?.weakest_skill ? (
+                                <TemplateCard
+                                    image={TemplateImg}
+                                    tag={
+                                        <>
+                                            <img
+                                                src={ChatIcon}
+                                                width={14}
+                                                alt="tag"
+                                            />
+                                            <span
+                                                style={{
+                                                    textTransform: 'capitalize',
+                                                }}
+                                            >
+                                                {recData.weakest_skill}
+                                            </span>
+                                        </>
+                                    }
+                                    title={`Luyện tập kỹ năng ${
+                                        recData.weakest_skill === 'reading'
+                                            ? 'Đọc (Reading)'
+                                            : recData.weakest_skill ===
+                                                'listening'
+                                              ? 'Nghe (Listening)'
+                                              : recData.weakest_skill ===
+                                                  'writing'
+                                                ? 'Viết (Writing)'
+                                                : 'Nói (Speaking)'
+                                    }`}
+                                    excerpt={`AI phát hiện kỹ năng ${
+                                        recData.weakest_skill === 'reading'
+                                            ? 'Đọc'
+                                            : recData.weakest_skill ===
+                                                'listening'
+                                              ? 'Nghe'
+                                              : recData.weakest_skill ===
+                                                  'writing'
+                                                ? 'Viết'
+                                                : 'Nói'
+                                    } của bạn đang yếu nhất. Hãy luyện tập để cải thiện.`}
+                                    ctaText="Luyện tập ngay"
+                                    ctaIcon={
                                         <img
-                                            src={ChatIcon}
+                                            src={YoutubeIcon}
                                             width={14}
-                                            alt="tag"
+                                            alt="cta"
                                         />
-                                        <span>Speaking</span>
-                                    </>
-                                }
-                                title="Luyện phát âm đuôi /ed/"
-                                excerpt="Bài học ngắn giúp bạn nắm vững quy tắc phát âm đuôi /ed/ trong 5 phút."
-                                ctaText="Xem ngay"
-                                ctaIcon={
-                                    <img
-                                        src={YoutubeIcon}
-                                        width={14}
-                                        alt="cta"
-                                    />
-                                }
-                            />
+                                    }
+                                />
+                            ) : (
+                                <TemplateCard
+                                    image={TemplateImg}
+                                    tag={
+                                        <>
+                                            <img
+                                                src={ChatIcon}
+                                                width={14}
+                                                alt="tag"
+                                            />
+                                            <span>Luyện tập</span>
+                                        </>
+                                    }
+                                    title="Luyện phát âm đuôi /ed/"
+                                    excerpt="Bài học ngắn giúp bạn nắm vững quy tắc phát âm đuôi /ed/ trong 5 phút."
+                                    ctaText="Xem ngay"
+                                    ctaIcon={
+                                        <img
+                                            src={YoutubeIcon}
+                                            width={14}
+                                            alt="cta"
+                                        />
+                                    }
+                                />
+                            )}
                         </div>
                     </Card>
                 </div>

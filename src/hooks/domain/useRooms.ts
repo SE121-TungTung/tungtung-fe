@@ -4,27 +4,10 @@ import {
     useQueryClient,
     keepPreviousData,
 } from '@tanstack/react-query'
-import {
-    listRooms,
-    deleteRoom,
-    type RoomType,
-    type RoomStatus,
-} from '@/lib/rooms'
-
-export interface RoomListParams {
-    page?: number
-    limit?: number
-    search?: string
-    sortBy?: 'name' | 'capacity' | 'created_at'
-    sortOrder?: 'asc' | 'desc'
-    roomType?: RoomType | ''
-    status?: RoomStatus | ''
-    capacity?: number | ''
-    includeDeleted?: boolean
-}
+import { listRooms, deleteRoom, type ListRoomsParams } from '@/lib/rooms'
 
 // 1. Hook lấy danh sách
-export const useRooms = (params: RoomListParams) => {
+export const useRooms = (params: ListRoomsParams) => {
     return useQuery({
         queryKey: ['rooms', params],
         queryFn: () => listRooms(params),

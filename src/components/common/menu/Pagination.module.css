@@ -10,7 +10,7 @@
 
 .pageInfo {
     font-size: 14px;
-    color: var(--text-secondary-light);
+    color: var(--color-text-secondary);
     min-width: 80px; /* Đảm bảo đủ chỗ cho text "Trang X / Y" */
     text-align: center;
 }

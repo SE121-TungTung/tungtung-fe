@@ -1,11 +1,19 @@
+import { useSession } from '@/stores/session.store'
 import { refreshAccessToken } from './auth'
+import { globalAlert } from '@/context/DialogContext'
 
-const API =
+export const API =
     import.meta.env.VITE_API_URL ||
     'https://tungtung-be-production.up.railway.app'
 
-const getAccessToken = () => {
-    const token = localStorage.getItem('access_token')
+const getStorage = () => {
+    if (sessionStorage.getItem('access_token')) return sessionStorage
+    return localStorage
+}
+
+export const getAccessToken = () => {
+    const storage = getStorage()
+    const token = storage.getItem('access_token')
     if (!token) return null
 
     try {
@@ -13,9 +21,8 @@ const getAccessToken = () => {
         const exp = payload.exp * 1000
 
         if (Date.now() >= exp) {
-            console.warn('⚠️ Token expired, clearing...')
-            localStorage.removeItem('access_token')
-            return null
+            console.warn('⚠️ Token expired locally')
+            // Don't clear tokens here, let the backend return 401 so the refresh logic kicks in
         }
 
         return token
@@ -24,7 +31,7 @@ const getAccessToken = () => {
         return null
     }
 }
-const getRefreshToken = () => localStorage.getItem('refresh_token')
+const getRefreshToken = () => getStorage().getItem('refresh_token')
 
 let isRefreshing = false
 let refreshSubscribers: ((token: string) => void)[] = []
@@ -37,10 +44,32 @@ const onRefreshed = (token: string) => {
 async function parseBody<T>(res: Response): Promise<T> {
     if (res.status === 204) return undefined as T
     const ct = res.headers.get('content-type') || ''
-    if (ct.includes('application/json')) return (await res.json()) as T
+    if (ct.includes('application/json')) {
+        const json = await res.json()
+        if (
+            json &&
+            typeof json === 'object' &&
+            'data' in json &&
+            'success' in json
+        ) {
+            if ('meta' in json) return json as T
+            return json.data as T
+        }
+        return json as T
+    }
     const text = await res.text()
     try {
-        return JSON.parse(text) as T
+        const json = JSON.parse(text)
+        if (
+            json &&
+            typeof json === 'object' &&
+            'data' in json &&
+            'success' in json
+        ) {
+            if ('meta' in json) return json as T
+            return json.data as T
+        }
+        return json as T
     } catch {
         return text as unknown as T
     }
@@ -69,6 +98,12 @@ async function parseError(res: Response): Promise<never> {
     } catch {
         /* ignore */
     }
+
+    if (res.status === 429) {
+        msg = 'Bạn thao tác quá nhanh, vui lòng thử lại sau.'
+        globalAlert(msg, 'Quá tải hệ thống')
+    }
+
     const error = new Error(msg) as Error & { status?: number }
     error.status = res.status
     throw error
@@ -151,10 +186,11 @@ export async function api<T>(
                 if (!refreshToken) throw new Error('No refresh token')
 
                 const data = await refreshAccessToken(refreshToken)
+                const storage = getStorage()
 
-                localStorage.setItem('access_token', data.access_token)
+                storage.setItem('access_token', data.access_token)
                 if (data.refresh_token) {
-                    localStorage.setItem('refresh_token', data.refresh_token)
+                    storage.setItem('refresh_token', data.refresh_token)
                 }
 
                 onRefreshed(data.access_token)
@@ -164,11 +200,7 @@ export async function api<T>(
                 return api<T>(path, { ...init, headers: newHeaders })
             } catch (error) {
                 console.error('Refresh token failed', error)
-                localStorage.removeItem('token')
-                localStorage.removeItem('access_token')
-                localStorage.removeItem('refresh_token')
-
-                // Only redirect if not already on login page
+                useSession.getState().clear()
                 if (!window.location.pathname.includes('/login')) {
                     window.location.href = '/login'
                 }

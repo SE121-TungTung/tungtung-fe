@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect, memo } from 'react'
-import { useMutation } from '@tanstack/react-query'
 import s from './Chatbot.module.css'
-import { chatbotApi } from '@/lib/chatbot'
+import { API, getAccessToken } from '@/lib/api'
 import CloseIcon from '@/assets/X Mark.svg'
 import SendIcon from '@/assets/Send Paper Plane.svg'
 import ResetIcon from '@/assets/Refresh History.svg'
@@ -53,45 +52,34 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
         const saved = localStorage.getItem(STORAGE_KEY)
         return saved
             ? JSON.parse(saved)
-            : [{ text: 'Xin chào! Tôi có thể giúp gì cho bạn?', sender: 'bot' }]
+            : [{ text: 'Xin chĂ o! TĂ´i cĂ³ thá»ƒ giĂºp gĂ¬ cho báº¡n?', sender: 'bot' }]
     })
 
     const [inputValue, setInputValue] = useState('')
+    const [isPending, setIsPending] = useState(false)
     const messagesEndRef = useRef<HTMLDivElement>(null)
+    const abortControllerRef = useRef<AbortController | null>(null)
 
     useEffect(() => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(messages))
         scrollToBottom()
     }, [messages])
 
+    useEffect(() => {
+        return () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort()
+            }
+        }
+    }, [])
+
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
 
-    const chatMutation = useMutation({
-        mutationFn: async (payload: { message: string; history: any[] }) => {
-            return chatbotApi.askBot(payload.message, payload.history)
-        },
-        onSuccess: (data) => {
-            setMessages((prev) => [
-                ...prev,
-                { text: data.reply, sender: 'bot' },
-            ])
-        },
-        onError: () => {
-            setMessages((prev) => [
-                ...prev,
-                {
-                    text: 'Xin lỗi, tôi đang gặp sự cố kết nối. Vui lòng thử lại sau.',
-                    sender: 'bot',
-                },
-            ])
-        },
-    })
-
-    const handleSendMessage = (e: React.FormEvent) => {
+    const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (inputValue.trim() === '' || chatMutation.isPending) return
+        if (inputValue.trim() === '' || isPending) return
 
         const userText = inputValue.trim()
 
@@ -101,21 +89,122 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
         ]
         setMessages(newMessages)
         setInputValue('')
+        setIsPending(true)
+
+        // Add a new empty bot response message that we will append to
+        setMessages((prev) => [...prev, { text: '', sender: 'bot' }])
 
         const historyPayload = messages.slice(-MAX_HISTORY_SEND).map((msg) => ({
             role: msg.sender === 'user' ? 'user' : 'model',
             content: msg.text,
         }))
 
-        chatMutation.mutate({
-            message: userText,
-            history: historyPayload,
-        })
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort()
+        }
+        const abortController = new AbortController()
+        abortControllerRef.current = abortController
+
+        try {
+            const accessToken = getAccessToken()
+            const url = `${API.replace(/\/$/, '')}/api/v1/chatbot/ask/stream`
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(accessToken
+                        ? { Authorization: `Bearer ${accessToken}` }
+                        : {}),
+                },
+                body: JSON.stringify({
+                    message: userText,
+                    history: historyPayload,
+                }),
+                signal: abortController.signal,
+            })
+
+            if (!response.ok) {
+                if (response.status === 403 || response.status === 429) {
+                    setMessages((prev) => {
+                        const next = [...prev]
+                        const lastMsg = next[next.length - 1]
+                        if (lastMsg && lastMsg.sender === 'bot') {
+                            lastMsg.text = '🛑 **Đã hết lượt sử dụng AI miễn phí hôm nay.**\n\nNâng cấp tài khoản hoặc đăng nhập để tiếp tục sử dụng không giới hạn nhé!'
+                        }
+                        return next
+                    })
+                    setIsPending(false)
+                    return
+                }
+                throw new Error('Lỗi kết nối máy chủ')
+            }
+
+            if (!response.body) {
+                throw new Error('Dá»¯ liá»‡u stream khĂ´ng kháº£ dá»¥ng')
+            }
+
+            const reader = response.body.getReader()
+            const decoder = new TextDecoder('utf-8')
+            let buffer = ''
+
+            while (true) {
+                const { value, done } = await reader.read()
+                if (done) break
+
+                buffer += decoder.decode(value, { stream: true })
+                const lines = buffer.split('\n')
+                buffer = lines.pop() || ''
+
+                for (const line of lines) {
+                    const cleanLine = line.trim()
+                    if (cleanLine.startsWith('data: ')) {
+                        try {
+                            const parsed = JSON.parse(cleanLine.substring(6))
+                            if (parsed.text) {
+                                setMessages((prev) => {
+                                    const next = [...prev]
+                                    const lastMsg = next[next.length - 1]
+                                    if (lastMsg && lastMsg.sender === 'bot') {
+                                        lastMsg.text += parsed.text
+                                    }
+                                    return next
+                                })
+                            }
+                        } catch (err) {
+                            console.error(
+                                'Lá»—i phĂ¢n tĂ­ch cĂº phĂ¡p stream chunk:',
+                                err
+                            )
+                        }
+                    }
+                }
+            }
+        } catch (error: any) {
+            if (error.name === 'AbortError') {
+                console.log('Stream request aborted.')
+                return
+            }
+            console.error('Lá»—i khi streaming chatbot:', error)
+            setMessages((prev) => {
+                const next = [...prev]
+                const lastMsg = next[next.length - 1]
+                if (lastMsg && lastMsg.sender === 'bot') {
+                    lastMsg.text =
+                        lastMsg.text ||
+                        'Xin lá»—i, tĂ´i Ä‘ang gáº·p sá»± cá»‘ káº¿t ná»‘i. Vui lĂ²ng thá»­ láº¡i sau.'
+                }
+                return next
+            })
+        } finally {
+            setIsPending(false)
+            abortControllerRef.current = null
+        }
     }
 
     const handleClearChat = () => {
         const defaultMsg: ChatMessage[] = [
-            { text: 'Xin chào! Tôi có thể giúp gì cho bạn?', sender: 'bot' },
+            { text: 'Xin chĂ o! TĂ´i cĂ³ thá»ƒ giĂºp gĂ¬ cho báº¡n?', sender: 'bot' },
         ]
         setMessages(defaultMsg)
         localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultMsg))
@@ -138,20 +227,20 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                             gap: 8,
                         }}
                     >
-                        <h4 title="Double click để xóa lịch sử">TungTung AI</h4>
+                        <h4 title="Double click Ä‘á»ƒ xĂ³a lá»‹ch sá»­">TungTung AI</h4>
                     </div>
                     <div>
                         <button
                             onClick={handleClearChat}
                             className={s.closeBtn}
-                            aria-label="Xóa lịch sử"
+                            aria-label="XĂ³a lá»‹ch sá»­"
                         >
                             <img src={ResetIcon} alt="Reset" />
                         </button>
                         <button
                             onClick={onClose}
                             className={s.closeBtn}
-                            aria-label="Đóng chatbot"
+                            aria-label="ÄĂ³ng chatbot"
                         >
                             <img src={CloseIcon} alt="Close" />
                         </button>
@@ -163,16 +252,16 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                 <form className={s.inputArea} onSubmit={handleSendMessage}>
                     <input
                         type="text"
-                        placeholder="Nhập câu hỏi của bạn..."
+                        placeholder="Nháº­p cĂ¢u há»i cá»§a báº¡n..."
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
-                        disabled={chatMutation.isPending}
+                        disabled={isPending}
                         autoFocus
                     />
                     <button
                         type="submit"
-                        aria-label="Gửi tin nhắn"
-                        disabled={!inputValue.trim() || chatMutation.isPending}
+                        aria-label="Gá»­i tin nháº¯n"
+                        disabled={!inputValue.trim() || isPending}
                     >
                         <img src={SendIcon} alt="Send" />
                     </button>

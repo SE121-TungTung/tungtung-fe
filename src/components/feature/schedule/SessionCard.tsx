@@ -23,11 +23,21 @@ export default function SessionCard({
     }
 
     if (compact) {
+        const isConflict = session.is_conflict
         return (
             <>
                 <div
                     ref={cardRef} // Gắn ref vào đây
                     className={s.sessionCardCompact}
+                    style={
+                        isConflict
+                            ? {
+                                  backgroundColor:
+                                      'var(--color-status-danger-bg)',
+                                  borderLeftColor: 'var(--color-status-danger)',
+                              }
+                            : undefined
+                    }
                     onClick={handleClick}
                     onMouseEnter={() => setShowTooltip(true)}
                     onMouseLeave={() => setShowTooltip(false)}
@@ -73,8 +83,20 @@ export default function SessionCard({
     }
 
     // Full card for list view
+    const isConflict = session.is_conflict
     return (
-        <div className={s.sessionCardFull} onClick={handleClick}>
+        <div
+            className={s.sessionCardFull}
+            style={
+                isConflict
+                    ? {
+                          backgroundColor: 'var(--color-status-danger-bg)',
+                          borderLeftColor: 'var(--color-status-danger)',
+                      }
+                    : undefined
+            }
+            onClick={handleClick}
+        >
             <div className={s.cardHeader}>
                 <div className={s.sessionTitle}>{session.class_name}</div>
                 <div className={s.sessionTime}>

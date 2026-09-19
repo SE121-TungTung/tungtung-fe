@@ -1,16 +1,16 @@
 .wrapper {
-    --input-bg: var(--surface-raised-light);
-    --input-bd: var(--boder-soft-light);
-    --input-bd-focus: var(--brand-primary-light);
-    --input-text: var(--text-primary-light);
-    --input-placeholder: var(--text-placeholder-light);
-    --input-icon: var(--text-secondary-light);
-    --input-shadow: var(--shadow-sm-light);
-    --label-color: var(--text-primary-light);
+    --input-bg: var(--color-surface-raised);
+    --input-bd: var(--color-border-soft);
+    --input-bd-focus: var(--color-brand-primary);
+    --input-text: var(--color-text-primary);
+    --input-placeholder: var(--color-text-placeholder);
+    --input-icon: var(--color-text-secondary);
+    --input-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --label-color: var(--color-text-primary);
 
     --pad-y: 10px;
     --pad-x: 16px;
-    --radius: var(--radius-md);
+    --radius: var(--primitive-radius-md);
     --gap: 10px;
     --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
@@ -21,14 +21,7 @@
 }
 
 .wrapper.dark {
-    --input-bg: var(--surface-raised-dark);
-    --input-bd: var(--boder-soft-dark);
-    --input-bd-focus: var(--brand-primary-dark);
-    --input-text: var(--text-primary-dark);
-    --input-placeholder: var(--text-placeholder-dark);
-    --input-icon: var(--text-secondary-dark);
-    --input-shadow: var(--shadow-sm-dark);
-    --label-color: var(--text-primary-dark);
+    /* Kept for backward compatibility, but ideally theme should be controlled by data-theme */
 }
 
 .fullWidth {
@@ -120,25 +113,156 @@
     background: none;
     border: none;
     padding: 0;
+    margin: 0;
+    cursor: pointer;
+    opacity: 0.55;
+    transition: opacity 0.2s ease;
+}
+.toggle:hover {
+    opacity: 0.9;
+}
+.toggle.suffix {
+    right: var(--pad-x);
 }
 
+/* Dark mode: invert eye icon so it's visible on dark backgrounds */
+[data-theme='dark'] .toggleBtn img {
+    filter: invert(1) brightness(2);
+    opacity: 0.8;
+}
+[data-theme='dark'] .toggleBtn:hover img {
+    opacity: 1;
+}
+
+/* Dark mode: input border and background */
+[data-theme='dark'] .input {
+    --input-bg: rgba(15, 23, 42, 0.6);
+    --input-bd: rgba(255, 255, 255, 0.12);
+    --input-text: rgba(255, 255, 255, 0.92);
+    --input-placeholder: rgba(255, 255, 255, 0.35);
+    --input-icon: rgba(255, 255, 255, 0.5);
+    --label-color: rgba(255, 255, 255, 0.85);
+}
+
+[data-theme='dark'] .input:hover {
+    border-color: rgba(255, 255, 255, 0.22);
+}
+
+[data-theme='dark'] .input:focus {
+    border-color: var(--input-bd-focus);
+    box-shadow: 0 0 0 4px
+        color-mix(in srgb, var(--input-bd-focus) 20%, transparent);
+}
+
+[data-theme='dark'] .label {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.withPrefix .input {
+    --pl: calc(var(--pad-x) * 2 + 18px); /* padding + icon_width + padding */
+}
+.withSuffix .input {
+    --pr: calc(var(--pad-x) * 2 + 18px); /* padding + icon_width + padding */
+}
+
+.size-sm .input.withPrefix {
+    padding-left: calc(var(--pad-x) * 2 + 16px); /* 16px icon size sm */
+}
+.size-sm .input.withSuffix {
+    padding-right: calc(var(--pad-x) * 2 + 16px);
+}
+.size-sm .input.withPrefix.withSuffix {
+    padding-left: calc(var(--pad-x) * 2 + 16px);
+    padding-right: calc(var(--pad-x) * 2 + 16px);
+}
+
+.size-lg .input.withPrefix {
+    padding-left: calc(var(--pad-x) * 2 + 20px); /* 20px icon size lg */
+}
+.size-lg .input.withSuffix {
+    padding-right: calc(var(--pad-x) * 2 + 20px);
+}
+.size-lg .input.withPrefix.withSuffix {
+    padding-left: calc(var(--pad-x) * 2 + 20px);
+    padding-right: calc(var(--pad-x) * 2 + 20px);
+}
+.size-sm {
+    --pad-y: 8px;
+    --pad-x: 12px;
+    --radius: var(--primitive-radius-sm);
+}
+.size-sm .input {
+    font-size: 13px;
+}
+.size-sm .icon img,
+.size-sm .icon svg {
+    width: 16px;
+    height: 16px;
+}
+.size-sm.withPrefix .input {
+    --pl: calc(var(--pad-x) * 2 + 16px);
+}
+.size-sm.withSuffix .input {
+    --pr: calc(var(--pad-x) * 2 + 16px);
+}
+
+.size-md {
+    /* default styles */
+}
+
+.size-lg {
+    --pad-y: 12px;
+    --pad-x: 20px;
+    --radius: var(--primitive-radius-lg);
+}
+.size-lg .input {
+    font-size: 16px;
+}
+.size-lg .icon img,
+.size-lg .icon svg {
+    width: 20px;
+    height: 20px;
+}
+.size-lg.withPrefix .input {
+    --pl: calc(var(--pad-x) * 2 + 20px);
+}
+.size-lg.withSuffix .input {
+    --pr: calc(var(--pad-x) * 2 + 20px);
+}
+
+/* --- Variants --- */
 .variant-glass .input {
-    background-color: color-mix(in srgb, var(--input-bg) 40%, transparent);
+    --input-bg: color-mix(in srgb, var(--color-surface-page) 50%, transparent);
+    --input-bd: color-mix(in srgb, var(--color-border-soft) 30%, transparent);
     backdrop-filter: blur(8px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
+.variant-neutral .input {
+    --input-bg: var(--color-surface-page);
+    --input-bd: var(--color-border-medium);
+    box-shadow: none;
+}
+
+.variant-soft .input {
+    --input-bg: var(--color-surface-raised);
+    --input-bd: var(--color-border-soft);
+    box-shadow: none;
+}
+
+/* --- States --- */
 .invalid .input {
-    border-color: var(--status-danger-light);
+    border-color: var(--color-status-danger);
     background-color: color-mix(
         in srgb,
-        var(--status-danger-light) 4%,
+        var(--color-status-danger) 4%,
         var(--input-bg)
     );
 }
 
 .invalid .input:focus {
     box-shadow: 0 0 0 4px
-        color-mix(in srgb, var(--status-danger-light) 20%, transparent);
+        color-mix(in srgb, var(--color-status-danger) 20%, transparent);
 }
 
 .input::placeholder {
@@ -165,8 +289,8 @@
 
 .input::file-selector-button {
     border: none;
-    background: var(--brand-primary-light);
-    color: var(--text-primary-light);
+    background: var(--color-brand-primary);
+    color: var(--color-text-primary);
     padding: 6px 12px;
     border-radius: var(--radius-sm);
     margin-right: 12px;
@@ -181,7 +305,7 @@
 }
 
 .dark .input::file-selector-button {
-    background: var(--brand-primary-dark);
+    background: var(--color-brand-primary);
 }
 
 .isFile .input::before {
@@ -217,14 +341,14 @@
 
 .mdTabs button.activeTab {
     background: #fff;
-    color: var(--brand-primary-500-light);
+    color: var(--color-brand-primary-500);
     box-shadow: var(--input-shadow);
     font-weight: bolder;
 }
 
 .dark .mdTabs button.activeTab {
-    background: var(--surface-raised-dark);
-    color: var(--brand-primary-500-dark);
+    background: var(--color-surface-raised);
+    color: var(--color-brand-primary-500);
 }
 
 /* --- Preview Area Content --- */
