@@ -1,7 +1,8 @@
 import { useSession } from '@/stores/session.store'
 import { refreshAccessToken } from './auth'
+import { globalAlert } from '@/context/DialogContext'
 
-const API =
+export const API =
     import.meta.env.VITE_API_URL ||
     'https://tungtung-be-production.up.railway.app'
 
@@ -10,7 +11,7 @@ const getStorage = () => {
     return localStorage
 }
 
-const getAccessToken = () => {
+export const getAccessToken = () => {
     const storage = getStorage()
     const token = storage.getItem('access_token')
     if (!token) return null
@@ -97,6 +98,12 @@ async function parseError(res: Response): Promise<never> {
     } catch {
         /* ignore */
     }
+
+    if (res.status === 429) {
+        msg = 'Bạn thao tác quá nhanh, vui lòng thử lại sau.'
+        globalAlert(msg, 'Quá tải hệ thống')
+    }
+
     const error = new Error(msg) as Error & { status?: number }
     error.status = res.status
     throw error

@@ -128,6 +128,9 @@ const AdminInvoicePage = lazy(
 const AdminFinanceReportPage = lazy(
     () => import('@/pages/admin/finance/AdminFinanceReportPage')
 )
+const AdminLeadsPage = lazy(
+    () => import('@/pages/admin/leads/AdminLeadsPage').then(m => ({ default: m.AdminLeadsPage }))
+)
 const AdminKpiOverviewPage = lazy(
     () => import('@/pages/admin/kpi/AdminKpiOverviewPage')
 )
@@ -249,6 +252,7 @@ export const router = createBrowserRouter([
                         path: '/finance/wallet',
                         element: <WalletPage />,
                     },
+
                     {
                         path: '/messages',
                         element: <MessagesPage />,
@@ -450,6 +454,20 @@ export const router = createBrowserRouter([
                                 ]}
                             >
                                 <Navigate to="/dashboard" replace />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/admin/leads',
+                        element: (
+                            <ProtectedRoute
+                                allowedRoles={[
+                                    'office_admin',
+                                    'center_admin',
+                                    'system_admin',
+                                ]}
+                            >
+                                <AdminLeadsPage />
                             </ProtectedRoute>
                         ),
                     },

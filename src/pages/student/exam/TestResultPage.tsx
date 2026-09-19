@@ -10,6 +10,7 @@ import Card from '@/components/common/card/Card'
 
 import s from './TestResultPage.module.css'
 import ReactMarkdown from 'react-markdown'
+import { useSession } from '@/stores/session.store'
 
 interface RubricBarProps {
     label: string
@@ -97,6 +98,8 @@ function PronunciationBreakdown({ breakdown }: { breakdown: any[] }) {
 export default function TestResultPage() {
     const { attemptId } = useParams<{ attemptId: string }>()
     const navigate = useNavigate()
+    const { user } = useSession()
+    const isGuestStudent = user?.role === 'guest_student'
 
     const [result, setResult] = useState<AttemptDetail | null>(null)
 
@@ -373,106 +376,81 @@ export default function TestResultPage() {
 
                                 {/* AI Refined & Upgraded Suggestions */}
                                 {(detail.responseData?.refined_transcript ||
-                                    detail.responseData?.better_version) && (
-                                    <div className={s.suggestionsBox}>
-                                        {detail.responseData
-                                            .refined_transcript && (
-                                            <div className={s.suggestionItem}>
-                                                <h5
-                                                    className={
-                                                        s.suggestionTitle
-                                                    }
-                                                >
-                                                    ✨ Refined Transcript (Bản
-                                                    sửa lỗi đề xuất):
-                                                </h5>
-                                                <div
-                                                    className={s.suggestionText}
-                                                >
-                                                    {
-                                                        detail.responseData
-                                                            .refined_transcript
-                                                    }
-                                                </div>
+                                    detail.responseData?.better_version ||
+                                    hasAIGrade) && (
+                                    <div className={isGuestStudent ? s.freemiumWrapper : ''}>
+                                        <div className={isGuestStudent ? s.freemiumBlur : ''}>
+                                            <div className={s.suggestionsBox} style={{ border: 'none', padding: 0 }}>
+                                                {detail.responseData?.refined_transcript && (
+                                                    <div className={s.suggestionItem}>
+                                                        <h5 className={s.suggestionTitle}>
+                                                            ✨ Refined Transcript (Bản sửa lỗi đề xuất):
+                                                        </h5>
+                                                        <div className={s.suggestionText}>
+                                                            {detail.responseData.refined_transcript}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {detail.responseData?.better_version && (
+                                                    <div className={s.suggestionItem}>
+                                                        <h5 className={s.suggestionTitle}>
+                                                            🚀 Upgraded Version (Đề xuất Band 8+):
+                                                        </h5>
+                                                        <div className={s.suggestionText}>
+                                                            {detail.responseData.better_version}
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
-                                        )}
-                                        {detail.responseData.better_version && (
-                                            <div className={s.suggestionItem}>
-                                                <h5
-                                                    className={
-                                                        s.suggestionTitle
-                                                    }
-                                                >
-                                                    🚀 Upgraded Version (Đề xuất
-                                                    Band 8+):
-                                                </h5>
-                                                <div
-                                                    className={s.suggestionText}
-                                                >
-                                                    {
-                                                        detail.responseData
-                                                            .better_version
-                                                    }
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
 
-                                {/* AI Grading & Feedback */}
-                                {hasAIGrade && (
-                                    <div className={s.aiSection}>
-                                        <h4 className={s.sectionTitle}>
-                                            🤖 Gợi ý từ AI:
-                                        </h4>
-                                        <div className={s.aiGrid}>
-                                            {detail.aiPointsEarned !== null && (
-                                                <div className={s.aiItem}>
-                                                    <span className={s.aiLabel}>
-                                                        Điểm AI:
-                                                    </span>
-                                                    <span className={s.aiValue}>
-                                                        {detail.aiPointsEarned.toFixed(
-                                                            1
-                                                        )}{' '}
-                                                        / {detail.maxPoints}
-                                                    </span>
-                                                </div>
-                                            )}
-                                            {detail.aiBandScore !== null && (
-                                                <div className={s.aiItem}>
-                                                    <span className={s.aiLabel}>
-                                                        Band Score:
-                                                    </span>
-                                                    <span className={s.aiValue}>
-                                                        {detail.aiBandScore.toFixed(
-                                                            1
+                                            {/* AI Grading & Feedback */}
+                                            {hasAIGrade && (
+                                                <div className={s.aiSection} style={{ marginTop: '1rem' }}>
+                                                    <h4 className={s.sectionTitle}>🤖 Gợi ý từ AI:</h4>
+                                                    <div className={s.aiGrid}>
+                                                        {detail.aiPointsEarned !== null && (
+                                                            <div className={s.aiItem}>
+                                                                <span className={s.aiLabel}>Điểm AI:</span>
+                                                                <span className={s.aiValue}>
+                                                                    {detail.aiPointsEarned.toFixed(1)} / {detail.maxPoints}
+                                                                </span>
+                                                            </div>
                                                         )}
-                                                    </span>
+                                                        {detail.aiBandScore !== null && (
+                                                            <div className={s.aiItem}>
+                                                                <span className={s.aiLabel}>Band Score:</span>
+                                                                <span className={s.aiValue}>
+                                                                    {detail.aiBandScore.toFixed(1)}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Rubric scores breakdown */}
+                                                    {isWriting && detail.aiRubricScores && getWritingRubricBars(detail.aiRubricScores)}
+                                                    {isSpeaking && detail.aiRubricScores && getSpeakingRubricBars(detail.aiRubricScores)}
+
+                                                    {detail.aiFeedback && (
+                                                        <div className={s.aiFeedback}>
+                                                            <strong>Nhận xét AI:</strong>
+                                                            <div className={s.markdownBody}>
+                                                                <ReactMarkdown>{detail.aiFeedback}</ReactMarkdown>
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             )}
                                         </div>
 
-                                        {/* Rubric scores breakdown */}
-                                        {isWriting &&
-                                            detail.aiRubricScores &&
-                                            getWritingRubricBars(
-                                                detail.aiRubricScores
-                                            )}
-                                        {isSpeaking &&
-                                            detail.aiRubricScores &&
-                                            getSpeakingRubricBars(
-                                                detail.aiRubricScores
-                                            )}
-
-                                        {detail.aiFeedback && (
-                                            <div className={s.aiFeedback}>
-                                                <strong>Nhận xét AI:</strong>
-                                                <div className={s.markdownBody}>
-                                                    <ReactMarkdown>
-                                                        {detail.aiFeedback}
-                                                    </ReactMarkdown>
+                                        {isGuestStudent && (
+                                            <div className={s.freemiumOverlay}>
+                                                <div className={s.freemiumIcon}>🔒</div>
+                                                <div className={s.freemiumText}>
+                                                    Đăng ký thành viên để xem chi tiết nhận xét của AI
                                                 </div>
+                                                <ButtonPrimary onClick={() => alert('Liên hệ trung tâm ngay!')}>
+                                                    Nâng cấp tài khoản
+                                                </ButtonPrimary>
                                             </div>
                                         )}
                                     </div>

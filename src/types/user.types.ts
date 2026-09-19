@@ -5,6 +5,8 @@ export type Role =
     | 'office_admin'
     | 'center_admin'
     | 'system_admin'
+    | 'guest'
+    | 'guest_student'
 
 export const ALL_ROLES: Role[] = [
     'student',
@@ -13,6 +15,8 @@ export const ALL_ROLES: Role[] = [
     'office_admin',
     'center_admin',
     'system_admin',
+    'guest',
+    'guest_student',
 ]
 
 export type UserStatus =

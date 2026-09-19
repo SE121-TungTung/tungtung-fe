@@ -618,3 +618,38 @@
 .markdownBody li {
     margin: 4px 0;
 }
+
+.freemiumWrapper {
+    position: relative;
+}
+.freemiumBlur {
+    filter: blur(5px);
+    pointer-events: none;
+    user-select: none;
+}
+.freemiumOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.4);
+    z-index: 10;
+    border-radius: var(--radius-md);
+}
+.freemiumIcon {
+    font-size: 32px;
+    margin-bottom: 12px;
+}
+.freemiumText {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: 16px;
+    text-align: center;
+}
+

@@ -26,6 +26,7 @@ import ExamGrid from '@/components/feature/exams/ExamGrid'
 import ButtonGhost from '@/components/common/button/ButtonGhost'
 import { useNavigate } from 'react-router-dom'
 import { useDialog } from '@/hooks/useDialog'
+import PublicHeader from './PublicHeader'
 
 const contentModeItems: SegItem[] = [
     { label: 'Theo Kỹ năng', value: 'skill' },
@@ -268,8 +269,10 @@ export default function GuestTestListPage() {
     }
 
     return (
-        <div className={s.pageWrapperWithoutHeader}>
-            <main className={s.mainContent}>
+        <>
+            <PublicHeader />
+            <div className={s.pageWrapperWithoutHeader}>
+                <main className={s.mainContent}>
                 <h1 className={s.pageTitle}>
                     <TextType
                         text="Luyện thi "
@@ -332,5 +335,6 @@ export default function GuestTestListPage() {
                 <div className={s.contentArea}>{renderContent()}</div>
             </main>
         </div>
+        </>
     )
 }

@@ -36,7 +36,11 @@ export default function ClassPage() {
     const queryClient = useQueryClient()
 
     // 1. Fetch lớp học của học viên
-    const { data: myClasses, isLoading: classesLoading } = useQuery({
+    const {
+        data: myClasses,
+        isLoading: classesLoading,
+        error: classesError,
+    } = useQuery({
         queryKey: ['my-classes'],
         queryFn: getMyClasses,
     })
@@ -125,6 +129,40 @@ export default function ClassPage() {
     }, [])
 
     const className = currentClass?.name || 'Lớp học của tôi'
+
+    if (classesError && (classesError as any).status === 403) {
+        return (
+            <div className={s.pageWrapperWithoutHeader}>
+                <main className={s.mainContent}>
+                    <div className={s.placeholderContent} style={{ marginTop: '10vh' }}>
+                        <div className={s.placeholderBox} style={{ border: '1px solid var(--color-error)' }}>
+                            <h2 style={{ color: 'var(--color-error)', marginBottom: '1rem' }}>
+                                🔒 Yêu cầu nâng cấp
+                            </h2>
+                            <p style={{ marginBottom: '1.5rem', lineHeight: '1.6' }}>
+                                Tính năng Quản lý Lớp học chỉ dành cho Học viên chính thức.<br/>
+                                Vui lòng đăng ký khóa học để mở khóa tính năng này và nhận lộ trình học tập chi tiết.
+                            </p>
+                            <button 
+                                onClick={() => alert('Vui lòng liên hệ trung tâm để được tư vấn!')}
+                                style={{
+                                    padding: '10px 20px',
+                                    background: 'var(--color-primary)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    fontWeight: 'bold'
+                                }}
+                            >
+                                Tư vấn ngay
+                            </button>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        )
+    }
 
     return (
         <div className={s.pageWrapperWithoutHeader}>

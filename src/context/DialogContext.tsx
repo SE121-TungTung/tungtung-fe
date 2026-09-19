@@ -4,6 +4,11 @@ import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import ButtonGhost from '@/components/common/button/ButtonGhost'
 import { DialogContext, type DialogOptions } from './dialog.constants'
 
+// eslint-disable-next-line react-refresh/only-export-components
+export let globalAlert: (message: string, title?: string) => Promise<void> = () => Promise.resolve()
+// eslint-disable-next-line react-refresh/only-export-components
+export let globalConfirm: (options: DialogOptions | string) => Promise<boolean> = () => Promise.resolve(false)
+
 export const DialogProvider: React.FC<{ children: React.ReactNode }> = ({
     children,
 }) => {
@@ -63,6 +68,9 @@ export const DialogProvider: React.FC<{ children: React.ReactNode }> = ({
             setIsOpen(true)
         })
     }, [])
+
+    globalAlert = alert
+    globalConfirm = confirm
 
     return (
         <DialogContext.Provider value={{ alert, confirm }}>

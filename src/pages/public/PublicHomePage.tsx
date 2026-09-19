@@ -11,18 +11,22 @@ import ChatbotWidget from '@/components/feature/chatbot/ChatbotWidget'
 import { useReveal } from '@/hooks/useReveal'
 import s from './PublicHomePage.module.css'
 import { Helmet } from 'react-helmet-async'
+import PublicHeader from './PublicHeader'
 
 // Custom component for scroll reveal block
 const RevealBlock = ({
     children,
     className = '',
+    id,
 }: {
     children: React.ReactNode
     className?: string
+    id?: string
 }) => {
     const { ref, isVisible } = useReveal()
     return (
         <div
+            id={id}
             ref={ref}
             className={`${className} ${s.reveal} ${isVisible ? s.revealVisible : ''}`}
         >
@@ -166,18 +170,7 @@ export default function PublicHomePage() {
                 />
             </Helmet>
 
-            <header className={s.header}>
-                <Link to="/" className={s.logo}>
-                    TungTung
-                </Link>
-                <button
-                    className={s.heroCta}
-                    onClick={() => navigate('/login')}
-                    style={{ padding: '8px 12px', fontSize: '14px' }}
-                >
-                    Đăng nhập
-                </button>
-            </header>
+            <PublicHeader />
 
             <main>
                 <RevealBlock className={s.hero}>
@@ -190,9 +183,18 @@ export default function PublicHomePage() {
                             hóa giúp bạn tăng band điểm bền vững chỉ sau một
                             khóa học.
                         </p>
-                        <a href="#consultation" className={s.heroCta}>
-                            Nhận lộ trình miễn phí
-                        </a>
+                        <div style={{ display: 'flex', gap: 'var(--spacing-4)', justifyContent: 'center' }}>
+                            <a href="#consultation" className={s.heroCta}>
+                                Nhận lộ trình miễn phí
+                            </a>
+                            <button 
+                                onClick={() => navigate('/public/tests')}
+                                className={s.heroCta}
+                                style={{ background: 'transparent', border: '1px solid var(--color-primary-light)', color: 'var(--color-primary-light)' }}
+                            >
+                                Thi thử trực tuyến
+                            </button>
+                        </div>
                         <p className={s.proofLine}>
                             Hàng ngàn học viên đã đạt mục tiêu 7.0+
                         </p>
@@ -246,6 +248,22 @@ export default function PublicHomePage() {
                                 Làm bài test chuẩn hóa miễn phí để xác định
                                 chính xác điểm yếu và trình độ hiện tại của bạn.
                             </p>
+                            <button 
+                                onClick={() => navigate('/public/tests')}
+                                style={{
+                                    marginTop: 'var(--spacing-4)',
+                                    padding: 'var(--spacing-2) var(--spacing-4)',
+                                    background: 'var(--color-primary)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: 'var(--radius-full)',
+                                    cursor: 'pointer',
+                                    fontWeight: '600',
+                                    width: '100%'
+                                }}
+                            >
+                                Bắt đầu Test
+                            </button>
                         </div>
                         <div className={s.card}>
                             <div className={s.cardIcon}>2</div>
