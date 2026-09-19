@@ -7,7 +7,7 @@
  * - Cho phép active nhiều type cùng lúc trên 1 bài viết.
  */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
     type ReactionsSummary,
@@ -117,6 +117,17 @@ export function ReactionBar({
     // Local optimistic state để cập nhật UI ngay lập tức
     const [optimisticSummary, setOptimisticSummary] =
         useState<ReactionsSummary>(initialSummary)
+
+    // Sync optimistic state khi server data thay đổi (refetch / remount)
+    useEffect(() => {
+        setOptimisticSummary(initialSummary)
+    }, [
+        initialSummary.like,
+        initialSummary.heart,
+        initialSummary.understood,
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        JSON.stringify(initialSummary.user_reactions),
+    ])
 
     const mutation = useMutation({
         mutationFn: (reactionType: ReactionType) =>

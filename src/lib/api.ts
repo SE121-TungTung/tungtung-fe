@@ -169,12 +169,23 @@ export async function api<T>(
         headers.set('Authorization', `Bearer ${accessToken}`)
     }
 
-    const isFormData = init.body instanceof FormData
-    if (init.body && !isFormData && !headers.has('Content-Type')) {
+    let body = init.body
+    const isFormData = body instanceof FormData
+    if (
+        body &&
+        !isFormData &&
+        typeof body === 'object' &&
+        !(body instanceof Blob) &&
+        !(body instanceof ArrayBuffer) &&
+        !(body instanceof URLSearchParams)
+    ) {
+        body = JSON.stringify(body)
+    }
+    if (body && !isFormData && !headers.has('Content-Type')) {
         headers.set('Content-Type', 'application/json')
     }
 
-    const res = await fetch(url, { ...init, headers })
+    const res = await fetch(url, { ...init, headers, body: body as BodyInit })
 
     // Check if this is an auth endpoint that should not trigger refresh
     const isAuthEndpoint = AUTH_ENDPOINTS.some((endpoint) =>

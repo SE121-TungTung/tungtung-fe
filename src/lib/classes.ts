@@ -305,13 +305,67 @@ export interface ViewerInfo {
     viewed_at?: string | null
 }
 
-export interface ViewersSummaryResponse {
+export interface InteractedStudentInfo {
+    user_id: string
+    name: string
+    email: string
+    avatar_url?: string | null
+    reactions: string[]
+    comment_count: number
+    last_interacted_at?: string | null
+}
+
+export interface DownloadedStudentInfo {
+    user_id: string
+    name: string
+    email: string
+    avatar_url?: string | null
+    downloaded_files: string[]
+    last_downloaded_at?: string | null
+}
+
+export interface ViewsMetrics {
+    count: number
+    percentage: number
+    viewers: ViewerInfo[]
+    non_viewers: ViewerInfo[]
+}
+
+export interface InteractionsMetrics {
+    count: number
+    percentage: number
+    interacted: InteractedStudentInfo[]
+    not_interacted: InteractedStudentInfo[]
+}
+
+export interface DownloadsMetrics {
+    has_attachments: boolean
+    count: number
+    percentage: number
+    downloaded: DownloadedStudentInfo[]
+    not_downloaded: DownloadedStudentInfo[]
+}
+
+export interface PostEngagementSummaryResponse {
     post_id: string
     total_students: number
+    views: ViewsMetrics
+    interactions: InteractionsMetrics
+    downloads: DownloadsMetrics
+    // Backward compatibility
     viewed_count: number
     not_viewed_count: number
     viewers: ViewerInfo[]
     non_viewers: ViewerInfo[]
+}
+
+export type ViewersSummaryResponse = PostEngagementSummaryResponse
+
+export interface RecordDownloadResponse {
+    post_id: string
+    file_name: string
+    downloaded: boolean
+    downloaded_at?: string | null
 }
 
 /**
@@ -526,6 +580,22 @@ export async function recordPostView(
     return await api<RecordViewResponse>(
         `/api/v1/classes/${classId}/posts/${postId}/view`,
         { method: 'POST' }
+    )
+}
+
+/** Ghi nhận học viên tải tệp đính kèm bài viết (idempotent). */
+export async function recordPostFileDownload(
+    classId: string,
+    postId: string,
+    fileName: string,
+    fileUrl?: string
+): Promise<RecordDownloadResponse> {
+    return await api<RecordDownloadResponse>(
+        `/api/v1/classes/${classId}/posts/${postId}/download`,
+        {
+            method: 'POST',
+            body: JSON.stringify({ file_name: fileName, file_url: fileUrl }),
+        }
     )
 }
 

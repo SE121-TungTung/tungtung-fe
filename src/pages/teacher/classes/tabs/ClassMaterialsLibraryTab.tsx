@@ -16,6 +16,7 @@ import React, { useState, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import {
     getClassMaterials,
+    recordPostFileDownload,
     MATERIAL_CATEGORY_LABELS,
     MATERIAL_CATEGORY_COLORS,
     type MaterialCategory,
@@ -24,6 +25,7 @@ import {
 } from '@/lib/classes'
 import { queryKeys } from '@/lib/queryKeys'
 import { useDebounce } from '@/hooks/useDebounce'
+import { downloadFileWithOriginalName } from '@/lib/download'
 import s from './ClassMaterialsLibraryTab.module.css'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -52,22 +54,157 @@ const ALL_CATEGORIES = Object.keys(
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 /** Lấy icon theo mime type */
-function getFileIcon(mimeType: string): string {
-    if (mimeType.startsWith('image/')) return '🖼️'
-    if (mimeType.startsWith('audio/')) return '🎵'
-    if (mimeType.startsWith('video/')) return '🎬'
-    if (mimeType.includes('pdf')) return '📄'
-    if (mimeType.includes('word') || mimeType.includes('document')) return '📝'
-    if (mimeType.includes('sheet') || mimeType.includes('excel')) return '📊'
-    if (mimeType.includes('presentation') || mimeType.includes('powerpoint'))
-        return '📊'
+function getFileIcon(mimeType: string): React.ReactNode {
+    if (mimeType.startsWith('image/')) {
+        return (
+            <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            >
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
+            </svg>
+        )
+    }
+    if (mimeType.startsWith('audio/')) {
+        return (
+            <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            >
+                <path d="M9 18V5l12-2v13" />
+                <circle cx="6" cy="18" r="3" />
+                <circle cx="18" cy="16" r="3" />
+            </svg>
+        )
+    }
+    if (mimeType.startsWith('video/')) {
+        return (
+            <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            >
+                <polygon points="23 7 16 12 23 17 23 7" />
+                <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+            </svg>
+        )
+    }
+    if (mimeType.includes('pdf')) {
+        return (
+            <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            >
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+            </svg>
+        )
+    }
+    if (mimeType.includes('word') || mimeType.includes('document')) {
+        return (
+            <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            >
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+            </svg>
+        )
+    }
+    if (
+        mimeType.includes('sheet') ||
+        mimeType.includes('excel') ||
+        mimeType.includes('presentation') ||
+        mimeType.includes('powerpoint')
+    ) {
+        return (
+            <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            >
+                <line x1="18" y1="20" x2="18" y2="10" />
+                <line x1="12" y1="20" x2="12" y2="4" />
+                <line x1="6" y1="20" x2="6" y2="14" />
+            </svg>
+        )
+    }
     if (
         mimeType.includes('zip') ||
         mimeType.includes('rar') ||
         mimeType.includes('compressed')
+    ) {
+        return (
+            <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            >
+                <polyline points="21 8 21 21 3 21 3 8" />
+                <rect x="1" y="3" width="22" height="5" />
+                <line x1="10" y1="12" x2="14" y2="12" />
+            </svg>
+        )
+    }
+    return (
+        <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+        </svg>
     )
-        return '📦'
-    return '📎'
 }
 
 /** Lấy extension từ tên file */
@@ -286,7 +423,21 @@ export function ClassMaterialsLibraryTab({
                 </div>
             ) : materialItems.length === 0 ? (
                 <div className={s.emptyState}>
-                    <div className={s.emptyIcon}>📚</div>
+                    <div className={s.emptyIcon}>
+                        <svg
+                            width="48"
+                            height="48"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="#94a3b8"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                        </svg>
+                    </div>
                     <h3 className={s.emptyTitle}>
                         {debouncedSearch || selectedCategory
                             ? 'Không tìm thấy tài liệu'
@@ -301,7 +452,11 @@ export function ClassMaterialsLibraryTab({
             ) : (
                 <div className={s.materialsGrid}>
                     {materialItems.map((item) => (
-                        <MaterialCard key={item.id} item={item} />
+                        <MaterialCard
+                            key={item.id}
+                            item={item}
+                            classId={classId}
+                        />
                     ))}
                 </div>
             )}
@@ -311,8 +466,16 @@ export function ClassMaterialsLibraryTab({
 
 // ─── MaterialCard ─────────────────────────────────────────────────────────────
 
-function MaterialCard({ item }: { item: MaterialItem }) {
+function MaterialCard({
+    item,
+    classId,
+}: {
+    item: MaterialItem
+    classId: string
+}) {
     const { attachment, materialCategory, postTitle, author, createdAt } = item
+    const [isDownloading, setIsDownloading] = useState(false)
+
     const ext = getFileExtension(attachment.file_name)
     const icon = getFileIcon(attachment.mime_type)
     const size = formatFileSize(attachment.file_size)
@@ -322,7 +485,27 @@ function MaterialCard({ item }: { item: MaterialItem }) {
         : '#6b7280'
     const catLabel = materialCategory
         ? MATERIAL_CATEGORY_LABELS[materialCategory]
-        : null
+        : 'Khác'
+
+    const handleDownload = async () => {
+        if (classId) {
+            void recordPostFileDownload(
+                classId,
+                item.postId,
+                attachment.file_name,
+                attachment.file_url
+            )
+        }
+        setIsDownloading(true)
+        try {
+            await downloadFileWithOriginalName(
+                attachment.file_url,
+                attachment.file_name
+            )
+        } finally {
+            setIsDownloading(false)
+        }
+    }
 
     return (
         <div className={s.materialCard} style={{ borderLeftColor: catColor }}>
@@ -375,17 +558,16 @@ function MaterialCard({ item }: { item: MaterialItem }) {
                     </span>
                     <span className={s.createdDate}>· {date}</span>
                 </div>
-                <a
-                    href={attachment.file_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    download={attachment.file_name}
+                <button
+                    type="button"
+                    onClick={handleDownload}
+                    disabled={isDownloading}
                     className={s.downloadBtn}
                     title={`Tải ${attachment.file_name}`}
                 >
                     <DownloadSvg />
-                    Tải về
-                </a>
+                    {isDownloading ? 'Đang tải...' : 'Tải về'}
+                </button>
             </div>
         </div>
     )

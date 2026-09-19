@@ -6,7 +6,7 @@ import InputField from '@/components/common/input/InputField'
 
 interface RenameGroupModalProps {
     isOpen: boolean
-    currentName?: string
+    currentName?: string | null
     onClose: () => void
     onSubmit: (newName: string) => void
     isSubmitting: boolean
@@ -19,17 +19,19 @@ export const RenameGroupModal: React.FC<RenameGroupModalProps> = ({
     onSubmit,
     isSubmitting,
 }) => {
-    const [name, setName] = useState(currentName)
+    const [name, setName] = useState(currentName || '')
 
     useEffect(() => {
         if (isOpen) {
-            setName(currentName)
+            setName(currentName || '')
         }
     }, [isOpen, currentName])
 
     const handleSubmit = () => {
-        if (name && name.trim() !== currentName) {
-            onSubmit(name.trim())
+        const trimmed = (name || '').trim()
+        const initial = (currentName || '').trim()
+        if (trimmed && trimmed !== initial) {
+            onSubmit(trimmed)
         } else {
             onClose()
         }
@@ -51,7 +53,7 @@ export const RenameGroupModal: React.FC<RenameGroupModalProps> = ({
                     <ButtonGhost onClick={onClose}>Hủy</ButtonGhost>
                     <ButtonPrimary
                         onClick={handleSubmit}
-                        disabled={!name.trim() || isSubmitting}
+                        disabled={!(name || '').trim() || isSubmitting}
                     >
                         {isSubmitting ? 'Đang lưu...' : 'Lưu thay đổi'}
                     </ButtonPrimary>
@@ -61,7 +63,7 @@ export const RenameGroupModal: React.FC<RenameGroupModalProps> = ({
             <div style={{ paddingTop: '10px' }}>
                 <InputField
                     label="Tên nhóm mới"
-                    value={name}
+                    value={name || ''}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Nhập tên nhóm..."
                     fullWidth

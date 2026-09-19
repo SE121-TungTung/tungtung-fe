@@ -66,6 +66,14 @@
     border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
+.tabContentWrapper {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 16px;
+    box-sizing: border-box;
+}
+
 .card {
     display: block;
     gap: 24px;
@@ -84,6 +92,12 @@
     width: 100%;
     height: auto;
     min-height: 500px;
+}
+
+@media (max-width: 960px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* Ensure both cards have equal height */

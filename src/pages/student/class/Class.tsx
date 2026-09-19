@@ -179,7 +179,7 @@ export default function ClassPage() {
                         </div>
                     </div>
                 ) : currentClass ? (
-                    <>
+                    <div className={s.tabContentWrapper}>
                         {activeTab === 'schedule' && (
                             <ClassScheduleTab
                                 todaySessions={todaySessions}
@@ -199,7 +199,7 @@ export default function ClassPage() {
                         {activeTab === 'members' && (
                             <ClassMembersTab members={classMembers} />
                         )}
-                    </>
+                    </div>
                 ) : (
                     <div className={s.placeholderContent}>
                         <div className={s.placeholderBox}>

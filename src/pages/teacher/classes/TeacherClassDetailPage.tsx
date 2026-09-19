@@ -4,8 +4,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 // Common Components
 import TabMenu, { type TabItem } from '@/components/common/menu/TabMenu'
-import ButtonGhost from '@/components/common/button/ButtonGhost'
-import BackIcon from '@/assets/arrow-left.svg'
 import s from './TeacherClassDetail.module.css'
 
 // API & Helpers
@@ -146,13 +144,13 @@ export default function TeacherClassDetailPage() {
     })
 
     // 5. Fetch Attendance & Student Stats
-    const { data: attendanceStats } = useQuery({
+    const { data: attendanceStats, isLoading: isLoadingAttendance } = useQuery({
         queryKey: ['class-attendance-stats', classId],
         queryFn: () => getClassAttendanceStats(classId!),
         enabled: !!classId && activeTab === 'reports',
     })
 
-    const { data: studentStats } = useQuery({
+    const { data: studentStats, isLoading: isLoadingStudentStats } = useQuery({
         queryKey: ['class-student-stats', classId],
         queryFn: () => getStudentAttendanceStats(classId!),
         enabled: !!classId && activeTab === 'reports',
@@ -176,6 +174,9 @@ export default function TeacherClassDetailPage() {
             formData.append('title', postTitle)
             formData.append('content', postContent)
             formData.append('post_type', postType)
+            if (postType === 'material' && materialCategory) {
+                formData.append('material_category', materialCategory)
+            }
             selectedFiles.forEach((file) => {
                 formData.append('files', file)
             })
@@ -184,6 +185,7 @@ export default function TeacherClassDetailPage() {
             alert('Đăng tin / tài liệu thành công!', 'Thành công')
             setPostTitle('')
             setPostContent('')
+            setMaterialCategory('')
             setSelectedFiles([])
             refetchPosts()
         } catch (err: any) {
@@ -494,7 +496,22 @@ export default function TeacherClassDetailPage() {
     }, [filteredSessions, currentPage, itemsPerPage])
 
     if (isLoading) {
-        return <div className="spinner-center">Đang tải thông tin...</div>
+        return (
+            <div className={s.pageWrapperWithoutHeader}>
+                <div className={s.skeletonPage}>
+                    <div className={`${s.skeleton} ${s.skeletonBackBtn}`} />
+                    <div className={`${s.skeleton} ${s.skeletonTitle}`} />
+                    <div className={`${s.skeleton} ${s.skeletonSubtitle}`} />
+                    <div className={`${s.skeleton} ${s.skeletonTabs}`} />
+                    <div className={s.skeletonCardRow}>
+                        <div className={`${s.skeleton} ${s.skeletonCard}`} />
+                        <div className={`${s.skeleton} ${s.skeletonCard}`} />
+                        <div className={`${s.skeleton} ${s.skeletonCard}`} />
+                    </div>
+                    <div className={`${s.skeleton} ${s.skeletonBlock}`} />
+                </div>
+            </div>
+        )
     }
 
     if (!classDetail) {
@@ -503,149 +520,206 @@ export default function TeacherClassDetailPage() {
 
     return (
         <div className={s.pageWrapperWithoutHeader}>
+            {/* ═══ Header Zone: Back + Title + Meta ═══ */}
             <div
                 className={s.header}
                 style={{
                     width: '100%',
                     maxWidth: 1000,
                     alignSelf: 'center',
-                    padding: '0 24px',
+                    marginTop: 24,
                 }}
             >
-                <ButtonGhost
+                <button
+                    className={s.headerBack}
                     onClick={() => navigate('/teacher/classes')}
-                    style={{ marginBottom: 16, paddingLeft: 0 }}
-                    leftIcon={<img src={BackIcon} alt="" />}
+                    type="button"
                 >
+                    <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    >
+                        <path d="M19 12H5" />
+                        <polyline points="12 19 5 12 12 5" />
+                    </svg>
                     Quay lại danh sách
-                </ButtonGhost>
+                </button>
 
-                <h1
-                    className={s.pageTitle}
-                    style={{
-                        fontSize: '28px',
-                        fontWeight: 700,
-                        textAlign: 'center',
-                        color: 'var(--color-text-primary)',
-                        letterSpacing: '-0.02em',
-                        lineHeight: '1.2',
-                        margin: '0 0 8px 0',
-                        whiteSpace: 'normal',
-                    }}
-                >
-                    {classDetail.name}
-                </h1>
-                <p
-                    style={{
-                        color: '#666',
-                        margin: '8px 0 0 0',
-                        textAlign: 'center',
-                    }}
-                >
-                    {classDetail.course?.name} • {classDetail.room?.name}
-                </p>
+                <div className={s.headerInfo}>
+                    <h1 className={s.headerTitle}>{classDetail.name}</h1>
+                    <div className={s.headerMeta}>
+                        {classDetail.course?.name && (
+                            <span
+                                className={`${s.metaBadge} ${s.metaBadgePrimary}`}
+                            >
+                                <svg
+                                    width="14"
+                                    height="14"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                                </svg>
+                                {classDetail.course.name}
+                            </span>
+                        )}
+                        {classDetail.room?.name && (
+                            <span className={s.metaBadge}>
+                                <svg
+                                    width="14"
+                                    height="14"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                                    <circle cx="12" cy="10" r="3" />
+                                </svg>
+                                {classDetail.room.name}
+                            </span>
+                        )}
+                    </div>
+                </div>
+            </div>
 
-                <div className={s.tabs} style={{ marginTop: 24 }}>
-                    <TabMenu
-                        items={tabItems}
-                        value={activeTab}
-                        onChange={setActiveTab}
+            {/* ═══ Tabs Zone ═══ */}
+            <div
+                className={s.tabs}
+                style={{
+                    width: '100%',
+                    maxWidth: 1000,
+                    alignSelf: 'center',
+                    padding: '0 24px',
+                    marginTop: 24,
+                }}
+            >
+                <TabMenu
+                    items={tabItems}
+                    value={activeTab}
+                    onChange={setActiveTab}
+                    variant="flat"
+                />
+            </div>
+
+            {/* ═══ Tab Content Zone — unified width ═══ */}
+            <div
+                className={s.tabContent}
+                style={{
+                    width: '100%',
+                    maxWidth: 1000,
+                    alignSelf: 'center',
+                    padding: '0 24px',
+                    marginTop: 24,
+                }}
+            >
+                {activeTab === 'overview' && (
+                    <ClassOverviewTab classDetail={classDetail} />
+                )}
+
+                {activeTab === 'feed' && (
+                    <ClassPostsFeedTab
+                        posts={postsData?.data ?? []}
+                        postsLoading={postsLoading}
+                        postType={postType}
+                        setPostType={setPostType}
+                        postTitle={postTitle}
+                        setPostTitle={setPostTitle}
+                        postContent={postContent}
+                        setPostContent={setPostContent}
+                        materialCategory={materialCategory}
+                        setMaterialCategory={setMaterialCategory}
+                        selectedFiles={selectedFiles}
+                        setSelectedFiles={setSelectedFiles}
+                        isCreatingPost={isCreatingPost}
+                        handleCreatePost={handleCreatePost}
+                        handleDeletePost={handleDeletePost}
+                        handlePinPost={handlePinPost}
+                        handleEditPost={handleEditPost}
+                        currentUserId={String(classDetail?.teacher?.id ?? '')}
+                        classId={classId ?? ''}
+                        teacherId={String(classDetail?.teacher?.id ?? '')}
+                        currentUserRole="teacher"
                     />
-                </div>
+                )}
 
-                <div style={{ marginTop: 24 }}>
-                    {activeTab === 'overview' && (
-                        <ClassOverviewTab classDetail={classDetail} />
-                    )}
+                {activeTab === 'materials' && (
+                    <ClassMaterialsLibraryTab classId={classId ?? ''} />
+                )}
 
-                    {activeTab === 'feed' && (
-                        <ClassPostsFeedTab
-                            posts={postsData?.data ?? []}
-                            postsLoading={postsLoading}
-                            postType={postType}
-                            setPostType={setPostType}
-                            postTitle={postTitle}
-                            setPostTitle={setPostTitle}
-                            postContent={postContent}
-                            setPostContent={setPostContent}
-                            materialCategory={materialCategory}
-                            setMaterialCategory={setMaterialCategory}
-                            selectedFiles={selectedFiles}
-                            setSelectedFiles={setSelectedFiles}
-                            isCreatingPost={isCreatingPost}
-                            handleCreatePost={handleCreatePost}
-                            handleDeletePost={handleDeletePost}
-                            handlePinPost={handlePinPost}
-                            handleEditPost={handleEditPost}
-                            currentUserId={String(
-                                classDetail?.teacher?.id ?? ''
-                            )}
-                            classId={classId ?? ''}
-                            teacherId={String(classDetail?.teacher?.id ?? '')}
-                            currentUserRole="teacher"
-                        />
-                    )}
+                {activeTab === 'members' && (
+                    <ClassMembersTab
+                        searchTerm={searchTerm}
+                        setSearchTerm={setSearchTerm}
+                        classMembers={classMembers}
+                    />
+                )}
 
-                    {activeTab === 'materials' && (
-                        <ClassMaterialsLibraryTab classId={classId ?? ''} />
-                    )}
+                {(activeTab === 'schedule' || activeTab === 'sessions') && (
+                    <ClassScheduleTab
+                        subTab={activeTab}
+                        classDetail={classDetail}
+                        sessions={sessions}
+                        filteredSessions={filteredSessions}
+                        paginatedSessions={paginatedSessions}
+                        attendanceFilter={attendanceFilter}
+                        setAttendanceFilter={setAttendanceFilter}
+                        timeFilter={timeFilter}
+                        setTimeFilter={setTimeFilter}
+                        currentPage={currentPage}
+                        setCurrentPage={setCurrentPage}
+                        totalPages={totalPages}
+                        isGeneratingQr={generateQrMutation.isPending}
+                        onGenerateQr={(sessionId) =>
+                            generateQrMutation.mutate(sessionId)
+                        }
+                        onOpenQrModal={(session) =>
+                            setSelectedSessionForQr(session)
+                        }
+                        onOpenSubstitutionModal={(session) =>
+                            setSelectedSessionForSub(session)
+                        }
+                        onOpenAttendanceModal={(sessionId) =>
+                            setSelectedSessionForAttendance(sessionId)
+                        }
+                    />
+                )}
 
-                    {activeTab === 'members' && (
-                        <ClassMembersTab
-                            searchTerm={searchTerm}
-                            setSearchTerm={setSearchTerm}
-                            classMembers={classMembers}
-                        />
-                    )}
+                {activeTab === 'certificates' && (
+                    <ClassCertificatesTab
+                        isLoadingEligibility={isLoadingEligibility}
+                        eligibilityList={eligibilityList}
+                        issuingIds={issuingIds}
+                        onIssueCertificate={handleIssueCertificate}
+                    />
+                )}
 
-                    {(activeTab === 'schedule' || activeTab === 'sessions') && (
-                        <ClassScheduleTab
-                            subTab={activeTab}
-                            classDetail={classDetail}
-                            sessions={sessions}
-                            filteredSessions={filteredSessions}
-                            paginatedSessions={paginatedSessions}
-                            attendanceFilter={attendanceFilter}
-                            setAttendanceFilter={setAttendanceFilter}
-                            timeFilter={timeFilter}
-                            setTimeFilter={setTimeFilter}
-                            currentPage={currentPage}
-                            setCurrentPage={setCurrentPage}
-                            totalPages={totalPages}
-                            isGeneratingQr={generateQrMutation.isPending}
-                            onGenerateQr={(sessionId) =>
-                                generateQrMutation.mutate(sessionId)
-                            }
-                            onOpenQrModal={(session) =>
-                                setSelectedSessionForQr(session)
-                            }
-                            onOpenSubstitutionModal={(session) =>
-                                setSelectedSessionForSub(session)
-                            }
-                            onOpenAttendanceModal={(sessionId) =>
-                                setSelectedSessionForAttendance(sessionId)
-                            }
-                        />
-                    )}
-
-                    {activeTab === 'certificates' && (
-                        <ClassCertificatesTab
-                            isLoadingEligibility={isLoadingEligibility}
-                            eligibilityList={eligibilityList}
-                            issuingIds={issuingIds}
-                            onIssueCertificate={handleIssueCertificate}
-                        />
-                    )}
-
-                    {activeTab === 'reports' && (
-                        <ClassReportsTab
-                            attendanceStats={attendanceStats}
-                            eligibilityList={eligibilityList || []}
-                            studentStats={studentStats || []}
-                            totalStudents={classDetail.currentStudents || 0}
-                        />
-                    )}
-                </div>
+                {activeTab === 'reports' && (
+                    <ClassReportsTab
+                        attendanceStats={attendanceStats}
+                        eligibilityList={eligibilityList || []}
+                        studentStats={studentStats || []}
+                        totalStudents={classDetail.currentStudents || 0}
+                        isLoading={
+                            isLoadingAttendance ||
+                            isLoadingStudentStats ||
+                            isLoadingEligibility
+                        }
+                    />
+                )}
             </div>
 
             {/* Attendance Modal Overlay */}

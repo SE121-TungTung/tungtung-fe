@@ -39,6 +39,7 @@ export default function ClassScheduleTab({
                             display: 'flex',
                             gap: '8px',
                             alignItems: 'center',
+                            flexWrap: 'wrap',
                         }}
                     >
                         <button
