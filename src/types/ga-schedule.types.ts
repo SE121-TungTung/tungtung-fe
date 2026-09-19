@@ -17,6 +17,12 @@ export interface GAClassPreference {
     preferred_time_period: 'morning' | 'afternoon' | 'evening'
 }
 
+export interface GAClassUnavailability {
+    class_id: string
+    day: string
+    slots: number[]
+}
+
 // --- Request ---
 
 export interface GAScheduleRequest {
@@ -42,6 +48,9 @@ export interface GAScheduleRequest {
 
     // Optional: per-class time preference
     class_preferences?: GAClassPreference[] | null
+
+    // Optional: per-class day/slot unavailabilities
+    class_unavailabilities?: GAClassUnavailability[] | null
 }
 
 // --- Run Responses ---
@@ -134,6 +143,7 @@ export interface AIAnalyzeRequest {
 export interface AIAnalyzeResponse {
     paired_class_ids?: string[][] | null
     class_preferences?: GAClassPreference[] | null
+    class_unavailabilities?: GAClassUnavailability[] | null
     penalties_override?: Record<string, number> | null
     ai_explanation?: string | null
     warnings?: string[] | null

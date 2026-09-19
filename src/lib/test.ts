@@ -67,6 +67,7 @@ import {
     type PreUploadResponse,
     type GradeAttemptRequest,
     type TestAttemptSummaryResponse,
+    type TestAttemptHistoryResponse,
 } from '@/types/test.types'
 
 const BASE_URL = '/api/v1/tests'
@@ -112,6 +113,33 @@ function parseEnum<T extends Record<string, string>>(
 }
 
 /**
+ * Normalize options from backend into a consistent array format.
+ * Backend may return:
+ *   - An array of {key, text, is_correct} objects (standard)
+ *   - A dict like {"A": "text", "B": "text"} (legacy/seed data)
+ *   - null/undefined
+ */
+function normalizeOptions(raw: any): QuestionOption[] | null {
+    if (!raw) return null
+
+    // Already an array of option objects
+    if (Array.isArray(raw)) {
+        return raw.map(mapQuestionOption)
+    }
+
+    // Dict format: {"A": "text", "B": "text", ...}
+    if (typeof raw === 'object') {
+        return Object.entries(raw).map(([key, text]) => ({
+            key,
+            text: String(text),
+            isCorrect: false, // not exposed to student view
+        }))
+    }
+
+    return null
+}
+
+/**
  * Map backend question response to frontend Question
  */
 function mapQuestion(dto: BackendQuestionResponse): Question {
@@ -124,7 +152,7 @@ function mapQuestion(dto: BackendQuestionResponse): Question {
             QuestionType.MULTIPLE_CHOICE,
         difficultyLevel: parseEnum(DifficultyLevel, dto.difficulty_level),
         skillArea: parseEnum(SkillArea, dto.skill_area),
-        options: dto.options?.map(mapQuestionOption) || null,
+        options: normalizeOptions(dto.options),
         imageUrl: dto.image_url,
         audioUrl: dto.audio_url,
         points: dto.points,
@@ -380,8 +408,9 @@ function mapStudentTestListItem(
         status: parseEnum(TestStatus, dto.status) || TestStatus.DRAFT,
         skill: dto.skill,
         difficulty: dto.difficulty,
-        durationMinutes: 0,
-        createdAt: '',
+        durationMinutes:
+            (dto as any).duration_minutes ?? dto.time_limit_minutes ?? 0,
+        createdAt: (dto as any).created_at ?? '',
     }
 }
 
@@ -675,18 +704,19 @@ export const testApi = {
                 ? `${BASE_URL}/?${queryString}`
                 : `${BASE_URL}/`
 
-            const response = await api<{
-                total: number
-                skip: number
-                limit: number
-                tests: BackendTestListResponse[]
-            }>(url, { method: 'GET' })
+            const response = await api<any>(url, { method: 'GET' })
 
+            const tests = Array.isArray(response.data)
+                ? response.data
+                : response.tests || []
+            const meta = response.meta || {}
             return {
-                total: response.total,
-                skip: response.skip,
-                limit: response.limit,
-                tests: response.tests.map(mapTestListItem),
+                total: meta.total ?? response.total ?? tests.length,
+                skip: meta.page
+                    ? (meta.page - 1) * (meta.limit || 0)
+                    : response.skip || 0,
+                limit: meta.limit ?? response.limit ?? tests.length,
+                tests: tests.map(mapTestListItem),
             }
         } catch (error) {
             console.error('Error fetching tests:', error)
@@ -736,13 +766,17 @@ export const testApi = {
                 }
             }
 
+            const tests = Array.isArray(response.data)
+                ? response.data
+                : response.tests || response.items || []
+            const meta = response.meta || {}
             return {
-                total: response.total || 0,
-                skip: response.skip || 0,
-                limit: response.limit || 0,
-                tests: (response.tests || response.items || []).map(
-                    mapStudentTestListItem
-                ),
+                total: meta.total ?? response.total ?? tests.length,
+                skip: meta.page
+                    ? (meta.page - 1) * (meta.limit || 0)
+                    : params?.skip || 0,
+                limit: meta.limit ?? response.limit ?? tests.length,
+                tests: tests.map(mapStudentTestListItem),
             }
         } catch (error) {
             console.error('Error fetching student tests:', error)
@@ -1058,8 +1092,33 @@ export const testApi = {
     listTestAttemptsForTeacher: async (
         testId: string
     ): Promise<TestAttemptSummaryResponse[]> => {
+        const response = await api<any>(`${BASE_URL}/${testId}/attempts`, {
+            method: 'GET',
+        })
+        return Array.isArray(response) ? response : response?.data || []
+    },
+
+    /**
+     * List attempts for student (for a specific test)
+     * Endpoint: GET /tests/{testId}/my-attempts
+     */
+    listMyAttempts: async (
+        testId: string
+    ): Promise<TestAttemptSummaryResponse[]> => {
         const response = await api<TestAttemptSummaryResponse[]>(
-            `${BASE_URL}/${testId}/attempts`,
+            `${BASE_URL}/${testId}/my-attempts`,
+            { method: 'GET' }
+        )
+        return response
+    },
+
+    /**
+     * List all attempts history for the current student across all tests
+     * Endpoint: GET /tests/attempts/my-history
+     */
+    listMyAttemptsHistory: async (): Promise<TestAttemptHistoryResponse[]> => {
+        const response = await api<TestAttemptHistoryResponse[]>(
+            `${BASE_URL}/attempts/my-history`,
             { method: 'GET' }
         )
         return response
@@ -1154,173 +1213,19 @@ export const testApi = {
 // HELPER FUNCTIONS
 // ============================================
 
-/**
- * Calculate remaining time in seconds
- */
-export function calculateRemainingTime(
-    startedAt: string,
-    timeLimitMinutes: number
-): number {
-    const start = new Date(startedAt).getTime()
-    const now = Date.now()
-    const elapsed = Math.floor((now - start) / 1000)
-    const limit = timeLimitMinutes * 60
-    const remaining = limit - elapsed
-    return Math.max(0, remaining)
-}
-
-/**
- * Format time in MM:SS
- */
-export function formatTime(seconds: number): string {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
-}
-
-/**
- * Check if answer is required
- */
-export function isAnswerRequired(questionType: QuestionType): boolean {
-    const speakingTypes = [
-        QuestionType.SPEAKING_PART_1,
-        QuestionType.SPEAKING_PART_2,
-        QuestionType.SPEAKING_PART_3,
-    ]
-    return !speakingTypes.includes(questionType)
-}
-
-/**
- * Get question type label
- */
-export function getQuestionTypeLabel(type: QuestionType): string {
-    const labels: Record<QuestionType, string> = {
-        // Reading & Listening
-        [QuestionType.MULTIPLE_CHOICE]: 'Multiple Choice',
-        [QuestionType.TRUE_FALSE_NOT_GIVEN]: 'True / False / Not Given',
-        [QuestionType.YES_NO_NOT_GIVEN]: 'Yes / No / Not Given',
-        [QuestionType.MATCHING_HEADINGS]: 'Matching Headings',
-        [QuestionType.MATCHING_INFORMATION]: 'Matching Information',
-        [QuestionType.MATCHING_FEATURES]: 'Matching Features',
-        [QuestionType.SENTENCE_COMPLETION]: 'Sentence Completion',
-        [QuestionType.SUMMARY_COMPLETION]: 'Summary Completion',
-        [QuestionType.NOTE_COMPLETION]: 'Note/Table/Flow-chart Completion',
-        [QuestionType.SHORT_ANSWER]: 'Short Answer',
-        [QuestionType.DIAGRAM_LABELING]: 'Diagram Labeling',
-
-        // Writing
-        [QuestionType.WRITING_TASK_1]: 'Writing Task 1',
-        [QuestionType.WRITING_TASK_2]: 'Writing Task 2',
-
-        // Speaking
-        [QuestionType.SPEAKING_PART_1]: 'Speaking Part 1',
-        [QuestionType.SPEAKING_PART_2]: 'Speaking Part 2',
-        [QuestionType.SPEAKING_PART_3]: 'Speaking Part 3',
-    }
-    return labels[type] || type
-}
-
-/**
- * Get skill area label
- */
-export function getSkillAreaLabel(skill: SkillArea): string {
-    const labels: Record<SkillArea, string> = {
-        [SkillArea.LISTENING]: 'Listening',
-        [SkillArea.READING]: 'Reading',
-        [SkillArea.WRITING]: 'Writing',
-        [SkillArea.SPEAKING]: 'Speaking',
-        [SkillArea.GRAMMAR]: 'Grammar',
-        [SkillArea.VOCABULARY]: 'Vocabulary',
-        [SkillArea.PRONUNCIATION]: 'Pronunciation',
-    }
-    return labels[skill] || skill
-}
-
-/**
- * Get difficulty level label with color
- */
-export function getDifficultyInfo(difficulty: DifficultyLevel): {
-    label: string
-    color: string
-} {
-    const info: Record<DifficultyLevel, { label: string; color: string }> = {
-        [DifficultyLevel.VERY_EASY]: { label: 'Very Easy', color: 'green' },
-        [DifficultyLevel.EASY]: { label: 'Easy', color: 'blue' },
-        [DifficultyLevel.MEDIUM]: { label: 'Medium', color: 'yellow' },
-        [DifficultyLevel.HARD]: { label: 'Hard', color: 'orange' },
-        [DifficultyLevel.VERY_HARD]: { label: 'Very Hard', color: 'red' },
-    }
-    return info[difficulty] || { label: difficulty, color: 'gray' }
-}
-
-/**
- * Get attempt status label with color
- */
-export function getAttemptStatusInfo(status: AttemptStatus): {
-    label: string
-    color: string
-} {
-    const info: Record<AttemptStatus, { label: string; color: string }> = {
-        [AttemptStatus.IN_PROGRESS]: { label: 'In Progress', color: 'blue' },
-        [AttemptStatus.SUBMITTED]: { label: 'Submitted', color: 'yellow' },
-        [AttemptStatus.GRADED]: { label: 'Graded', color: 'green' },
-        [AttemptStatus.CANCELLED]: { label: 'Cancelled', color: 'gray' },
-        [AttemptStatus.EXPIRED]: { label: 'Expired', color: 'red' },
-    }
-    return info[status] || { label: status, color: 'gray' }
-}
-
-/**
- * Calculate percentage score
- */
-export function calculatePercentage(earned: number, total: number): number {
-    if (total === 0) return 0
-    return Math.round((earned / total) * 100 * 100) / 100 // Round to 2 decimals
-}
-
-/**
- * Check if test is available now
- */
-export function isTestAvailable(
-    startTime: string | null,
-    endTime: string | null
-): boolean {
-    const now = new Date()
-
-    if (startTime && new Date(startTime) > now) {
-        return false // Not started yet
-    }
-
-    if (endTime && new Date(endTime) < now) {
-        return false // Already ended
-    }
-
-    return true
-}
-
-/**
- * Get test availability status message
- */
-export function getTestAvailabilityMessage(
-    startTime: string | null,
-    endTime: string | null
-): string | null {
-    const now = new Date()
-
-    if (startTime && new Date(startTime) > now) {
-        return `Test opens on ${new Date(startTime).toLocaleString()}`
-    }
-
-    if (endTime && new Date(endTime) < now) {
-        return 'Test has ended'
-    }
-
-    if (endTime) {
-        return `Available until ${new Date(endTime).toLocaleString()}`
-    }
-
-    return null
-}
+// Re-export pure formatting and evaluation helpers from dedicated utils
+export {
+    calculateRemainingTime,
+    formatTime,
+    isAnswerRequired,
+    getQuestionTypeLabel,
+    getSkillAreaLabel,
+    getDifficultyInfo,
+    getAttemptStatusInfo,
+    calculatePercentage,
+    isTestAvailable,
+    getTestAvailabilityMessage,
+} from '@/utils/exam.helpers'
 
 /**
  * Remove temporary IDs from create payload before sending to backend
@@ -1330,20 +1235,24 @@ function cleanCreatePayload(payload: TestCreatePayload): TestCreatePayload {
     return {
         ...payload,
         sections: payload.sections.map((section) => {
-            const { id: _sId, ...sectionRest } = section as any
+            const { id: _, ...sectionRest } = section as any
+            void _
             return {
                 ...sectionRest,
                 parts: section.parts.map((part) => {
-                    const { id: _pId, ...partRest } = part as any
+                    const { id: __, ...partRest } = part as any
+                    void __
                     return {
                         ...partRest,
                         question_groups: part.question_groups.map((group) => {
-                            const { id: _gId, ...groupRest } = group as any
+                            const { id: ___, ...groupRest } = group as any
+                            void ___
                             return {
                                 ...groupRest,
                                 questions: group.questions.map((question) => {
-                                    const { id: _qId, ...questionRest } =
+                                    const { id: ____, ...questionRest } =
                                         question as any
+                                    void ____
                                     return questionRest
                                 }),
                             }

@@ -80,6 +80,27 @@
     color: var(--text-primary);
 }
 
+.arrowIcon {
+    width: 14px;
+    height: 14px;
+    display: inline-block;
+    vertical-align: middle;
+    transition:
+        filter 0.2s ease,
+        transform 0.2s ease;
+}
+
+[data-theme='dark'] .arrowIcon,
+.dark .arrowIcon,
+[data-theme='dark'] .ctaButton img,
+.dark .ctaButton img {
+    filter: invert(1) brightness(2);
+}
+
+.clickable:hover .arrowIcon {
+    transform: translateX(2px);
+}
+
 .arrowRight {
     width: 14px;
     height: 14px;

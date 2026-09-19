@@ -491,11 +491,81 @@
 /* Icon-only (square button) */
 .iconOnly {
     aspect-ratio: 1 / 1;
-    padding: var(--button-padding-y);
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
 .iconOnly .label {
-    display: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    width: 100%;
+    height: 100%;
+}
+
+.iconOnly.size-xs {
+    width: 24px;
+    height: 24px;
+}
+
+.iconOnly.size-sm {
+    width: 32px;
+    height: 32px;
+}
+
+.iconOnly.size-md {
+    width: 36px;
+    height: 36px;
+}
+
+.iconOnly.size-lg {
+    width: 44px;
+    height: 44px;
+}
+
+.iconOnly.size-xl {
+    width: 52px;
+    height: 52px;
+}
+
+.iconOnly svg,
+.iconOnly img {
+    display: block;
+    flex-shrink: 0;
+}
+
+.iconOnly.size-xs svg,
+.iconOnly.size-xs img {
+    width: 16px;
+    height: 16px;
+}
+
+.iconOnly.size-sm svg,
+.iconOnly.size-sm img {
+    width: 20px;
+    height: 20px;
+}
+
+.iconOnly.size-md svg,
+.iconOnly.size-md img {
+    width: 22px;
+    height: 22px;
+}
+
+.iconOnly.size-lg svg,
+.iconOnly.size-lg img {
+    width: 24px;
+    height: 24px;
+}
+
+.iconOnly.size-xl svg,
+.iconOnly.size-xl img {
+    width: 28px;
+    height: 28px;
 }
 
 /* Elevated shadow */

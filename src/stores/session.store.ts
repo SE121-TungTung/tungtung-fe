@@ -16,8 +16,10 @@ type SessionState = {
 export const useSession = create<SessionState>((set) => ({
     user: undefined,
     isAuthenticated:
-        !!localStorage.getItem('access_token') ||
-        !!sessionStorage.getItem('access_token'),
+        typeof window !== 'undefined'
+            ? !!localStorage.getItem('access_token') ||
+              !!sessionStorage.getItem('access_token')
+            : false,
     setUser: (u) => set({ user: u }),
     clear: () => {
         localStorage.removeItem('access_token')

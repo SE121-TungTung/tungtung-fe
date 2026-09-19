@@ -262,7 +262,7 @@ export function RefundCalculateModal({ enrollmentId, onClose }: Props) {
                                             Tổng số buổi:
                                         </span>
                                         <span style={{ fontWeight: 600 }}>
-                                            {calc.total_sessions} buổi
+                                            {calc.sessions_total} buổi
                                         </span>
                                     </div>
                                     <div
@@ -280,7 +280,7 @@ export function RefundCalculateModal({ enrollmentId, onClose }: Props) {
                                             Đã học:
                                         </span>
                                         <span style={{ fontWeight: 600 }}>
-                                            {calc.attended_sessions} buổi
+                                            {calc.sessions_attended} buổi
                                         </span>
                                     </div>
                                     <div
@@ -303,7 +303,7 @@ export function RefundCalculateModal({ enrollmentId, onClose }: Props) {
                                                 color: 'var(--color-status-info)',
                                             }}
                                         >
-                                            {calc.remaining_sessions} buổi
+                                            {calc.sessions_remaining} buổi
                                         </span>
                                     </div>
                                     <hr
@@ -329,7 +329,8 @@ export function RefundCalculateModal({ enrollmentId, onClose }: Props) {
                                             Học phí gốc đã đóng:
                                         </span>
                                         <span style={{ fontWeight: 600 }}>
-                                            {calc.total_fee.toLocaleString()} đ
+                                            {calc.original_fee.toLocaleString()}{' '}
+                                            đ
                                         </span>
                                     </div>
                                     <div

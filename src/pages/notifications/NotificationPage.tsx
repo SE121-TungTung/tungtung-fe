@@ -40,7 +40,10 @@ export default function NotificationPage() {
         placeholderData: (previousData) => previousData,
     })
 
-    const notifications = data?.notifications || []
+    const notifications = useMemo(
+        () => data?.notifications || [],
+        [data?.notifications]
+    )
     const totalCount = data?.total || 0
 
     const markAllMutation = useMutation({

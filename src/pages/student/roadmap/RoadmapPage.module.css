@@ -52,3 +52,20 @@
     padding: 32px 16px 16px 16px;
     margin: 0;
 }
+
+.chartsGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .chartsGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.chartCard {
+    width: 100%;
+}

@@ -8,6 +8,15 @@ export type CourseLevel =
     | 'advanced'
     | 'proficiency'
 export type CourseStatus = 'active' | 'inactive' | 'archived'
+export type CourseType =
+    | 'general_english'
+    | 'ielts'
+    | 'toeic'
+    | 'toefl'
+    | 'business'
+    | 'conversation'
+    | 'grammar'
+    | 'writing'
 
 export type BackendCourse = {
     id: string
@@ -17,6 +26,13 @@ export type BackendCourse = {
     duration_hours: number
     level: CourseLevel
     status: CourseStatus
+    course_type: CourseType
+    max_students: number
+    min_students: number
+    currency: string
+    syllabus?: any | null
+    learning_objectives?: string[] | null
+    prerequisites?: string[] | null
     created_at: string
     updated_at: string
 }
@@ -29,6 +45,13 @@ export type Course = {
     durationHours: number
     level: CourseLevel
     status: CourseStatus
+    courseType: CourseType
+    maxStudents: number
+    minStudents: number
+    currency: string
+    syllabus?: any | null
+    learningObjectives?: string[] | null
+    prerequisites?: string[] | null
     createdAt: string
     updatedAt: string
 }
@@ -41,6 +64,13 @@ const mapCourse = (c: BackendCourse): Course => ({
     durationHours: c.duration_hours,
     level: c.level,
     status: c.status,
+    courseType: c.course_type,
+    maxStudents: c.max_students,
+    minStudents: c.min_students,
+    currency: c.currency,
+    syllabus: c.syllabus ?? null,
+    learningObjectives: c.learning_objectives ?? [],
+    prerequisites: c.prerequisites ?? [],
     createdAt: c.created_at,
     updatedAt: c.updated_at,
 })
@@ -136,6 +166,13 @@ export type CreateCourseDto = {
     duration_hours: number
     level: CourseLevel
     status: CourseStatus
+    course_type: CourseType
+    max_students: number
+    min_students: number
+    currency: string
+    syllabus?: any | null
+    learning_objectives?: string[] | null
+    prerequisites?: string[] | null
 }
 
 export async function createCourse(body: CreateCourseDto): Promise<Course> {

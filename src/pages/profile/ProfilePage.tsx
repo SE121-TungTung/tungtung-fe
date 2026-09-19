@@ -48,17 +48,30 @@ export default function ProfilePage() {
         },
     })
 
+    const userData = sessionState?.user
+
     const onSubmitForm = async (
         values: UserFormValues & { avatarFile?: File | null }
     ) => {
+        const targetBandValue = values.preferences?.target_band
+            ? parseFloat(values.preferences.target_band)
+            : undefined
+
         const payload = {
             first_name: values.firstName || undefined,
             last_name: values.lastName || undefined,
             phone: values.phone || undefined,
             address: values.address || undefined,
-            // Add other fields as necessary:
-            // emergency_contact: values.emergencyContact,
-            // preferences: values.preferences,
+            preferences: values.preferences
+                ? {
+                      ...userData?.preferences,
+                      target_band: targetBandValue
+                          ? parseFloat(String(targetBandValue))
+                          : null,
+                      expected_exam_date:
+                          values.preferences.expected_exam_date || null,
+                  }
+                : undefined,
             avatar_file: values.avatarFile ?? undefined,
         }
         await updateMeMutate(payload)
@@ -67,8 +80,6 @@ export default function ProfilePage() {
         return
     }
 
-    const userData = sessionState?.user
-
     return (
         <div className={s.pageWrapperWithoutHeader}>
             {/* --- Main Content --- */}
@@ -76,6 +87,7 @@ export default function ProfilePage() {
                 {/* Tiêu đề trang */}
                 <h1 className={s.pageTitle}>
                     <TextType
+                        as="span"
                         text="Hồ sơ "
                         typingSpeed={50}
                         loop={false}

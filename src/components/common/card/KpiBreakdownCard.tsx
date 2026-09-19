@@ -217,8 +217,7 @@ export const KpiBreakdownCard: React.FC<KpiBreakdownCardProps> = ({
                                     <td style={tdStyle}>
                                         {isGroup ? (
                                             ''
-                                        ) : !readOnly &&
-                                          m.data_source === 'MANUAL' ? (
+                                        ) : !readOnly ? (
                                             <input
                                                 type="number"
                                                 step={
@@ -445,9 +444,9 @@ export const KpiBreakdownCard: React.FC<KpiBreakdownCardProps> = ({
                             color: 'var(--color-text-secondary)',
                         }}
                     >
-                        * Quản trị viên nhập giá trị thực cho các tiêu chí{' '}
-                        <strong>thủ công (MANUAL)</strong> và nhấn Lưu thay đổi
-                        trước khi tính lại điểm.
+                        * Quản trị viên nhập giá trị thực cho các tiêu chí thủ
+                        công hoặc ghi đè các tiêu chí tự động và nhấn Lưu thay
+                        đổi trước khi tính lại điểm.
                     </p>
                     {onSaveMetrics && (
                         <ButtonPrimary

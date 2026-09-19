@@ -6,8 +6,6 @@ import {
 } from '@/components/common/typography/StatusBadge'
 import { usePermissions } from '@/hooks/usePermissions'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
-import IconEdit from '@/assets/Edit Pen.svg'
-import IconDelete from '@/assets/Trash Bin.svg'
 import Skeleton from '@/components/effect/Skeleton'
 
 const classStatusMap: Record<
@@ -19,16 +17,26 @@ const classStatusMap: Record<
     completed: { label: 'Đã hoàn thành', variant: 'neutral' },
     cancelled: { label: 'Đã hủy', variant: 'danger' },
     postponed: { label: 'Dời ngày', variant: 'neutral' },
+    draft: { label: 'Nháp (DRAFT)', variant: 'warning' },
+    open: { label: 'Mở đăng ký (OPEN)', variant: 'success' },
+    ongoing: { label: 'Bắt đầu học (ONGOING)', variant: 'success' },
 }
 
 const getClassStatusProps = (status: ClassStatus) => {
-    return classStatusMap[status] || classStatusMap.cancelled
+    return (
+        classStatusMap[status] || {
+            label: status,
+            variant: 'neutral' as StatusBadgeVariant,
+        }
+    )
 }
 
 type Props = {
     classes: Class[]
     onEditClass: (classItem: Class) => void
     onDeleteClass: (classItem: Class) => void
+    onUpdateStatus: (classItem: Class, newStatus: ClassStatus) => void
+    onViewDetail?: (classItem: Class) => void
     isLoading?: boolean
 }
 
@@ -36,6 +44,8 @@ export default function ClassTable({
     classes,
     onEditClass,
     onDeleteClass,
+    onUpdateStatus,
+    onViewDetail,
     isLoading,
 }: Props) {
     const { can } = usePermissions()
@@ -133,7 +143,7 @@ export default function ClassTable({
                     classes.map((c) => {
                         const statusProps = getClassStatusProps(c.status)
                         return (
-                            <tr key={c.id}>
+                            <tr key={c.id} onClick={() => onViewDetail?.(c)}>
                                 <td>
                                     <div className={s.userInfo}>
                                         <span className={s.userName}>
@@ -148,7 +158,7 @@ export default function ClassTable({
                                 <td>{c.course.name}</td>
                                 <td>{c.teacher.name}</td>
                                 <td>{c.room.name}</td>
-                                <td>
+                                <td onClick={(e) => e.stopPropagation()}>
                                     <StatusBadge
                                         variant={statusProps.variant}
                                         label={statusProps.label}
@@ -157,8 +167,46 @@ export default function ClassTable({
                                 <td>
                                     {c.startDate} - {c.endDate}
                                 </td>
-                                <td>
+                                <td onClick={(e) => e.stopPropagation()}>
                                     <div className={s.actionsCell}>
+                                        {(c.status === 'draft' ||
+                                            c.status === 'scheduled') && (
+                                            <ButtonPrimary
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() =>
+                                                    onUpdateStatus(c, 'open')
+                                                }
+                                                title="Mở đăng ký lớp học (Chuyển sang trạng thái OPEN)"
+                                                style={{
+                                                    fontSize: '12px',
+                                                    padding: '4px 8px',
+                                                    minHeight: 'unset',
+                                                    whiteSpace: 'nowrap',
+                                                }}
+                                            >
+                                                Mở đăng ký
+                                            </ButtonPrimary>
+                                        )}
+                                        {c.status === 'open' && (
+                                            <ButtonPrimary
+                                                variant="outline"
+                                                tone="success"
+                                                size="sm"
+                                                onClick={() =>
+                                                    onUpdateStatus(c, 'ongoing')
+                                                }
+                                                title="Bắt đầu lớp học (Chuyển sang trạng thái ONGOING)"
+                                                style={{
+                                                    fontSize: '12px',
+                                                    padding: '4px 8px',
+                                                    minHeight: 'unset',
+                                                    whiteSpace: 'nowrap',
+                                                }}
+                                            >
+                                                Bắt đầu lớp
+                                            </ButtonPrimary>
+                                        )}
                                         <ButtonPrimary
                                             variant="ghost"
                                             size="sm"
@@ -171,7 +219,19 @@ export default function ClassTable({
                                                     : 'Không có quyền sửa'
                                             }
                                         >
-                                            <img src={IconEdit} alt="Sửa" />
+                                            <svg
+                                                width="20"
+                                                height="20"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            >
+                                                <path d="M20 12V21C20 21.55 19.55 22 19 22H3C2.45 22 2 21.55 2 21V5C2 4.45 2.45 4 3 4H12" />
+                                                <path d="M19.15 2.38L9.24 12.29L8 16L11.71 14.76L21.62 4.85C22.07 4.4 22.13 3.71 21.74 3.32L20.68 2.26C20.29 1.87 19.6 1.92 19.15 2.38Z" />
+                                            </svg>
                                         </ButtonPrimary>
                                         <ButtonPrimary
                                             variant="ghost"
@@ -186,7 +246,23 @@ export default function ClassTable({
                                             }
                                             className={s.dangerButton}
                                         >
-                                            <img src={IconDelete} alt="Xóa" />
+                                            <svg
+                                                width="20"
+                                                height="20"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            >
+                                                <path d="M16.13 22H7.87C7.37 22 6.95 21.63 6.88 21.14L5 8H19L17.12 21.14C17.05 21.63 16.63 22 16.13 22Z" />
+                                                <path d="M3.5 8H20.5" />
+                                                <path d="M10 12V18" />
+                                                <path d="M14 12V18" />
+                                                <path d="M16 5H8L9.7 2.45C9.89 2.17 10.2 2 10.54 2H13.47C13.8 2 14.12 2.17 14.3 2.45L16 5Z" />
+                                                <path d="M3 5H21" />
+                                            </svg>
                                         </ButtonPrimary>
                                     </div>
                                 </td>

@@ -300,6 +300,8 @@ export interface KpiDispute {
     resolution_note?: string | null
     created_at: string
     resolved_at?: string | null
+    teacher_name?: string | null
+    period_name?: string | null
 }
 
 export interface KpiDisputeCreate {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { testApi } from '@/lib/test'
 import type { TestAttemptSummaryResponse } from '@/types/test.types'
@@ -19,11 +19,7 @@ export default function TeacherGradingPage() {
         'all' | 'pending' | 'graded'
     >('all')
 
-    useEffect(() => {
-        loadAttempts()
-    }, [testId])
-
-    const loadAttempts = async () => {
+    const loadAttempts = useCallback(async () => {
         if (!testId) return
 
         setLoading(true)
@@ -35,7 +31,11 @@ export default function TeacherGradingPage() {
         } finally {
             setLoading(false)
         }
-    }
+    }, [testId])
+
+    useEffect(() => {
+        loadAttempts()
+    }, [testId, loadAttempts])
 
     const filteredAttempts = attempts.filter((a) => {
         if (filterStatus === 'pending')

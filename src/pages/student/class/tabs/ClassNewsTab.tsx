@@ -1,0 +1,302 @@
+import { useState, useRef } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import s from './ClassNewsTab.module.css'
+import Card from '@/components/common/card/Card'
+import {
+    getClassPosts,
+    recordPostView,
+    MATERIAL_CATEGORY_LABELS,
+} from '@/lib/classes'
+import type { ClassPost } from '@/lib/classes'
+import { queryKeys } from '@/lib/queryKeys'
+import { useSession } from '@/stores/session.store'
+import { usePostViewTracker } from '@/hooks/usePostViewTracker'
+import { ReactionBar } from '@/pages/teacher/classes/components/ReactionBar'
+import { CommentSection } from '@/pages/teacher/classes/components/CommentSection'
+
+interface ClassNewsTabProps {
+    classId?: string
+}
+
+type PostFilter = 'all' | 'announcement' | 'material'
+
+export default function ClassNewsTab({ classId }: ClassNewsTabProps) {
+    const [filter, setFilter] = useState<PostFilter>('all')
+    const { user } = useSession()
+
+    const { data: postsData, isLoading: postsLoading } = useQuery({
+        queryKey: queryKeys.classes.posts(classId ?? ''),
+        queryFn: () => getClassPosts(classId!, 1, 100),
+        enabled: !!classId,
+    })
+
+    const allPosts: ClassPost[] = postsData?.data ?? []
+    const filteredPosts =
+        filter === 'all'
+            ? allPosts
+            : allPosts.filter((p) => p.post_type === filter)
+
+    const pinnedPosts = filteredPosts.filter((p) => p.is_pinned)
+    const regularPosts = filteredPosts.filter((p) => !p.is_pinned)
+
+    const currentUserId = user?.id ?? ''
+    const currentUserRole = user?.role ?? 'student'
+    const isStudent = currentUserRole === 'student'
+
+    return (
+        <div className={s.newsLayout}>
+            <div>
+                <Card
+                    title="Bảng tin & Tài liệu lớp học"
+                    variant="outline"
+                    mode="light"
+                >
+                    {/* Filter tabs */}
+                    <div className={s.filterRow}>
+                        <div className={s.filterTabs} role="tablist">
+                            {(
+                                [
+                                    'all',
+                                    'announcement',
+                                    'material',
+                                ] as PostFilter[]
+                            ).map((tab) => (
+                                <button
+                                    key={tab}
+                                    role="tab"
+                                    aria-selected={filter === tab}
+                                    onClick={() => setFilter(tab)}
+                                    className={`${s.filterTab} ${filter === tab ? s.filterTabActive : ''}`}
+                                >
+                                    {tab === 'all'
+                                        ? 'Tất cả'
+                                        : tab === 'announcement'
+                                          ? '📢 Thông báo'
+                                          : '📚 Tài liệu'}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className={s.postsContainer}>
+                        {postsLoading ? (
+                            <div className={s.loadingText}>Đang tải...</div>
+                        ) : filteredPosts.length === 0 ? (
+                            <div className={s.emptyText}>
+                                {filter === 'all'
+                                    ? 'Lớp học chưa có thông báo hoặc tài liệu nào.'
+                                    : `Không có ${filter === 'announcement' ? 'thông báo' : 'tài liệu'} nào.`}
+                            </div>
+                        ) : (
+                            <>
+                                {/* ─── Nhóm bài viết đã ghim ─── */}
+                                {pinnedPosts.length > 0 && (
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            gap: '12px',
+                                        }}
+                                    >
+                                        <div className={s.pinnedSectionHeader}>
+                                            <span>📌</span>
+                                            <span>
+                                                Bài viết đã ghim (
+                                                {pinnedPosts.length}/3)
+                                            </span>
+                                        </div>
+                                        {pinnedPosts.map((post) => (
+                                            <StudentPostCard
+                                                key={post.id}
+                                                post={post}
+                                                classId={classId}
+                                                currentUserId={currentUserId}
+                                                currentUserRole={
+                                                    currentUserRole
+                                                }
+                                                isStudent={isStudent}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* ─── Danh sách bài viết thông thường ─── */}
+                                {regularPosts.map((post) => (
+                                    <StudentPostCard
+                                        key={post.id}
+                                        post={post}
+                                        classId={classId}
+                                        currentUserId={currentUserId}
+                                        currentUserRole={currentUserRole}
+                                        isStudent={isStudent}
+                                    />
+                                ))}
+                            </>
+                        )}
+                    </div>
+                </Card>
+            </div>
+        </div>
+    )
+}
+
+// ─── StudentPostCard (kèm View Tracking) ──────────────────────────────────────
+
+interface StudentPostCardProps {
+    post: ClassPost
+    classId?: string
+    currentUserId: string
+    currentUserRole: string
+    isStudent: boolean
+}
+
+function StudentPostCard({
+    post,
+    classId,
+    currentUserId,
+    currentUserRole,
+    isStudent,
+}: StudentPostCardProps) {
+    const cardRef = useRef<HTMLDivElement>(null)
+
+    // Tự động ghi nhận lượt xem nếu học viên dừng lại trên viewport >= 2 giây
+    usePostViewTracker({
+        elementRef: cardRef,
+        onViewed: () => {
+            if (classId) {
+                void recordPostView(classId, post.id)
+            }
+        },
+        durationMs: 2000,
+        threshold: 0.3,
+        isEnabled: isStudent && Boolean(classId),
+    })
+
+    return (
+        <div
+            ref={cardRef}
+            className={`${s.postCard} ${post.is_pinned ? s.pinnedPostCard : ''}`}
+        >
+            {/* Pinned badge */}
+            {post.is_pinned && (
+                <div className={s.pinnedBadge}>📌 Đang được ghim</div>
+            )}
+
+            <div className={s.postHeader}>
+                <div className={s.authorRow}>
+                    <div className={s.authorAvatar}>
+                        {post.author?.full_name?.charAt(0).toUpperCase() ?? 'G'}
+                    </div>
+                    <div>
+                        <div className={s.authorName}>
+                            {post.author?.full_name ?? 'Giảng viên'}
+                        </div>
+                        <div className={s.postDate}>
+                            {new Date(post.created_at).toLocaleString('vi-VN')}
+                            {post.is_edited && (
+                                <span className={s.editedLabel}>
+                                    {' '}
+                                    · (đã chỉnh sửa)
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Type + category badges */}
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        flexWrap: 'wrap',
+                    }}
+                >
+                    <span
+                        className={`${s.typeBadge} ${post.post_type === 'material' ? s.badgeMaterial : s.badgeNotice}`}
+                    >
+                        {post.post_type === 'material'
+                            ? 'Tài liệu'
+                            : 'Thông báo'}
+                    </span>
+                    {post.material_category && (
+                        <span className={s.categoryBadge}>
+                            {MATERIAL_CATEGORY_LABELS[post.material_category]}
+                        </span>
+                    )}
+                </div>
+            </div>
+
+            <h4 className={s.postTitle}>{post.title}</h4>
+
+            {post.content && <p className={s.postContent}>{post.content}</p>}
+
+            {post.attachments.length > 0 && (
+                <div className={s.attachmentsSection}>
+                    <div className={s.attachmentsLabel}>
+                        Tệp đính kèm ({post.attachments.length}):
+                    </div>
+                    <div className={s.attachmentsList}>
+                        {post.attachments.map((file, idx) => (
+                            <a
+                                key={idx}
+                                href={file.file_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={s.attachmentLink}
+                            >
+                                <svg
+                                    width="16"
+                                    height="16"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+                                </svg>
+                                <span>{file.file_name}</span>
+                                <span className={s.fileSize}>
+                                    ({(file.file_size / 1024).toFixed(1)} KB)
+                                </span>
+                            </a>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* ─── Phase 2: Reaction Bar ─── */}
+            {classId && (
+                <div className={s.postFooter}>
+                    <ReactionBar
+                        classId={classId}
+                        postId={post.id}
+                        summary={
+                            post.reactions_summary ?? {
+                                like: 0,
+                                heart: 0,
+                                understood: 0,
+                                user_reactions: [],
+                            }
+                        }
+                        isInteractive={!!currentUserId}
+                    />
+                </div>
+            )}
+
+            {/* ─── Phase 2: Comment Section ─── */}
+            {classId && (
+                <CommentSection
+                    classId={classId}
+                    postId={post.id}
+                    currentUserId={currentUserId}
+                    currentUserRole={currentUserRole}
+                    isCommentLocked={post.is_comment_locked}
+                    commentCount={post.comment_count ?? 0}
+                />
+            )}
+        </div>
+    )
+}

@@ -1,0 +1,173 @@
+.chartCard {
+    padding: 24px;
+}
+
+.chartTitle {
+    margin: 0 0 24px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.stateBox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 240px;
+}
+
+.errorText {
+    color: var(--color-error, #ef4444);
+}
+
+.loadingText {
+    color: var(--color-text-secondary);
+}
+
+.chartContainer {
+    display: flex;
+    height: 240px;
+    position: relative;
+    padding-left: 40px;
+    padding-bottom: 30px;
+}
+
+.yAxisLabels {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 30px;
+    width: 35px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    opacity: 0.8;
+    padding-right: 8px;
+}
+
+.gridLines {
+    position: absolute;
+    left: 40px;
+    right: 0;
+    top: 0;
+    bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    pointer-events: none;
+}
+
+.gridLine {
+    width: 100%;
+    border-bottom: 1px dashed var(--color-border-soft);
+    height: 0;
+}
+
+.gridLineBase {
+    width: 100%;
+    border-bottom: 2px solid var(--color-border-medium);
+    height: 0;
+}
+
+.barsContainer {
+    flex: 1;
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    height: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+.barColumn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    justify-content: flex-end;
+    position: relative;
+}
+
+.barItem {
+    width: 100%;
+    background: linear-gradient(
+        180deg,
+        var(--color-brand-primary) 0%,
+        rgba(99, 102, 241, 0.6) 100%
+    );
+    border-radius: 6px 6px 0 0;
+    cursor: pointer;
+    position: relative;
+    box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.1);
+    transition: box-shadow 0.2s;
+}
+
+.barHovered {
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+}
+
+.xAxisLabel {
+    position: absolute;
+    bottom: -25px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.tooltip {
+    position: absolute;
+    background-color: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(4px);
+    color: #fff;
+    padding: 12px;
+    border-radius: 8px;
+    fontsize: 12px;
+    width: 160px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    z-index: 10;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.tooltipTitle {
+    font-weight: 700;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    padding-bottom: 4px;
+    margin-bottom: 4px;
+}
+
+.tooltipRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.kpiScoreValue {
+    color: #818cf8;
+}
+
+.bonusValue {
+    color: #34d399;
+}
+
+.statusBadge {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 700;
+}
+
+.statusApproved {
+    background-color: rgba(52, 211, 153, 0.2);
+    color: #34d399;
+}
+
+.statusPending {
+    background-color: rgba(251, 191, 36, 0.2);
+    color: #fbbf24;
+}

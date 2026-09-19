@@ -7,6 +7,7 @@ import {
     useSalaryDetail,
     useApproveSalary,
     useAddSalaryAdjustment,
+    usePaySalary,
 } from '@/hooks/domain/useKpi'
 import { EmptyState } from '@/components/common/state/EmptyState'
 import { useDialog } from '@/hooks/useDialog'
@@ -26,6 +27,7 @@ export default function AdminSalaryDetailPage() {
 
     const { data: salary, isLoading } = useSalaryDetail(salaryId)
     const approveMutation = useApproveSalary()
+    const payMutation = usePaySalary()
     const adjustmentMutation = useAddSalaryAdjustment()
 
     const {
@@ -43,6 +45,16 @@ export default function AdminSalaryDetailPage() {
             onSuccess: () => alert('Đã chốt phiếu lương cho giáo viên này.'),
             onError: (err: any) =>
                 alert(err?.message || 'Có lỗi xảy ra khi chốt lương.'),
+        })
+    }
+
+    const handlePay = () => {
+        if (!salaryId) return
+        payMutation.mutate(salaryId, {
+            onSuccess: () =>
+                alert('Đã thanh toán lương thành công cho giáo viên này.'),
+            onError: (err: any) =>
+                alert(err?.message || 'Có lỗi xảy ra khi thanh toán lương.'),
         })
     }
 
@@ -115,6 +127,8 @@ export default function AdminSalaryDetailPage() {
                             readOnly={false}
                             onApprove={handleApprove}
                             isApproving={approveMutation.isPending}
+                            onPay={handlePay}
+                            isPaying={payMutation.isPending}
                         />
 
                         {/* List existing adjustments if any */}

@@ -1,0 +1,90 @@
+.tableContainer {
+    margin-top: 32px;
+    background: var(--color-surface-card, #fff);
+    border-radius: 12px;
+    border: 1px solid var(--color-border-soft, #e2e8f0);
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.tableTitle {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--color-text-primary, #1e293b);
+}
+
+.tableWrapper {
+    overflow-x: auto;
+}
+
+.disputesTable {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 14px;
+}
+
+.tableHeaderRow {
+    border-bottom: 1px solid var(--color-border-medium, #cbd5e1);
+    color: var(--color-text-muted, #64748b);
+    font-weight: 500;
+}
+
+.thCell {
+    padding: 12px 8px;
+}
+
+.tableBodyRow {
+    border-bottom: 1px solid var(--color-border-soft, #f1f5f9);
+}
+
+.tdCell {
+    padding: 12px 8px;
+}
+
+.tdDate {
+    padding: 12px 8px;
+    white-space: nowrap;
+}
+
+.tdPeriod {
+    padding: 12px 8px;
+    font-weight: 500;
+}
+
+.tdReason {
+    padding: 12px 8px;
+    max-width: 300px;
+    word-break: break-word;
+}
+
+.tdResolution {
+    padding: 12px 8px;
+    color: var(--color-text-secondary, #475569);
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.badgeResolved {
+    background: rgba(34, 197, 94, 0.1);
+    color: #16a34a;
+}
+
+.badgeRejected {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+}
+
+.badgePending {
+    background: rgba(234, 179, 8, 0.1);
+    color: #ca8a04;
+}

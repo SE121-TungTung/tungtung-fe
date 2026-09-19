@@ -25,7 +25,6 @@
 .card.disabled {
     opacity: 0.6;
     cursor: not-allowed;
-    pointer-events: none;
 }
 
 /* Header */
@@ -143,6 +142,28 @@
     margin-top: auto;
     padding-top: 12px;
     border-top: 1px solid var(--color-border-soft);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.historyBtn {
+    background: transparent;
+    border: 1px solid var(--color-brand-primary-200);
+    color: var(--color-brand-primary-600);
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.historyBtn:hover {
+    background: var(--color-brand-primary-50);
+    border-color: var(--color-brand-primary-500);
+    color: var(--color-brand-primary-700);
 }
 
 .ctaText {

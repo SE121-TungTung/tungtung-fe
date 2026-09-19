@@ -129,7 +129,7 @@ export default function ReadingTestPage() {
                 await submit(answers)
             }
         },
-        [answers, submit]
+        [answers, submit, confirm]
     )
 
     const handleNavigateQuestion = useCallback(

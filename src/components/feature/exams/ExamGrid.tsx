@@ -5,6 +5,7 @@ import type { TestListItem, StudentTestListItem } from '@/types/test.types'
 interface ExamGridProps {
     exams: (TestListItem | StudentTestListItem)[]
     onExamClick: (examId: string) => void
+    onHistoryClick?: (examId: string) => void
     userRole:
         | 'student'
         | 'teacher'
@@ -16,6 +17,7 @@ interface ExamGridProps {
 export default function ExamGrid({
     exams,
     onExamClick,
+    onHistoryClick,
     userRole,
 }: ExamGridProps) {
     if (exams.length === 0) {
@@ -33,6 +35,7 @@ export default function ExamGrid({
                     key={exam.id}
                     exam={exam}
                     onClick={() => onExamClick(exam.id)}
+                    onHistoryClick={onHistoryClick}
                     userRole={userRole}
                 />
             ))}

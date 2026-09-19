@@ -51,7 +51,18 @@ export const SubmitConfirmationDialog: React.FC<SubmitConfirmationProps> = ({
         const questions = section.parts.flatMap((p) =>
             p.questionGroups.flatMap((g) => g.questions)
         )
-        const answered = questions.filter((q) => answers[q.id]).length
+        let answered = questions.filter((q) => answers[q.id]).length
+
+        if (section.skillArea === SkillArea.SPEAKING) {
+            if (speakingResults) {
+                answered =
+                    speakingResults.totalQuestions ||
+                    speakingResults.processedCount ||
+                    0
+            } else {
+                answered = 0
+            }
+        }
 
         return {
             name: section.name || 'Untitled Section',

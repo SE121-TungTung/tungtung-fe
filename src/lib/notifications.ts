@@ -68,3 +68,27 @@ export async function markAllAsRead(): Promise<{
         method: 'PUT',
     })
 }
+
+export interface BroadcastPayload {
+    target_type: 'all' | 'role' | 'specific_users'
+    target_role?: 'student' | 'teacher' | 'admin' | 'center_admin' | ''
+    title: string
+    content: string
+    priority: 'low' | 'normal' | 'high' | 'urgent'
+}
+
+export async function broadcastNotification(
+    payload: BroadcastPayload
+): Promise<any> {
+    return api<any>(`${BASE_URL}/broadcast`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            ...payload,
+            target_role: payload.target_role || undefined,
+            channels: ['in_app'],
+        }),
+    })
+}

@@ -77,3 +77,17 @@
     flex-direction: column;
     gap: 24px;
 }
+
+/* Responsive adjustments for AdminLayout header */
+@media (max-width: 1200px) {
+    .header {
+        width: 90%;
+    }
+}
+
+@media (max-width: 768px) {
+    .header {
+        width: 100%;
+        margin-bottom: 24px;
+    }
+}

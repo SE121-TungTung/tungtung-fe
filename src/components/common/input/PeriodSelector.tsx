@@ -6,6 +6,7 @@ interface PeriodSelectorProps {
     onChange: (val: string) => void
     disabled?: boolean
     label?: string
+    showAll?: boolean
 }
 
 export const PeriodSelector: React.FC<PeriodSelectorProps> = ({
@@ -13,6 +14,7 @@ export const PeriodSelector: React.FC<PeriodSelectorProps> = ({
     onChange,
     disabled = false,
     label = 'Kỳ (Tháng/Năm)',
+    showAll = false,
 }) => {
     const periodOptions = useMemo(() => {
         const options = []
@@ -43,6 +45,8 @@ export const PeriodSelector: React.FC<PeriodSelectorProps> = ({
                 onChange={(e) => onChange(e.target.value)}
                 options={periodOptions}
                 disabled={disabled}
+                placeholder={showAll ? 'Tất cả' : '-- Chọn --'}
+                placeholderDisabled={!showAll}
             />
         </div>
     )

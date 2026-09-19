@@ -9,6 +9,8 @@ interface SalaryBreakdownPanelProps {
     readOnly?: boolean
     onApprove?: () => void
     isApproving?: boolean
+    onPay?: () => void
+    isPaying?: boolean
 }
 
 export const SalaryBreakdownPanel: React.FC<SalaryBreakdownPanelProps> = ({
@@ -16,6 +18,8 @@ export const SalaryBreakdownPanel: React.FC<SalaryBreakdownPanelProps> = ({
     readOnly = true,
     onApprove,
     isApproving = false,
+    onPay,
+    isPaying = false,
 }) => {
     if (!data) return null
 
@@ -207,6 +211,20 @@ export const SalaryBreakdownPanel: React.FC<SalaryBreakdownPanelProps> = ({
                 >
                     <ButtonPrimary onClick={onApprove} disabled={isApproving}>
                         Duyệt phiếu lương này
+                    </ButtonPrimary>
+                </div>
+            )}
+
+            {!readOnly && status === 'APPROVED' && onPay && (
+                <div
+                    style={{
+                        display: 'flex',
+                        justifyContent: 'flex-end',
+                        marginTop: '16px',
+                    }}
+                >
+                    <ButtonPrimary onClick={onPay} disabled={isPaying}>
+                        Thanh toán lương này
                     </ButtonPrimary>
                 </div>
             )}

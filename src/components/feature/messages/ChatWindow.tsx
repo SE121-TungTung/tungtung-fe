@@ -75,14 +75,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             const customEvent = event as CustomEvent<any>
             const data = customEvent.detail
 
-            console.log('WebSocket event received:', data)
-
             if (
-                data.type === 'new_message' &&
-                data.room_id === conversation.id
+                data?.type === 'new_message' &&
+                data?.room_id === conversation.id
             ) {
-                console.log('Invalidating queries for:', conversation.id)
-
                 queryClient.invalidateQueries({
                     queryKey: ['messages', conversation.id],
                 })
@@ -143,8 +139,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         },
 
         onSuccess: (response, _variables, context) => {
-            console.log('✅ Message sent successfully')
-
             const realMessage = {
                 ...response,
                 isPending: false,
@@ -233,8 +227,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         },
 
         onSuccess: (response, _variables, context) => {
-            console.log('✅ Message edited successfully')
-
             queryClient.setQueryData(
                 ['messages', conversation.id],
                 (old: Message[] = []) => {

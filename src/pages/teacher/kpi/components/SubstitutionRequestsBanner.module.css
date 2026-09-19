@@ -1,0 +1,115 @@
+.bannerContainer {
+    background: linear-gradient(135deg, #fef08a 0%, #fef9c3 100%);
+    border: 1px solid #fef08a;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.bannerTitle {
+    font-size: 18px;
+    font-weight: 700;
+    color: #854d0e;
+    margin: 0 0 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.requestsList {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.requestCard {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #fef08a;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.infoCol {
+    text-align: left;
+}
+
+.requesterText {
+    font-size: 12px;
+    color: #854d0e;
+    margin-bottom: 4px;
+}
+
+.classTitle {
+    font-size: 16px;
+    fontweight: 600;
+    color: #1e293b;
+    margin: 0 0 6px 0;
+}
+
+.timeInfo {
+    font-size: 13px;
+    color: #475569;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.reasonText {
+    margin: 6px 0 0 0;
+    font-size: 13px;
+    color: #64748b;
+    font-style: italic;
+}
+
+.actionsCol {
+    display: flex;
+    gap: 8px;
+}
+
+.btnDecline {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid #ef4444;
+    background-color: #fff;
+    color: #ef4444;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btnDecline:hover {
+    background-color: #fef2f2;
+}
+
+.btnDecline:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btnAccept {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    background-color: #16a34a;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btnAccept:hover {
+    background-color: #15803d;
+}
+
+.btnAccept:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

@@ -5,6 +5,7 @@ import InputField from '@/components/common/input/InputField'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import type { User } from '@/types/auth'
 import type { UserFormValues } from '@/forms/user.schema'
+import { SelectField } from '@/components/common/input/SelectField'
 import { useForm } from 'react-hook-form'
 import { changePassword } from '@/lib/users'
 import { useMutation } from '@tanstack/react-query'
@@ -76,6 +77,10 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
             phone: user?.phone ?? '',
             address: user?.address ?? '',
             dateOfBirth: formatDateForInput(user?.dateOfBirth), // Set default value formatting
+            preferences: {
+                target_band: user?.preferences?.target_band ?? '',
+                expected_exam_date: user?.preferences?.expected_exam_date ?? '',
+            },
         },
     })
 
@@ -130,6 +135,10 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
             phone: user?.phone ?? '',
             address: user?.address ?? '',
             dateOfBirth: formatDateForInput(user?.dateOfBirth),
+            preferences: {
+                target_band: user?.preferences?.target_band ?? '',
+                expected_exam_date: user?.preferences?.expected_exam_date ?? '',
+            },
         })
     }, [user, reset])
 
@@ -324,6 +333,52 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
                         className={s.fullWidth}
                         {...register('address')}
                     />
+
+                    {user?.role === 'student' && (
+                        <>
+                            <SelectField
+                                id="targetBand"
+                                label="Band mục tiêu IELTS"
+                                variant="soft"
+                                mode="light"
+                                className={s.fullWidth}
+                                options={[
+                                    {
+                                        label: 'Chọn band mục tiêu...',
+                                        value: '',
+                                    },
+                                    ...[
+                                        4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5,
+                                        8.0, 8.5, 9.0,
+                                    ].map((val) => ({
+                                        label: val.toFixed(1),
+                                        value: val,
+                                    })),
+                                ]}
+                                registration={register(
+                                    'preferences.target_band'
+                                )}
+                                error={
+                                    (errors.preferences as any)?.target_band
+                                        ?.message
+                                }
+                            />
+
+                            <InputField
+                                id="expectedExamDate"
+                                label="Ngày dự kiến thi IELTS"
+                                type="date"
+                                variant="soft"
+                                mode="light"
+                                className={s.fullWidth}
+                                {...register('preferences.expected_exam_date')}
+                                error={
+                                    (errors.preferences as any)
+                                        ?.expected_exam_date?.message
+                                }
+                            />
+                        </>
+                    )}
 
                     <div className={`${s.formActions} ${s.fullWidth}`}>
                         <ButtonPrimary

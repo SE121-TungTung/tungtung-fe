@@ -19,14 +19,14 @@
 
 .forgotLink {
     font-size: var(--primitive-text-sm);
-    color: rgba(255, 255, 255, 0.85);
+    color: var(--color-brand-primary);
     text-decoration: none;
     transition: var(--transition-colors);
     white-space: nowrap;
 }
 
 .forgotLink:hover {
-    color: rgba(255, 255, 255, 1);
+    color: var(--color-brand-primary-hover);
     text-decoration: underline;
 }
 
@@ -50,11 +50,14 @@
 }
 
 /* Dark theme adjustments */
-[data-theme='dark'] .rememberCheck,
-[data-theme='dark'] .forgotLink {
+[data-theme='dark'] .rememberCheck {
     color: rgba(255, 255, 255, 0.9);
 }
 
+[data-theme='dark'] .forgotLink {
+    color: var(--primitive-cyan-500);
+}
+
 [data-theme='dark'] .forgotLink:hover {
-    color: rgba(255, 255, 255, 1);
+    color: var(--primitive-cyan-600);
 }

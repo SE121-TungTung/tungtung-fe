@@ -3,6 +3,46 @@ import s from './AuthLayout.module.css'
 import { TextHorizontal } from '@/components/common/text/TextHorizontal'
 import ChatSquare from '@/assets/Chat Square Exclamation.svg'
 import EducationalBackground from '@/components/effect/EducationalBackground'
+import { useUIStore } from '@/stores/ui.store'
+import { Tooltip } from '@/components/core/Tooltip'
+
+const SunIcon = () => (
+    <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <circle cx="12" cy="12" r="5" />
+        <line x1="12" y1="1" x2="12" y2="3" />
+        <line x1="12" y1="21" x2="12" y2="23" />
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+        <line x1="1" y1="12" x2="3" y2="12" />
+        <line x1="21" y1="12" x2="23" y2="12" />
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+    </svg>
+)
+
+const MoonIcon = () => (
+    <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </svg>
+)
 
 export interface AuthLayoutProps {
     /** Main heading text (e.g., "Đăng nhập") */
@@ -45,9 +85,46 @@ export default function AuthLayout({
     hideInfoOnMobile = false,
     customBackground,
 }: AuthLayoutProps) {
+    const { theme, setTheme } = useUIStore()
+    const isDark = theme === 'dark'
+
+    const toggleTheme = () => {
+        setTheme(isDark ? 'light' : 'dark')
+    }
+
     return (
         <div className={s.container}>
-            {/* Animated Background */}
+            {/* Theme Toggle Button (Top Right) */}
+            <div className={s.themeToggleWrapper}>
+                <Tooltip
+                    placement="bottom-end"
+                    content={
+                        isDark
+                            ? 'Chuyển sang giao diện Sáng'
+                            : 'Chuyển sang giao diện Tối'
+                    }
+                >
+                    <button
+                        type="button"
+                        onClick={toggleTheme}
+                        className={s.themeToggleBtn}
+                        aria-label={
+                            isDark
+                                ? 'Chuyển sang giao diện Sáng'
+                                : 'Chuyển sang giao diện Tối'
+                        }
+                    >
+                        <span className={s.themeIconWrapper}>
+                            {isDark ? <SunIcon /> : <MoonIcon />}
+                        </span>
+                        <span className={s.themeToggleText}>
+                            {isDark ? 'Sáng' : 'Tối'}
+                        </span>
+                    </button>
+                </Tooltip>
+            </div>
+
+            {/* Background */}
             <div className={s.background} aria-hidden="true">
                 {customBackground || <EducationalBackground />}
             </div>
@@ -83,6 +160,7 @@ export default function AuthLayout({
                                 />
                             }
                             iconStyle="glass"
+                            mode={isDark ? 'dark' : 'light'}
                             description={infoDescription}
                             ctaText={infoCtaText}
                             onCtaClick={onInfoCtaClick}

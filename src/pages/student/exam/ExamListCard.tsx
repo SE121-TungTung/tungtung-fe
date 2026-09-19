@@ -17,6 +17,7 @@ interface ExamListCardProps {
     onBackClick?: () => void
     onExamClick: (examId: string) => void
     onGradingClick?: (examId: string) => void // ✅ NEW: Handler cho nút chấm điểm
+    onHistoryClick?: (examId: string) => void
     isLoading?: boolean
     viewMode?: 'list' | 'compact'
     userRole:
@@ -33,6 +34,7 @@ export default function ExamListCard({
     onBackClick,
     onExamClick,
     onGradingClick,
+    onHistoryClick,
     isLoading = false,
     viewMode = 'list',
     userRole,
@@ -91,9 +93,9 @@ export default function ExamListCard({
                 : { label: 'N/A', color: 'gray' }
 
         const duration =
-            'timeLimitMinutes' in exam
+            'timeLimitMinutes' in exam && exam.timeLimitMinutes
                 ? exam.timeLimitMinutes
-                : 'durationMinutes' in exam
+                : 'durationMinutes' in exam && exam.durationMinutes
                   ? exam.durationMinutes
                   : 0
 
@@ -152,17 +154,18 @@ export default function ExamListCard({
                                     {studentExam.maxAttempts}
                                 </strong>
                             </span>
-                            {studentExam.latestAttemptScore !== null && (
-                                <span className={s.score}>
-                                    <img src={CheckIcon} alt="score" />
-                                    Điểm:{' '}
-                                    <strong>
-                                        {studentExam.latestAttemptScore.toFixed(
-                                            1
-                                        )}
-                                    </strong>
-                                </span>
-                            )}
+                            {studentExam.latestAttemptScore !== undefined &&
+                                studentExam.latestAttemptScore !== null && (
+                                    <span className={s.score}>
+                                        <img src={CheckIcon} alt="score" />
+                                        Điểm:{' '}
+                                        <strong>
+                                            {Number(
+                                                studentExam.latestAttemptScore
+                                            ).toFixed(1)}
+                                        </strong>
+                                    </span>
+                                )}
                         </div>
                     )}
                 </div>
@@ -197,14 +200,33 @@ export default function ExamListCard({
                         </div>
                     ) : isStudentView ? (
                         /* Student view */
-                        canAttempt ? (
-                            <span className={s.ctaText}>
-                                Làm bài
-                                <span className={s.arrow}>→</span>
-                            </span>
-                        ) : (
-                            <span className={s.disabledText}>Hết lượt</span>
-                        )
+                        <div
+                            className={s.studentActions}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {studentExam &&
+                                studentExam.attemptsCount > 0 &&
+                                onHistoryClick && (
+                                    <ButtonGhost
+                                        size="sm"
+                                        mode="light"
+                                        onClick={() => onHistoryClick(exam.id)}
+                                        style={{ marginRight: 8 }}
+                                    >
+                                        Lịch sử
+                                    </ButtonGhost>
+                                )}
+                            {canAttempt ? (
+                                <ButtonPrimary
+                                    size="sm"
+                                    onClick={() => onExamClick(exam.id)}
+                                >
+                                    Làm bài
+                                </ButtonPrimary>
+                            ) : (
+                                <span className={s.disabledText}>Hết lượt</span>
+                            )}
+                        </div>
                     ) : null}
                 </div>
             </li>

@@ -174,21 +174,15 @@ export function LoginPage() {
                     placeholder="Nhập mật khẩu"
                     mode="dark"
                     aria-describedby={errors.password ? passMsgId : undefined}
-                    {...register('password', {
-                        minLength: {
-                            value: 8,
-                            message: 'Tối thiểu 8 ký tự',
-                        },
-                    })}
+                    {...register('password')}
                 />
                 {errors.password && (
                     <FieldMessage
-                        tone="warning"
+                        tone="error"
                         variant="chip"
                         messageId={passMsgId}
                     >
-                        {errors.password.message ||
-                            'Mật khẩu tối thiểu 8 ký tự'}
+                        {errors.password.message || 'Vui lòng nhập mật khẩu'}
                     </FieldMessage>
                 )}
 

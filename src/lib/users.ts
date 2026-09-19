@@ -44,6 +44,7 @@ export const mapUser = (u: BackendUser): User => ({
     updatedAt: u.updated_at,
     isFirstLogin: !!u.is_first_login,
     emergencyContact: safeParse(u.emergency_contact),
+    preferences: safeParse(u.preferences),
 })
 
 // --- API FUNCTIONS ---
@@ -226,4 +227,13 @@ export async function selfCheckIn(sessionId: string) {
             body: JSON.stringify({ session_id: sessionId }),
         }
     )
+}
+
+// 11. Update Target Band
+export async function updateTargetBand(targetBand: number): Promise<User> {
+    const res = await api<BackendUser>(`/api/v1/users/me/target-band`, {
+        method: 'PUT',
+        body: JSON.stringify({ target_band: targetBand }),
+    })
+    return mapUser(res)
 }

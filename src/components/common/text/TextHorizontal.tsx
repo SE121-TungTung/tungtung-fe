@@ -56,7 +56,13 @@ export const TextHorizontal = ({
                     size="md"
                     glow
                     tone="brand"
-                    rightIcon={<img src={ArrowRight} alt="arrow" />}
+                    rightIcon={
+                        <img
+                            src={ArrowRight}
+                            alt="arrow"
+                            className={s.arrowIcon}
+                        />
+                    }
                 >
                     <span className={s.ctaText}>{ctaText}</span>
                 </Button>

@@ -26,6 +26,7 @@ import ExamGrid from '@/components/feature/exams/ExamGrid'
 import ButtonGhost from '@/components/common/button/ButtonGhost'
 import { useNavigate } from 'react-router-dom'
 import { useDialog } from '@/hooks/useDialog'
+import { Modal } from '@/components/core/Modal'
 
 const contentModeItems: SegItem[] = [
     { label: 'Theo Kỹ năng', value: 'skill' },
@@ -80,7 +81,56 @@ export default function ExamPracticePage() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
-    const loadTests = async () => {
+    // History Modal state
+    const [historyModalOpen, setHistoryModalOpen] = useState(false)
+    const [historyTest, setHistoryTest] = useState<
+        TestListItem | StudentTestListItem | null
+    >(null)
+    const [historyAttempts, setHistoryAttempts] = useState<any[]>([])
+    const [loadingAttempts, setLoadingAttempts] = useState(false)
+
+    const formatDateTime = (dateStr?: string | null) => {
+        if (!dateStr) return 'N/A'
+        try {
+            const d = new Date(dateStr)
+            if (isNaN(d.getTime())) return 'N/A'
+            return d.toLocaleString('vi-VN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+            })
+        } catch {
+            return 'N/A'
+        }
+    }
+
+    const handleHistoryClick = async (examId: string) => {
+        const testItem = tests.find((t) => t.id === examId)
+        if (!testItem) return
+
+        setHistoryTest(testItem)
+        setHistoryModalOpen(true)
+        setLoadingAttempts(true)
+        setHistoryAttempts([])
+        try {
+            const data = await testApi.listMyAttempts(examId)
+            const sortedData = [...(data || [])].sort(
+                (a, b) =>
+                    new Date(b.started_at || 0).getTime() -
+                    new Date(a.started_at || 0).getTime()
+            )
+            setHistoryAttempts(sortedData)
+        } catch (error: any) {
+            console.error('Failed to load my attempts:', error)
+            alert('Không thể tải lịch sử làm bài: ' + (error.message || ''))
+        } finally {
+            setLoadingAttempts(false)
+        }
+    }
+
+    const loadTests = useCallback(async () => {
         setLoading(true)
         setError(null)
         try {
@@ -94,11 +144,30 @@ export default function ExamPracticePage() {
                     limit: 100,
                 })
             }
+            console.debug('[ExamPracticePage] loadTests raw data:', data)
             if (Array.isArray(data)) {
+                console.debug(
+                    '[ExamPracticePage] branch: array, count:',
+                    data.length
+                )
                 setTests(data)
+            } else if (data && Array.isArray(data.data)) {
+                console.debug(
+                    '[ExamPracticePage] branch: data.data, count:',
+                    data.data.length
+                )
+                setTests(data.data)
             } else if (data && Array.isArray(data.tests)) {
+                console.debug(
+                    '[ExamPracticePage] branch: data.tests, count:',
+                    data.tests.length
+                )
                 setTests(data.tests)
             } else if (data && Array.isArray(data.items)) {
+                console.debug(
+                    '[ExamPracticePage] branch: data.items, count:',
+                    data.items.length
+                )
                 setTests(data.items)
             } else {
                 console.warn('Unexpected API response structure:', data)
@@ -110,11 +179,11 @@ export default function ExamPracticePage() {
         } finally {
             setLoading(false)
         }
-    }
+    }, [userRole])
 
     useEffect(() => {
         loadTests()
-    }, [])
+    }, [loadTests])
 
     const handleGreetingComplete = useCallback(() => {
         setShowGradientName(true)
@@ -151,17 +220,26 @@ export default function ExamPracticePage() {
     const handleGradingClick = (examId: string) => {
         navigate(`/teacher/grading/${examId}`)
     }
-
     const filteredExams = useMemo(() => {
         let examsToShow = tests
 
+        console.debug('[ExamPracticePage] filteredExams recompute:', {
+            testsCount: tests.length,
+            contentMode,
+            selectedSkill,
+            firstItem: tests[0],
+        })
+
         if (contentMode === 'skill' && selectedSkill) {
-            examsToShow = tests.filter((test) => {
-                if ('skill' in test) {
-                    return test.skill === selectedSkill
-                }
-                return false
-            })
+            examsToShow = tests.filter(
+                (test) => (test as any).skill === selectedSkill
+            )
+            console.debug(
+                '[ExamPracticePage] after skill filter:',
+                examsToShow.length,
+                'selectedSkill:',
+                selectedSkill
+            )
         }
 
         if (searchTerm.trim()) {
@@ -231,6 +309,7 @@ export default function ExamPracticePage() {
                         <ExamGrid
                             exams={filteredExams}
                             onExamClick={handleExamClick}
+                            onHistoryClick={handleHistoryClick}
                             userRole={userRole as any}
                         />
                     </div>
@@ -242,6 +321,7 @@ export default function ExamPracticePage() {
                         exams={filteredExams}
                         onBackClick={handleBackFromList}
                         onExamClick={handleExamClick}
+                        onHistoryClick={handleHistoryClick}
                         onGradingClick={
                             userRole === 'teacher'
                                 ? handleGradingClick
@@ -262,6 +342,7 @@ export default function ExamPracticePage() {
                     <ExamGrid
                         exams={filteredExams}
                         onExamClick={handleExamClick}
+                        onHistoryClick={handleHistoryClick}
                         userRole={userRole as any}
                     />
                 </div>
@@ -272,6 +353,7 @@ export default function ExamPracticePage() {
                     title="Tất cả bài thi"
                     exams={filteredExams}
                     onExamClick={handleExamClick}
+                    onHistoryClick={handleHistoryClick}
                     onGradingClick={
                         userRole === 'teacher' ? handleGradingClick : undefined
                     }
@@ -347,6 +429,110 @@ export default function ExamPracticePage() {
 
                 <div className={s.contentArea}>{renderContent()}</div>
             </main>
+
+            <Modal
+                isOpen={historyModalOpen}
+                onClose={() => setHistoryModalOpen(false)}
+                title={`Lịch sử làm bài: ${historyTest?.title || ''}`}
+            >
+                {loadingAttempts ? (
+                    <div className={s.modalLoading}>
+                        Đang tải lịch sử làm bài...
+                    </div>
+                ) : historyAttempts.length === 0 ? (
+                    <div className={s.modalEmpty}>
+                        Bạn chưa thực hiện lượt làm bài nào cho bài thi này.
+                    </div>
+                ) : (
+                    <div className={s.attemptsList}>
+                        {historyAttempts.map((attempt, index) => {
+                            const isGraded = attempt.status === 'GRADED'
+                            const isInProgress =
+                                attempt.status === 'IN_PROGRESS'
+                            const isSubmitted = attempt.status === 'SUBMITTED'
+
+                            return (
+                                <div key={attempt.id} className={s.attemptItem}>
+                                    <div className={s.attemptInfo}>
+                                        <span className={s.attemptIndex}>
+                                            Lần {historyAttempts.length - index}
+                                        </span>
+                                        <span className={s.attemptTime}>
+                                            Bắt đầu:{' '}
+                                            {formatDateTime(attempt.started_at)}
+                                        </span>
+                                    </div>
+                                    <div className={s.attemptStatus}>
+                                        {isGraded && (
+                                            <span
+                                                className={`${s.badge} ${s.badgeGraded}`}
+                                            >
+                                                Đã chấm
+                                            </span>
+                                        )}
+                                        {isInProgress && (
+                                            <span
+                                                className={`${s.badge} ${s.badgeInProgress}`}
+                                            >
+                                                Đang làm
+                                            </span>
+                                        )}
+                                        {isSubmitted && (
+                                            <span
+                                                className={`${s.badge} ${s.badgeSubmitted}`}
+                                            >
+                                                Đã nộp
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className={s.attemptScore}>
+                                        {isGraded ? (
+                                            <span className={s.scoreVal}>
+                                                {attempt.score !== null &&
+                                                attempt.score !== undefined
+                                                    ? attempt.score.toFixed(1)
+                                                    : '0.0'}
+                                            </span>
+                                        ) : (
+                                            <span className={s.scorePending}>
+                                                --
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className={s.attemptAction}>
+                                        {isInProgress ? (
+                                            <ButtonPrimary
+                                                size="sm"
+                                                onClick={() => {
+                                                    setHistoryModalOpen(false)
+                                                    navigate(
+                                                        `/student/tests/${historyTest?.id}/take/${attempt.id}`
+                                                    )
+                                                }}
+                                            >
+                                                Làm tiếp
+                                            </ButtonPrimary>
+                                        ) : (
+                                            <ButtonGhost
+                                                size="sm"
+                                                mode="light"
+                                                onClick={() => {
+                                                    setHistoryModalOpen(false)
+                                                    navigate(
+                                                        `/student/tests/results/${attempt.id}`
+                                                    )
+                                                }}
+                                            >
+                                                Xem kết quả
+                                            </ButtonGhost>
+                                        )}
+                                    </div>
+                                </div>
+                            )
+                        })}
+                    </div>
+                )}
+            </Modal>
         </div>
     )
 }

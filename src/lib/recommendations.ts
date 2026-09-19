@@ -72,3 +72,25 @@ export async function getLearningPath(): Promise<LearningPath> {
         method: 'GET',
     })
 }
+
+export interface HistoryRecommendationLog {
+    id: string
+    generated_at: string | null
+    recommendation_type: string
+    is_read: boolean
+    predicted_band: number | null
+    target_band: number | null
+    attendance_rate: number | null
+    skill_scores: Record<string, number> | null
+}
+
+export async function getRecommendationHistory(): Promise<
+    HistoryRecommendationLog[]
+> {
+    return api<HistoryRecommendationLog[]>(
+        '/api/v1/recommendations/history?page=1&size=50',
+        {
+            method: 'GET',
+        }
+    )
+}

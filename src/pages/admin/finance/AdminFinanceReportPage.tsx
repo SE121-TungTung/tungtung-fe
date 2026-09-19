@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Card from '@/components/common/card/Card'
 import { EmptyState } from '@/components/common/state/EmptyState'
 import {
@@ -7,6 +7,7 @@ import {
     useProfitReport,
     useDebtsReport,
     useCreateExportJob,
+    useExportJob,
 } from '@/hooks/domain/useFinance'
 import s from './Finance.module.css'
 import {
@@ -104,7 +105,6 @@ function RevenueTab({
     dateTo: string
 }) {
     const { data: revRes, isLoading } = useRevenueReport(dateFrom, dateTo, true)
-    const { mutate: exportJob } = useCreateExportJob()
 
     if (isLoading) return <div>Đang tải...</div>
     const rev = revRes
@@ -169,43 +169,11 @@ function RevenueTab({
                     style={{
                         padding: '16px 24px',
                         borderBottom: '1px solid var(--color-border-soft)',
-                        display: 'flex',
-                        justifyContent: 'space-between',
                     }}
                 >
                     <h3 style={{ margin: 0, fontSize: '16px' }}>
                         Doanh thu theo khóa học
                     </h3>
-                    <button
-                        onClick={() =>
-                            exportJob(
-                                { report_type: 'REVENUE' },
-                                {
-                                    onSuccess: () =>
-                                        alert(
-                                            'Đã khởi tạo yêu cầu xuất Excel.'
-                                        ),
-                                }
-                            )
-                        }
-                        className="flex items-center gap-2 text-sm text-brand-primary font-semibold hover:underline"
-                    >
-                        <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        >
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="7 10 12 15 17 10"></polyline>
-                            <line x1="12" y1="15" x2="12" y2="3"></line>
-                        </svg>{' '}
-                        Xuất Excel
-                    </button>
                 </div>
                 <div className={s.tableWrapper}>
                     <table className={s.table}>
@@ -561,6 +529,74 @@ export default function AdminFinanceReportPage() {
     const [timeRange, setTimeRange] = useState<TimeRange>('ALL_TIME')
     const { dateFrom, dateTo } = getDateRange(timeRange)
 
+    const { mutate: createExportJob, isPending: isExportPending } =
+        useCreateExportJob()
+    const [pollingJobId, setPollingJobId] = useState<string | undefined>(
+        undefined
+    )
+    const { data: jobStatus } = useExportJob(pollingJobId)
+
+    useEffect(() => {
+        if (!jobStatus) return
+
+        if (jobStatus.status === 'completed') {
+            setPollingJobId(undefined)
+
+            // Trigger download
+            const API_BASE = (
+                import.meta.env.VITE_API_URL ||
+                'https://tungtung-be-production.up.railway.app'
+            ).replace(/\/$/, '')
+
+            const downloadUrl = `${API_BASE}${jobStatus.file_url}`
+            const ext = jobStatus.file_url?.split('.').pop() || 'csv'
+
+            const a = document.createElement('a')
+            a.href = downloadUrl
+            a.download = `bao_cao_${jobStatus.report_type}_${new Date().toISOString().slice(0, 10)}.${ext}`
+            document.body.appendChild(a)
+            a.click()
+            document.body.removeChild(a)
+        } else if (jobStatus.status === 'failed') {
+            setPollingJobId(undefined)
+            alert(
+                `Xuất báo cáo thất bại: ${jobStatus.error_message || 'Lỗi không xác định'}`
+            )
+        }
+    }, [jobStatus])
+
+    const handleExport = () => {
+        const mapping: Record<
+            typeof tab,
+            'revenue' | 'expenses' | 'profit' | 'debts'
+        > = {
+            REVENUE: 'revenue',
+            EXPENSE: 'expenses',
+            PROFIT: 'profit',
+            DEBT: 'debts',
+        }
+
+        createExportJob(
+            {
+                report_type: mapping[tab],
+                filters:
+                    tab !== 'DEBT'
+                        ? { date_from: dateFrom, date_to: dateTo }
+                        : undefined,
+            },
+            {
+                onSuccess: (res) => {
+                    setPollingJobId(res.id)
+                },
+                onError: (err: any) => {
+                    alert(
+                        `Không thể khởi tạo tiến trình xuất báo cáo: ${err.message || 'Lỗi không xác định'}`
+                    )
+                },
+            }
+        )
+    }
+
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div
@@ -590,30 +626,82 @@ export default function AdminFinanceReportPage() {
                         trung tâm.
                     </p>
                 </div>
-                {tab !== 'DEBT' && (
-                    <select
-                        value={timeRange}
-                        onChange={(e) =>
-                            setTimeRange(e.target.value as TimeRange)
-                        }
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                    }}
+                >
+                    {tab !== 'DEBT' && (
+                        <select
+                            value={timeRange}
+                            onChange={(e) =>
+                                setTimeRange(e.target.value as TimeRange)
+                            }
+                            style={{
+                                padding: '8px 12px',
+                                borderRadius: '8px',
+                                border: '1px solid var(--color-border-soft)',
+                                background: 'var(--color-surface-card)',
+                                color: 'var(--color-text-primary)',
+                                outline: 'none',
+                                cursor: 'pointer',
+                                fontSize: '14px',
+                                fontWeight: 500,
+                            }}
+                        >
+                            <option value="ALL_TIME">Tất cả thời gian</option>
+                            <option value="THIS_MONTH">Tháng này</option>
+                            <option value="LAST_MONTH">Tháng trước</option>
+                            <option value="THIS_YEAR">Năm nay</option>
+                        </select>
+                    )}
+                    <button
+                        onClick={handleExport}
+                        disabled={isExportPending || !!pollingJobId}
                         style={{
-                            padding: '8px 12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            padding: '8px 16px',
                             borderRadius: '8px',
-                            border: '1px solid var(--color-border-soft)',
-                            background: 'var(--color-surface-card)',
-                            color: 'var(--color-text-primary)',
-                            outline: 'none',
-                            cursor: 'pointer',
+                            border: '1px solid var(--color-brand-primary)',
+                            background:
+                                isExportPending || !!pollingJobId
+                                    ? 'var(--color-bg-subtle)'
+                                    : 'transparent',
+                            color: 'var(--color-brand-primary)',
                             fontSize: '14px',
-                            fontWeight: 500,
+                            fontWeight: 600,
+                            cursor:
+                                isExportPending || !!pollingJobId
+                                    ? 'not-allowed'
+                                    : 'pointer',
+                            opacity:
+                                isExportPending || !!pollingJobId ? 0.6 : 1,
+                            transition: 'all 0.2s',
                         }}
                     >
-                        <option value="ALL_TIME">Tất cả thời gian</option>
-                        <option value="THIS_MONTH">Tháng này</option>
-                        <option value="LAST_MONTH">Tháng trước</option>
-                        <option value="THIS_YEAR">Năm nay</option>
-                    </select>
-                )}
+                        <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        {isExportPending || !!pollingJobId
+                            ? 'Đang xuất...'
+                            : 'Xuất Excel'}
+                    </button>
+                </div>
             </div>
 
             <Card
