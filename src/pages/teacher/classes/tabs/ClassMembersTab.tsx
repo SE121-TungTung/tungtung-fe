@@ -16,7 +16,7 @@ export const ClassMembersTab: React.FC<ClassMembersTabProps> = ({
     classMembers,
 }) => {
     return (
-        <div style={{ width: '100%', maxWidth: 800, margin: '0 auto' }}>
+        <div style={{ width: '100%' }}>
             <div style={{ marginBottom: 16 }}>
                 <InputField
                     placeholder="Tìm kiếm học viên..."

@@ -9,6 +9,7 @@ import TextType from '@/components/common/text/TextType'
 import ClassScheduleTab from './tabs/ClassScheduleTab'
 import ClassNewsTab from './tabs/ClassNewsTab'
 import ClassMembersTab from './tabs/ClassMembersTab'
+import { ClassMaterialsLibraryTab } from '@/pages/teacher/classes/tabs/ClassMaterialsLibraryTab'
 import QrScannerModal from './modals/QrScannerModal'
 
 // Helpers & API
@@ -25,6 +26,7 @@ import { useDialog } from '@/hooks/useDialog'
 const tabItems: TabItem[] = [
     { label: 'Lịch học', value: 'schedule' },
     { label: 'Bảng tin', value: 'news' },
+    { label: 'Kho học liệu', value: 'materials' },
     { label: 'Thành viên', value: 'members' },
 ]
 
@@ -215,7 +217,7 @@ export default function ClassPage() {
                         </div>
                     </div>
                 ) : currentClass ? (
-                    <>
+                    <div className={s.tabContentWrapper}>
                         {activeTab === 'schedule' && (
                             <ClassScheduleTab
                                 todaySessions={todaySessions}
@@ -227,10 +229,15 @@ export default function ClassPage() {
                         {activeTab === 'news' && (
                             <ClassNewsTab classId={currentClass.id} />
                         )}
+                        {activeTab === 'materials' && (
+                            <ClassMaterialsLibraryTab
+                                classId={currentClass.id}
+                            />
+                        )}
                         {activeTab === 'members' && (
                             <ClassMembersTab members={classMembers} />
                         )}
-                    </>
+                    </div>
                 ) : (
                     <div className={s.placeholderContent}>
                         <div className={s.placeholderBox}>

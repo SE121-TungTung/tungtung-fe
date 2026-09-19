@@ -1,45 +1,227 @@
-.newsLayout {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 24px;
-    align-items: stretch;
-    width: 100%;
-    min-height: 500px;
-}
+/* ClassNewsTab.module.css — Modern Full-Width Student Feed Layout */
 
-.postsContainer {
+.feedLayout {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
     display: flex;
     flex-direction: column;
     gap: 20px;
-    padding: 16px;
 }
 
-.loadingText {
-    text-align: center;
-    padding: 20px;
-    color: #666;
+/* ─── List Header & Filter Tabs ─── */
+.listHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
 }
 
-.emptyText {
-    text-align: center;
-    padding: 40px 20px;
-    color: #888;
+.filterTabs {
+    display: flex;
+    gap: 4px;
+    background: #f1f5f9;
+    padding: 4px;
+    border-radius: 10px;
 }
 
-.postCard {
-    padding: 20px;
-    border-radius: 12px;
-    border: 1px solid #eef2f6;
+.filterTab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 500;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.filterTab:hover {
+    color: #0f172a;
+}
+
+.filterTabActive {
+    background: #ffffff;
+    color: #4f46e5;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* ─── Pinned Posts Carousel (Facebook Style) ─── */
+.pinnedCarouselWrapper {
+    background: #fffdf7;
+    border: 1px solid #fef3c7;
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin-bottom: 4px;
+}
+
+.pinnedCarouselHeader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    color: #92400e;
+}
+
+.pinnedCarouselTitle {
+    font-size: 15px;
+    font-weight: 700;
+    color: #92400e;
+    margin: 0;
+}
+
+.pinnedCarouselViewport {
+    position: relative;
+}
+
+.pinnedCarouselTrack {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 4px 0;
+}
+
+.pinnedCarouselTrack::-webkit-scrollbar {
+    display: none;
+}
+
+.pinnedCarouselItem {
+    flex: 0 0 300px;
+    scroll-snap-align: start;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 14px 16px;
     background: #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
-    transition: all 0.2s ease-in-out;
+    border: 1px solid #fef3c7;
+    border-radius: 12px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s ease;
 }
 
-.postHeader {
+.pinnedCarouselItem:hover {
+    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.15);
+    border-color: #fbbf24;
+    transform: translateY(-2px);
+}
+
+.pinnedItemAvatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.pinnedItemBody {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.pinnedItemAuthor {
+    font-size: 12px;
+    font-weight: 600;
+    color: #92400e;
+}
+
+.pinnedItemTitle {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pinnedItemPreview {
+    font-size: 12px;
+    color: #64748b;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-top: 2px;
+}
+
+.carouselArrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.15s ease;
+}
+
+.carouselArrow:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.carouselArrowLeft {
+    left: -12px;
+}
+
+.carouselArrowRight {
+    right: -12px;
+}
+
+/* ─── Post Card (Modern Full-Width Card) ─── */
+.postCard {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transition:
+        box-shadow 0.2s,
+        border-color 0.2s;
+}
+
+.postCard:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
+    border-color: #cbd5e1;
+}
+
+.postHeaderRow {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 12px;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
 .authorRow {
@@ -48,35 +230,57 @@
     align-items: center;
 }
 
-.authorAvatar {
-    width: 40px;
-    height: 40px;
+.avatar {
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+    background: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%);
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
-    font-size: 16px;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
 }
 
 .authorName {
     font-weight: 600;
     color: #1e293b;
+    font-size: 14px;
 }
 
-.postDate {
+.postMeta {
     font-size: 12px;
-    color: #64748b;
+    color: #94a3b8;
+    margin-top: 2px;
+}
+
+.editedBadge {
+    font-style: italic;
+    color: #94a3b8;
+}
+
+.actionsRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 .typeBadge {
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 11px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 12px;
     font-weight: 600;
-    text-transform: uppercase;
+}
+
+.badgeAnnouncement {
+    background: #fef3c7;
+    color: #92400e;
 }
 
 .badgeMaterial {
@@ -84,177 +288,323 @@
     color: #0369a1;
 }
 
-.badgeNotice {
-    background: #fef3c7;
-    color: #b45309;
+.categoryBadge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    background: #f1f5f9;
+    color: #475569;
 }
 
 .postTitle {
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 700;
     color: #0f172a;
-    margin-bottom: 8px;
+    margin: 0;
+    line-height: 1.4;
 }
 
 .postContent {
-    color: #334155;
     font-size: 14px;
     line-height: 1.6;
+    color: #334155;
     white-space: pre-wrap;
-    margin-bottom: 16px;
+    word-break: break-word;
+    margin: 0;
 }
 
+/* Attachments */
 .attachmentsSection {
     border-top: 1px dashed #e2e8f0;
-    padding-top: 12px;
-    margin-top: 12px;
+    padding-top: 14px;
 }
 
 .attachmentsLabel {
     font-size: 12px;
     font-weight: 600;
-    color: #64748b;
+    color: #94a3b8;
     margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .attachmentsList {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
 }
 
 .attachmentLink {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 8px;
     padding: 8px 12px;
     border-radius: 8px;
     background: #f8fafc;
     border: 1px solid #e2e8f0;
-    color: #2563eb;
-    text-decoration: none;
+    color: #334155;
     font-size: 13px;
     font-weight: 500;
+    text-decoration: none;
+    transition: all 0.15s ease;
     width: fit-content;
-    transition: background 0.2s;
+    max-width: 100%;
 }
 
 .attachmentLink:hover {
-    background: #eff6ff;
+    background: #eef2ff;
+    border-color: #c7d2fe;
+    color: #4f46e5;
+}
+
+.attachmentIcon {
+    color: #6366f1;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.attachmentName {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .fileSize {
-    color: #64748b;
-    font-size: 11px;
-}
-
-/* ─── Pinned Post ─────────────────────────────────────────────────────────── */
-
-.pinnedPostCard {
-    border-left: 3px solid #f59e0b;
-    background: #fffdf7;
-}
-
-.pinnedSectionHeader {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 12px;
-    background: #fffbeb;
-    border: 1px solid #fef3c7;
-    border-radius: 8px;
-    color: #92400e;
-    font-size: 12px;
-    font-weight: 700;
-}
-
-.pinnedBadge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: #b45309;
-    background: #fef3c7;
-    padding: 2px 8px;
-    border-radius: 6px;
-    margin-bottom: 10px;
-}
-
-/* ─── Edited Label ────────────────────────────────────────────────────────── */
-
-.editedLabel {
-    font-size: 11px;
     color: #94a3b8;
-    font-style: italic;
-}
-
-/* ─── Material Category Badge ─────────────────────────────────────────────── */
-
-.categoryBadge {
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-size: 10px;
-    font-weight: 600;
-    background: #f0fdf4;
-    color: #15803d;
-    border: 1px solid #bbf7d0;
+    font-size: 11px;
+    font-weight: 400;
     margin-left: 4px;
+    flex-shrink: 0;
 }
 
-/* ─── Filter Tabs ─────────────────────────────────────────────────────────── */
-
-.filterRow {
+.postFooter {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 0 16px 4px;
-    flex-wrap: wrap;
-    gap: 8px;
+    justify-content: space-between;
+    gap: 12px;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 12px;
+    margin-top: 4px;
 }
 
-.filterTabs {
+/* ─── Pinned Post Expand Modal ─── */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
     display: flex;
-    gap: 4px;
-    background: #f1f5f9;
-    padding: 3px;
-    border-radius: 10px;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 24px;
+    animation: overlayFadeIn 0.2s ease;
 }
 
-.filterTab {
-    padding: 5px 12px;
-    border-radius: 8px;
-    border: none;
-    background: transparent;
-    font-size: 12px;
-    font-weight: 500;
-    color: #64748b;
-    cursor: pointer;
-    transition:
-        background 0.15s,
-        color 0.15s;
-}
-
-.filterTabActive {
-    background: #ffffff;
-    color: #4f46e5;
-    font-weight: 600;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-}
-
-@media (max-width: 1024px) {
-    .newsLayout {
-        grid-template-columns: 1fr;
-        min-height: auto;
+@keyframes overlayFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
     }
 }
 
-/* ─── Phase 2 ────────────────────────────────────────────────────────────── */
+.modalBox {
+    background: #fff;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 680px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+    animation: modalSlideUp 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
 
-.postFooter {
-    margin-top: 10px;
-    padding-top: 8px;
-    border-top: 1px solid #f1f5f9;
+@keyframes modalSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(24px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modalHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    position: sticky;
+    top: 0;
+    background: #fff;
+    border-radius: 20px 20px 0 0;
+    z-index: 2;
+}
+
+.modalClose {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: none;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.modalClose:hover {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+/* ─── Pagination ─── */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding-bottom: 24px;
+}
+
+.pageBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1.5px solid #e2e8f0;
+    background: #fff;
+    color: #475569;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.pageBtn:hover:not(:disabled) {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    color: #0f172a;
+}
+
+.pageBtn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.pageNumbers {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.pageNumBtn {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    border: 1.5px solid #e2e8f0;
+    background: #fff;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+}
+
+.pageNumBtn:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    color: #0f172a;
+}
+
+.pageNumBtnActive {
+    background: #4f46e5;
+    border-color: #4f46e5;
+    color: #fff;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+}
+
+.pageNumBtnActive:hover {
+    background: #4338ca;
+    border-color: #4338ca;
+    color: #fff;
+}
+
+/* Empty & Loading States */
+.emptyState {
+    background: #fff;
+    border-radius: 12px;
+    border: 1.5px dashed #e2e8f0;
+    padding: 48px 24px;
+    text-align: center;
+    color: #64748b;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.emptyTitle {
+    font-size: 15px;
+    font-weight: 600;
+    color: #334155;
+    margin: 0;
+}
+
+.emptySubtitle {
+    font-size: 13px;
+    color: #94a3b8;
+    margin: 0;
+}
+
+.loadingSkeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.skeletonCard {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.skeletonRow {
+    height: 14px;
+    border-radius: 4px;
+    background: #f1f5f9;
+    animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
 }

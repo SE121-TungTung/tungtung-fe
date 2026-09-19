@@ -14,10 +14,74 @@
 
 .header {
     display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 20px 24px;
+}
+
+.headerBack {
+    display: inline-flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 6px;
+    font-size: 13px;
+    color: #64748b;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.15s;
+}
+
+.headerBack:hover {
+    color: #6366f1;
+}
+
+.headerInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.headerTitle {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+}
+
+.headerMeta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     flex-wrap: wrap;
-    gap: var(--space-4);
+}
+
+.metaBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+}
+
+.metaBadge svg {
+    flex-shrink: 0;
+}
+
+.metaBadgePrimary {
+    background: #eef2ff;
+    border-color: #c7d2fe;
+    color: #4338ca;
 }
 
 .headerLeft {
@@ -65,11 +129,14 @@
 
 /* Section Cards & Containers */
 .card {
-    background: var(--color-surface-card, #fff);
-    border: 1px solid var(--color-border);
+    background: #ffffff;
+    border: 1px solid var(--color-border-soft, #e2e8f0);
     border-radius: var(--radius-xl);
-    padding: var(--space-6);
-    box-shadow: var(--shadow-sm);
+    padding: 24px;
+    box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.06),
+        0 4px 16px rgba(0, 0, 0, 0.04);
+    margin-bottom: var(--space-6);
 }
 
 .sectionTitle {
@@ -81,17 +148,17 @@
 
 .enrollmentContainer {
     width: 100%;
-    max-width: 1100px;
-    margin: 0 auto;
     text-align: left;
 }
 
 .studentsListSection {
-    background: var(--color-surface-card, #fff);
-    border: 1px solid var(--color-border);
+    background: #ffffff;
+    border: 1px solid var(--color-border-soft, #e2e8f0);
     border-radius: var(--radius-xl);
-    padding: var(--space-6);
-    box-shadow: var(--shadow-sm);
+    padding: 24px;
+    box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.06),
+        0 4px 16px rgba(0, 0, 0, 0.04);
 }
 
 /* Tables */
@@ -114,12 +181,12 @@
     background: var(--color-surface-subtle, #f8fafc);
     color: var(--color-text-secondary);
     font-weight: 600;
-    padding: var(--space-3) var(--space-4);
+    padding: 14px 18px;
     border-bottom: 1px solid var(--color-border);
 }
 
 .studentTable td {
-    padding: var(--space-3) var(--space-4);
+    padding: 14px 18px;
     border-bottom: 1px solid var(--color-border-subtle, #f1f5f9);
     color: var(--color-text-primary);
     vertical-align: middle;
@@ -157,11 +224,11 @@
     grid-template-columns: 1fr 1fr;
     gap: var(--space-6);
     width: 100%;
-    max-width: 1200px;
+    /* max-width controlled by parent .tabContent container */
     text-align: left;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1000px) {
     .feedGrid {
         grid-template-columns: 1fr;
     }
@@ -189,13 +256,16 @@
 }
 
 .statCard {
-    background: var(--color-surface-card, #fff);
-    border: 1px solid var(--color-border);
+    background: #ffffff;
+    border: 1px solid var(--color-border-soft, #e2e8f0);
     border-radius: var(--radius-lg);
-    padding: var(--space-4);
+    padding: 20px 24px;
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
+    gap: var(--space-2);
+    box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.06),
+        0 4px 16px rgba(0, 0, 0, 0.04);
 }
 
 .statLabel {
@@ -228,4 +298,79 @@
 
 .tabs {
     width: 100%;
+}
+
+.tabContent {
+    width: 100%;
+    padding-bottom: var(--space-12);
+}
+
+/* ─── Skeleton Loading ────────────────────────────────────────────────────── */
+
+@keyframes shimmer {
+    0% {
+        background-position: -400px 0;
+    }
+    100% {
+        background-position: 400px 0;
+    }
+}
+
+.skeleton {
+    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+    background-size: 800px 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 8px;
+}
+
+.skeletonPage {
+    width: 100%;
+    max-width: 1000px;
+    align-self: center;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
+
+.skeletonBackBtn {
+    width: 160px;
+    height: 36px;
+    align-self: flex-start;
+}
+
+.skeletonTitle {
+    width: 340px;
+    height: 32px;
+}
+
+.skeletonSubtitle {
+    width: 240px;
+    height: 18px;
+}
+
+.skeletonTabs {
+    width: 100%;
+    height: 42px;
+    margin-top: 8px;
+}
+
+.skeletonCardRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.skeletonCard {
+    height: 100px;
+    border-radius: 16px;
+}
+
+.skeletonBlock {
+    width: 100%;
+    height: 200px;
+    border-radius: 16px;
 }

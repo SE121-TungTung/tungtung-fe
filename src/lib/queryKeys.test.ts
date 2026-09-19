@@ -42,12 +42,43 @@ describe('Query Key Factory', () => {
             'cls-1',
             'material',
         ])
+        expect(queryKeys.classes.postComments('cls-1', 'post-1')).toEqual([
+            'classes',
+            'posts',
+            'cls-1',
+            'post-1',
+            'comments',
+        ])
+        expect(queryKeys.classes.postReactions('cls-1', 'post-1')).toEqual([
+            'classes',
+            'posts',
+            'cls-1',
+            'post-1',
+            'reactions',
+        ])
+        expect(queryKeys.classes.postViewers('cls-1', 'post-1')).toEqual([
+            'classes',
+            'posts',
+            'cls-1',
+            'post-1',
+            'viewers',
+        ])
         expect(queryKeys.classes.attendance('cls-1', 'session-10')).toEqual([
             'classes',
             'attendance',
             'cls-1',
             'session-10',
         ])
+        expect(queryKeys.classes.materials('cls-1')).toEqual([
+            'classes',
+            'materials',
+            'cls-1',
+            'all',
+            '',
+        ])
+        expect(
+            queryKeys.classes.materials('cls-1', 'exercise', 'homework')
+        ).toEqual(['classes', 'materials', 'cls-1', 'exercise', 'homework'])
     })
 
     it('generates parameterized schedule keys', () => {

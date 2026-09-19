@@ -24,6 +24,14 @@ export const queryKeys = {
             ['classes', 'posts', classId, postId, 'reactions'] as const,
         postViewers: (classId: string, postId: string) =>
             ['classes', 'posts', classId, postId, 'viewers'] as const,
+        materials: (classId: string, category?: string, search?: string) =>
+            [
+                'classes',
+                'materials',
+                classId,
+                category ?? 'all',
+                search ?? '',
+            ] as const,
         sessions: (id: string) => ['classes', 'sessions', id] as const,
         attendance: (classId: string, sessionId: string) =>
             ['classes', 'attendance', classId, sessionId] as const,

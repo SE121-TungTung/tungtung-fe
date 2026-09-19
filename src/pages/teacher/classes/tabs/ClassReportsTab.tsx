@@ -6,6 +6,7 @@ interface ClassReportsTabProps {
     eligibilityList: any[]
     studentStats: any[]
     totalStudents: number
+    isLoading?: boolean
 }
 
 export const ClassReportsTab: React.FC<ClassReportsTabProps> = ({
@@ -13,7 +14,157 @@ export const ClassReportsTab: React.FC<ClassReportsTabProps> = ({
     eligibilityList,
     studentStats,
     totalStudents,
+    isLoading = false,
 }) => {
+    if (isLoading) {
+        return (
+            <div
+                style={{
+                    width: '100%',
+                    textAlign: 'left',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '24px',
+                }}
+            >
+                {/* Skeleton stat cards */}
+                <div className={s.statsGrid}>
+                    {[0, 1, 2].map((i) => (
+                        <div
+                            key={i}
+                            className={s.statCard}
+                            style={{ minHeight: '100px' }}
+                        >
+                            <div
+                                className={`${s.skeleton}`}
+                                style={{
+                                    width: '120px',
+                                    height: '12px',
+                                    borderRadius: '4px',
+                                }}
+                            />
+                            <div
+                                className={`${s.skeleton}`}
+                                style={{
+                                    width: '80px',
+                                    height: '28px',
+                                    marginTop: '12px',
+                                    borderRadius: '6px',
+                                }}
+                            />
+                            <div
+                                className={`${s.skeleton}`}
+                                style={{
+                                    width: '180px',
+                                    height: '12px',
+                                    marginTop: '10px',
+                                    borderRadius: '4px',
+                                }}
+                            />
+                        </div>
+                    ))}
+                </div>
+                {/* Skeleton chart + at-risk */}
+                <div
+                    style={{
+                        display: 'grid',
+                        gridTemplateColumns: '2fr 1fr',
+                        gap: '24px',
+                    }}
+                >
+                    <div className={s.card}>
+                        <div
+                            className={`${s.skeleton}`}
+                            style={{
+                                width: '260px',
+                                height: '18px',
+                                borderRadius: '6px',
+                            }}
+                        />
+                        <div
+                            className={`${s.skeleton}`}
+                            style={{
+                                width: '100%',
+                                height: '180px',
+                                marginTop: '20px',
+                                borderRadius: '8px',
+                            }}
+                        />
+                    </div>
+                    <div className={s.card}>
+                        <div
+                            className={`${s.skeleton}`}
+                            style={{
+                                width: '200px',
+                                height: '18px',
+                                borderRadius: '6px',
+                            }}
+                        />
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '12px',
+                                marginTop: '16px',
+                            }}
+                        >
+                            {[0, 1, 2].map((i) => (
+                                <div
+                                    key={i}
+                                    className={`${s.skeleton}`}
+                                    style={{
+                                        width: '100%',
+                                        height: '50px',
+                                        borderRadius: '8px',
+                                    }}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                </div>
+                {/* Skeleton table */}
+                <div className={s.card}>
+                    <div
+                        className={`${s.skeleton}`}
+                        style={{
+                            width: '300px',
+                            height: '18px',
+                            borderRadius: '6px',
+                        }}
+                    />
+                    <div
+                        style={{
+                            marginTop: '16px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '8px',
+                        }}
+                    >
+                        <div
+                            className={`${s.skeleton}`}
+                            style={{
+                                width: '100%',
+                                height: '40px',
+                                borderRadius: '6px',
+                            }}
+                        />
+                        {[0, 1, 2, 3, 4].map((i) => (
+                            <div
+                                key={i}
+                                className={`${s.skeleton}`}
+                                style={{
+                                    width: '100%',
+                                    height: '44px',
+                                    borderRadius: '6px',
+                                }}
+                            />
+                        ))}
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
     let excellentCount = 0
     let goodCount = 0
     let averageCount = 0
@@ -81,8 +232,6 @@ export const ClassReportsTab: React.FC<ClassReportsTabProps> = ({
         <div
             style={{
                 width: '100%',
-                maxWidth: 1000,
-                margin: '0 auto',
                 textAlign: 'left',
                 display: 'flex',
                 flexDirection: 'column',
@@ -179,8 +328,7 @@ export const ClassReportsTab: React.FC<ClassReportsTabProps> = ({
                             fontSize: '16px',
                             fontWeight: '600',
                             color: '#1e293b',
-                            marginBottom: '20px',
-                            margin: 0,
+                            margin: '0 0 20px 0',
                         }}
                     >
                         Phân phối điểm số cuối kỳ của lớp
@@ -398,8 +546,7 @@ export const ClassReportsTab: React.FC<ClassReportsTabProps> = ({
                             fontSize: '16px',
                             fontWeight: '600',
                             color: '#b45309',
-                            marginBottom: '16px',
-                            margin: 0,
+                            margin: '0 0 16px 0',
                             display: 'flex',
                             alignItems: 'center',
                             gap: '6px',
@@ -505,8 +652,7 @@ export const ClassReportsTab: React.FC<ClassReportsTabProps> = ({
                         fontSize: '16px',
                         fontWeight: '600',
                         color: '#1e293b',
-                        marginBottom: '16px',
-                        margin: 0,
+                        margin: '0 0 16px 0',
                     }}
                 >
                     Thống kê chi tiết toàn bộ học viên lớp học
@@ -516,8 +662,11 @@ export const ClassReportsTab: React.FC<ClassReportsTabProps> = ({
                         <thead>
                             <tr>
                                 <th>Học viên</th>
-                                <th>Tỉ lệ chuyên cần</th>
-                                <th>Chi tiết đi học</th>
+                                <th>Chuyên cần</th>
+                                <th style={{ textAlign: 'center' }}>Đi học</th>
+                                <th style={{ textAlign: 'center' }}>Muộn</th>
+                                <th style={{ textAlign: 'center' }}>Vắng</th>
+                                <th style={{ textAlign: 'center' }}>Có phép</th>
                                 <th>Điểm số</th>
                                 <th>Xếp loại</th>
                                 <th>Trạng thái</th>
@@ -544,16 +693,91 @@ export const ClassReportsTab: React.FC<ClassReportsTabProps> = ({
                                             %
                                         </span>
                                     </td>
-                                    <td
-                                        style={{
-                                            fontSize: '12px',
-                                            color: '#64748b',
-                                        }}
-                                    >
-                                        🟢 {student.present} đi học | 🟡{' '}
-                                        {student.late} muộn | 🔴{' '}
-                                        {student.absent} vắng | 🔵{' '}
-                                        {student.excused} có phép
+                                    <td style={{ textAlign: 'center' }}>
+                                        <span
+                                            style={{
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                gap: '4px',
+                                                padding: '3px 8px',
+                                                borderRadius: '6px',
+                                                fontSize: '12px',
+                                                fontWeight: 600,
+                                                background: '#dcfce7',
+                                                color: '#166534',
+                                            }}
+                                        >
+                                            {student.present}
+                                        </span>
+                                    </td>
+                                    <td style={{ textAlign: 'center' }}>
+                                        <span
+                                            style={{
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                gap: '4px',
+                                                padding: '3px 8px',
+                                                borderRadius: '6px',
+                                                fontSize: '12px',
+                                                fontWeight: 600,
+                                                background:
+                                                    student.late > 0
+                                                        ? '#fef9c3'
+                                                        : '#f1f5f9',
+                                                color:
+                                                    student.late > 0
+                                                        ? '#854d0e'
+                                                        : '#94a3b8',
+                                            }}
+                                        >
+                                            {student.late}
+                                        </span>
+                                    </td>
+                                    <td style={{ textAlign: 'center' }}>
+                                        <span
+                                            style={{
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                gap: '4px',
+                                                padding: '3px 8px',
+                                                borderRadius: '6px',
+                                                fontSize: '12px',
+                                                fontWeight: 600,
+                                                background:
+                                                    student.absent > 0
+                                                        ? '#fee2e2'
+                                                        : '#f1f5f9',
+                                                color:
+                                                    student.absent > 0
+                                                        ? '#991b1b'
+                                                        : '#94a3b8',
+                                            }}
+                                        >
+                                            {student.absent}
+                                        </span>
+                                    </td>
+                                    <td style={{ textAlign: 'center' }}>
+                                        <span
+                                            style={{
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                gap: '4px',
+                                                padding: '3px 8px',
+                                                borderRadius: '6px',
+                                                fontSize: '12px',
+                                                fontWeight: 600,
+                                                background:
+                                                    student.excused > 0
+                                                        ? '#dbeafe'
+                                                        : '#f1f5f9',
+                                                color:
+                                                    student.excused > 0
+                                                        ? '#1e40af'
+                                                        : '#94a3b8',
+                                            }}
+                                        >
+                                            {student.excused}
+                                        </span>
                                     </td>
                                     <td style={{ fontWeight: 600 }}>
                                         {student.finalScore !== null ? (

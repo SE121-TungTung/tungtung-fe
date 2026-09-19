@@ -9,7 +9,7 @@ export const ClassOverviewTab: React.FC<ClassOverviewTabProps> = ({
     classDetail,
 }) => {
     return (
-        <div style={{ maxWidth: 800, width: '100%', textAlign: 'left' }}>
+        <div style={{ width: '100%', textAlign: 'left' }}>
             <div className={s.card}>
                 <h3 className={s.sectionTitle}>Thông tin lớp học</h3>
                 <div className={s.infoGrid}>
