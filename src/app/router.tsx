@@ -64,6 +64,9 @@ const StudentInvoicePage = lazy(
 const PaymentCallbackPage = lazy(
     () => import('@/pages/student/finance/PaymentCallbackPage')
 )
+const PronunciationPracticePage = lazy(
+    () => import('@/pages/student/pronunciation/PronunciationPracticePage')
+)
 
 // Teacher Pages
 const TeacherClassPage = lazy(
@@ -128,8 +131,10 @@ const AdminInvoicePage = lazy(
 const AdminFinanceReportPage = lazy(
     () => import('@/pages/admin/finance/AdminFinanceReportPage')
 )
-const AdminLeadsPage = lazy(
-    () => import('@/pages/admin/leads/AdminLeadsPage').then(m => ({ default: m.AdminLeadsPage }))
+const AdminLeadsPage = lazy(() =>
+    import('@/pages/admin/leads/AdminLeadsPage').then((m) => ({
+        default: m.AdminLeadsPage,
+    }))
 )
 const AdminKpiOverviewPage = lazy(
     () => import('@/pages/admin/kpi/AdminKpiOverviewPage')
@@ -320,6 +325,14 @@ export const router = createBrowserRouter([
                         element: (
                             <ProtectedRoute allowedRoles={['student']}>
                                 <RoadmapPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/student/pronunciation',
+                        element: (
+                            <ProtectedRoute allowedRoles={['student']}>
+                                <PronunciationPracticePage />
                             </ProtectedRoute>
                         ),
                     },

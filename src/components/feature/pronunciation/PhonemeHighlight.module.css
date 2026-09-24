@@ -1,0 +1,384 @@
+.highlightContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: rgba(30, 41, 59, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 20px;
+}
+
+.emptyNotice {
+    color: #94a3b8;
+    font-size: 14px;
+    text-align: center;
+    padding: 24px;
+    background: rgba(15, 23, 42, 0.4);
+    border-radius: 12px;
+}
+
+.headerRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.sectionTitle {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #f1f5f9;
+}
+
+.sectionSubtitle {
+    margin: 4px 0 0 0;
+    font-size: 13px;
+    color: #94a3b8;
+}
+
+.legend {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+    color: #cbd5e1;
+}
+
+.legendItem {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.legendDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.bgGreen {
+    background-color: #10b981;
+    box-shadow: 0 0 6px #10b981;
+}
+
+.bgYellow {
+    background-color: #f59e0b;
+    box-shadow: 0 0 6px #f59e0b;
+}
+
+.bgRed {
+    background-color: #ef4444;
+    box-shadow: 0 0 6px #ef4444;
+}
+
+.ipaComparisonBox {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: 12px 18px;
+}
+
+.ipaRow {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.ipaLabel {
+    font-size: 12px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+}
+
+.ipaTarget {
+    font-family: monospace;
+    font-size: 16px;
+    color: #38bdf8;
+    font-weight: 600;
+}
+
+.ipaActual {
+    font-family: monospace;
+    font-size: 16px;
+    color: #fca5a5;
+    font-weight: 600;
+}
+
+.phonemeBadgesGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.phonemeTile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 60px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.phonemeTile:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+}
+
+.tileSelected {
+    border-color: #38bdf8 !important;
+    box-shadow: 0 0 14px rgba(56, 189, 248, 0.4) !important;
+    transform: scale(1.05);
+}
+
+.phonemeSymbol {
+    font-family: monospace;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.phonemeScore {
+    font-size: 11px;
+    opacity: 0.9;
+    margin-top: 2px;
+    font-weight: 600;
+}
+
+.errorIndicator {
+    position: absolute;
+    top: 2px;
+    right: 6px;
+    font-size: 16px;
+    color: #ef4444;
+}
+
+/* Score color states */
+.scoreGood {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.35);
+    color: #6ee7b7;
+}
+
+.scoreGood:hover {
+    background: rgba(16, 185, 129, 0.25);
+}
+
+.scoreWarning {
+    background: rgba(245, 158, 11, 0.15);
+    border-color: rgba(245, 158, 11, 0.35);
+    color: #fcd34d;
+}
+
+.scoreWarning:hover {
+    background: rgba(245, 158, 11, 0.25);
+}
+
+.scoreError {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.35);
+    color: #fca5a5;
+}
+
+.scoreError:hover {
+    background: rgba(239, 68, 68, 0.25);
+}
+
+.scoreDeleted {
+    background: rgba(148, 163, 184, 0.1);
+    border-color: rgba(148, 163, 184, 0.3);
+    color: #94a3b8;
+    border-style: dashed;
+}
+
+/* Detail Card */
+.detailCard {
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    animation: fadeIn 0.2s ease-out;
+}
+
+.detailHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 14px;
+}
+
+.detailTitleGroup {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.bigSymbol {
+    font-family: monospace;
+    font-size: 28px;
+    font-weight: 800;
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    padding: 4px 12px;
+    border-radius: 10px;
+}
+
+.badgeWrapper {
+    margin-bottom: 4px;
+}
+
+.statusBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 9999px;
+}
+
+.badgeCorrect {
+    background: rgba(16, 185, 129, 0.2);
+    color: #6ee7b7;
+    border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.badgeSubstitution {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fcd34d;
+    border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.badgeDeletion {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.badgeInsertion {
+    background: rgba(168, 85, 247, 0.2);
+    color: #d8b4fe;
+    border: 1px solid rgba(168, 85, 247, 0.4);
+}
+
+.badgeStress {
+    background: rgba(236, 72, 153, 0.2);
+    color: #f472b6;
+    border: 1px solid rgba(236, 72, 153, 0.4);
+}
+
+.badgeWarning {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fcd34d;
+}
+
+.detailAccuracy {
+    font-size: 13px;
+    color: #94a3b8;
+}
+
+.detailAccuracy strong {
+    color: #f1f5f9;
+}
+
+.closeBtn {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px;
+    border-radius: 6px;
+    transition: color 0.15s;
+}
+
+.closeBtn:hover {
+    color: #f1f5f9;
+}
+
+.detailBody {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.comparisonGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    background: rgba(30, 41, 59, 0.5);
+    padding: 12px;
+    border-radius: 10px;
+}
+
+.compareCol {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.compareLabel {
+    font-size: 11px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.compareValExpected {
+    font-family: monospace;
+    font-size: 15px;
+    color: #38bdf8;
+    font-weight: 600;
+}
+
+.compareValActual {
+    font-family: monospace;
+    font-size: 15px;
+    color: #fca5a5;
+    font-weight: 600;
+}
+
+.tipBox {
+    display: flex;
+    gap: 10px;
+    background: rgba(56, 189, 248, 0.08);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 13px;
+    color: #e2e8f0;
+}
+
+.tipIcon {
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.tipText {
+    margin: 4px 0 0 0;
+    color: #94a3b8;
+    line-height: 1.5;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

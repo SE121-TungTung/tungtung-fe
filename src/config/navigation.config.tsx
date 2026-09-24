@@ -32,6 +32,11 @@ const studyMenuItems: ExtendedSideMenuItem[] = [
         label: 'Lộ trình',
         href: '/student/roadmap',
     },
+    {
+        id: 'pronunciation',
+        label: 'Luyện phát âm',
+        href: '/student/pronunciation',
+    },
 ]
 
 const studentNavItems: AppNavItem[] = [
