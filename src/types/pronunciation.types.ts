@@ -91,6 +91,12 @@ export interface PronunciationStreakResponse {
     longest_streak: number
     last_practice_date: string | null
     today_practiced: boolean
+    active_days_this_month?: number
+}
+
+export interface DrillSuggestionsResponse {
+    topic: string
+    items: string[]
 }
 
 export interface IPAPhonemeInfo {

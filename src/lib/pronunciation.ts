@@ -99,3 +99,17 @@ export async function getPronunciationStreak(): Promise<PronunciationStreakRespo
         }
     )
 }
+
+/**
+ * Lấy danh sách 5 từ/câu gợi ý luyện phát âm theo chủ đề IELTS (Drill Mode).
+ */
+export async function getDrillSuggestions(
+    topic: string
+): Promise<{ topic: string; items: string[] }> {
+    return api<{ topic: string; items: string[] }>(
+        `/api/v1/pronunciation/drill-suggestions?topic=${encodeURIComponent(topic)}`,
+        {
+            method: 'GET',
+        }
+    )
+}

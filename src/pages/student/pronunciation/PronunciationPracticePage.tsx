@@ -1,8 +1,12 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import { MicRecorder } from '@/components/feature/pronunciation/MicRecorder'
 import { PhonemeHighlight } from '@/components/feature/pronunciation/PhonemeHighlight'
 import { IPABoard } from '@/components/feature/pronunciation/IPABoard'
-import { submitPronunciationPractice } from '@/lib/pronunciation'
+import {
+    submitPronunciationPractice,
+    getDrillSuggestions,
+} from '@/lib/pronunciation'
 import type {
     TargetType,
     PronunciationPracticeResponse,
@@ -87,17 +91,54 @@ const SUGGESTED_TARGETS: Record<
     ],
 }
 
+// 6 chủ đề Drill Mode chuẩn IELTS
+const DRILL_TOPICS = [
+    { key: 'environment', label: '🌿 Môi trường' },
+    { key: 'technology', label: '💻 Công nghệ' },
+    { key: 'health', label: '🩺 Sức khỏe' },
+    { key: 'education', label: '🎓 Giáo dục' },
+    { key: 'travel', label: '✈️ Du lịch' },
+    { key: 'culture', label: '🎭 Văn hóa' },
+]
+
 export default function PronunciationPracticePage() {
     const [targetType, setTargetType] = useState<TargetType>('word')
     const [targetText, setTargetText] = useState('architecture')
     const [customInput, setCustomInput] = useState('')
     const [isCustomMode, setIsCustomMode] = useState(false)
 
+    // Drill Mode state
+    const [activeSidebarTab, setActiveSidebarTab] = useState<
+        'presets' | 'drill'
+    >('presets')
+    const [selectedDrillTopic, setSelectedDrillTopic] = useState('environment')
+    const [drillItems, setDrillItems] = useState<string[]>([])
+    const [isLoadingDrill, setIsLoadingDrill] = useState(false)
+
     const [isAnalyzing, setIsAnalyzing] = useState(false)
     const [analysisResult, setAnalysisResult] =
         useState<PronunciationPracticeResponse | null>(null)
     const [errorMsg, setErrorMsg] = useState<string | null>(null)
     const [showIpaModal, setShowIpaModal] = useState(false)
+
+    // Load drill suggestions khi chọn topic hoặc bấm đổi từ
+    const loadDrillSuggestions = useCallback(async (topic: string) => {
+        setIsLoadingDrill(true)
+        try {
+            const data = await getDrillSuggestions(topic)
+            setDrillItems(data.items || [])
+        } catch (err) {
+            console.error('Lỗi khi tải gợi ý drill:', err)
+        } finally {
+            setIsLoadingDrill(false)
+        }
+    }, [])
+
+    useEffect(() => {
+        if (activeSidebarTab === 'drill') {
+            loadDrillSuggestions(selectedDrillTopic)
+        }
+    }, [activeSidebarTab, selectedDrillTopic, loadDrillSuggestions])
 
     // Phát âm mẫu câu/từ đang chọn bằng Web Speech API
     const speakTargetText = () => {
@@ -112,6 +153,19 @@ export default function PronunciationPracticePage() {
 
     const handleSelectPreset = (text: string) => {
         setTargetText(text)
+        setIsCustomMode(false)
+        setAnalysisResult(null)
+        setErrorMsg(null)
+    }
+
+    const handleSelectDrillItem = (text: string) => {
+        setTargetText(text)
+        // Tự động phân loại targetType theo độ dài
+        if (text.split(' ').length > 4) {
+            setTargetType('sentence')
+        } else {
+            setTargetType('word')
+        }
         setIsCustomMode(false)
         setAnalysisResult(null)
         setErrorMsg(null)
@@ -151,6 +205,13 @@ export default function PronunciationPracticePage() {
     }
 
     const handleNextWord = () => {
+        if (activeSidebarTab === 'drill' && drillItems.length > 0) {
+            const currentIndex = drillItems.indexOf(targetText)
+            const nextIndex = (currentIndex + 1) % drillItems.length
+            handleSelectDrillItem(drillItems[nextIndex])
+            return
+        }
+
         const currentGroup = SUGGESTED_TARGETS[targetType]
         const allItems = currentGroup.flatMap((g) => g.items)
         const currentIndex = allItems.indexOf(targetText)
@@ -186,140 +247,273 @@ export default function PronunciationPracticePage() {
                     </p>
                 </div>
 
-                <button
-                    type="button"
-                    className={s.btnOpenIpa}
-                    onClick={() => setShowIpaModal(!showIpaModal)}
-                >
-                    <span>
-                        {showIpaModal ? '📖 Ẩn Bảng IPA' : '📖 Bảng 44 Âm IPA'}
-                    </span>
-                </button>
+                <div className={s.headerActions}>
+                    <Link
+                        to="/student/pronunciation/history"
+                        className={s.btnHistoryLink}
+                        title="Xem chuỗi streak và lịch sử luyện tập"
+                    >
+                        <span>📜 Lịch sử & Streak</span>
+                    </Link>
+
+                    <button
+                        type="button"
+                        className={s.btnOpenIpa}
+                        onClick={() => setShowIpaModal(!showIpaModal)}
+                    >
+                        <span>
+                            {showIpaModal
+                                ? '📖 Ẩn Bảng IPA'
+                                : '📖 Bảng 44 Âm IPA'}
+                        </span>
+                    </button>
+                </div>
             </div>
 
-            {/* Layout chính: 2 hoặc 3 cột */}
+            {/* Layout chính: 2 cột */}
             <div className={s.mainLayout}>
                 {/* Cột trái: Lựa chọn chế độ & Từ vựng luyện tập */}
                 <aside className={s.sidebar}>
                     <div className={s.sidebarCard}>
-                        <h3 className={s.sidebarTitle}>Chế độ luyện tập</h3>
-                        <div className={s.modeSelector}>
+                        {/* Tab chuyển đổi giữa Gợi ý tiêu chuẩn và Drill Mode theo chủ đề */}
+                        <div className={s.tabSwitcher}>
                             <button
                                 type="button"
-                                className={`${s.modeBtn} ${targetType === 'word' ? s.modeActive : ''}`}
-                                onClick={() => {
-                                    setTargetType('word')
-                                    setTargetText('architecture')
-                                    setAnalysisResult(null)
-                                }}
+                                className={`${s.tabSwitchBtn} ${activeSidebarTab === 'presets' ? s.tabSwitchActive : ''}`}
+                                onClick={() => setActiveSidebarTab('presets')}
                             >
-                                Từ đơn
+                                🎯 Tiêu chuẩn
                             </button>
                             <button
                                 type="button"
-                                className={`${s.modeBtn} ${targetType === 'sentence' ? s.modeActive : ''}`}
-                                onClick={() => {
-                                    setTargetType('sentence')
-                                    setTargetText(
-                                        'Could you please tell me how to get to the station?'
-                                    )
-                                    setAnalysisResult(null)
-                                }}
+                                className={`${s.tabSwitchBtn} ${activeSidebarTab === 'drill' ? s.tabSwitchActive : ''}`}
+                                onClick={() => setActiveSidebarTab('drill')}
                             >
-                                Câu ngắn
-                            </button>
-                            <button
-                                type="button"
-                                className={`${s.modeBtn} ${targetType === 'paragraph' ? s.modeActive : ''}`}
-                                onClick={() => {
-                                    setTargetType('paragraph')
-                                    setTargetText(
-                                        SUGGESTED_TARGETS.paragraph[0].items[0]
-                                    )
-                                    setAnalysisResult(null)
-                                }}
-                            >
-                                Đoạn văn
+                                ⚡ Drill IELTS Topics
                             </button>
                         </div>
 
-                        {/* Tự nhập nội dung tùy thích */}
-                        <div className={s.customInputSection}>
-                            {!isCustomMode ? (
-                                <button
-                                    type="button"
-                                    className={s.btnToggleCustom}
-                                    onClick={() => {
-                                        setIsCustomMode(true)
-                                        setCustomInput(targetText)
-                                    }}
-                                >
-                                    ✏️ Tự nhập nội dung khác
-                                </button>
-                            ) : (
-                                <form
-                                    onSubmit={handleApplyCustom}
-                                    className={s.customForm}
-                                >
-                                    <textarea
-                                        rows={
-                                            targetType === 'paragraph' ? 4 : 2
-                                        }
-                                        value={customInput}
-                                        onChange={(e) =>
-                                            setCustomInput(e.target.value)
-                                        }
-                                        placeholder={`Nhập ${targetType === 'word' ? 'từ' : targetType === 'sentence' ? 'câu' : 'đoạn'} tiếng Anh bạn muốn luyện...`}
-                                        className={s.customTextarea}
-                                        autoFocus
-                                    />
-                                    <div className={s.customFormActions}>
+                        {activeSidebarTab === 'presets' ? (
+                            <>
+                                <h3 className={s.sidebarTitle}>
+                                    Chế độ luyện tập
+                                </h3>
+                                <div className={s.modeSelector}>
+                                    <button
+                                        type="button"
+                                        className={`${s.modeBtn} ${targetType === 'word' ? s.modeActive : ''}`}
+                                        onClick={() => {
+                                            setTargetType('word')
+                                            setTargetText('architecture')
+                                            setAnalysisResult(null)
+                                        }}
+                                    >
+                                        Từ đơn
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`${s.modeBtn} ${targetType === 'sentence' ? s.modeActive : ''}`}
+                                        onClick={() => {
+                                            setTargetType('sentence')
+                                            setTargetText(
+                                                'Could you please tell me how to get to the station?'
+                                            )
+                                            setAnalysisResult(null)
+                                        }}
+                                    >
+                                        Câu ngắn
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`${s.modeBtn} ${targetType === 'paragraph' ? s.modeActive : ''}`}
+                                        onClick={() => {
+                                            setTargetType('paragraph')
+                                            setTargetText(
+                                                SUGGESTED_TARGETS.paragraph[0]
+                                                    .items[0]
+                                            )
+                                            setAnalysisResult(null)
+                                        }}
+                                    >
+                                        Đoạn văn
+                                    </button>
+                                </div>
+
+                                {/* Tự nhập nội dung tùy thích */}
+                                <div className={s.customInputSection}>
+                                    {!isCustomMode ? (
                                         <button
                                             type="button"
-                                            className={s.btnCancelCustom}
-                                            onClick={() =>
-                                                setIsCustomMode(false)
-                                            }
+                                            className={s.btnToggleCustom}
+                                            onClick={() => {
+                                                setIsCustomMode(true)
+                                                setCustomInput(targetText)
+                                            }}
                                         >
-                                            Hủy
+                                            ✏️ Tự nhập nội dung khác
                                         </button>
-                                        <button
-                                            type="submit"
-                                            className={s.btnApplyCustom}
+                                    ) : (
+                                        <form
+                                            onSubmit={handleApplyCustom}
+                                            className={s.customForm}
                                         >
-                                            Áp dụng
-                                        </button>
-                                    </div>
-                                </form>
-                            )}
-                        </div>
-
-                        {/* Danh sách gợi ý theo chủ đề */}
-                        <div className={s.presetsList}>
-                            {SUGGESTED_TARGETS[targetType].map(
-                                (group, gIdx) => (
-                                    <div key={gIdx} className={s.presetGroup}>
-                                        <span className={s.groupHeader}>
-                                            {group.title}
-                                        </span>
-                                        <div className={s.itemsPillContainer}>
-                                            {group.items.map((item, iIdx) => (
+                                            <textarea
+                                                rows={
+                                                    targetType === 'paragraph'
+                                                        ? 4
+                                                        : 2
+                                                }
+                                                value={customInput}
+                                                onChange={(e) =>
+                                                    setCustomInput(
+                                                        e.target.value
+                                                    )
+                                                }
+                                                placeholder={`Nhập ${targetType === 'word' ? 'từ' : targetType === 'sentence' ? 'câu' : 'đoạn'} tiếng Anh bạn muốn luyện...`}
+                                                className={s.customTextarea}
+                                                autoFocus
+                                            />
+                                            <div
+                                                className={s.customFormActions}
+                                            >
                                                 <button
-                                                    key={iIdx}
                                                     type="button"
-                                                    className={`${s.presetPill} ${targetText === item ? s.pillActive : ''}`}
+                                                    className={
+                                                        s.btnCancelCustom
+                                                    }
                                                     onClick={() =>
-                                                        handleSelectPreset(item)
+                                                        setIsCustomMode(false)
                                                     }
                                                 >
-                                                    {item}
+                                                    Hủy
+                                                </button>
+                                                <button
+                                                    type="submit"
+                                                    className={s.btnApplyCustom}
+                                                >
+                                                    Áp dụng
+                                                </button>
+                                            </div>
+                                        </form>
+                                    )}
+                                </div>
+
+                                {/* Danh sách gợi ý theo chủ đề */}
+                                <div className={s.presetsList}>
+                                    {SUGGESTED_TARGETS[targetType].map(
+                                        (group, gIdx) => (
+                                            <div
+                                                key={gIdx}
+                                                className={s.presetGroup}
+                                            >
+                                                <span className={s.groupHeader}>
+                                                    {group.title}
+                                                </span>
+                                                <div
+                                                    className={
+                                                        s.itemsPillContainer
+                                                    }
+                                                >
+                                                    {group.items.map(
+                                                        (item, iIdx) => (
+                                                            <button
+                                                                key={iIdx}
+                                                                type="button"
+                                                                className={`${s.presetPill} ${targetText === item ? s.pillActive : ''}`}
+                                                                onClick={() =>
+                                                                    handleSelectPreset(
+                                                                        item
+                                                                    )
+                                                                }
+                                                            >
+                                                                {item}
+                                                            </button>
+                                                        )
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )
+                                    )}
+                                </div>
+                            </>
+                        ) : (
+                            /* DRILL MODE - 6 IELTS TOPICS */
+                            <div className={s.drillModeSection}>
+                                <div className={s.drillHeader}>
+                                    <h3 className={s.sidebarTitle}>
+                                        Chọn chủ đề IELTS
+                                    </h3>
+                                    <span className={s.drillBadge}>
+                                        5 từ/câu ngẫu nhiên
+                                    </span>
+                                </div>
+
+                                <div className={s.topicsGrid}>
+                                    {DRILL_TOPICS.map((topic) => (
+                                        <button
+                                            key={topic.key}
+                                            type="button"
+                                            className={`${s.topicBtn} ${selectedDrillTopic === topic.key ? s.topicActive : ''}`}
+                                            onClick={() =>
+                                                setSelectedDrillTopic(topic.key)
+                                            }
+                                        >
+                                            {topic.label}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <div className={s.drillItemsBox}>
+                                    <div className={s.drillItemsHeader}>
+                                        <span className={s.drillItemsTitle}>
+                                            Từ vựng chủ đề ({selectedDrillTopic}
+                                            ):
+                                        </span>
+                                        <button
+                                            type="button"
+                                            className={s.btnRefreshDrill}
+                                            onClick={() =>
+                                                loadDrillSuggestions(
+                                                    selectedDrillTopic
+                                                )
+                                            }
+                                            disabled={isLoadingDrill}
+                                            title="Tải 5 từ khác ngẫu nhiên"
+                                        >
+                                            🔄 Đổi 5 từ khác
+                                        </button>
+                                    </div>
+
+                                    {isLoadingDrill ? (
+                                        <div className={s.loadingDrill}>
+                                            <span>⏳ Đang tải từ vựng...</span>
+                                        </div>
+                                    ) : (
+                                        <div className={s.drillList}>
+                                            {drillItems.map((item, idx) => (
+                                                <button
+                                                    key={idx}
+                                                    type="button"
+                                                    className={`${s.drillPill} ${targetText === item ? s.pillActive : ''}`}
+                                                    onClick={() =>
+                                                        handleSelectDrillItem(
+                                                            item
+                                                        )
+                                                    }
+                                                >
+                                                    <span
+                                                        className={s.drillNum}
+                                                    >
+                                                        {idx + 1}.
+                                                    </span>
+                                                    <span>{item}</span>
                                                 </button>
                                             ))}
                                         </div>
-                                    </div>
-                                )
-                            )}
-                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </aside>
 
