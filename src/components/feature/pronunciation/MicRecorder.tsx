@@ -15,6 +15,7 @@ interface MicRecorderProps {
     isAnalyzing?: boolean
     maxDurationSeconds?: number
     onReset?: () => void
+    resetKey?: string | number
 }
 
 export const MicRecorder: React.FC<MicRecorderProps> = ({
@@ -22,6 +23,7 @@ export const MicRecorder: React.FC<MicRecorderProps> = ({
     isAnalyzing = false,
     maxDurationSeconds = 30,
     onReset,
+    resetKey,
 }) => {
     const [isRecording, setIsRecording] = useState(false)
     const [duration, setDuration] = useState(0)
@@ -35,6 +37,29 @@ export const MicRecorder: React.FC<MicRecorderProps> = ({
     const audioChunksRef = useRef<Blob[]>([])
     const timerRef = useRef<number | null>(null)
     const previewAudioRef = useRef<HTMLAudioElement | null>(null)
+
+    // Tự động dọn dẹp và reset khi resetKey thay đổi (ví dụ chuyển từ/câu)
+    useEffect(() => {
+        if (resetKey !== undefined) {
+            if (timerRef.current) clearInterval(timerRef.current)
+            if (
+                mediaRecorderRef.current &&
+                mediaRecorderRef.current.state !== 'inactive'
+            ) {
+                mediaRecorderRef.current.stop()
+            }
+            if (audioUrl) {
+                URL.revokeObjectURL(audioUrl)
+                setAudioUrl(null)
+            }
+            setAudioBlob(null)
+            setDuration(0)
+            audioChunksRef.current = []
+            setIsRecording(false)
+            setIsPlayingPreview(false)
+            setErrorMsg(null)
+        }
+    }, [resetKey])
 
     // Dọn dẹp object URL và stream khi component unmount
     useEffect(() => {

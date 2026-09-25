@@ -406,3 +406,61 @@ export const CalendarIcon: React.FC<IconProps> = ({ size = 18, ...props }) => (
         <line x1="3" x2="21" y1="10" y2="10" />
     </svg>
 )
+
+export const ShuffleIcon: React.FC<IconProps> = ({ size = 18, ...props }) => (
+    <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        {...props}
+    >
+        <path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.8-1.1 2-1.7 3.3-1.7H22" />
+        <path d="m18 2 4 4-4 4" />
+        <path d="M2 6h1.9c1.5 0 2.9.9 3.6 2.2" />
+        <path d="M22 18h-5.9c-1.3 0-2.5-.7-3.3-1.8l-.5-.8" />
+        <path d="m18 14 4 4-4 4" />
+    </svg>
+)
+
+export const RoadmapIcon: React.FC<IconProps> = ({ size = 18, ...props }) => (
+    <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        {...props}
+    >
+        <circle cx="6" cy="19" r="3" />
+        <path d="M9 19h8.5a4.5 4.5 0 0 0 0-9H11a4 4 0 0 1 0-8h7" />
+        <circle cx="18" cy="5" r="3" />
+    </svg>
+)
+
+export const CheckCircleIcon: React.FC<IconProps> = ({
+    size = 18,
+    ...props
+}) => (
+    <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        {...props}
+    >
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+        <polyline points="22 4 12 14.01 9 11.01" />
+    </svg>
+)

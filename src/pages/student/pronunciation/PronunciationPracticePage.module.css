@@ -958,3 +958,456 @@
         transform: translateY(0);
     }
 }
+
+/* Target Header Actions */
+.targetHeaderActions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btnShuffleTarget {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--color-surface-raised, #f1f5f9);
+    border: 1px solid var(--color-border-soft, #e2e8f0);
+    color: var(--color-text-secondary, #475569);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btnShuffleTarget:hover {
+    border-color: #0284c7;
+    color: #0284c7;
+    background: rgba(14, 165, 233, 0.08);
+}
+
+:global([data-theme='dark']) .btnShuffleTarget {
+    background: rgba(30, 41, 59, 0.6);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #cbd5e1;
+}
+
+:global([data-theme='dark']) .btnShuffleTarget:hover {
+    border-color: #38bdf8;
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.12);
+}
+
+/* Section Header Row & Mini Shuffle Button */
+.sectionHeaderRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.btnMiniShuffle {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: 1px solid var(--color-border-soft, #e2e8f0);
+    color: #0284c7;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btnMiniShuffle:hover {
+    background: rgba(14, 165, 233, 0.08);
+    border-color: #0284c7;
+}
+
+:global([data-theme='dark']) .btnMiniShuffle {
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #38bdf8;
+}
+
+:global([data-theme='dark']) .btnMiniShuffle:hover {
+    border-color: #38bdf8;
+    background: rgba(56, 189, 248, 0.12);
+}
+
+/* Roadmap Section */
+.roadmapSection {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.levelPillList {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.levelPillBtn {
+    background: var(--color-surface-raised, #f8fafc);
+    border: 1px solid var(--color-border-soft, #e2e8f0);
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-align: left;
+    transition: all 0.15s;
+}
+
+:global([data-theme='dark']) .levelPillBtn {
+    background: rgba(15, 23, 42, 0.5);
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+.levelPillBtn:hover {
+    border-color: #0284c7;
+    transform: translateX(2px);
+}
+
+.levelPillActive {
+    background: rgba(14, 165, 233, 0.1) !important;
+    border-color: #0284c7 !important;
+}
+
+:global([data-theme='dark']) .levelPillActive {
+    background: rgba(14, 165, 233, 0.2) !important;
+    border-color: #38bdf8 !important;
+}
+
+.levelBadgeNum {
+    font-size: 11px;
+    font-weight: 700;
+    color: #0284c7;
+    background: rgba(14, 165, 233, 0.12);
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+:global([data-theme='dark']) .levelBadgeNum {
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.15);
+}
+
+.levelTitleText {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-primary, #0f172a);
+}
+
+:global([data-theme='dark']) .levelTitleText {
+    color: #f1f5f9;
+}
+
+.levelDescCard {
+    background: var(--color-surface-raised, #f1f5f9);
+    border-radius: 8px;
+    padding: 8px 12px;
+}
+
+:global([data-theme='dark']) .levelDescCard {
+    background: rgba(15, 23, 42, 0.4);
+}
+
+.levelDescText {
+    margin: 0;
+    font-size: 12px;
+    color: var(--color-text-secondary, #475569);
+    line-height: 1.5;
+}
+
+:global([data-theme='dark']) .levelDescText {
+    color: #94a3b8;
+}
+
+/* Phoneme Grid & Section */
+.phonemeSection {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.phonemeGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    max-height: 220px;
+    overflow-y: auto;
+    padding-right: 2px;
+}
+
+.phonemeGridBtn {
+    background: var(--color-surface-card, #ffffff);
+    border: 1px solid var(--color-border-soft, #e2e8f0);
+    border-radius: 8px;
+    padding: 6px 4px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    transition: all 0.15s;
+}
+
+:global([data-theme='dark']) .phonemeGridBtn {
+    background: rgba(30, 41, 59, 0.5);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.phonemeGridBtn:hover {
+    border-color: #0284c7;
+    transform: translateY(-1px);
+}
+
+.phonemeGridActive {
+    background: rgba(14, 165, 233, 0.12) !important;
+    border-color: #0284c7 !important;
+}
+
+:global([data-theme='dark']) .phonemeGridActive {
+    background: rgba(14, 165, 233, 0.22) !important;
+    border-color: #38bdf8 !important;
+}
+
+.phonemeSym {
+    font-size: 14px;
+    font-family: 'Times New Roman', serif;
+    color: #0284c7;
+}
+
+:global([data-theme='dark']) .phonemeSym {
+    color: #38bdf8;
+}
+
+.phonemeSample {
+    font-size: 10px;
+    color: var(--color-text-muted, #64748b);
+}
+
+.activePhonemeCard {
+    background: var(--color-surface-raised, #f8fafc);
+    border: 1px solid var(--color-border-soft, #e2e8f0);
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+:global([data-theme='dark']) .activePhonemeCard {
+    background: rgba(15, 23, 42, 0.5);
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+.activePhonemeHeader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.activePhonemeBadge {
+    font-size: 18px;
+    font-family: 'Times New Roman', serif;
+    font-weight: 700;
+    color: #0284c7;
+    background: rgba(14, 165, 233, 0.12);
+    padding: 2px 8px;
+    border-radius: 6px;
+}
+
+:global([data-theme='dark']) .activePhonemeBadge {
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.18);
+}
+
+.activePhonemeMeta {
+    display: flex;
+    flex-direction: column;
+}
+
+.activePhonemeName {
+    font-size: 12px;
+    color: var(--color-text-primary, #0f172a);
+}
+
+:global([data-theme='dark']) .activePhonemeName {
+    color: #f8fafc;
+}
+
+.activePhonemeType {
+    font-size: 10px;
+    color: var(--color-text-muted, #64748b);
+}
+
+.activePhonemeTip {
+    margin: 0;
+    font-size: 11px;
+    color: var(--color-text-secondary, #475569);
+    line-height: 1.45;
+}
+
+:global([data-theme='dark']) .activePhonemeTip {
+    color: #94a3b8;
+}
+
+.phonemeWordsList {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* Daily Section */
+.dailySection {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dailyProgressCard {
+    background: var(--color-surface-raised, #f8fafc);
+    border: 1px solid var(--color-border-soft, #e2e8f0);
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+:global([data-theme='dark']) .dailyProgressCard {
+    background: rgba(15, 23, 42, 0.5);
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+.dailyProgressInfo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+}
+
+.dailyProgressLabel {
+    color: var(--color-text-secondary, #475569);
+    font-weight: 500;
+}
+
+.dailyProgressVal {
+    color: #0284c7;
+    font-weight: 700;
+}
+
+:global([data-theme='dark']) .dailyProgressVal {
+    color: #38bdf8;
+}
+
+.progressBarTrack {
+    height: 6px;
+    background: var(--color-border-soft, #e2e8f0);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+:global([data-theme='dark']) .progressBarTrack {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.progressBarFill {
+    height: 100%;
+    background: linear-gradient(90deg, #38bdf8, #0284c7);
+    border-radius: 999px;
+    transition: width 0.3s ease;
+}
+
+.dailyTaskList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dailyTaskCard {
+    background: var(--color-surface-card, #ffffff);
+    border: 1px solid var(--color-border-soft, #e2e8f0);
+    border-radius: 10px;
+    padding: 10px 12px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-align: left;
+    transition: all 0.15s;
+}
+
+:global([data-theme='dark']) .dailyTaskCard {
+    background: rgba(30, 41, 59, 0.5);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.dailyTaskCard:hover {
+    border-color: #0284c7;
+    transform: translateY(-1px);
+}
+
+.dailyTaskCurrent {
+    border-color: #0284c7 !important;
+    background: rgba(14, 165, 233, 0.06) !important;
+}
+
+:global([data-theme='dark']) .dailyTaskCurrent {
+    border-color: #38bdf8 !important;
+    background: rgba(14, 165, 233, 0.15) !important;
+}
+
+.dailyTaskDone {
+    border-color: #10b981 !important;
+}
+
+.dailyTaskHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dailyTaskBadge {
+    font-size: 10px;
+    font-weight: 700;
+    color: #0284c7;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+:global([data-theme='dark']) .dailyTaskBadge {
+    color: #38bdf8;
+}
+
+.doneCheck {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: #10b981;
+    font-weight: 600;
+}
+
+.dailyTaskText {
+    font-size: 13px;
+    color: var(--color-text-primary, #0f172a);
+    font-weight: 600;
+}
+
+:global([data-theme='dark']) .dailyTaskText {
+    color: #f1f5f9;
+}
+
+.dailyTaskHint {
+    font-size: 11px;
+    color: var(--color-text-muted, #64748b);
+    line-height: 1.4;
+}
