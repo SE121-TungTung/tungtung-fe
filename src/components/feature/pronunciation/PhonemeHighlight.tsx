@@ -1,11 +1,7 @@
 import React, { useState } from 'react'
 import type { PhonemeItem, ErrorType } from '@/types/pronunciation.types'
-import {
-    CloseIcon,
-    SparklesIcon,
-    CheckIcon,
-    AlertTriangleIcon,
-} from './PronunciationIcons'
+import { getDetailedArticulatoryAdvice } from '@/data/phoneticCoaching'
+import { CloseIcon, SparklesIcon } from './PronunciationIcons'
 import s from './PhonemeHighlight.module.css'
 
 interface PhonemeHighlightProps {
@@ -249,15 +245,11 @@ export const PhonemeHighlight: React.FC<PhonemeHighlightProps> = ({
                                 <strong>Lời khuyên cải thiện:</strong>
                                 <p className={s.tipText}>
                                     {selectedPhoneme.tip ||
-                                        (selectedPhoneme.is_correct
-                                            ? 'Bạn đã phát âm âm vị này rất chuẩn xác và rõ ràng. Tiếp tục duy trì phong độ!'
-                                            : selectedPhoneme.error_type ===
-                                                'deletion'
-                                              ? 'Bạn đã bỏ sót hoặc nuốt mất âm này. Hãy chú ý mở rộng khẩu hình và bật âm rõ ràng ở cuối từ.'
-                                              : selectedPhoneme.error_type ===
-                                                  'substitution'
-                                                ? `Bạn đã phát âm lệch sang âm /${selectedPhoneme.phoneme_actual}/. Hãy kiểm tra lại vị trí đặt lưỡi và độ căng của môi.`
-                                                : 'Hãy chú ý vị trí đặt lưỡi và luồng hơi thoát ra khi phát âm.')}
+                                        getDetailedArticulatoryAdvice(
+                                            selectedPhoneme.phoneme_expected,
+                                            selectedPhoneme.phoneme_actual,
+                                            selectedPhoneme.error_type
+                                        )}
                                 </p>
                             </div>
                         </div>

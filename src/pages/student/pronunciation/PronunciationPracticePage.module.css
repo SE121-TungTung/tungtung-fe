@@ -144,6 +144,12 @@
     .mainLayout {
         grid-template-columns: 1fr;
     }
+
+    .sidebar {
+        position: static !important;
+        top: auto !important;
+        z-index: 1;
+    }
 }
 
 /* Sidebar */
@@ -645,6 +651,80 @@
     background: rgba(56, 189, 248, 0.12);
 }
 
+.headerBadgesRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.accentSwitcher {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(148, 163, 184, 0.15);
+    padding: 2px;
+    border-radius: 8px;
+    gap: 2px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+:global([data-theme='dark']) .accentSwitcher {
+    background: rgba(30, 41, 59, 0.6);
+    border-color: rgba(71, 85, 105, 0.4);
+}
+
+.accentBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: var(--color-text-secondary, #64748b);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+:global([data-theme='dark']) .accentBtn {
+    color: #94a3b8;
+}
+
+.accentBtn:hover {
+    color: var(--color-text-primary, #0f172a);
+}
+
+:global([data-theme='dark']) .accentBtn:hover {
+    color: #f8fafc;
+}
+
+.accentActive {
+    background: #ffffff !important;
+    color: #0284c7 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+:global([data-theme='dark']) .accentActive {
+    background: #0284c7 !important;
+    color: #ffffff !important;
+}
+
+.accentTag {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 1px 4px;
+    border-radius: 4px;
+    background: rgba(2, 132, 199, 0.12);
+    color: #0284c7;
+}
+
+:global([data-theme='dark']) .accentActive .accentTag {
+    background: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+}
+
 .btnListenNative {
     display: inline-flex;
     align-items: center;
@@ -694,6 +774,94 @@
 }
 
 :global([data-theme='dark']) .ipaSubtitle strong {
+    color: #38bdf8;
+}
+
+.ipaDualContainer {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.ipaBadgeCol {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    background: var(--color-surface-raised, #ffffff);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+:global([data-theme='dark']) .ipaBadgeCol {
+    background: rgba(15, 23, 42, 0.6);
+    border-color: rgba(51, 65, 85, 0.6);
+}
+
+.ipaBadgeCol:hover {
+    border-color: rgba(14, 165, 233, 0.5);
+    transform: translateY(-1px);
+}
+
+.ipaBadgeActive {
+    border-color: #0284c7 !important;
+    background: rgba(14, 165, 233, 0.08) !important;
+    box-shadow: 0 0 0 1px #0284c7;
+}
+
+:global([data-theme='dark']) .ipaBadgeActive {
+    background: rgba(14, 165, 233, 0.16) !important;
+    border-color: #38bdf8 !important;
+    box-shadow: 0 0 0 1px #38bdf8;
+}
+
+.ipaColLabel {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-muted, #64748b);
+}
+
+:global([data-theme='dark']) .ipaColLabel {
+    color: #94a3b8;
+}
+
+.ipaBadgeActive .ipaColLabel {
+    color: #0284c7;
+}
+
+:global([data-theme='dark']) .ipaBadgeActive .ipaColLabel {
+    color: #38bdf8;
+}
+
+.ipaColCode {
+    font-family:
+        'SF Pro Display',
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        Roboto,
+        monospace;
+    font-size: 14px;
+    color: var(--color-text-primary, #0f172a);
+    letter-spacing: 0.02em;
+}
+
+:global([data-theme='dark']) .ipaColCode {
+    color: #f1f5f9;
+}
+
+.ipaBadgeActive .ipaColCode {
+    color: #0284c7;
+    font-weight: 700;
+}
+
+:global([data-theme='dark']) .ipaBadgeActive .ipaColCode {
     color: #38bdf8;
 }
 

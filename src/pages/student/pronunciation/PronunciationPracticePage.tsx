@@ -22,7 +22,13 @@ import {
 import {
     ROADMAP_LEVELS,
     PHONEME_GROUPS,
+    DICTIONARY_WORDS,
+    DICTIONARY_SENTENCES,
     getDailyChallenge,
+    findIpaForText,
+    getRandomDictionaryBatch,
+    getRandomPhonemeWords,
+    type PracticeItem,
 } from '@/data/pronunciationPracticeData'
 import {
     submitPronunciationPractice,
@@ -33,84 +39,6 @@ import type {
     PronunciationPracticeResponse,
 } from '@/types/pronunciation.types'
 import s from './PronunciationPracticePage.module.css'
-
-// Danh sách các từ/câu gợi ý luyện tập tiêu chuẩn theo nhóm
-const SUGGESTED_TARGETS: Record<
-    TargetType,
-    { title: string; items: string[] }[]
-> = {
-    word: [
-        {
-            title: 'Cặp âm dễ nhầm lẫn (Minimal Pairs)',
-            items: [
-                'sheep',
-                'ship',
-                'think',
-                'sink',
-                'bed',
-                'bad',
-                'pull',
-                'pool',
-                'vet',
-                'wet',
-                'three',
-                'tree',
-            ],
-        },
-        {
-            title: 'Từ vựng IELTS học thuật (Academic Words)',
-            items: [
-                'architecture',
-                'comfortable',
-                'environment',
-                'phenomenon',
-                'development',
-                'technology',
-                'pronunciation',
-                'vocabulary',
-            ],
-        },
-        {
-            title: 'Âm đuôi khó (Ending Sounds)',
-            items: [
-                'months',
-                'clothes',
-                'breathes',
-                'sixth',
-                'strengths',
-                'crisps',
-                'glimpsed',
-            ],
-        },
-    ],
-    sentence: [
-        {
-            title: 'Giao tiếp hàng ngày & Speaking Part 1',
-            items: [
-                'Could you please tell me how to get to the station?',
-                'I usually spend my free time listening to acoustic music.',
-                'The weather today is much warmer than yesterday.',
-            ],
-        },
-        {
-            title: 'IELTS Speaking Cụm diễn đạt điểm cao',
-            items: [
-                'To be perfectly honest, I have always had a strong passion for art.',
-                'From my perspective, technological advancement plays a crucial role in modern life.',
-                'I am firmly convinced that regular exercise brings tremendous health benefits.',
-            ],
-        },
-    ],
-    paragraph: [
-        {
-            title: 'IELTS Speaking Part 2 Monologue',
-            items: [
-                'I would like to talk about a memorable journey that I took two years ago. It was a trip to Da Lat with my closest friends. The magnificent scenery and cool atmosphere made it truly unforgettable.',
-                'Learning a foreign language requires consistent dedication and regular practice. Not only does it broaden your horizons, but it also opens up numerous global career opportunities.',
-            ],
-        },
-    ],
-}
 
 // 6 chủ đề Drill Mode chuẩn IELTS
 const DRILL_TOPICS = [
@@ -126,9 +54,12 @@ type SidebarTab = 'roadmap' | 'phonemes' | 'daily' | 'presets' | 'drill'
 
 export default function PronunciationPracticePage() {
     const [targetType, setTargetType] = useState<TargetType>('word')
-    const [targetText, setTargetText] = useState('architecture')
+    const [targetText, setTargetText] = useState('comfortable')
     const [customInput, setCustomInput] = useState('')
     const [isCustomMode, setIsCustomMode] = useState(false)
+
+    // Chuẩn giọng đánh giá: US (Mỹ) hoặc UK (Anh)
+    const [accent, setAccent] = useState<'US' | 'UK'>('US')
 
     // Sidebar Tab state
     const [activeSidebarTab, setActiveSidebarTab] =
@@ -140,6 +71,14 @@ export default function PronunciationPracticePage() {
     // Phoneme Practice state
     const [selectedPhonemeSymbol, setSelectedPhonemeSymbol] =
         useState<string>('/θ/')
+
+    // Kho từ / câu động khi học viên bấm "Shuffle cả danh sách từ điển"
+    const [currentWordList, setCurrentWordList] = useState<PracticeItem[]>(() =>
+        DICTIONARY_WORDS.slice(0, 12)
+    )
+    const [currentSentenceList, setCurrentSentenceList] = useState<
+        PracticeItem[]
+    >(() => DICTIONARY_SENTENCES.slice(0, 8))
 
     // Daily Challenge state
     const [dailySeed, setDailySeed] = useState<number>(0)
@@ -160,6 +99,11 @@ export default function PronunciationPracticePage() {
         useState<PronunciationPracticeResponse | null>(null)
     const [errorMsg, setErrorMsg] = useState<string | null>(null)
     const [showIpaModal, setShowIpaModal] = useState(false)
+
+    // Tra cứu phiên âm US & UK cho từ/câu đang chọn
+    const activeIpaData = useMemo(() => {
+        return findIpaForText(targetText)
+    }, [targetText])
 
     // Load drill suggestions khi chọn topic
     const loadDrillSuggestions = useCallback(async (topic: string) => {
@@ -195,12 +139,12 @@ export default function PronunciationPracticePage() {
         }
     }, [analysisResult, targetText, dailyChallenges, completedDailyTasks])
 
-    // Phát âm mẫu câu/từ đang chọn bằng Web Speech API
+    // Phát âm mẫu câu/từ đang chọn bằng Web Speech API theo đúng chuẩn US hoặc UK
     const speakTargetText = () => {
         if ('speechSynthesis' in window && targetText) {
             window.speechSynthesis.cancel()
             const utterance = new SpeechSynthesisUtterance(targetText)
-            utterance.lang = 'en-US'
+            utterance.lang = accent === 'UK' ? 'en-GB' : 'en-US'
             utterance.rate = 0.85
             window.speechSynthesis.speak(utterance)
         }
@@ -232,7 +176,7 @@ export default function PronunciationPracticePage() {
         handleSelectTarget(customInput.trim(), targetType)
     }
 
-    // Nhận blob ghi âm từ MicRecorder và gửi lên API Backend
+    // Nhận blob ghi âm từ MicRecorder và gửi lên API Backend kèm giọng accent
     const handleRecordingComplete = async (blob: Blob) => {
         setIsAnalyzing(true)
         setErrorMsg(null)
@@ -241,7 +185,8 @@ export default function PronunciationPracticePage() {
             const res = await submitPronunciationPractice(
                 blob,
                 targetText,
-                targetType
+                targetType,
+                accent
             )
             setAnalysisResult(res)
         } catch (err: unknown) {
@@ -256,7 +201,32 @@ export default function PronunciationPracticePage() {
         }
     }
 
-    // Shuffle ngẫu nhiên bài tập theo ngữ cảnh tab đang hoạt động
+    // SHUFFLE CẢ DANH SÁCH TỪ ĐIỂN (Đổi toàn bộ danh sách sidebar)
+    const handleShuffleEntireList = () => {
+        if (activeSidebarTab === 'phonemes') {
+            const fresh = getRandomPhonemeWords(selectedPhonemeSymbol, 12)
+            if (fresh.length > 0) {
+                handleSelectTarget(fresh[0].text, 'word')
+            }
+            return
+        }
+
+        if (targetType === 'sentence') {
+            const fresh = getRandomDictionaryBatch('sentence', 8)
+            setCurrentSentenceList(fresh)
+            if (fresh.length > 0) {
+                handleSelectTarget(fresh[0].text, 'sentence')
+            }
+        } else {
+            const fresh = getRandomDictionaryBatch('word', 12)
+            setCurrentWordList(fresh)
+            if (fresh.length > 0) {
+                handleSelectTarget(fresh[0].text, 'word')
+            }
+        }
+    }
+
+    // Shuffle ngẫu nhiên 1 từ/câu tiếp theo
     const handleShuffleRandom = () => {
         if (activeSidebarTab === 'phonemes') {
             const currentGroup = PHONEME_GROUPS.find(
@@ -264,12 +234,12 @@ export default function PronunciationPracticePage() {
             )
             if (currentGroup && currentGroup.words.length > 0) {
                 const candidates = currentGroup.words.filter(
-                    (w) => w !== targetText
+                    (w) => w.text !== targetText
                 )
                 const picked =
                     candidates[Math.floor(Math.random() * candidates.length)] ||
                     currentGroup.words[0]
-                handleSelectTarget(picked, 'word')
+                handleSelectTarget(picked.text, 'word')
                 return
             }
         }
@@ -283,13 +253,13 @@ export default function PronunciationPracticePage() {
                     g.items.map((item) => ({ item, type: g.targetType }))
                 )
                 const candidates = allItems.filter(
-                    (cand) => cand.item !== targetText
+                    (cand) => cand.item.text !== targetText
                 )
                 const picked =
                     candidates[Math.floor(Math.random() * candidates.length)] ||
                     allItems[0]
                 if (picked) {
-                    handleSelectTarget(picked.item, picked.type)
+                    handleSelectTarget(picked.item.text, picked.type)
                     return
                 }
             }
@@ -308,23 +278,15 @@ export default function PronunciationPracticePage() {
             }
         }
 
-        if (activeSidebarTab === 'drill' && drillItems.length > 0) {
-            const candidates = drillItems.filter((w) => w !== targetText)
-            const picked =
-                candidates[Math.floor(Math.random() * candidates.length)] ||
-                drillItems[0]
-            handleSelectTarget(picked)
-            return
-        }
-
-        // Mặc định: Shuffle trong SUGGESTED_TARGETS
-        const currentGroup = SUGGESTED_TARGETS[targetType]
-        const allItems = currentGroup.flatMap((g) => g.items)
-        const candidates = allItems.filter((w) => w !== targetText)
+        // Mặc định: Shuffle trong currentWordList hoặc currentSentenceList
+        const pool =
+            targetType === 'sentence' ? currentSentenceList : currentWordList
+        const candidates = pool.filter((w) => w.text !== targetText)
         const picked =
-            candidates[Math.floor(Math.random() * candidates.length)] ||
-            allItems[0]
-        handleSelectTarget(picked, targetType)
+            candidates[Math.floor(Math.random() * candidates.length)] || pool[0]
+        if (picked) {
+            handleSelectTarget(picked.text, targetType)
+        }
     }
 
     const handleNextWord = () => {
@@ -369,9 +331,9 @@ export default function PronunciationPracticePage() {
                         Phòng Luyện Phát Âm Trực Quan
                     </h1>
                     <p className={s.pageDescription}>
-                        Luyện khẩu hình chuẩn xác, chọn theo lộ trình bài tập
-                        hoặc chuyên sâu theo từng âm vị IPA, ghi âm và nhận đánh
-                        giá chi tiết từ AI.
+                        Luyện khẩu hình chuẩn xác theo giọng Anh (UK) hoặc Mỹ
+                        (US), chọn theo lộ trình 4 cấp độ hoặc chuyên sâu từng
+                        âm vị IPA.
                     </p>
                 </div>
 
@@ -436,10 +398,10 @@ export default function PronunciationPracticePage() {
                                 type="button"
                                 className={`${s.tabSwitchBtn} ${activeSidebarTab === 'presets' ? s.tabSwitchActive : ''}`}
                                 onClick={() => setActiveSidebarTab('presets')}
-                                title="Danh mục bài tập theo định dạng"
+                                title="Kho từ điển phong phú"
                             >
                                 <TargetIcon size={14} />
-                                <span>Kho từ</span>
+                                <span>Từ điển</span>
                             </button>
                             <button
                                 type="button"
@@ -463,10 +425,10 @@ export default function PronunciationPracticePage() {
                                         type="button"
                                         className={s.btnMiniShuffle}
                                         onClick={handleShuffleRandom}
-                                        title="Lấy ngẫu nhiên từ trong cấp độ này"
+                                        title="Lấy ngẫu nhiên bài tập trong cấp độ này"
                                     >
                                         <ShuffleIcon size={13} />
-                                        <span>Shuffle cấp độ</span>
+                                        <span>Shuffle bài</span>
                                     </button>
                                 </div>
 
@@ -521,15 +483,15 @@ export default function PronunciationPracticePage() {
                                                             <button
                                                                 key={iIdx}
                                                                 type="button"
-                                                                className={`${s.presetPill} ${targetText === item ? s.pillActive : ''}`}
+                                                                className={`${s.presetPill} ${targetText === item.text ? s.pillActive : ''}`}
                                                                 onClick={() =>
                                                                     handleSelectTarget(
-                                                                        item,
+                                                                        item.text,
                                                                         group.targetType
                                                                     )
                                                                 }
                                                             >
-                                                                {item}
+                                                                {item.text}
                                                             </button>
                                                         )
                                                     )}
@@ -555,7 +517,7 @@ export default function PronunciationPracticePage() {
                                         title="Lấy ngẫu nhiên từ chứa âm này"
                                     >
                                         <ShuffleIcon size={13} />
-                                        <span>Shuffle âm này</span>
+                                        <span>Shuffle từ</span>
                                     </button>
                                 </div>
 
@@ -571,7 +533,7 @@ export default function PronunciationPracticePage() {
                                                     g.symbol
                                                 )
                                                 handleSelectTarget(
-                                                    g.words[0],
+                                                    g.words[0].text,
                                                     'word'
                                                 )
                                             }}
@@ -626,15 +588,15 @@ export default function PronunciationPracticePage() {
                                                 <button
                                                     key={idx}
                                                     type="button"
-                                                    className={`${s.presetPill} ${targetText === w ? s.pillActive : ''}`}
+                                                    className={`${s.presetPill} ${targetText === w.text ? s.pillActive : ''}`}
                                                     onClick={() =>
                                                         handleSelectTarget(
-                                                            w,
+                                                            w.text,
                                                             'word'
                                                         )
                                                     }
                                                 >
-                                                    {w}
+                                                    {w.text}
                                                 </button>
                                             )
                                         )}
@@ -747,49 +709,57 @@ export default function PronunciationPracticePage() {
                             </div>
                         )}
 
-                        {/* TAB 4: KHO TỪ TIÊU CHUẨN (PRESETS) */}
+                        {/* TAB 4: KHO TỪ ĐIỂN & SHUFFLE CẢ DANH SÁCH (PRESETS) */}
                         {activeSidebarTab === 'presets' && (
                             <>
-                                <h3 className={s.sidebarTitle}>
-                                    Chế độ luyện tập
-                                </h3>
+                                <div className={s.sectionHeaderRow}>
+                                    <h3 className={s.sidebarTitle}>
+                                        Kho từ điển
+                                    </h3>
+                                    {/* Nút Shuffle đổi toàn bộ danh sách */}
+                                    <button
+                                        type="button"
+                                        className={s.btnMiniShuffle}
+                                        onClick={handleShuffleEntireList}
+                                        title="Đổi toàn bộ danh sách từ vựng/câu ngẫu nhiên từ ngân hàng từ điển"
+                                    >
+                                        <ShuffleIcon size={13} />
+                                        <span>Shuffle cả list</span>
+                                    </button>
+                                </div>
+
                                 <div className={s.modeSelector}>
                                     <button
                                         type="button"
                                         className={`${s.modeBtn} ${targetType === 'word' ? s.modeActive : ''}`}
-                                        onClick={() =>
-                                            handleSelectTarget(
-                                                'architecture',
-                                                'word'
-                                            )
-                                        }
+                                        onClick={() => {
+                                            setTargetType('word')
+                                            if (currentWordList.length > 0) {
+                                                handleSelectTarget(
+                                                    currentWordList[0].text,
+                                                    'word'
+                                                )
+                                            }
+                                        }}
                                     >
-                                        Từ đơn
+                                        Từ vựng
                                     </button>
                                     <button
                                         type="button"
                                         className={`${s.modeBtn} ${targetType === 'sentence' ? s.modeActive : ''}`}
-                                        onClick={() =>
-                                            handleSelectTarget(
-                                                'Could you please tell me how to get to the station?',
-                                                'sentence'
-                                            )
-                                        }
+                                        onClick={() => {
+                                            setTargetType('sentence')
+                                            if (
+                                                currentSentenceList.length > 0
+                                            ) {
+                                                handleSelectTarget(
+                                                    currentSentenceList[0].text,
+                                                    'sentence'
+                                                )
+                                            }
+                                        }}
                                     >
-                                        Câu ngắn
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className={`${s.modeBtn} ${targetType === 'paragraph' ? s.modeActive : ''}`}
-                                        onClick={() =>
-                                            handleSelectTarget(
-                                                SUGGESTED_TARGETS.paragraph[0]
-                                                    .items[0],
-                                                'paragraph'
-                                            )
-                                        }
-                                    >
-                                        Đoạn văn
+                                        Câu nói
                                     </button>
                                 </div>
 
@@ -820,7 +790,7 @@ export default function PronunciationPracticePage() {
                                                         e.target.value
                                                     )
                                                 }
-                                                placeholder={`Nhập ${targetType === 'word' ? 'từ' : targetType === 'sentence' ? 'câu' : 'đoạn'} tiếng Anh bạn muốn luyện...`}
+                                                placeholder={`Nhập ${targetType === 'word' ? 'từ' : 'câu'} tiếng Anh bạn muốn luyện...`}
                                                 className={s.customTextarea}
                                                 autoFocus
                                             />
@@ -849,43 +819,35 @@ export default function PronunciationPracticePage() {
                                     )}
                                 </div>
 
-                                {/* Danh sách gợi ý theo chủ đề */}
+                                {/* Danh sách từ vựng / câu hiển thị */}
                                 <div className={s.presetsList}>
-                                    {SUGGESTED_TARGETS[targetType].map(
-                                        (group, gIdx) => (
-                                            <div
-                                                key={gIdx}
-                                                className={s.presetGroup}
-                                            >
-                                                <span className={s.groupHeader}>
-                                                    {group.title}
-                                                </span>
-                                                <div
-                                                    className={
-                                                        s.itemsPillContainer
+                                    <div className={s.presetGroup}>
+                                        <span className={s.groupHeader}>
+                                            {targetType === 'word'
+                                                ? `Danh sách từ vựng (${currentWordList.length} từ ngẫu nhiên)`
+                                                : `Danh sách câu luyện tập (${currentSentenceList.length} câu ngẫu nhiên)`}
+                                        </span>
+                                        <div className={s.itemsPillContainer}>
+                                            {(targetType === 'word'
+                                                ? currentWordList
+                                                : currentSentenceList
+                                            ).map((item, iIdx) => (
+                                                <button
+                                                    key={iIdx}
+                                                    type="button"
+                                                    className={`${s.presetPill} ${targetText === item.text ? s.pillActive : ''}`}
+                                                    onClick={() =>
+                                                        handleSelectTarget(
+                                                            item.text,
+                                                            item.targetType
+                                                        )
                                                     }
                                                 >
-                                                    {group.items.map(
-                                                        (item, iIdx) => (
-                                                            <button
-                                                                key={iIdx}
-                                                                type="button"
-                                                                className={`${s.presetPill} ${targetText === item ? s.pillActive : ''}`}
-                                                                onClick={() =>
-                                                                    handleSelectTarget(
-                                                                        item,
-                                                                        targetType
-                                                                    )
-                                                                }
-                                                            >
-                                                                {item}
-                                                            </button>
-                                                        )
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )
-                                    )}
+                                                    {item.text}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
                                 </div>
                             </>
                         )}
@@ -973,33 +935,57 @@ export default function PronunciationPracticePage() {
                     {/* Thẻ hiển thị mục tiêu luyện tập */}
                     <div className={s.targetCard}>
                         <div className={s.targetHeaderRow}>
-                            <span className={s.targetTypeBadge}>
-                                {targetType === 'word'
-                                    ? 'Target Word'
-                                    : targetType === 'sentence'
-                                      ? 'Target Sentence'
-                                      : 'Target Paragraph'}
-                            </span>
+                            <div className={s.headerBadgesRow}>
+                                <span className={s.targetTypeBadge}>
+                                    {targetType === 'word'
+                                        ? 'Target Word'
+                                        : targetType === 'sentence'
+                                          ? 'Target Sentence'
+                                          : 'Target Paragraph'}
+                                </span>
+
+                                {/* Bộ chọn chuẩn giọng UK vs US (Point 5) */}
+                                <div className={s.accentSwitcher}>
+                                    <button
+                                        type="button"
+                                        className={`${s.accentBtn} ${accent === 'US' ? s.accentActive : ''}`}
+                                        onClick={() => setAccent('US')}
+                                        title="Chuyển sang chuẩn giọng Mỹ (General American)"
+                                    >
+                                        <span className={s.accentTag}>US</span>
+                                        <span>Giọng Mỹ</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`${s.accentBtn} ${accent === 'UK' ? s.accentActive : ''}`}
+                                        onClick={() => setAccent('UK')}
+                                        title="Chuyển sang chuẩn giọng Anh (Received Pronunciation)"
+                                    >
+                                        <span className={s.accentTag}>UK</span>
+                                        <span>Giọng Anh</span>
+                                    </button>
+                                </div>
+                            </div>
 
                             <div className={s.targetHeaderActions}>
                                 <button
                                     type="button"
                                     className={s.btnShuffleTarget}
                                     onClick={handleShuffleRandom}
-                                    title="Đổi từ / câu ngẫu nhiên"
+                                    title="Đổi 1 từ / câu ngẫu nhiên"
                                 >
                                     <ShuffleIcon size={15} />
-                                    <span>Đổi ngẫu nhiên</span>
+                                    <span>Đổi 1 bài</span>
                                 </button>
 
                                 <button
                                     type="button"
                                     className={s.btnListenNative}
                                     onClick={speakTargetText}
-                                    title="Nghe giọng đọc bản xứ"
+                                    title={`Nghe giọng đọc bản xứ (${accent})`}
                                 >
                                     <VolumeIcon size={15} />
-                                    <span>Nghe mẫu</span>
+                                    <span>Nghe mẫu ({accent})</span>
                                 </button>
                             </div>
                         </div>
@@ -1008,12 +994,42 @@ export default function PronunciationPracticePage() {
                             &ldquo;{targetText}&rdquo;
                         </div>
 
-                        {analysisResult?.target_ipa && (
-                            <div className={s.ipaSubtitle}>
-                                Phiên âm IPA chuẩn:{' '}
-                                <strong>/{analysisResult.target_ipa}/</strong>
+                        {/* Hiển thị cả US và UK IPA cho cả từ và câu (Point 7) */}
+                        <div className={s.ipaDualContainer}>
+                            <div
+                                className={`${s.ipaBadgeCol} ${accent === 'US' ? s.ipaBadgeActive : ''}`}
+                                onClick={() => setAccent('US')}
+                                title="Nhấp để chọn chuẩn giọng Mỹ"
+                            >
+                                <span className={s.ipaColLabel}>US (Mỹ):</span>
+                                <strong className={s.ipaColCode}>
+                                    /
+                                    {analysisResult &&
+                                    accent === 'US' &&
+                                    analysisResult.target_ipa
+                                        ? analysisResult.target_ipa
+                                        : activeIpaData.us}
+                                    /
+                                </strong>
                             </div>
-                        )}
+
+                            <div
+                                className={`${s.ipaBadgeCol} ${accent === 'UK' ? s.ipaBadgeActive : ''}`}
+                                onClick={() => setAccent('UK')}
+                                title="Nhấp để chọn chuẩn giọng Anh"
+                            >
+                                <span className={s.ipaColLabel}>UK (Anh):</span>
+                                <strong className={s.ipaColCode}>
+                                    /
+                                    {analysisResult &&
+                                    accent === 'UK' &&
+                                    analysisResult.target_ipa
+                                        ? analysisResult.target_ipa
+                                        : activeIpaData.uk}
+                                    /
+                                </strong>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Bộ ghi âm tích hợp Waveform (key={targetText} và resetKey={targetText} bảo đảm reset triệt để khi đổi từ) */}
@@ -1138,7 +1154,7 @@ export default function PronunciationPracticePage() {
                                 actualIpa={analysisResult.actual_ipa}
                             />
 
-                            {/* Nhận xét AI định dạng Markdown chuẩn đẹp */}
+                            {/* Nhận xét AI chuyên gia định dạng thẻ chuẩn đẹp (Point 4) */}
                             {analysisResult.feedback_text && (
                                 <AIFeedbackMarkdown
                                     content={analysisResult.feedback_text}

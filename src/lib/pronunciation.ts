@@ -14,13 +14,15 @@ import type {
 export async function submitPronunciationPractice(
     audioBlob: Blob,
     target: string,
-    targetType: TargetType
+    targetType: TargetType,
+    accent: 'US' | 'UK' = 'US'
 ): Promise<PronunciationPracticeResponse> {
     const formData = new FormData()
     // Đặt tên file là practice.webm hoặc audio file phù hợp
     formData.append('audio', audioBlob, 'practice.webm')
     formData.append('target', target)
     formData.append('target_type', targetType)
+    formData.append('accent', accent)
 
     return api<PronunciationPracticeResponse>(
         '/api/v1/pronunciation/practices',

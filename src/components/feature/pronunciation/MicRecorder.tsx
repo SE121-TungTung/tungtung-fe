@@ -36,12 +36,17 @@ export const MicRecorder: React.FC<MicRecorderProps> = ({
     const mediaRecorderRef = useRef<MediaRecorder | null>(null)
     const audioChunksRef = useRef<Blob[]>([])
     const timerRef = useRef<number | null>(null)
+    const startTimeRef = useRef<number | null>(null)
     const previewAudioRef = useRef<HTMLAudioElement | null>(null)
 
     // Tự động dọn dẹp và reset khi resetKey thay đổi (ví dụ chuyển từ/câu)
     useEffect(() => {
         if (resetKey !== undefined) {
-            if (timerRef.current) clearInterval(timerRef.current)
+            if (timerRef.current) {
+                clearInterval(timerRef.current)
+                timerRef.current = null
+            }
+            startTimeRef.current = null
             if (
                 mediaRecorderRef.current &&
                 mediaRecorderRef.current.state !== 'inactive'
@@ -61,16 +66,32 @@ export const MicRecorder: React.FC<MicRecorderProps> = ({
         }
     }, [resetKey])
 
-    // Dọn dẹp object URL và stream khi component unmount
+    // Dọn dẹp timer và preview audio khi component unmount
     useEffect(() => {
         return () => {
             if (timerRef.current) clearInterval(timerRef.current)
-            if (audioUrl) URL.revokeObjectURL(audioUrl)
+            if (previewAudioRef.current) {
+                previewAudioRef.current.pause()
+                previewAudioRef.current = null
+            }
+        }
+    }, [])
+
+    // Dọn dẹp stream microphone
+    useEffect(() => {
+        return () => {
             if (mediaStream) {
                 mediaStream.getTracks().forEach((track) => track.stop())
             }
         }
-    }, [audioUrl, mediaStream])
+    }, [mediaStream])
+
+    // Dọn dẹp Object URL khi audioUrl thay đổi hoặc unmount
+    useEffect(() => {
+        return () => {
+            if (audioUrl) URL.revokeObjectURL(audioUrl)
+        }
+    }, [audioUrl])
 
     // Lựa chọn MIME type phù hợp nhất với trình duyệt
     const getSupportedMimeType = (): string => {
@@ -91,6 +112,30 @@ export const MicRecorder: React.FC<MicRecorderProps> = ({
         }
         return ''
     }
+
+    const stopRecording = useCallback(() => {
+        if (timerRef.current) {
+            clearInterval(timerRef.current)
+            timerRef.current = null
+        }
+
+        if (startTimeRef.current) {
+            const finalSecs = Math.max(
+                1,
+                Math.round((Date.now() - startTimeRef.current) / 1000)
+            )
+            setDuration(finalSecs)
+        }
+
+        if (
+            mediaRecorderRef.current &&
+            mediaRecorderRef.current.state !== 'inactive'
+        ) {
+            mediaRecorderRef.current.stop()
+        }
+
+        setIsRecording(false)
+    }, [])
 
     const startRecording = async () => {
         setErrorMsg(null)
@@ -149,18 +194,23 @@ export const MicRecorder: React.FC<MicRecorderProps> = ({
             recorder.start(100)
             setIsRecording(true)
 
-            // Bắt đầu đếm thời gian
-            const startTime = Date.now()
-            timerRef.current = window.setInterval(() => {
-                const elapsedSeconds = Math.floor(
-                    (Date.now() - startTime) / 1000
-                )
-                setDuration(elapsedSeconds)
+            // Bắt đầu đếm thời gian bằng startTimeRef
+            const now = Date.now()
+            startTimeRef.current = now
 
-                if (elapsedSeconds >= maxDurationSeconds) {
-                    stopRecording()
+            if (timerRef.current) clearInterval(timerRef.current)
+            timerRef.current = window.setInterval(() => {
+                if (startTimeRef.current) {
+                    const elapsedSeconds = Math.floor(
+                        (Date.now() - startTimeRef.current) / 1000
+                    )
+                    setDuration(elapsedSeconds)
+
+                    if (elapsedSeconds >= maxDurationSeconds) {
+                        stopRecording()
+                    }
                 }
-            }, 250)
+            }, 200)
         } catch (err: unknown) {
             console.error('Không thể truy cập microphone:', err)
             const error = err as Error
@@ -179,22 +229,6 @@ export const MicRecorder: React.FC<MicRecorderProps> = ({
             setIsRecording(false)
         }
     }
-
-    const stopRecording = useCallback(() => {
-        if (timerRef.current) {
-            clearInterval(timerRef.current)
-            timerRef.current = null
-        }
-
-        if (
-            mediaRecorderRef.current &&
-            mediaRecorderRef.current.state !== 'inactive'
-        ) {
-            mediaRecorderRef.current.stop()
-        }
-
-        setIsRecording(false)
-    }, [])
 
     const handleReset = () => {
         if (timerRef.current) clearInterval(timerRef.current)
