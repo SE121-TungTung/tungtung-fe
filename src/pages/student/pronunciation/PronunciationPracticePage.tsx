@@ -4,6 +4,17 @@ import { MicRecorder } from '@/components/feature/pronunciation/MicRecorder'
 import { PhonemeHighlight } from '@/components/feature/pronunciation/PhonemeHighlight'
 import { IPABoard } from '@/components/feature/pronunciation/IPABoard'
 import {
+    VolumeIcon,
+    HistoryIcon,
+    BookOpenIcon,
+    TargetIcon,
+    ZapIcon,
+    EditIcon,
+    RefreshIcon,
+    SparklesIcon,
+    AlertTriangleIcon,
+} from '@/components/feature/pronunciation/PronunciationIcons'
+import {
     submitPronunciationPractice,
     getDrillSuggestions,
 } from '@/lib/pronunciation'
@@ -93,12 +104,12 @@ const SUGGESTED_TARGETS: Record<
 
 // 6 chủ đề Drill Mode chuẩn IELTS
 const DRILL_TOPICS = [
-    { key: 'environment', label: '🌿 Môi trường' },
-    { key: 'technology', label: '💻 Công nghệ' },
-    { key: 'health', label: '🩺 Sức khỏe' },
-    { key: 'education', label: '🎓 Giáo dục' },
-    { key: 'travel', label: '✈️ Du lịch' },
-    { key: 'culture', label: '🎭 Văn hóa' },
+    { key: 'environment', label: 'Môi trường' },
+    { key: 'technology', label: 'Công nghệ' },
+    { key: 'health', label: 'Sức khỏe' },
+    { key: 'education', label: 'Giáo dục' },
+    { key: 'travel', label: 'Du lịch' },
+    { key: 'culture', label: 'Văn hóa' },
 ]
 
 export default function PronunciationPracticePage() {
@@ -253,7 +264,8 @@ export default function PronunciationPracticePage() {
                         className={s.btnHistoryLink}
                         title="Xem chuỗi streak và lịch sử luyện tập"
                     >
-                        <span>📜 Lịch sử & Streak</span>
+                        <HistoryIcon size={16} />
+                        <span>Lịch sử & Streak</span>
                     </Link>
 
                     <button
@@ -261,10 +273,9 @@ export default function PronunciationPracticePage() {
                         className={s.btnOpenIpa}
                         onClick={() => setShowIpaModal(!showIpaModal)}
                     >
+                        <BookOpenIcon size={16} />
                         <span>
-                            {showIpaModal
-                                ? '📖 Ẩn Bảng IPA'
-                                : '📖 Bảng 44 Âm IPA'}
+                            {showIpaModal ? 'Ẩn Bảng IPA' : 'Bảng 44 Âm IPA'}
                         </span>
                     </button>
                 </div>
@@ -282,14 +293,16 @@ export default function PronunciationPracticePage() {
                                 className={`${s.tabSwitchBtn} ${activeSidebarTab === 'presets' ? s.tabSwitchActive : ''}`}
                                 onClick={() => setActiveSidebarTab('presets')}
                             >
-                                🎯 Tiêu chuẩn
+                                <TargetIcon size={14} />
+                                <span>Tiêu chuẩn</span>
                             </button>
                             <button
                                 type="button"
                                 className={`${s.tabSwitchBtn} ${activeSidebarTab === 'drill' ? s.tabSwitchActive : ''}`}
                                 onClick={() => setActiveSidebarTab('drill')}
                             >
-                                ⚡ Drill IELTS Topics
+                                <ZapIcon size={14} />
+                                <span>Drill IELTS Topics</span>
                             </button>
                         </div>
 
@@ -350,7 +363,8 @@ export default function PronunciationPracticePage() {
                                                 setCustomInput(targetText)
                                             }}
                                         >
-                                            ✏️ Tự nhập nội dung khác
+                                            <EditIcon size={14} />
+                                            <span>Tự nhập nội dung khác</span>
                                         </button>
                                     ) : (
                                         <form
@@ -480,13 +494,14 @@ export default function PronunciationPracticePage() {
                                             disabled={isLoadingDrill}
                                             title="Tải 5 từ khác ngẫu nhiên"
                                         >
-                                            🔄 Đổi 5 từ khác
+                                            <RefreshIcon size={14} />
+                                            <span>Đổi 5 từ khác</span>
                                         </button>
                                     </div>
 
                                     {isLoadingDrill ? (
                                         <div className={s.loadingDrill}>
-                                            <span>⏳ Đang tải từ vựng...</span>
+                                            <span>Đang tải từ vựng...</span>
                                         </div>
                                     ) : (
                                         <div className={s.drillList}>
@@ -535,7 +550,8 @@ export default function PronunciationPracticePage() {
                                 onClick={speakTargetText}
                                 title="Nghe giọng đọc bản xứ"
                             >
-                                <span>🔊 Nghe mẫu</span>
+                                <VolumeIcon size={16} />
+                                <span>Nghe mẫu</span>
                             </button>
                         </div>
 
@@ -571,7 +587,8 @@ export default function PronunciationPracticePage() {
                     {/* Lỗi nếu có */}
                     {errorMsg && (
                         <div className={s.errorAlert}>
-                            <span>⚠️ {errorMsg}</span>
+                            <AlertTriangleIcon size={16} />
+                            <span>{errorMsg}</span>
                         </div>
                     )}
 
@@ -678,9 +695,8 @@ export default function PronunciationPracticePage() {
                             {analysisResult.feedback_text && (
                                 <div className={s.aiFeedbackCard}>
                                     <div className={s.feedbackHeader}>
-                                        <span>
-                                            🤖 Nhận xét từ AI Chuyên gia:
-                                        </span>
+                                        <SparklesIcon size={16} />
+                                        <span>Nhận xét từ AI Chuyên gia:</span>
                                     </div>
                                     <p className={s.feedbackText}>
                                         {analysisResult.feedback_text}

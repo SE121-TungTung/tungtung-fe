@@ -9,6 +9,15 @@ import {
 import { StreakCard } from '@/components/feature/pronunciation/StreakCard'
 import { PracticeHistoryChart } from '@/components/feature/pronunciation/PracticeHistoryChart'
 import { PhonemeHighlight } from '@/components/feature/pronunciation/PhonemeHighlight'
+import {
+    HistoryIcon,
+    ArrowLeftIcon,
+    EyeIcon,
+    MicIcon,
+    CalendarIcon,
+    CloseIcon,
+    SparklesIcon,
+} from '@/components/feature/pronunciation/PronunciationIcons'
 import type {
     PronunciationPracticeResponse,
     TargetType,
@@ -85,12 +94,16 @@ export default function PronunciationHistoryPage() {
                             to="/student/pronunciation"
                             className={s.backLink}
                         >
-                            ← Quay lại Phòng Luyện Phát Âm
+                            <ArrowLeftIcon size={14} />
+                            <span>Quay lại Phòng Luyện Phát Âm</span>
                         </Link>
                     </div>
-                    <h1 className={s.pageTitle}>
-                        📜 Lịch Sử & Tiến Độ Luyện Phát Âm
-                    </h1>
+                    <div className={s.pageTitleRow}>
+                        <HistoryIcon size={24} color="#0284c7" />
+                        <h1 className={s.pageTitle}>
+                            Lịch Sử & Tiến Độ Luyện Phát Âm
+                        </h1>
+                    </div>
                     <p className={s.pageDescription}>
                         Theo dõi sự cải thiện của từng âm vị và lịch sử các lượt
                         ghi âm đã qua của bạn.
@@ -162,11 +175,13 @@ export default function PronunciationHistoryPage() {
                         {/* Bảng danh sách */}
                         {isLoading ? (
                             <div className={s.loadingBox}>
-                                <span>⏳ Đang tải lịch sử phát âm...</span>
+                                <span>Đang tải lịch sử phát âm...</span>
                             </div>
                         ) : items.length === 0 ? (
                             <div className={s.emptyBox}>
-                                <span className={s.emptyIcon}>🎙️</span>
+                                <span className={s.emptyIcon}>
+                                    <MicIcon size={32} color="#94a3b8" />
+                                </span>
                                 <h4>Chưa có lượt luyện phát âm nào</h4>
                                 <p>
                                     Hãy sang phòng luyện tập để bắt đầu ghi âm
@@ -212,10 +227,12 @@ export default function PronunciationHistoryPage() {
                                                     </span>
                                                 )}
                                                 <span className={s.dateText}>
-                                                    🕒{' '}
-                                                    {formatDate(
-                                                        item.created_at
-                                                    )}
+                                                    <CalendarIcon size={12} />
+                                                    <span>
+                                                        {formatDate(
+                                                            item.created_at
+                                                        )}
+                                                    </span>
                                                 </span>
                                             </div>
                                         </div>
@@ -242,7 +259,8 @@ export default function PronunciationHistoryPage() {
                                                 }
                                                 title="Xem chi tiết phân tích"
                                             >
-                                                👁️ Chi tiết
+                                                <EyeIcon size={14} />
+                                                <span>Chi tiết</span>
                                             </button>
                                         </div>
                                     </div>
@@ -303,14 +321,14 @@ export default function PronunciationHistoryPage() {
                                 className={s.btnCloseModal}
                                 onClick={() => setSelectedPracticeId(null)}
                             >
-                                ✕
+                                <CloseIcon size={18} />
                             </button>
                         </div>
 
                         <div className={s.modalBody}>
                             {isDetailLoading ? (
                                 <div className={s.loadingModal}>
-                                    <span>⏳ Đang tải kết quả chi tiết...</span>
+                                    <span>Đang tải kết quả chi tiết...</span>
                                 </div>
                             ) : detailData ? (
                                 <div className={s.detailContent}>
@@ -376,7 +394,13 @@ export default function PronunciationHistoryPage() {
                                     {/* Nhận xét AI */}
                                     {detailData.feedback_text && (
                                         <div className={s.aiFeedback}>
-                                            <strong>🤖 Nhận xét AI:</strong>
+                                            <div className={s.aiFeedbackHeader}>
+                                                <SparklesIcon
+                                                    size={16}
+                                                    color="#0284c7"
+                                                />
+                                                <strong>Nhận xét AI:</strong>
+                                            </div>
                                             <p>{detailData.feedback_text}</p>
                                         </div>
                                     )}

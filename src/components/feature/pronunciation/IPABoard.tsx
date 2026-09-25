@@ -1,6 +1,14 @@
 import React, { useState } from 'react'
 import { IPA_PHONEMES } from './ipaData'
 import { MouthDiagram } from './MouthDiagram'
+import {
+    VolumeIcon,
+    SearchIcon,
+    CloseIcon,
+    MicIcon,
+    SparklesIcon,
+    AlertTriangleIcon,
+} from './PronunciationIcons'
 import type { IPAPhonemeInfo } from '@/types/pronunciation.types'
 import s from './IPABoard.module.css'
 
@@ -126,7 +134,7 @@ export const IPABoard: React.FC<IPABoardProps> = ({
                             className={s.clearBtn}
                             onClick={() => setSearchQuery('')}
                         >
-                            ✕
+                            <CloseIcon size={14} />
                         </button>
                     )}
                 </div>
@@ -189,11 +197,7 @@ export const IPABoard: React.FC<IPABoardProps> = ({
                                     }
                                     title="Nghe phát âm mẫu"
                                 >
-                                    {isPlaying ? (
-                                        <span className={s.audioWave}>♪</span>
-                                    ) : (
-                                        <span>🔊</span>
-                                    )}
+                                    <VolumeIcon size={14} />
                                 </button>
                             </div>
 
@@ -253,7 +257,7 @@ export const IPABoard: React.FC<IPABoardProps> = ({
                                 className={s.modalClose}
                                 onClick={() => setActiveDetailPhoneme(null)}
                             >
-                                ✕
+                                <CloseIcon size={18} />
                             </button>
                         </div>
 
@@ -288,7 +292,8 @@ export const IPABoard: React.FC<IPABoardProps> = ({
                                             )
                                         }
                                     >
-                                        🔊 Nghe mẫu
+                                        <VolumeIcon size={14} />
+                                        <span>Nghe mẫu</span>
                                     </button>
                                 </div>
                             </div>
@@ -296,7 +301,8 @@ export const IPABoard: React.FC<IPABoardProps> = ({
                             {/* Cột phải: Hướng dẫn chi tiết môi, răng, lưỡi */}
                             <div className={s.guideCol}>
                                 <h5 className={s.guideSectionHeader}>
-                                    👄 Hướng dẫn cấu âm & Khẩu hình
+                                    <SparklesIcon size={16} />
+                                    <span>Hướng dẫn cấu âm & Khẩu hình</span>
                                 </h5>
 
                                 <div className={s.guideGrid}>
@@ -345,7 +351,10 @@ export const IPABoard: React.FC<IPABoardProps> = ({
 
                                 {activeDetailPhoneme.commonMistakes && (
                                     <div className={s.mistakeAlert}>
-                                        <span className={s.alertIcon}>⚠️</span>
+                                        <AlertTriangleIcon
+                                            size={16}
+                                            className={s.alertIcon}
+                                        />
                                         <div>
                                             <strong>
                                                 Lỗi người Việt hay mắc:
@@ -370,8 +379,9 @@ export const IPABoard: React.FC<IPABoardProps> = ({
                                     handleSelectForPractice(activeDetailPhoneme)
                                 }
                             >
+                                <MicIcon size={16} />
                                 <span>
-                                    🎙️ Chọn từ &quot;
+                                    Chọn từ &quot;
                                     {activeDetailPhoneme.sampleWord}&quot; để
                                     luyện phát âm ngay
                                 </span>

@@ -2,25 +2,35 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
-    background: rgba(30, 41, 59, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--color-surface-card, #ffffff);
+    border: 1px solid var(--color-border-soft, #e2e8f0);
     border-radius: 16px;
     padding: 16px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+:global([data-theme='dark']) .recorderCard {
+    background: var(--color-surface-card, rgba(30, 41, 59, 0.7));
+    border-color: var(--color-border-soft, rgba(255, 255, 255, 0.1));
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
 }
 
 .errorBox {
     display: flex;
     align-items: center;
     gap: 8px;
-    background: rgba(220, 38, 38, 0.15);
+    background: rgba(220, 38, 38, 0.1);
     border: 1px solid rgba(239, 68, 68, 0.3);
-    color: #fca5a5;
+    color: #dc2626;
     padding: 10px 14px;
     border-radius: 10px;
     font-size: 13px;
     line-height: 1.4;
+}
+
+:global([data-theme='dark']) .errorBox {
+    background: rgba(220, 38, 38, 0.2);
+    color: #fca5a5;
 }
 
 .controlBar {
@@ -41,7 +51,7 @@
 }
 
 .timerText {
-    color: #cbd5e1;
+    color: var(--color-text-primary, #0f172a);
 }
 
 .recordingTimer {
@@ -51,7 +61,7 @@
 
 .timerMax {
     font-size: 13px;
-    color: #64748b;
+    color: var(--color-text-muted, #64748b);
     font-weight: normal;
 }
 
@@ -64,7 +74,7 @@
 .btnRecord {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
     color: #ffffff;
     font-weight: 600;
@@ -94,7 +104,7 @@
 .btnStop {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
     color: #ffffff;
     font-weight: 600;
@@ -123,19 +133,30 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: rgba(255, 255, 255, 0.08);
-    color: #e2e8f0;
+    background: var(--color-surface-raised, #f1f5f9);
+    color: var(--color-text-primary, #0f172a);
     font-size: 13px;
-    font-weight: 500;
-    padding: 8px 14px;
+    font-weight: 600;
+    padding: 9px 14px;
     border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid var(--color-border-soft, #cbd5e1);
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .btnSecondary:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.14);
+    background: var(--color-border-soft, #e2e8f0);
+    color: var(--color-brand-primary, #0284c7);
+}
+
+:global([data-theme='dark']) .btnSecondary {
+    background: rgba(255, 255, 255, 0.08);
+    color: #e2e8f0;
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+:global([data-theme='dark']) .btnSecondary:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.15);
     color: #ffffff;
 }
 

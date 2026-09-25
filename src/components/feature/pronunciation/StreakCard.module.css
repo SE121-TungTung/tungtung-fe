@@ -1,18 +1,24 @@
 .streakCard {
-    background: radial-gradient(
-        circle at 100% 0%,
-        rgba(245, 158, 11, 0.15) 0%,
-        rgba(15, 23, 42, 0.85) 100%
-    );
-    border: 1px solid rgba(245, 158, 11, 0.25);
+    background: var(--color-surface-card, #ffffff);
+    border: 1px solid var(--color-border-soft, #e2e8f0);
     border-radius: 16px;
     padding: 20px;
     display: flex;
     flex-direction: column;
     gap: 16px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
     position: relative;
     overflow: hidden;
+}
+
+:global([data-theme='dark']) .streakCard {
+    background: radial-gradient(
+        circle at 100% 0%,
+        rgba(245, 158, 11, 0.15) 0%,
+        rgba(15, 23, 42, 0.85) 100%
+    );
+    border-color: rgba(245, 158, 11, 0.25);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
 .header {
@@ -30,44 +36,70 @@
 }
 
 .headerIcon {
-    font-size: 20px;
+    display: flex;
+    align-items: center;
 }
 
 .title {
     margin: 0;
     font-size: 16px;
     font-weight: 700;
+    color: var(--color-text-primary, #0f172a);
+}
+
+:global([data-theme='dark']) .title {
     color: #f8fafc;
 }
 
 .todayBadgeDone {
     font-size: 11px;
     font-weight: 600;
-    color: #34d399;
-    background: rgba(16, 185, 129, 0.18);
+    color: #059669;
+    background: rgba(16, 185, 129, 0.12);
     border: 1px solid rgba(16, 185, 129, 0.35);
     padding: 3px 8px;
     border-radius: 9999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+:global([data-theme='dark']) .todayBadgeDone {
+    color: #34d399;
+    background: rgba(16, 185, 129, 0.18);
 }
 
 .todayBadgePending {
     font-size: 11px;
     font-weight: 600;
-    color: #fcd34d;
-    background: rgba(245, 158, 11, 0.15);
-    border: 1px solid rgba(245, 158, 11, 0.3);
+    color: #b45309;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.25);
     padding: 3px 8px;
     border-radius: 9999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+:global([data-theme='dark']) .todayBadgePending {
+    color: #fcd34d;
+    background: rgba(245, 158, 11, 0.15);
 }
 
 .mainStreak {
     display: flex;
     align-items: center;
     gap: 16px;
-    background: rgba(30, 41, 59, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--color-surface-raised, #f8fafc);
+    border: 1px solid var(--color-border-soft, #e2e8f0);
     border-radius: 14px;
     padding: 16px;
+}
+
+:global([data-theme='dark']) .mainStreak {
+    background: rgba(30, 41, 59, 0.5);
+    border-color: rgba(255, 255, 255, 0.06);
 }
 
 .flameWrapper {
@@ -75,58 +107,70 @@
     height: 60px;
     background: radial-gradient(
         circle,
-        rgba(239, 68, 68, 0.25) 0%,
-        rgba(245, 158, 11, 0.1) 70%
+        rgba(239, 68, 68, 0.2) 0%,
+        rgba(245, 158, 11, 0.08) 70%
     );
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    border: 2px solid rgba(245, 158, 11, 0.4);
+    border: 2px solid rgba(245, 158, 11, 0.35);
 }
 
-.flameEmoji {
-    font-size: 32px;
-    filter: grayscale(0.8) opacity(0.5);
+.flameIconWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transition: all 0.3s;
 }
 
 .flameActive {
-    filter: none !important;
     animation: flameBounce 1.5s ease-in-out infinite alternate;
 }
 
 .streakCountWrapper {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 4px;
 }
 
 .streakNumberRow {
     display: flex;
     align-items: baseline;
-    gap: 6px;
+    gap: 8px;
 }
 
 .currentStreakNumber {
     font-size: 32px;
-    font-weight: 900;
-    color: #fbbf24;
+    font-weight: 800;
+    color: #d97706;
     line-height: 1;
 }
 
+:global([data-theme='dark']) .currentStreakNumber {
+    color: #f59e0b;
+}
+
 .streakUnit {
-    font-size: 13px;
-    color: #94a3b8;
+    font-size: 14px;
     font-weight: 600;
+    color: var(--color-text-secondary, #64748b);
+}
+
+:global([data-theme='dark']) .streakUnit {
+    color: #94a3b8;
 }
 
 .streakEncourage {
-    margin: 4px 0 0 0;
+    margin: 0;
     font-size: 12px;
-    color: #cbd5e1;
+    color: var(--color-text-secondary, #475569);
     line-height: 1.4;
+}
+
+:global([data-theme='dark']) .streakEncourage {
+    color: #cbd5e1;
 }
 
 .statsGrid {
@@ -136,17 +180,24 @@
 }
 
 .statBox {
+    background: var(--color-surface-raised, #f8fafc);
+    border: 1px solid var(--color-border-soft, #e2e8f0);
+    border-radius: 12px;
+    padding: 12px;
     display: flex;
     align-items: center;
     gap: 10px;
-    background: rgba(15, 23, 42, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 10px;
-    padding: 10px 12px;
+}
+
+:global([data-theme='dark']) .statBox {
+    background: rgba(30, 41, 59, 0.4);
+    border-color: rgba(255, 255, 255, 0.06);
 }
 
 .statIcon {
-    font-size: 20px;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
 }
 
 .statTextGroup {
@@ -157,125 +208,141 @@
 
 .statLabel {
     font-size: 11px;
-    color: #94a3b8;
+    color: var(--color-text-muted, #64748b);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
 }
 
 .statValue {
-    font-size: 14px;
-    color: #f1f5f9;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-text-primary, #0f172a);
 }
 
-/* Warrior Badge - Shimmer Animation */
+:global([data-theme='dark']) .statValue {
+    color: #f8fafc;
+}
+
 .warriorBadgeActive {
+    background: linear-gradient(
+        135deg,
+        rgba(245, 158, 11, 0.12) 0%,
+        rgba(217, 119, 6, 0.2) 100%
+    );
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    border-radius: 12px;
+    padding: 12px;
     display: flex;
     align-items: center;
     gap: 12px;
-    background: linear-gradient(
-        135deg,
-        rgba(245, 158, 11, 0.2) 0%,
-        rgba(217, 119, 6, 0.3) 50%,
-        rgba(245, 158, 11, 0.2) 100%
-    );
-    border: 1px solid rgba(245, 158, 11, 0.5);
-    border-radius: 12px;
-    padding: 12px 14px;
     position: relative;
     overflow: hidden;
 }
 
-.warriorBadgeActive::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: linear-gradient(
-        60deg,
-        transparent 20%,
-        rgba(255, 255, 255, 0.15) 30%,
-        transparent 40%
-    );
-    animation: shimmer 3s infinite linear;
-}
-
 .badgeIcon {
-    font-size: 26px;
+    display: flex;
+    align-items: center;
     flex-shrink: 0;
 }
 
 .badgeContent {
+    flex: 1;
     display: flex;
     flex-direction: column;
     gap: 2px;
-    position: relative;
-    z-index: 1;
+    color: var(--color-text-primary, #0f172a);
+}
+
+:global([data-theme='dark']) .badgeContent {
+    color: #f8fafc;
 }
 
 .badgeTitleRow {
     display: flex;
     align-items: center;
     gap: 6px;
-    color: #fde68a;
     font-size: 13px;
+    font-weight: 700;
+    color: #d97706;
+}
+
+:global([data-theme='dark']) .badgeTitleRow {
+    color: #f59e0b;
 }
 
 .sparkle {
-    font-size: 12px;
-    animation: spinSparkle 2s linear infinite;
+    display: flex;
+    align-items: center;
+    animation: sparkleSpin 3s linear infinite;
 }
 
 .badgeDesc {
     margin: 0;
     font-size: 11px;
-    color: #fcd34d;
-    opacity: 0.9;
-    line-height: 1.4;
+    color: var(--color-text-secondary, #64748b);
+    line-height: 1.35;
+}
+
+:global([data-theme='dark']) .badgeDesc {
+    color: #cbd5e1;
 }
 
 .warriorBadgeLocked {
+    background: var(--color-surface-raised, #f8fafc);
+    border: 1px dashed var(--color-border-soft, #cbd5e1);
+    border-radius: 12px;
+    padding: 12px;
     display: flex;
     align-items: center;
     gap: 12px;
-    background: rgba(15, 23, 42, 0.4);
-    border: 1px dashed rgba(255, 255, 255, 0.15);
-    border-radius: 12px;
-    padding: 12px 14px;
-    color: #94a3b8;
-    font-size: 12px;
 }
 
-.badgeLockedIcon {
-    font-size: 20px;
-    opacity: 0.6;
+:global([data-theme='dark']) .warriorBadgeLocked {
+    background: rgba(15, 23, 42, 0.4);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.badgeIconLocked {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    opacity: 0.5;
+}
+
+.progressBarTrack {
+    width: 100%;
+    height: 5px;
+    background: var(--color-border-soft, #e2e8f0);
+    border-radius: 9999px;
+    overflow: hidden;
+    margin-top: 6px;
+}
+
+:global([data-theme='dark']) .progressBarTrack {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.progressBarFill {
+    height: 100%;
+    background: linear-gradient(90deg, #f59e0b 0%, #ef4444 100%);
+    border-radius: 9999px;
+    transition: width 0.4s ease;
 }
 
 @keyframes flameBounce {
-    from {
-        transform: scale(0.95);
+    0% {
+        transform: scale(1);
     }
-    to {
-        transform: scale(1.15);
+    100% {
+        transform: scale(1.12) rotate(3deg);
     }
 }
 
-@keyframes shimmer {
+@keyframes sparkleSpin {
     0% {
-        transform: translateX(-100%);
+        transform: rotate(0deg);
     }
     100% {
-        transform: translateX(100%);
-    }
-}
-
-@keyframes spinSparkle {
-    0% {
-        transform: rotate(0deg) scale(0.9);
-    }
-    50% {
-        transform: rotate(180deg) scale(1.2);
-    }
-    100% {
-        transform: rotate(360deg) scale(0.9);
+        transform: rotate(360deg);
     }
 }

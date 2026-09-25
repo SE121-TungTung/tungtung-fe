@@ -1,5 +1,13 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { WaveformCanvas } from './WaveformCanvas'
+import {
+    MicIcon,
+    StopIcon,
+    PlayIcon,
+    ResetIcon,
+    CheckIcon,
+    AlertTriangleIcon,
+} from './PronunciationIcons'
 import s from './MicRecorder.module.css'
 
 interface MicRecorderProps {
@@ -227,7 +235,7 @@ export const MicRecorder: React.FC<MicRecorderProps> = ({
             {/* Thông báo lỗi nếu bị chặn quyền micro */}
             {errorMsg && (
                 <div className={s.errorBox}>
-                    <span className={s.errorIcon}>⚠️</span>
+                    <AlertTriangleIcon size={18} className={s.errorIcon} />
                     <span>{errorMsg}</span>
                 </div>
             )}
@@ -256,8 +264,8 @@ export const MicRecorder: React.FC<MicRecorderProps> = ({
                             disabled={isAnalyzing}
                             title="Bắt đầu ghi âm"
                         >
-                            <span className={s.recordIcon} />
-                            <span>🎙️ Bắt đầu nói</span>
+                            <MicIcon size={18} />
+                            <span>Bắt đầu nói</span>
                         </button>
                     )}
 
@@ -268,8 +276,8 @@ export const MicRecorder: React.FC<MicRecorderProps> = ({
                             onClick={stopRecording}
                             title="Dừng ghi âm"
                         >
-                            <span className={s.stopIcon} />
-                            <span>⏹️ Dừng & Hoàn tất</span>
+                            <StopIcon size={16} />
+                            <span>Dừng & Hoàn tất</span>
                         </button>
                     )}
 
@@ -285,11 +293,17 @@ export const MicRecorder: React.FC<MicRecorderProps> = ({
                                     isPlayingPreview ? 'Tạm dừng' : 'Nghe lại'
                                 }
                             >
-                                <span>
-                                    {isPlayingPreview
-                                        ? '⏸️ Dừng'
-                                        : '▶️ Nghe lại'}
-                                </span>
+                                {isPlayingPreview ? (
+                                    <>
+                                        <StopIcon size={14} />
+                                        <span>Dừng</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <PlayIcon size={14} />
+                                        <span>Nghe lại</span>
+                                    </>
+                                )}
                             </button>
 
                             {/* Nút thu âm lại */}
@@ -300,7 +314,8 @@ export const MicRecorder: React.FC<MicRecorderProps> = ({
                                 disabled={isAnalyzing}
                                 title="Thu âm lại từ đầu"
                             >
-                                <span>⟳ Thu lại</span>
+                                <ResetIcon size={14} />
+                                <span>Thu lại</span>
                             </button>
 
                             {/* Nút gửi chấm điểm */}
@@ -317,7 +332,8 @@ export const MicRecorder: React.FC<MicRecorderProps> = ({
                                     </>
                                 ) : (
                                     <>
-                                        <span>✓ Chấm điểm ngay</span>
+                                        <CheckIcon size={16} />
+                                        <span>Chấm điểm ngay</span>
                                     </>
                                 )}
                             </button>

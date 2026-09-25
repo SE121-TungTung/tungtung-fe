@@ -1,5 +1,11 @@
 import React, { useState } from 'react'
 import type { PhonemeItem, ErrorType } from '@/types/pronunciation.types'
+import {
+    CloseIcon,
+    SparklesIcon,
+    CheckIcon,
+    AlertTriangleIcon,
+} from './PronunciationIcons'
 import s from './PhonemeHighlight.module.css'
 
 interface PhonemeHighlightProps {
@@ -206,7 +212,7 @@ export const PhonemeHighlight: React.FC<PhonemeHighlightProps> = ({
                             onClick={() => setSelectedPhoneme(null)}
                             title="Đóng chi tiết"
                         >
-                            ✕
+                            <CloseIcon size={14} />
                         </button>
                     </div>
 
@@ -236,7 +242,9 @@ export const PhonemeHighlight: React.FC<PhonemeHighlightProps> = ({
 
                         {/* Hướng dẫn khắc phục */}
                         <div className={s.tipBox}>
-                            <span className={s.tipIcon}>💡</span>
+                            <span className={s.tipIcon}>
+                                <SparklesIcon size={16} />
+                            </span>
                             <div>
                                 <strong>Lời khuyên cải thiện:</strong>
                                 <p className={s.tipText}>
