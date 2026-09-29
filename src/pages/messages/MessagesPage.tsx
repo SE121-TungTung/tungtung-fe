@@ -9,7 +9,7 @@ import { ChatDetailsPanel } from '@/components/feature/messages/ChatDetailsPanel
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import { NewChatModal } from '@/components/feature/messages/NewChatModal'
 import type { Conversation } from '@/types/message.types'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useParams, useNavigate } from 'react-router-dom'
 import { wsManager } from '@/lib/websocket'
 import { useDialog } from '@/hooks/useDialog'
 
@@ -158,19 +158,31 @@ export default function MessagesPage() {
     }, [activeConversationId])
 
     const location = useLocation()
+    const { userId: routeUserId } = useParams<{ userId: string }>()
+    const navigate = useNavigate()
 
     useEffect(() => {
         const state = location.state as LocationState | null
-        const startChatWithUserId = state?.startChatWith
+        const startChatWithUserId = routeUserId || state?.startChatWith
 
-        console.log('📍 [MessagesPage] State nhận được:', state)
+        console.log(
+            '📍 [MessagesPage] State nhận được:',
+            state,
+            'Route params:',
+            routeUserId
+        )
 
         if (startChatWithUserId) {
             console.log(
                 '🚀 [MessagesPage] Bắt đầu tạo hội thoại với User:',
                 startChatWithUserId
             )
-            window.history.replaceState({}, document.title)
+            // Nếu có route params thì replace URL về /messages
+            if (routeUserId) {
+                navigate('/messages', { replace: true })
+            } else {
+                window.history.replaceState({}, document.title)
+            }
 
             messageApi
                 .getOrCreateDirectConversation(startChatWithUserId)

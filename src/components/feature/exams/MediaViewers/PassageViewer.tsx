@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react'
 import s from './PassageViewer.module.css'
 import HighlightToolbar from '../HighlightToolbar'
+import SaveWordModal from '../SaveWordModal'
 import { useTextHighlighter } from '@/hooks/useTextHighlighter'
 import type { Passage } from '@/types/test.types'
 
@@ -19,6 +20,7 @@ export const PassageViewer = React.memo(
         clearHighlightsRef,
     }: PassageViewerProps) => {
         const contentRef = useRef<HTMLDivElement>(null!)
+        const [wordToSave, setWordToSave] = React.useState<string | null>(null)
 
         const {
             toolbarState,
@@ -54,6 +56,22 @@ export const PassageViewer = React.memo(
                         state={toolbarState}
                         onAdd={addHighlight}
                         onRemove={removeHighlight}
+                        onSaveWord={() => {
+                            const selected = window.getSelection()?.toString()
+                            if (selected) setWordToSave(selected)
+                        }}
+                    />
+                )}
+
+                {wordToSave !== null && (
+                    <SaveWordModal
+                        initialWord={wordToSave}
+                        onClose={() => setWordToSave(null)}
+                        onSuccess={() => {
+                            setWordToSave(null)
+                            // could show a toast here
+                            alert('Đã lưu từ vựng vào Flashcard!')
+                        }}
                     />
                 )}
             </div>
