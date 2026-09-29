@@ -32,6 +32,11 @@ const studyMenuItems: ExtendedSideMenuItem[] = [
         label: 'Lộ trình',
         href: '/student/roadmap',
     },
+    {
+        id: 'flashcards',
+        label: 'Flashcards',
+        href: '/student/flashcards',
+    },
 ]
 
 const studentNavItems: AppNavItem[] = [

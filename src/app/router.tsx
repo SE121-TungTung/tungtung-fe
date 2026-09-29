@@ -48,6 +48,15 @@ const WalletPage = lazy(() => import('@/pages/finance/WalletPage'))
 // Student Pages
 const ClassPage = lazy(() => import('@/pages/student/class/Class'))
 const RoadmapPage = lazy(() => import('@/pages/student/roadmap/RoadmapPage'))
+const DeckListPage = lazy(
+    () => import('@/pages/student/flashcards/DeckListPage')
+)
+const FlipCardStudyPage = lazy(
+    () => import('@/pages/student/flashcards/FlipCardStudyPage')
+)
+const DeckStatsPage = lazy(
+    () => import('@/pages/student/flashcards/DeckStatsPage')
+)
 const ExamPracticePage = lazy(
     () => import('@/pages/student/exam/ExamPracticePage')
 )
@@ -128,8 +137,10 @@ const AdminInvoicePage = lazy(
 const AdminFinanceReportPage = lazy(
     () => import('@/pages/admin/finance/AdminFinanceReportPage')
 )
-const AdminLeadsPage = lazy(
-    () => import('@/pages/admin/leads/AdminLeadsPage').then(m => ({ default: m.AdminLeadsPage }))
+const AdminLeadsPage = lazy(() =>
+    import('@/pages/admin/leads/AdminLeadsPage').then((m) => ({
+        default: m.AdminLeadsPage,
+    }))
 )
 const AdminKpiOverviewPage = lazy(
     () => import('@/pages/admin/kpi/AdminKpiOverviewPage')
@@ -258,6 +269,10 @@ export const router = createBrowserRouter([
                         element: <MessagesPage />,
                     },
                     {
+                        path: '/messages/direct/:userId',
+                        element: <MessagesPage />,
+                    },
+                    {
                         path: '/notifications',
                         element: <NotificationPage />,
                     },
@@ -280,6 +295,38 @@ export const router = createBrowserRouter([
                         element: (
                             <ProtectedRoute allowedRoles={['student']}>
                                 <ClassPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/student/class/:classId',
+                        element: (
+                            <ProtectedRoute allowedRoles={['student']}>
+                                <ClassPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/student/flashcards',
+                        element: (
+                            <ProtectedRoute allowedRoles={['student']}>
+                                <DeckListPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/student/flashcards/:deckId/study',
+                        element: (
+                            <ProtectedRoute allowedRoles={['student']}>
+                                <FlipCardStudyPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/student/flashcards/:deckId/stats',
+                        element: (
+                            <ProtectedRoute allowedRoles={['student']}>
+                                <DeckStatsPage />
                             </ProtectedRoute>
                         ),
                     },
@@ -309,6 +356,14 @@ export const router = createBrowserRouter([
                     },
                     {
                         path: '/student/messages',
+                        element: (
+                            <ProtectedRoute allowedRoles={['student']}>
+                                <MessagesPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/student/messages/direct/:userId',
                         element: (
                             <ProtectedRoute allowedRoles={['student']}>
                                 <MessagesPage />
