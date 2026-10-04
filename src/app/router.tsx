@@ -70,6 +70,9 @@ const PronunciationPracticePage = lazy(
 const PronunciationHistoryPage = lazy(
     () => import('@/pages/student/pronunciation/PronunciationHistoryPage')
 )
+const PronunciationAssessmentPage = lazy(
+    () => import('@/pages/student/pronunciation/PronunciationAssessmentPage')
+)
 
 // Teacher Pages
 const TeacherClassPage = lazy(
@@ -344,6 +347,14 @@ export const router = createBrowserRouter([
                         element: (
                             <ProtectedRoute allowedRoles={['student']}>
                                 <PronunciationHistoryPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/student/pronunciation/assessment',
+                        element: (
+                            <ProtectedRoute allowedRoles={['student']}>
+                                <PronunciationAssessmentPage />
                             </ProtectedRoute>
                         ),
                     },

@@ -1,0 +1,683 @@
+/* ═══════════════════════════════════════════════════════
+   Placement Test — Assessment Page (Tokenized & Modernized)
+   ═══════════════════════════════════════════════════════ */
+
+.page {
+    min-height: calc(100vh - 120px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--primitive-spacing-6, 1.5rem) var(--primitive-spacing-4, 1rem)
+        var(--primitive-spacing-10, 2.5rem);
+    background: transparent;
+    color: var(--color-text-primary);
+    width: 100%;
+}
+
+/* ── Top Progress Bar ── */
+.progressBar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: rgba(0, 0, 0, 0.06);
+    z-index: var(--primitive-z-sticky, 1020);
+}
+
+.progressFill {
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        var(--color-brand-primary),
+        var(--color-brand-accent)
+    );
+    transition: width var(--primitive-duration-base, 250ms)
+        var(--primitive-ease-out, ease-out);
+    border-radius: 0 4px 4px 0;
+}
+
+/* ── Intro Card ── */
+.introCard {
+    max-width: 580px;
+    width: 100%;
+    border-radius: var(--primitive-radius-xl, 16px);
+    padding: 3rem 2.5rem;
+    text-align: center;
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-border-soft);
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.06),
+        0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.introIcon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: rgba(36, 132, 181, 0.12);
+    border: 1px solid rgba(36, 132, 181, 0.25);
+    color: var(--color-brand-primary-hover, #2484b5);
+    margin-bottom: 1.25rem;
+}
+
+.introTitle {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0 0 0.85rem;
+    color: var(--color-text-primary);
+    letter-spacing: -0.02em;
+}
+
+.introDesc {
+    color: var(--color-text-secondary);
+    font-size: 0.96rem;
+    line-height: var(--primitive-leading-relaxed, 1.6);
+    margin-bottom: 1.75rem;
+}
+
+.introSteps {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    text-align: left;
+}
+
+.introSteps li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    font-size: 0.92rem;
+    color: var(--color-text-primary);
+    line-height: 1.5;
+}
+
+.stepNum {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(36, 132, 181, 0.15);
+    color: var(--color-brand-primary);
+    font-weight: 700;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.introCta {
+    display: flex;
+    justify-content: center;
+    margin-top: 0.5rem;
+}
+
+.backLink {
+    display: inline-block;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-brand-primary);
+    text-decoration: none;
+    transition: color var(--primitive-duration-fast, 150ms);
+}
+
+.backLink:hover {
+    color: var(--color-brand-primary-hover);
+    text-decoration: underline;
+}
+
+/* ── Test Card ── */
+.testCard {
+    max-width: 680px;
+    width: 100%;
+    border-radius: var(--primitive-radius-xl, 16px);
+    padding: 2.25rem 2rem;
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-border-soft);
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.06),
+        0 1px 3px rgba(0, 0, 0, 0.03);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.testHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-border-soft);
+    padding-bottom: 1rem;
+}
+
+.counterBadge {
+    display: flex;
+    align-items: baseline;
+    gap: 3px;
+}
+
+.counterCurrent {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--color-brand-primary);
+}
+
+.counterTotal {
+    font-size: 0.95rem;
+    color: var(--color-text-muted);
+    font-weight: 600;
+}
+
+.testType {
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 5px 14px;
+    border-radius: var(--primitive-radius-full, 9999px);
+    background: rgba(36, 132, 181, 0.1);
+    border: 1px solid rgba(36, 132, 181, 0.25);
+    color: var(--color-brand-primary);
+}
+
+/* ── Target Block ── */
+.targetBlock {
+    text-align: center;
+    padding: 1.5rem;
+    background: var(--color-surface-raised);
+    border-radius: var(--primitive-radius-lg, 12px);
+    border: 1px solid var(--color-border-soft);
+}
+
+.targetRow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.targetText {
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin: 0;
+    color: var(--color-text-primary);
+    letter-spacing: -0.02em;
+}
+
+.btnListen {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--color-brand-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 50%;
+    transition: all var(--primitive-duration-fast, 150ms);
+}
+
+.btnListen:hover {
+    background: rgba(36, 132, 181, 0.12);
+    transform: scale(1.1);
+}
+
+.targetIpaBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 0.75rem;
+    padding: 6px 16px;
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-border-soft);
+    border-radius: var(--primitive-radius-md, 8px);
+}
+
+.ipaLabel {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    letter-spacing: 0.05em;
+}
+
+.ipaValue {
+    font-family: inherit;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-brand-primary);
+    letter-spacing: 0.02em;
+}
+
+/* ── Record Section (State 1) ── */
+.recordSection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0;
+}
+
+.recordPrompt {
+    font-size: 0.95rem;
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+/* ── Analysis Section (State 2) ── */
+.analysisSection {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.analysisScoreBanner {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.25rem;
+    background: var(--color-surface-raised);
+    border: 1px solid var(--color-border-soft);
+    border-radius: var(--primitive-radius-lg, 12px);
+}
+
+.scoreCircle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: rgba(36, 132, 181, 0.1);
+    border: 2.5px solid var(--color-brand-primary);
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.scoreNumber {
+    font-size: 1.7rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    line-height: 1;
+}
+
+.scorePercent {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--color-brand-primary);
+    line-height: 1;
+    margin-left: 2px;
+}
+
+.scoreTextGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.scoreRating {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.scoreHint {
+    font-size: 0.88rem;
+    color: var(--color-text-secondary);
+    line-height: 1.4;
+}
+
+/* ── Spoken IPA Comparison Box ── */
+.ipaComparisonBox {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: var(--color-surface-raised);
+    border-radius: var(--primitive-radius-md, 8px);
+    border: 1px solid var(--color-border-soft);
+}
+
+.ipaCompCol {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.compLabel {
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+    font-weight: 600;
+}
+
+.compIpaTarget {
+    font-family: inherit;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--color-brand-primary);
+}
+
+.compIpaActual {
+    font-family: inherit;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--color-brand-accent);
+}
+
+/* ── Phoneme Highlight Block ── */
+.phonemeBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.phonemeHeader {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+/* ── Component Metrics Grid ── */
+.componentsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 0.75rem;
+}
+
+.compMetric {
+    background: var(--color-surface-raised);
+    padding: 10px 14px;
+    border-radius: var(--primitive-radius-md, 8px);
+    border: 1px solid var(--color-border-soft);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.metricLabel {
+    font-size: 0.76rem;
+    color: var(--color-text-muted);
+    font-weight: 600;
+}
+
+.metricBar {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.metricFill {
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        var(--color-brand-primary),
+        var(--color-brand-accent)
+    );
+    border-radius: 3px;
+}
+
+.metricVal {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    text-align: right;
+}
+
+/* ── Action Controls ── */
+.actionControls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    margin-top: 0.75rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border-soft);
+}
+
+/* ── Score Color Classes ── */
+.scoreExcellent {
+    color: var(--color-status-success) !important;
+}
+
+.scoreGood {
+    color: var(--color-brand-primary-hover, #2484b5) !important;
+}
+
+.scoreFair {
+    color: var(--color-status-warning) !important;
+}
+
+.scorePoor {
+    color: var(--color-status-danger) !important;
+}
+
+/* ── Loading Card ── */
+.loadingCard {
+    max-width: 480px;
+    width: 100%;
+    padding: 3rem 2rem;
+    text-align: center;
+    border-radius: var(--primitive-radius-xl, 16px);
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-border-soft);
+}
+
+.spinner {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 1.5rem;
+    border: 3px solid rgba(36, 132, 181, 0.2);
+    border-top-color: var(--color-brand-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loadingTitle {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+    color: var(--color-text-primary);
+}
+
+.loadingDesc {
+    font-size: 0.92rem;
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+/* ── Results Card ── */
+.resultsCard {
+    max-width: 660px;
+    width: 100%;
+    border-radius: var(--primitive-radius-xl, 16px);
+    padding: 2.5rem 2rem;
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-border-soft);
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.06),
+        0 1px 3px rgba(0, 0, 0, 0.03);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.resultsTitle {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--color-status-success);
+}
+
+.levelGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.levelBox {
+    background: var(--color-surface-raised);
+    border: 1px solid var(--color-border-soft);
+    border-radius: var(--primitive-radius-lg, 12px);
+    padding: 1.25rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.levelLabel {
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+    font-weight: 700;
+}
+
+.levelValue {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--color-brand-primary);
+}
+
+.phonemeSection {
+    background: var(--color-surface-raised);
+    border: 1px solid var(--color-border-soft);
+    border-radius: var(--primitive-radius-md, 8px);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.phonemeSectionTitle {
+    margin: 0;
+    font-size: 0.92rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-text-primary);
+}
+
+.phonemeTags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tagWeak {
+    padding: 4px 12px;
+    border-radius: var(--primitive-radius-full, 9999px);
+    background: var(--color-status-danger-bg);
+    border: 1px solid var(--color-status-danger);
+    color: var(--color-status-danger);
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.tagStrong {
+    padding: 4px 12px;
+    border-radius: var(--primitive-radius-full, 9999px);
+    background: var(--color-status-success-bg);
+    border: 1px solid var(--color-status-success);
+    color: var(--color-status-success);
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.breakdownTitle {
+    margin: 0.5rem 0 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.breakdownList {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 220px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.breakdownItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--color-surface-raised);
+    border-radius: 8px;
+    border: 1px solid var(--color-border-soft);
+}
+
+.breakdownInfo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.breakdownIdx {
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+    font-weight: 700;
+}
+
+.breakdownText {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.breakdownScore {
+    font-size: 0.92rem;
+    font-weight: 800;
+}
+
+.resultsCta {
+    display: flex;
+    justify-content: center;
+    margin-top: 0.5rem;
+}
+
+.errorAlert {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-radius: var(--primitive-radius-md, 8px);
+    background: var(--color-status-danger-bg);
+    border: 1px solid var(--color-status-danger);
+    color: var(--color-status-danger);
+    font-size: 0.88rem;
+    font-weight: 600;
+}

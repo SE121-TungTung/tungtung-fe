@@ -53,7 +53,7 @@ export const PracticeHistoryChart: React.FC<PracticeHistoryChartProps> = ({
         const chartHeight = height - padding.top - padding.bottom
 
         // Vẽ các đường kẻ ngang mức điểm (0, 25, 50, 75, 100)
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.07)'
+        ctx.strokeStyle = 'rgba(23, 86, 118, 0.12)'
         ctx.lineWidth = 1
         ctx.font = '10px monospace'
         ctx.fillStyle = '#64748b'
@@ -127,16 +127,16 @@ export const PracticeHistoryChart: React.FC<PracticeHistoryChartProps> = ({
 
             // Chấm điểm
             ctx.beginPath()
-            ctx.arc(c.x, c.y, 4.5, 0, Math.PI * 2)
+            ctx.arc(c.x, c.y, 5, 0, Math.PI * 2)
             ctx.fillStyle = pointColor
             ctx.fill()
-            ctx.strokeStyle = '#0f172a'
+            ctx.strokeStyle = '#ffffff'
             ctx.lineWidth = 2
             ctx.stroke()
 
             // Nhãn ngày trục X
-            ctx.fillStyle = '#94a3b8'
-            ctx.font = '11px sans-serif'
+            ctx.fillStyle = '#475569'
+            ctx.font = '600 11px sans-serif'
             ctx.fillText(c.point.date, c.x, height - 10)
         })
     }, [points, height])

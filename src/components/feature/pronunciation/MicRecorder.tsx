@@ -93,14 +93,15 @@ export const MicRecorder: React.FC<MicRecorderProps> = ({
         }
     }, [audioUrl])
 
-    // Lựa chọn MIME type phù hợp nhất với trình duyệt
+    // Lựa chọn MIME type: ưu tiên lossless (WAV/PCM) để AI nhận diện IPA chính xác hơn
     const getSupportedMimeType = (): string => {
         const types = [
-            'audio/webm;codecs=opus',
+            'audio/wav', // Lossless — tốt nhất cho Wav2Vec2
+            'audio/webm;codecs=pcm', // PCM trong WebM (Chrome 130+)
+            'audio/ogg;codecs=pcm', // PCM trong OGG (Firefox)
+            'audio/webm;codecs=opus', // Fallback lossy — chấp nhận được
             'audio/webm',
             'audio/mp4',
-            'audio/aac',
-            'audio/ogg;codecs=opus',
         ]
         for (const type of types) {
             if (

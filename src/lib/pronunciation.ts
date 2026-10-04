@@ -115,3 +115,117 @@ export async function getDrillSuggestions(
         }
     )
 }
+
+// ── Phase 2: Assessment + Mastery + Missions ──────────────
+
+/**
+ * Lấy danh sách items cho Placement Test (8 từ + 2 câu).
+ */
+export async function getAssessmentItems(): Promise<{
+    items: {
+        target_text: string
+        target_type: string
+        ipa?: string
+        phonemes?: string[]
+    }[]
+    total: number
+}> {
+    return api('/api/v1/pronunciation/assessment/items', { method: 'GET' })
+}
+
+/**
+ * Nộp kết quả Placement Test.
+ */
+export async function submitAssessment(
+    items: {
+        target_text: string
+        target_type: string
+        overall_score: number
+        phoneme_results?: unknown[]
+    }[]
+): Promise<{
+    id: string
+    cefr_level: string
+    ielts_band_estimate: number
+    weak_phonemes: string[]
+    strong_phonemes: string[]
+    retake_count: number
+}> {
+    return api('/api/v1/pronunciation/assessment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items }),
+    })
+}
+
+/**
+ * Lấy kết quả placement test gần nhất.
+ */
+export async function getLatestAssessment(): Promise<{
+    id: string
+    cefr_level: string
+    ielts_band_estimate: number
+    weak_phonemes: string[]
+    strong_phonemes: string[]
+    retake_count: number
+} | null> {
+    return api('/api/v1/pronunciation/assessment/latest', { method: 'GET' })
+}
+
+/**
+ * Lấy daily missions cá nhân hóa.
+ */
+export interface MissionItem {
+    mission_id: string
+    type: 'review' | 'weak_practice' | 'new_phoneme' | 'sentence'
+    label: string
+    description: string
+    target_text: string
+    target_type: string
+    phoneme: string | null
+    priority: number
+    completed: boolean
+}
+
+export async function getDailyMissions(): Promise<{
+    date: string
+    missions: MissionItem[]
+    total_missions: number
+    completed_count: number
+    streak_bonus: boolean
+}> {
+    return api('/api/v1/pronunciation/missions/today', { method: 'GET' })
+}
+
+/**
+ * Lấy phoneme mastery map (44 phonemes + status).
+ */
+export interface PhonemeMasteryItem {
+    phoneme: string
+    mastery_level: number
+    avg_score: number | null
+    total_attempts: number
+    status: 'unseen' | 'learning' | 'familiar' | 'practiced' | 'mastered'
+}
+
+export async function getMasteryMap(): Promise<{
+    phonemes: PhonemeMasteryItem[]
+}> {
+    return api('/api/v1/pronunciation/mastery/map', { method: 'GET' })
+}
+
+/**
+ * Lấy mastery summary cho Radar Chart.
+ */
+export async function getMasterySummary(): Promise<{
+    categories: Record<
+        string,
+        { avg_mastery: number; practiced_count: number; total_phonemes: number }
+    >
+    total_mastered: number
+    total_learning: number
+    total_unseen: number
+    due_for_review_count: number
+}> {
+    return api('/api/v1/pronunciation/mastery/summary', { method: 'GET' })
+}
