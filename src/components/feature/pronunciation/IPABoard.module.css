@@ -261,36 +261,44 @@
     color: #38bdf8;
 }
 
-/* Modal */
+/* Modal (Full-page Viewport Portal) */
 .modalOverlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(6px);
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
+    z-index: var(--primitive-z-modal, 1050);
     padding: 16px;
-    animation: fadeIn 0.2s ease-out;
+    animation: modalOverlayFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .modalContent {
     background: var(--color-surface-card, #ffffff);
     border: 1px solid var(--color-border-soft, #cbd5e1);
     border-radius: 20px;
-    width: 100%;
-    max-width: 680px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+    width: min(720px, calc(100vw - 32px));
+    max-height: min(88vh, 820px);
+    box-shadow:
+        0 25px 60px -15px rgba(0, 0, 0, 0.35),
+        0 0 0 1px rgba(0, 0, 0, 0.05);
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    animation: modalContentPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 :global([data-theme='dark']) .modalContent {
     background: #0f172a;
-    border-color: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow:
+        0 25px 60px -15px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 .modalHeader {
@@ -607,6 +615,26 @@
     to {
         opacity: 1;
         transform: scale(1);
+    }
+}
+
+@keyframes modalOverlayFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes modalContentPopIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
     }
 }
 

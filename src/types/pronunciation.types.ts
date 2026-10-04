@@ -11,6 +11,11 @@ export interface ComponentScores {
     stress?: number
     intonation?: number
     rhythm?: number
+    individual_sounds?: number
+    word_stress?: number
+    sentence_stress?: number
+    linking?: number
+    [key: string]: number | undefined
 }
 
 export interface PhonemeItem {

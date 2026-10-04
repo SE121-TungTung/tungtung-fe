@@ -1,0 +1,19 @@
+.wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.5rem;
+}
+
+.svg {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+}
+
+.label {
+    font-size: 10px;
+    fill: var(--color-text-secondary);
+    font-weight: 700;
+    font-family: inherit;
+}

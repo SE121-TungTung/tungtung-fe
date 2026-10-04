@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { Link } from 'react-router-dom'
+import TextType from '@/components/common/text/TextType'
+import Card from '@/components/common/card/Card'
 import { MicRecorder } from '@/components/feature/pronunciation/MicRecorder'
 import { PhonemeHighlight } from '@/components/feature/pronunciation/PhonemeHighlight'
 import { IPABoard } from '@/components/feature/pronunciation/IPABoard'
 import { AIFeedbackMarkdown } from '@/components/feature/pronunciation/AIFeedbackMarkdown'
+import { PronunciationDashboard } from '@/components/feature/pronunciation/PronunciationDashboard'
 import {
     VolumeIcon,
     HistoryIcon,
@@ -61,9 +64,20 @@ export default function PronunciationPracticePage() {
     // Chuẩn giọng đánh giá: US (Mỹ) hoặc UK (Anh)
     const [accent, setAccent] = useState<'US' | 'UK'>('US')
 
-    // Sidebar Tab state
+    // Header animated typing state
+    const [showGradientName, setShowGradientName] = useState(false)
+    const handleGreetingComplete = useCallback(() => {
+        setShowGradientName(true)
+    }, [])
+
+    // Practice Mode: Guided (lộ trình cá nhân) vs Self-guide (tự chọn tự do)
+    const [practiceMode, setPracticeMode] = useState<'guided' | 'self-guide'>(
+        'guided'
+    )
+
+    // Sidebar Tab state — mặc định "Hôm nay" để user thấy bài tập ngay
     const [activeSidebarTab, setActiveSidebarTab] =
-        useState<SidebarTab>('roadmap')
+        useState<SidebarTab>('daily')
 
     // Roadmap state
     const [selectedRoadmapLevel, setSelectedRoadmapLevel] = useState<number>(1)
@@ -320,873 +334,1101 @@ export default function PronunciationPracticePage() {
 
     return (
         <div className={s.pageWrapper}>
-            {/* Header trang */}
-            <div className={s.pageHeader}>
-                <div className={s.headerContent}>
-                    <div className={s.badgeLabel}>
-                        <SparklesIcon size={14} />
-                        <span>AI IELTS Speech Lab</span>
-                    </div>
-                    <h1 className={s.pageTitle}>
-                        Phòng Luyện Phát Âm Trực Quan
-                    </h1>
-                    <p className={s.pageDescription}>
-                        Luyện khẩu hình chuẩn xác theo giọng Anh (UK) hoặc Mỹ
-                        (US), chọn theo lộ trình 4 cấp độ hoặc chuyên sâu từng
-                        âm vị IPA.
-                    </p>
+            {/* Header trang chuẩn TungTung: Căn giữa với hiệu ứng gõ chữ TextType */}
+            <div className={s.pageHeaderCentered}>
+                <div className={s.badgeLabel}>
+                    <SparklesIcon size={14} />
+                    <span>AI IELTS Speech Lab</span>
+                </div>
+                <h1 className={s.pageTitle}>
+                    <TextType
+                        text="Luyện phát âm "
+                        typingSpeed={50}
+                        loop={false}
+                        showCursor={!showGradientName}
+                        onSentenceComplete={handleGreetingComplete}
+                    />
+                    {showGradientName && (
+                        <TextType
+                            as="span"
+                            className={s.gradientText}
+                            text="chuẩn cùng AI"
+                            typingSpeed={70}
+                            loop={false}
+                        />
+                    )}
+                </h1>
+                <p className={s.pageDescription}>
+                    Luyện khẩu hình chuẩn xác theo chuẩn IPA quốc tế, lộ trình
+                    AI cá nhân hóa &amp; đối chiếu âm vị thời gian thực.
+                </p>
+            </div>
+
+            {/* Thanh công cụ phân tầng phân lớp (Chia 2 bên cân đối, không dồn trái) */}
+            <div className={s.controlToolbar}>
+                {/* Cánh trái: Segmented Pill Switcher (Guided vs Self-guide) */}
+                <div
+                    className={s.practiceSegmentedControl}
+                    role="tablist"
+                    aria-label="Chế độ luyện tập"
+                >
+                    <button
+                        type="button"
+                        role="tab"
+                        aria-selected={practiceMode === 'guided'}
+                        className={`${s.practiceSegmentBtn} ${practiceMode === 'guided' ? s.practiceSegmentBtnActive : ''}`}
+                        onClick={() => setPracticeMode('guided')}
+                    >
+                        <TargetIcon size={15} className={s.segmentIcon} />
+                        <span>Lộ Trình AI (Guided)</span>
+                        {practiceMode === 'guided' && (
+                            <span
+                                className={s.segmentActivePillDot}
+                                aria-hidden="true"
+                            />
+                        )}
+                    </button>
+                    <button
+                        type="button"
+                        role="tab"
+                        aria-selected={practiceMode === 'self-guide'}
+                        className={`${s.practiceSegmentBtn} ${practiceMode === 'self-guide' ? s.practiceSegmentBtnActive : ''}`}
+                        onClick={() => setPracticeMode('self-guide')}
+                    >
+                        <EditIcon size={15} className={s.segmentIcon} />
+                        <span>Tự Luyện Tập (Self-guide)</span>
+                        {practiceMode === 'self-guide' && (
+                            <span
+                                className={s.segmentActivePillDot}
+                                aria-hidden="true"
+                            />
+                        )}
+                    </button>
                 </div>
 
-                <div className={s.headerActions}>
+                {/* Cánh phải: Các lối tắt tiện ích */}
+                <div className={s.toolbarRight}>
+                    <button
+                        type="button"
+                        className={`${s.btnIpaToggle} ${showIpaModal ? s.btnIpaToggleActive : ''}`}
+                        onClick={() => setShowIpaModal(!showIpaModal)}
+                        title="Bảng 44 âm vị IPA quốc tế"
+                    >
+                        <BookOpenIcon size={16} />
+                        <span>
+                            {showIpaModal
+                                ? 'Thu Gọn Bảng IPA'
+                                : 'Bảng 44 Âm IPA'}
+                        </span>
+                        <span className={s.toggleChevron}>
+                            {showIpaModal ? '▲' : '▼'}
+                        </span>
+                    </button>
+
+                    <Link
+                        to="/student/pronunciation/assessment"
+                        className={s.btnPlacementLink}
+                        title="Đánh giá trình độ phát âm Placement Test"
+                    >
+                        <SparklesIcon size={15} />
+                        <span>Placement Test</span>
+                    </Link>
+
                     <Link
                         to="/student/pronunciation/history"
                         className={s.btnHistoryLink}
                         title="Xem chuỗi streak và lịch sử luyện tập"
                     >
-                        <HistoryIcon size={16} />
-                        <span>Lịch sử & Streak</span>
+                        <HistoryIcon size={15} />
+                        <span>Lịch Sử &amp; Streak</span>
                     </Link>
-
-                    <button
-                        type="button"
-                        className={s.btnOpenIpa}
-                        onClick={() => setShowIpaModal(!showIpaModal)}
-                    >
-                        <BookOpenIcon size={16} />
-                        <span>
-                            {showIpaModal ? 'Ẩn Bảng IPA' : 'Bảng 44 Âm IPA'}
-                        </span>
-                    </button>
                 </div>
             </div>
 
-            {/* Layout chính: 2 cột */}
-            <div className={s.mainLayout}>
-                {/* Cột trái: Lựa chọn chế độ & Ngân hàng bài tập */}
-                <aside className={s.sidebar}>
-                    <div className={s.sidebarCard}>
-                        {/* Thanh Tab chính */}
-                        <div className={s.tabSwitcher}>
-                            <button
-                                type="button"
-                                className={`${s.tabSwitchBtn} ${activeSidebarTab === 'roadmap' ? s.tabSwitchActive : ''}`}
-                                onClick={() => setActiveSidebarTab('roadmap')}
-                                title="Lộ trình luyện phát âm từ cơ bản đến nâng cao"
-                            >
-                                <RoadmapIcon size={14} />
-                                <span>Lộ trình</span>
-                            </button>
-                            <button
-                                type="button"
-                                className={`${s.tabSwitchBtn} ${activeSidebarTab === 'phonemes' ? s.tabSwitchActive : ''}`}
-                                onClick={() => setActiveSidebarTab('phonemes')}
-                                title="Luyện theo từng âm vị IPA & Shuffle theo âm"
-                            >
-                                <SparklesIcon size={14} />
-                                <span>Theo Âm</span>
-                            </button>
-                            <button
-                                type="button"
-                                className={`${s.tabSwitchBtn} ${activeSidebarTab === 'daily' ? s.tabSwitchActive : ''}`}
-                                onClick={() => setActiveSidebarTab('daily')}
-                                title="Thử thách luyện phát âm hàng ngày"
-                            >
-                                <CalendarIcon size={14} />
-                                <span>Hôm nay</span>
-                            </button>
-                            <button
-                                type="button"
-                                className={`${s.tabSwitchBtn} ${activeSidebarTab === 'presets' ? s.tabSwitchActive : ''}`}
-                                onClick={() => setActiveSidebarTab('presets')}
-                                title="Kho từ điển phong phú"
-                            >
-                                <TargetIcon size={14} />
-                                <span>Từ điển</span>
-                            </button>
-                            <button
-                                type="button"
-                                className={`${s.tabSwitchBtn} ${activeSidebarTab === 'drill' ? s.tabSwitchActive : ''}`}
-                                onClick={() => setActiveSidebarTab('drill')}
-                                title="Drill bài tập IELTS theo chủ đề"
-                            >
-                                <ZapIcon size={14} />
-                                <span>Drill</span>
-                            </button>
-                        </div>
-
-                        {/* TAB 1: LỘ TRÌNH BÀI TẬP PHÁT ÂM (ROADMAP) */}
-                        {activeSidebarTab === 'roadmap' && (
-                            <div className={s.roadmapSection}>
-                                <div className={s.sectionHeaderRow}>
-                                    <h3 className={s.sidebarTitle}>
-                                        Lộ trình 4 Cấp độ
+            {/* Section mở rộng Bảng 44 Âm IPA (Expand/Collapse tinh tế ngay trên trang) */}
+            {showIpaModal && (
+                <section className={s.ipaCollapsibleSection}>
+                    <Card variant="outline" className={s.ipaCardWrapper}>
+                        <div className={s.ipaCardHeader}>
+                            <div className={s.ipaCardTitleGroup}>
+                                <div className={s.ipaIconBadge}>
+                                    <BookOpenIcon size={18} />
+                                </div>
+                                <div>
+                                    <h3 className={s.ipaCardHeading}>
+                                        Bảng 44 Âm Vị Quốc Tế (IPA) Chuẩn Oxford
                                     </h3>
-                                    <button
-                                        type="button"
-                                        className={s.btnMiniShuffle}
-                                        onClick={handleShuffleRandom}
-                                        title="Lấy ngẫu nhiên bài tập trong cấp độ này"
-                                    >
-                                        <ShuffleIcon size={13} />
-                                        <span>Shuffle bài</span>
-                                    </button>
-                                </div>
-
-                                {/* Thanh chọn cấp độ */}
-                                <div className={s.levelPillList}>
-                                    {ROADMAP_LEVELS.map((lvl) => (
-                                        <button
-                                            key={lvl.id}
-                                            type="button"
-                                            className={`${s.levelPillBtn} ${selectedRoadmapLevel === lvl.id ? s.levelPillActive : ''}`}
-                                            onClick={() =>
-                                                setSelectedRoadmapLevel(lvl.id)
-                                            }
-                                        >
-                                            <span className={s.levelBadgeNum}>
-                                                Cấp {lvl.id}
-                                            </span>
-                                            <span className={s.levelTitleText}>
-                                                {lvl.title.replace(
-                                                    `Cấp ${lvl.id}: `,
-                                                    ''
-                                                )}
-                                            </span>
-                                        </button>
-                                    ))}
-                                </div>
-
-                                <div className={s.levelDescCard}>
-                                    <p className={s.levelDescText}>
-                                        {activeRoadmapLevel.description}
+                                    <p className={s.ipaCardSubheading}>
+                                        Bấm vào từng âm vị để nghe khẩu hình mẫu
+                                        và chọn từ vựng thực hành
                                     </p>
-                                </div>
-
-                                {/* Danh sách các bài tập trong cấp độ */}
-                                <div className={s.presetsList}>
-                                    {activeRoadmapLevel.groups.map(
-                                        (group, gIdx) => (
-                                            <div
-                                                key={gIdx}
-                                                className={s.presetGroup}
-                                            >
-                                                <span className={s.groupHeader}>
-                                                    {group.title}
-                                                </span>
-                                                <div
-                                                    className={
-                                                        s.itemsPillContainer
-                                                    }
-                                                >
-                                                    {group.items.map(
-                                                        (item, iIdx) => (
-                                                            <button
-                                                                key={iIdx}
-                                                                type="button"
-                                                                className={`${s.presetPill} ${targetText === item.text ? s.pillActive : ''}`}
-                                                                onClick={() =>
-                                                                    handleSelectTarget(
-                                                                        item.text,
-                                                                        group.targetType
-                                                                    )
-                                                                }
-                                                            >
-                                                                {item.text}
-                                                            </button>
-                                                        )
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )
-                                    )}
                                 </div>
                             </div>
-                        )}
+                            <button
+                                type="button"
+                                className={s.ipaCardCloseBtn}
+                                onClick={() => setShowIpaModal(false)}
+                                title="Thu gọn bảng IPA"
+                            >
+                                Thu gọn ▲
+                            </button>
+                        </div>
+                        <IPABoard
+                            onSelectPhoneme={(phoneme) => {
+                                setSelectedPhonemeSymbol(phoneme.symbol)
+                                setActiveSidebarTab('phonemes')
+                                setShowIpaModal(false)
+                                if (practiceMode !== 'self-guide') {
+                                    setPracticeMode('self-guide')
+                                }
+                            }}
+                        />
+                    </Card>
+                </section>
+            )}
 
-                        {/* TAB 2: LUYỆN THEO ÂM VỊ & SHUFFLE THEO ÂM */}
-                        {activeSidebarTab === 'phonemes' && (
-                            <div className={s.phonemeSection}>
-                                <div className={s.sectionHeaderRow}>
-                                    <h3 className={s.sidebarTitle}>
-                                        Chọn âm vị để luyện
-                                    </h3>
-                                    <button
-                                        type="button"
-                                        className={s.btnMiniShuffle}
-                                        onClick={handleShuffleRandom}
-                                        title="Lấy ngẫu nhiên từ chứa âm này"
-                                    >
-                                        <ShuffleIcon size={13} />
-                                        <span>Shuffle từ</span>
-                                    </button>
-                                </div>
+            {/* Layout chính: Dashboard rộng rãi (Guided) hoặc 2 cột Luyện tập (Self-guide) */}
+            {practiceMode === 'guided' ? (
+                <div className={s.guidedWrapper}>
+                    <PronunciationDashboard
+                        onStartPractice={(text, type) => {
+                            handleSelectTarget(text, type as TargetType)
+                            setPracticeMode('self-guide')
+                        }}
+                    />
+                </div>
+            ) : (
+                <div className={s.mainLayout}>
+                    <aside className={s.sidebar}>
+                        <div className={s.sidebarCard}>
+                            {/* Thanh Tab chính */}
+                            <div className={s.tabSwitcher}>
+                                <button
+                                    type="button"
+                                    className={`${s.tabSwitchBtn} ${activeSidebarTab === 'roadmap' ? s.tabSwitchActive : ''}`}
+                                    onClick={() =>
+                                        setActiveSidebarTab('roadmap')
+                                    }
+                                    title="Lộ trình luyện phát âm từ cơ bản đến nâng cao"
+                                >
+                                    <RoadmapIcon size={14} />
+                                    <span>Lộ trình</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`${s.tabSwitchBtn} ${activeSidebarTab === 'phonemes' ? s.tabSwitchActive : ''}`}
+                                    onClick={() =>
+                                        setActiveSidebarTab('phonemes')
+                                    }
+                                    title="Luyện theo từng âm vị IPA & Shuffle theo âm"
+                                >
+                                    <SparklesIcon size={14} />
+                                    <span>Theo Âm</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`${s.tabSwitchBtn} ${activeSidebarTab === 'daily' ? s.tabSwitchActive : ''}`}
+                                    onClick={() => setActiveSidebarTab('daily')}
+                                    title="Thử thách luyện phát âm hàng ngày"
+                                >
+                                    <CalendarIcon size={14} />
+                                    <span>Hôm nay</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`${s.tabSwitchBtn} ${activeSidebarTab === 'presets' ? s.tabSwitchActive : ''}`}
+                                    onClick={() =>
+                                        setActiveSidebarTab('presets')
+                                    }
+                                    title="Kho từ điển phong phú"
+                                >
+                                    <TargetIcon size={14} />
+                                    <span>Từ điển</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`${s.tabSwitchBtn} ${activeSidebarTab === 'drill' ? s.tabSwitchActive : ''}`}
+                                    onClick={() => setActiveSidebarTab('drill')}
+                                    title="Drill bài tập IELTS theo chủ đề"
+                                >
+                                    <ZapIcon size={14} />
+                                    <span>Drill</span>
+                                </button>
+                            </div>
 
-                                {/* Lưới các âm vị IPA phổ biến */}
-                                <div className={s.phonemeGrid}>
-                                    {PHONEME_GROUPS.map((g) => (
+                            {/* TAB 1: LỘ TRÌNH BÀI TẬP PHÁT ÂM (ROADMAP) */}
+                            {activeSidebarTab === 'roadmap' && (
+                                <div className={s.roadmapSection}>
+                                    <div className={s.sectionHeaderRow}>
+                                        <h3 className={s.sidebarTitle}>
+                                            Lộ trình 4 Cấp độ
+                                        </h3>
                                         <button
-                                            key={g.symbol}
                                             type="button"
-                                            className={`${s.phonemeGridBtn} ${selectedPhonemeSymbol === g.symbol ? s.phonemeGridActive : ''}`}
-                                            onClick={() => {
-                                                setSelectedPhonemeSymbol(
-                                                    g.symbol
-                                                )
-                                                handleSelectTarget(
-                                                    g.words[0].text,
-                                                    'word'
-                                                )
-                                            }}
+                                            className={s.btnMiniShuffle}
+                                            onClick={handleShuffleRandom}
+                                            title="Lấy ngẫu nhiên bài tập trong cấp độ này"
                                         >
-                                            <strong className={s.phonemeSym}>
-                                                {g.symbol}
-                                            </strong>
-                                            <span className={s.phonemeSample}>
-                                                {g.exampleWord}
-                                            </span>
+                                            <ShuffleIcon size={13} />
+                                            <span>Shuffle bài</span>
                                         </button>
-                                    ))}
-                                </div>
-
-                                {/* Chi tiết âm vị đang chọn */}
-                                <div className={s.activePhonemeCard}>
-                                    <div className={s.activePhonemeHeader}>
-                                        <span className={s.activePhonemeBadge}>
-                                            {activePhonemeGroup.symbol}
-                                        </span>
-                                        <div className={s.activePhonemeMeta}>
-                                            <strong
-                                                className={s.activePhonemeName}
-                                            >
-                                                {activePhonemeGroup.name}
-                                            </strong>
-                                            <span
-                                                className={s.activePhonemeType}
-                                            >
-                                                {activePhonemeGroup.type ===
-                                                'vowel'
-                                                    ? 'Nguyên âm'
-                                                    : 'Phụ âm'}
-                                            </span>
-                                        </div>
                                     </div>
-                                    <p className={s.activePhonemeTip}>
-                                        {activePhonemeGroup.description}
-                                    </p>
-                                </div>
 
-                                {/* Danh sách từ chứa âm */}
-                                <div className={s.phonemeWordsList}>
-                                    <span className={s.groupHeader}>
-                                        Kho từ chứa âm{' '}
-                                        {activePhonemeGroup.symbol} (
-                                        {activePhonemeGroup.words.length} từ):
-                                    </span>
-                                    <div className={s.itemsPillContainer}>
-                                        {activePhonemeGroup.words.map(
-                                            (w, idx) => (
-                                                <button
-                                                    key={idx}
-                                                    type="button"
-                                                    className={`${s.presetPill} ${targetText === w.text ? s.pillActive : ''}`}
-                                                    onClick={() =>
-                                                        handleSelectTarget(
-                                                            w.text,
-                                                            'word'
-                                                        )
-                                                    }
+                                    {/* Thanh chọn cấp độ */}
+                                    <div className={s.levelPillList}>
+                                        {ROADMAP_LEVELS.map((lvl) => (
+                                            <button
+                                                key={lvl.id}
+                                                type="button"
+                                                className={`${s.levelPillBtn} ${selectedRoadmapLevel === lvl.id ? s.levelPillActive : ''}`}
+                                                onClick={() =>
+                                                    setSelectedRoadmapLevel(
+                                                        lvl.id
+                                                    )
+                                                }
+                                            >
+                                                <span
+                                                    className={s.levelBadgeNum}
                                                 >
-                                                    {w.text}
-                                                </button>
+                                                    Cấp {lvl.id}
+                                                </span>
+                                                <span
+                                                    className={s.levelTitleText}
+                                                >
+                                                    {lvl.title.replace(
+                                                        `Cấp ${lvl.id}: `,
+                                                        ''
+                                                    )}
+                                                </span>
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    <div className={s.levelDescCard}>
+                                        <p className={s.levelDescText}>
+                                            {activeRoadmapLevel.description}
+                                        </p>
+                                    </div>
+
+                                    {/* Danh sách các bài tập trong cấp độ */}
+                                    <div className={s.presetsList}>
+                                        {activeRoadmapLevel.groups.map(
+                                            (group, gIdx) => (
+                                                <div
+                                                    key={gIdx}
+                                                    className={s.presetGroup}
+                                                >
+                                                    <span
+                                                        className={
+                                                            s.groupHeader
+                                                        }
+                                                    >
+                                                        {group.title}
+                                                    </span>
+                                                    <div
+                                                        className={
+                                                            s.itemsPillContainer
+                                                        }
+                                                    >
+                                                        {group.items.map(
+                                                            (item, iIdx) => (
+                                                                <button
+                                                                    key={iIdx}
+                                                                    type="button"
+                                                                    className={`${s.presetPill} ${targetText === item.text ? s.pillActive : ''}`}
+                                                                    onClick={() =>
+                                                                        handleSelectTarget(
+                                                                            item.text,
+                                                                            group.targetType
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    {item.text}
+                                                                </button>
+                                                            )
+                                                        )}
+                                                    </div>
+                                                </div>
                                             )
                                         )}
                                     </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        {/* TAB 3: THỬ THÁCH HÀNG NGÀY (DAILY PRACTICE) */}
-                        {activeSidebarTab === 'daily' && (
-                            <div className={s.dailySection}>
-                                <div className={s.sectionHeaderRow}>
-                                    <h3 className={s.sidebarTitle}>
-                                        Thử thách hôm nay
-                                    </h3>
-                                    <button
-                                        type="button"
-                                        className={s.btnMiniShuffle}
-                                        onClick={() =>
-                                            setDailySeed((prev) => prev + 1)
-                                        }
-                                        title="Đổi bộ bài tập hôm nay"
-                                    >
-                                        <RefreshIcon size={13} />
-                                        <span>Đổi bộ mới</span>
-                                    </button>
-                                </div>
-
-                                <div className={s.dailyProgressCard}>
-                                    <div className={s.dailyProgressInfo}>
-                                        <span className={s.dailyProgressLabel}>
-                                            Tiến độ hoàn thành:
-                                        </span>
-                                        <strong className={s.dailyProgressVal}>
-                                            {completedDailyTasks.length} /{' '}
-                                            {dailyChallenges.length}
-                                        </strong>
-                                    </div>
-                                    <div className={s.progressBarTrack}>
-                                        <div
-                                            className={s.progressBarFill}
-                                            style={{
-                                                width: `${(completedDailyTasks.length / dailyChallenges.length) * 100}%`,
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className={s.dailyTaskList}>
-                                    {dailyChallenges.map((task) => {
-                                        const isDone =
-                                            completedDailyTasks.includes(
-                                                task.id
-                                            )
-                                        const isCurrent =
-                                            targetText.toLowerCase() ===
-                                            task.text.toLowerCase()
-
-                                        return (
-                                            <button
-                                                key={task.id}
-                                                type="button"
-                                                className={`${s.dailyTaskCard} ${isCurrent ? s.dailyTaskCurrent : ''} ${isDone ? s.dailyTaskDone : ''}`}
-                                                onClick={() =>
-                                                    handleSelectTarget(
-                                                        task.text,
-                                                        task.type
-                                                    )
-                                                }
-                                            >
-                                                <div
-                                                    className={
-                                                        s.dailyTaskHeader
-                                                    }
-                                                >
-                                                    <span
-                                                        className={
-                                                            s.dailyTaskBadge
-                                                        }
-                                                    >
-                                                        {task.label}
-                                                    </span>
-                                                    {isDone && (
-                                                        <span
-                                                            className={
-                                                                s.doneCheck
-                                                            }
-                                                        >
-                                                            <CheckCircleIcon
-                                                                size={16}
-                                                            />
-                                                            <span>Đã đạt</span>
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <strong
-                                                    className={s.dailyTaskText}
-                                                >
-                                                    &ldquo;{task.text}&rdquo;
-                                                </strong>
-                                                <span
-                                                    className={s.dailyTaskHint}
-                                                >
-                                                    {task.hint}
-                                                </span>
-                                            </button>
-                                        )
-                                    })}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* TAB 4: KHO TỪ ĐIỂN & SHUFFLE CẢ DANH SÁCH (PRESETS) */}
-                        {activeSidebarTab === 'presets' && (
-                            <>
-                                <div className={s.sectionHeaderRow}>
-                                    <h3 className={s.sidebarTitle}>
-                                        Kho từ điển
-                                    </h3>
-                                    {/* Nút Shuffle đổi toàn bộ danh sách */}
-                                    <button
-                                        type="button"
-                                        className={s.btnMiniShuffle}
-                                        onClick={handleShuffleEntireList}
-                                        title="Đổi toàn bộ danh sách từ vựng/câu ngẫu nhiên từ ngân hàng từ điển"
-                                    >
-                                        <ShuffleIcon size={13} />
-                                        <span>Shuffle cả list</span>
-                                    </button>
-                                </div>
-
-                                <div className={s.modeSelector}>
-                                    <button
-                                        type="button"
-                                        className={`${s.modeBtn} ${targetType === 'word' ? s.modeActive : ''}`}
-                                        onClick={() => {
-                                            setTargetType('word')
-                                            if (currentWordList.length > 0) {
-                                                handleSelectTarget(
-                                                    currentWordList[0].text,
-                                                    'word'
-                                                )
-                                            }
-                                        }}
-                                    >
-                                        Từ vựng
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className={`${s.modeBtn} ${targetType === 'sentence' ? s.modeActive : ''}`}
-                                        onClick={() => {
-                                            setTargetType('sentence')
-                                            if (
-                                                currentSentenceList.length > 0
-                                            ) {
-                                                handleSelectTarget(
-                                                    currentSentenceList[0].text,
-                                                    'sentence'
-                                                )
-                                            }
-                                        }}
-                                    >
-                                        Câu nói
-                                    </button>
-                                </div>
-
-                                {/* Tự nhập nội dung tùy thích */}
-                                <div className={s.customInputSection}>
-                                    {!isCustomMode ? (
+                            {/* TAB 2: LUYỆN THEO ÂM VỊ & SHUFFLE THEO ÂM */}
+                            {activeSidebarTab === 'phonemes' && (
+                                <div className={s.phonemeSection}>
+                                    <div className={s.sectionHeaderRow}>
+                                        <h3 className={s.sidebarTitle}>
+                                            Chọn âm vị để luyện
+                                        </h3>
                                         <button
                                             type="button"
-                                            className={s.btnToggleCustom}
-                                            onClick={() =>
-                                                setIsCustomMode(true)
-                                            }
+                                            className={s.btnMiniShuffle}
+                                            onClick={handleShuffleRandom}
+                                            title="Lấy ngẫu nhiên từ chứa âm này"
                                         >
-                                            <EditIcon size={14} />
-                                            <span>
-                                                Nhập câu / từ tùy chỉnh...
-                                            </span>
+                                            <ShuffleIcon size={13} />
+                                            <span>Shuffle từ</span>
                                         </button>
-                                    ) : (
-                                        <form
-                                            onSubmit={handleApplyCustom}
-                                            className={s.customForm}
-                                        >
-                                            <textarea
-                                                value={customInput}
-                                                onChange={(e) =>
-                                                    setCustomInput(
-                                                        e.target.value
-                                                    )
-                                                }
-                                                placeholder={`Nhập ${targetType === 'word' ? 'từ' : 'câu'} tiếng Anh bạn muốn luyện...`}
-                                                className={s.customTextarea}
-                                                autoFocus
-                                            />
-                                            <div
-                                                className={s.customFormActions}
-                                            >
-                                                <button
-                                                    type="button"
-                                                    className={
-                                                        s.btnCancelCustom
-                                                    }
-                                                    onClick={() =>
-                                                        setIsCustomMode(false)
-                                                    }
-                                                >
-                                                    Hủy
-                                                </button>
-                                                <button
-                                                    type="submit"
-                                                    className={s.btnApplyCustom}
-                                                >
-                                                    Áp dụng
-                                                </button>
-                                            </div>
-                                        </form>
-                                    )}
-                                </div>
+                                    </div>
 
-                                {/* Danh sách từ vựng / câu hiển thị */}
-                                <div className={s.presetsList}>
-                                    <div className={s.presetGroup}>
+                                    {/* Lưới các âm vị IPA phổ biến */}
+                                    <div className={s.phonemeGrid}>
+                                        {PHONEME_GROUPS.map((g) => (
+                                            <button
+                                                key={g.symbol}
+                                                type="button"
+                                                className={`${s.phonemeGridBtn} ${selectedPhonemeSymbol === g.symbol ? s.phonemeGridActive : ''}`}
+                                                onClick={() => {
+                                                    setSelectedPhonemeSymbol(
+                                                        g.symbol
+                                                    )
+                                                    handleSelectTarget(
+                                                        g.words[0].text,
+                                                        'word'
+                                                    )
+                                                }}
+                                            >
+                                                <strong
+                                                    className={s.phonemeSym}
+                                                >
+                                                    {g.symbol}
+                                                </strong>
+                                                <span
+                                                    className={s.phonemeSample}
+                                                >
+                                                    {g.exampleWord}
+                                                </span>
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    {/* Chi tiết âm vị đang chọn */}
+                                    <div className={s.activePhonemeCard}>
+                                        <div className={s.activePhonemeHeader}>
+                                            <span
+                                                className={s.activePhonemeBadge}
+                                            >
+                                                {activePhonemeGroup.symbol}
+                                            </span>
+                                            <div
+                                                className={s.activePhonemeMeta}
+                                            >
+                                                <strong
+                                                    className={
+                                                        s.activePhonemeName
+                                                    }
+                                                >
+                                                    {activePhonemeGroup.name}
+                                                </strong>
+                                                <span
+                                                    className={
+                                                        s.activePhonemeType
+                                                    }
+                                                >
+                                                    {activePhonemeGroup.type ===
+                                                    'vowel'
+                                                        ? 'Nguyên âm'
+                                                        : 'Phụ âm'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <p className={s.activePhonemeTip}>
+                                            {activePhonemeGroup.description}
+                                        </p>
+                                    </div>
+
+                                    {/* Danh sách từ chứa âm */}
+                                    <div className={s.phonemeWordsList}>
                                         <span className={s.groupHeader}>
-                                            {targetType === 'word'
-                                                ? `Danh sách từ vựng (${currentWordList.length} từ ngẫu nhiên)`
-                                                : `Danh sách câu luyện tập (${currentSentenceList.length} câu ngẫu nhiên)`}
+                                            Kho từ chứa âm{' '}
+                                            {activePhonemeGroup.symbol} (
+                                            {activePhonemeGroup.words.length}{' '}
+                                            từ):
                                         </span>
                                         <div className={s.itemsPillContainer}>
-                                            {(targetType === 'word'
-                                                ? currentWordList
-                                                : currentSentenceList
-                                            ).map((item, iIdx) => (
+                                            {activePhonemeGroup.words.map(
+                                                (w, idx) => (
+                                                    <button
+                                                        key={idx}
+                                                        type="button"
+                                                        className={`${s.presetPill} ${targetText === w.text ? s.pillActive : ''}`}
+                                                        onClick={() =>
+                                                            handleSelectTarget(
+                                                                w.text,
+                                                                'word'
+                                                            )
+                                                        }
+                                                    >
+                                                        {w.text}
+                                                    </button>
+                                                )
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* TAB 3: THỬ THÁCH HÀNG NGÀY (DAILY PRACTICE) */}
+                            {activeSidebarTab === 'daily' && (
+                                <div className={s.dailySection}>
+                                    <div className={s.sectionHeaderRow}>
+                                        <h3 className={s.sidebarTitle}>
+                                            Thử thách hôm nay
+                                        </h3>
+                                        <button
+                                            type="button"
+                                            className={s.btnMiniShuffle}
+                                            onClick={() =>
+                                                setDailySeed((prev) => prev + 1)
+                                            }
+                                            title="Đổi bộ bài tập hôm nay"
+                                        >
+                                            <RefreshIcon size={13} />
+                                            <span>Đổi bộ mới</span>
+                                        </button>
+                                    </div>
+
+                                    <div className={s.dailyProgressCard}>
+                                        <div className={s.dailyProgressInfo}>
+                                            <span
+                                                className={s.dailyProgressLabel}
+                                            >
+                                                Tiến độ hoàn thành:
+                                            </span>
+                                            <strong
+                                                className={s.dailyProgressVal}
+                                            >
+                                                {completedDailyTasks.length} /{' '}
+                                                {dailyChallenges.length}
+                                            </strong>
+                                        </div>
+                                        <div className={s.progressBarTrack}>
+                                            <div
+                                                className={s.progressBarFill}
+                                                style={{
+                                                    width: `${(completedDailyTasks.length / dailyChallenges.length) * 100}%`,
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className={s.dailyTaskList}>
+                                        {dailyChallenges.map((task) => {
+                                            const isDone =
+                                                completedDailyTasks.includes(
+                                                    task.id
+                                                )
+                                            const isCurrent =
+                                                targetText.toLowerCase() ===
+                                                task.text.toLowerCase()
+
+                                            return (
                                                 <button
-                                                    key={iIdx}
+                                                    key={task.id}
                                                     type="button"
-                                                    className={`${s.presetPill} ${targetText === item.text ? s.pillActive : ''}`}
+                                                    className={`${s.dailyTaskCard} ${isCurrent ? s.dailyTaskCurrent : ''} ${isDone ? s.dailyTaskDone : ''}`}
                                                     onClick={() =>
                                                         handleSelectTarget(
-                                                            item.text,
-                                                            item.targetType
+                                                            task.text,
+                                                            task.type
                                                         )
                                                     }
                                                 >
-                                                    {item.text}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            </>
-                        )}
-
-                        {/* TAB 5: DRILL MODE - 6 IELTS TOPICS */}
-                        {activeSidebarTab === 'drill' && (
-                            <div className={s.drillModeSection}>
-                                <div className={s.drillHeader}>
-                                    <h3 className={s.sidebarTitle}>
-                                        Chọn chủ đề IELTS
-                                    </h3>
-                                    <span className={s.drillBadge}>
-                                        5 từ/câu ngẫu nhiên
-                                    </span>
-                                </div>
-
-                                <div className={s.topicsGrid}>
-                                    {DRILL_TOPICS.map((topic) => (
-                                        <button
-                                            key={topic.key}
-                                            type="button"
-                                            className={`${s.topicBtn} ${selectedDrillTopic === topic.key ? s.topicActive : ''}`}
-                                            onClick={() =>
-                                                setSelectedDrillTopic(topic.key)
-                                            }
-                                        >
-                                            {topic.label}
-                                        </button>
-                                    ))}
-                                </div>
-
-                                <div className={s.drillItemsBox}>
-                                    <div className={s.drillItemsHeader}>
-                                        <span className={s.drillItemsTitle}>
-                                            Danh sách gợi ý theo chủ đề
-                                        </span>
-                                        <button
-                                            type="button"
-                                            className={s.btnRefreshDrill}
-                                            onClick={() =>
-                                                loadDrillSuggestions(
-                                                    selectedDrillTopic
-                                                )
-                                            }
-                                            disabled={isLoadingDrill}
-                                        >
-                                            <RefreshIcon size={12} />
-                                            <span>Lấy bộ khác</span>
-                                        </button>
-                                    </div>
-
-                                    {isLoadingDrill ? (
-                                        <div className={s.loadingDrill}>
-                                            Đang tạo bài tập theo chủ đề...
-                                        </div>
-                                    ) : (
-                                        <div className={s.drillList}>
-                                            {drillItems.map((item, idx) => (
-                                                <button
-                                                    key={idx}
-                                                    type="button"
-                                                    className={`${s.drillPill} ${targetText === item ? s.pillActive : ''}`}
-                                                    onClick={() =>
-                                                        handleSelectTarget(item)
-                                                    }
-                                                >
-                                                    <span
-                                                        className={s.drillNum}
+                                                    <div
+                                                        className={
+                                                            s.dailyTaskHeader
+                                                        }
                                                     >
-                                                        {idx + 1}.
+                                                        <span
+                                                            className={
+                                                                s.dailyTaskBadge
+                                                            }
+                                                        >
+                                                            {task.label}
+                                                        </span>
+                                                        {isDone && (
+                                                            <span
+                                                                className={
+                                                                    s.doneCheck
+                                                                }
+                                                            >
+                                                                <CheckCircleIcon
+                                                                    size={16}
+                                                                />
+                                                                <span>
+                                                                    Đã đạt
+                                                                </span>
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <strong
+                                                        className={
+                                                            s.dailyTaskText
+                                                        }
+                                                    >
+                                                        &ldquo;{task.text}
+                                                        &rdquo;
+                                                    </strong>
+                                                    <span
+                                                        className={
+                                                            s.dailyTaskHint
+                                                        }
+                                                    >
+                                                        {task.hint}
                                                     </span>
-                                                    <span>{item}</span>
                                                 </button>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </aside>
-
-                {/* Khu vực trung tâm: Bảng thực hành & Chấm điểm */}
-                <main className={s.practiceArea}>
-                    {/* Thẻ hiển thị mục tiêu luyện tập */}
-                    <div className={s.targetCard}>
-                        <div className={s.targetHeaderRow}>
-                            <div className={s.headerBadgesRow}>
-                                <span className={s.targetTypeBadge}>
-                                    {targetType === 'word'
-                                        ? 'Target Word'
-                                        : targetType === 'sentence'
-                                          ? 'Target Sentence'
-                                          : 'Target Paragraph'}
-                                </span>
-
-                                {/* Bộ chọn chuẩn giọng UK vs US (Point 5) */}
-                                <div className={s.accentSwitcher}>
-                                    <button
-                                        type="button"
-                                        className={`${s.accentBtn} ${accent === 'US' ? s.accentActive : ''}`}
-                                        onClick={() => setAccent('US')}
-                                        title="Chuyển sang chuẩn giọng Mỹ (General American)"
-                                    >
-                                        <span className={s.accentTag}>US</span>
-                                        <span>Giọng Mỹ</span>
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className={`${s.accentBtn} ${accent === 'UK' ? s.accentActive : ''}`}
-                                        onClick={() => setAccent('UK')}
-                                        title="Chuyển sang chuẩn giọng Anh (Received Pronunciation)"
-                                    >
-                                        <span className={s.accentTag}>UK</span>
-                                        <span>Giọng Anh</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className={s.targetHeaderActions}>
-                                <button
-                                    type="button"
-                                    className={s.btnShuffleTarget}
-                                    onClick={handleShuffleRandom}
-                                    title="Đổi 1 từ / câu ngẫu nhiên"
-                                >
-                                    <ShuffleIcon size={15} />
-                                    <span>Đổi 1 bài</span>
-                                </button>
-
-                                <button
-                                    type="button"
-                                    className={s.btnListenNative}
-                                    onClick={speakTargetText}
-                                    title={`Nghe giọng đọc bản xứ (${accent})`}
-                                >
-                                    <VolumeIcon size={15} />
-                                    <span>Nghe mẫu ({accent})</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className={s.targetTextDisplay}>
-                            &ldquo;{targetText}&rdquo;
-                        </div>
-
-                        {/* Hiển thị cả US và UK IPA cho cả từ và câu (Point 7) */}
-                        <div className={s.ipaDualContainer}>
-                            <div
-                                className={`${s.ipaBadgeCol} ${accent === 'US' ? s.ipaBadgeActive : ''}`}
-                                onClick={() => setAccent('US')}
-                                title="Nhấp để chọn chuẩn giọng Mỹ"
-                            >
-                                <span className={s.ipaColLabel}>US (Mỹ):</span>
-                                <strong className={s.ipaColCode}>
-                                    /
-                                    {analysisResult &&
-                                    accent === 'US' &&
-                                    analysisResult.target_ipa
-                                        ? analysisResult.target_ipa
-                                        : activeIpaData.us}
-                                    /
-                                </strong>
-                            </div>
-
-                            <div
-                                className={`${s.ipaBadgeCol} ${accent === 'UK' ? s.ipaBadgeActive : ''}`}
-                                onClick={() => setAccent('UK')}
-                                title="Nhấp để chọn chuẩn giọng Anh"
-                            >
-                                <span className={s.ipaColLabel}>UK (Anh):</span>
-                                <strong className={s.ipaColCode}>
-                                    /
-                                    {analysisResult &&
-                                    accent === 'UK' &&
-                                    analysisResult.target_ipa
-                                        ? analysisResult.target_ipa
-                                        : activeIpaData.uk}
-                                    /
-                                </strong>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Bộ ghi âm tích hợp Waveform (key={targetText} và resetKey={targetText} bảo đảm reset triệt để khi đổi từ) */}
-                    <MicRecorder
-                        key={targetText}
-                        resetKey={targetText}
-                        onRecordingComplete={handleRecordingComplete}
-                        isAnalyzing={isAnalyzing}
-                        maxDurationSeconds={
-                            targetType === 'paragraph'
-                                ? 90
-                                : targetType === 'sentence'
-                                  ? 30
-                                  : 15
-                        }
-                        onReset={() => {
-                            setAnalysisResult(null)
-                            setErrorMsg(null)
-                        }}
-                    />
-
-                    {/* Lỗi nếu có */}
-                    {errorMsg && (
-                        <div className={s.errorAlert}>
-                            <AlertTriangleIcon size={16} />
-                            <span>{errorMsg}</span>
-                        </div>
-                    )}
-
-                    {/* Khung kết quả phân tích AI */}
-                    {analysisResult && (
-                        <div className={s.resultSection}>
-                            {/* Score Overview Card */}
-                            <div className={s.scoreOverviewCard}>
-                                <div className={s.scoreGaugeCol}>
-                                    <div className={s.circularScore}>
-                                        <span className={s.scoreNumber}>
-                                            {Math.round(
-                                                analysisResult.overall_score
-                                            )}
-                                        </span>
-                                        <span className={s.scoreMax}>/100</span>
-                                    </div>
-                                    <div className={s.scoreVerdict}>
-                                        <span className={s.verdictLevel}>
-                                            {
-                                                getBandEstimate(
-                                                    analysisResult.overall_score
-                                                ).cefr
-                                            }
-                                        </span>
-                                        <span className={s.verdictBand}>
-                                            IELTS Speaking Band ~{' '}
-                                            {
-                                                getBandEstimate(
-                                                    analysisResult.overall_score
-                                                ).band
-                                            }
-                                        </span>
+                                            )
+                                        })}
                                     </div>
                                 </div>
-
-                                {/* 4 chỉ số chi tiết */}
-                                <div className={s.subScoresGrid}>
-                                    <div className={s.subScoreItem}>
-                                        <span className={s.subScoreLabel}>
-                                            Phát âm (Accuracy)
-                                        </span>
-                                        <strong className={s.subScoreVal}>
-                                            {Math.round(
-                                                analysisResult.component_scores
-                                                    ?.accuracy ??
-                                                    analysisResult.overall_score
-                                            )}
-                                            %
-                                        </strong>
-                                    </div>
-                                    <div className={s.subScoreItem}>
-                                        <span className={s.subScoreLabel}>
-                                            Lưu loát (Fluency)
-                                        </span>
-                                        <strong className={s.subScoreVal}>
-                                            {Math.round(
-                                                analysisResult.component_scores
-                                                    ?.fluency ?? 85
-                                            )}
-                                            %
-                                        </strong>
-                                    </div>
-                                    <div className={s.subScoreItem}>
-                                        <span className={s.subScoreLabel}>
-                                            Độ trọn vẹn (Completeness)
-                                        </span>
-                                        <strong className={s.subScoreVal}>
-                                            {Math.round(
-                                                analysisResult.component_scores
-                                                    ?.completeness ?? 90
-                                            )}
-                                            %
-                                        </strong>
-                                    </div>
-                                    <div className={s.subScoreItem}>
-                                        <span className={s.subScoreLabel}>
-                                            Ngữ điệu & Trọng âm
-                                        </span>
-                                        <strong className={s.subScoreVal}>
-                                            {Math.round(
-                                                analysisResult.component_scores
-                                                    ?.prosody ?? 80
-                                            )}
-                                            %
-                                        </strong>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Khối âm vị PhonemeHighlight */}
-                            <PhonemeHighlight
-                                phonemes={analysisResult.phoneme_results}
-                                targetText={analysisResult.target_text}
-                                targetIpa={analysisResult.target_ipa}
-                                actualIpa={analysisResult.actual_ipa}
-                            />
-
-                            {/* Nhận xét AI chuyên gia định dạng thẻ chuẩn đẹp (Point 4) */}
-                            {analysisResult.feedback_text && (
-                                <AIFeedbackMarkdown
-                                    content={analysisResult.feedback_text}
-                                />
                             )}
 
-                            {/* Nút hành động sau khi có kết quả */}
-                            <div className={s.actionsRow}>
-                                <button
-                                    type="button"
-                                    className={s.btnNextTarget}
-                                    onClick={handleNextWord}
+                            {/* TAB 4: KHO TỪ ĐIỂN & SHUFFLE CẢ DANH SÁCH (PRESETS) */}
+                            {activeSidebarTab === 'presets' && (
+                                <>
+                                    <div className={s.sectionHeaderRow}>
+                                        <h3 className={s.sidebarTitle}>
+                                            Kho từ điển
+                                        </h3>
+                                        {/* Nút Shuffle đổi toàn bộ danh sách */}
+                                        <button
+                                            type="button"
+                                            className={s.btnMiniShuffle}
+                                            onClick={handleShuffleEntireList}
+                                            title="Đổi toàn bộ danh sách từ vựng/câu ngẫu nhiên từ ngân hàng từ điển"
+                                        >
+                                            <ShuffleIcon size={13} />
+                                            <span>Shuffle cả list</span>
+                                        </button>
+                                    </div>
+
+                                    <div className={s.presetTargetTypeSelector}>
+                                        <button
+                                            type="button"
+                                            className={`${s.presetTargetTypeBtn} ${targetType === 'word' ? s.presetTargetTypeActive : ''}`}
+                                            onClick={() => {
+                                                setTargetType('word')
+                                                if (
+                                                    currentWordList.length > 0
+                                                ) {
+                                                    handleSelectTarget(
+                                                        currentWordList[0].text,
+                                                        'word'
+                                                    )
+                                                }
+                                            }}
+                                        >
+                                            Từ vựng
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className={`${s.presetTargetTypeBtn} ${targetType === 'sentence' ? s.presetTargetTypeActive : ''}`}
+                                            onClick={() => {
+                                                setTargetType('sentence')
+                                                if (
+                                                    currentSentenceList.length >
+                                                    0
+                                                ) {
+                                                    handleSelectTarget(
+                                                        currentSentenceList[0]
+                                                            .text,
+                                                        'sentence'
+                                                    )
+                                                }
+                                            }}
+                                        >
+                                            Câu nói
+                                        </button>
+                                    </div>
+
+                                    {/* Tự nhập nội dung tùy thích */}
+                                    <div className={s.customInputSection}>
+                                        {!isCustomMode ? (
+                                            <button
+                                                type="button"
+                                                className={s.btnToggleCustom}
+                                                onClick={() =>
+                                                    setIsCustomMode(true)
+                                                }
+                                            >
+                                                <EditIcon size={14} />
+                                                <span>
+                                                    Nhập câu / từ tùy chỉnh...
+                                                </span>
+                                            </button>
+                                        ) : (
+                                            <form
+                                                onSubmit={handleApplyCustom}
+                                                className={s.customForm}
+                                            >
+                                                <textarea
+                                                    value={customInput}
+                                                    onChange={(e) =>
+                                                        setCustomInput(
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    placeholder={`Nhập ${targetType === 'word' ? 'từ' : 'câu'} tiếng Anh bạn muốn luyện...`}
+                                                    className={s.customTextarea}
+                                                    autoFocus
+                                                />
+                                                <div
+                                                    className={
+                                                        s.customFormActions
+                                                    }
+                                                >
+                                                    <button
+                                                        type="button"
+                                                        className={
+                                                            s.btnCancelCustom
+                                                        }
+                                                        onClick={() =>
+                                                            setIsCustomMode(
+                                                                false
+                                                            )
+                                                        }
+                                                    >
+                                                        Hủy
+                                                    </button>
+                                                    <button
+                                                        type="submit"
+                                                        className={
+                                                            s.btnApplyCustom
+                                                        }
+                                                    >
+                                                        Áp dụng
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        )}
+                                    </div>
+
+                                    {/* Danh sách từ vựng / câu hiển thị */}
+                                    <div className={s.presetsList}>
+                                        <div className={s.presetGroup}>
+                                            <span className={s.groupHeader}>
+                                                {targetType === 'word'
+                                                    ? `Danh sách từ vựng (${currentWordList.length} từ ngẫu nhiên)`
+                                                    : `Danh sách câu luyện tập (${currentSentenceList.length} câu ngẫu nhiên)`}
+                                            </span>
+                                            <div
+                                                className={s.itemsPillContainer}
+                                            >
+                                                {(targetType === 'word'
+                                                    ? currentWordList
+                                                    : currentSentenceList
+                                                ).map((item, iIdx) => (
+                                                    <button
+                                                        key={iIdx}
+                                                        type="button"
+                                                        className={`${s.presetPill} ${targetText === item.text ? s.pillActive : ''}`}
+                                                        onClick={() =>
+                                                            handleSelectTarget(
+                                                                item.text,
+                                                                item.targetType
+                                                            )
+                                                        }
+                                                    >
+                                                        {item.text}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+
+                            {/* TAB 5: DRILL MODE - 6 IELTS TOPICS */}
+                            {activeSidebarTab === 'drill' && (
+                                <div className={s.drillModeSection}>
+                                    <div className={s.drillHeader}>
+                                        <h3 className={s.sidebarTitle}>
+                                            Chọn chủ đề IELTS
+                                        </h3>
+                                        <span className={s.drillBadge}>
+                                            5 từ/câu ngẫu nhiên
+                                        </span>
+                                    </div>
+
+                                    <div className={s.topicsGrid}>
+                                        {DRILL_TOPICS.map((topic) => (
+                                            <button
+                                                key={topic.key}
+                                                type="button"
+                                                className={`${s.topicBtn} ${selectedDrillTopic === topic.key ? s.topicActive : ''}`}
+                                                onClick={() =>
+                                                    setSelectedDrillTopic(
+                                                        topic.key
+                                                    )
+                                                }
+                                            >
+                                                {topic.label}
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    <div className={s.drillItemsBox}>
+                                        <div className={s.drillItemsHeader}>
+                                            <span className={s.drillItemsTitle}>
+                                                Danh sách gợi ý theo chủ đề
+                                            </span>
+                                            <button
+                                                type="button"
+                                                className={s.btnRefreshDrill}
+                                                onClick={() =>
+                                                    loadDrillSuggestions(
+                                                        selectedDrillTopic
+                                                    )
+                                                }
+                                                disabled={isLoadingDrill}
+                                            >
+                                                <RefreshIcon size={12} />
+                                                <span>Lấy bộ khác</span>
+                                            </button>
+                                        </div>
+
+                                        {isLoadingDrill ? (
+                                            <div className={s.loadingDrill}>
+                                                Đang tạo bài tập theo chủ đề...
+                                            </div>
+                                        ) : (
+                                            <div className={s.drillList}>
+                                                {drillItems.map((item, idx) => (
+                                                    <button
+                                                        key={idx}
+                                                        type="button"
+                                                        className={`${s.drillPill} ${targetText === item ? s.pillActive : ''}`}
+                                                        onClick={() =>
+                                                            handleSelectTarget(
+                                                                item
+                                                            )
+                                                        }
+                                                    >
+                                                        <span
+                                                            className={
+                                                                s.drillNum
+                                                            }
+                                                        >
+                                                            {idx + 1}.
+                                                        </span>
+                                                        <span>{item}</span>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </aside>
+
+                    {/* Khu vực trung tâm: Bảng thực hành & Chấm điểm */}
+                    <main className={s.practiceArea}>
+                        {/* Thẻ hiển thị mục tiêu luyện tập */}
+                        <div className={s.targetCard}>
+                            <div className={s.targetHeaderRow}>
+                                <div className={s.headerBadgesRow}>
+                                    <span className={s.targetTypeBadge}>
+                                        {targetType === 'word'
+                                            ? 'Target Word'
+                                            : targetType === 'sentence'
+                                              ? 'Target Sentence'
+                                              : 'Target Paragraph'}
+                                    </span>
+
+                                    {/* Bộ chọn chuẩn giọng UK vs US (Point 5) */}
+                                    <div className={s.accentSwitcher}>
+                                        <button
+                                            type="button"
+                                            className={`${s.accentBtn} ${accent === 'US' ? s.accentActive : ''}`}
+                                            onClick={() => setAccent('US')}
+                                            title="Chuyển sang chuẩn giọng Mỹ (General American)"
+                                        >
+                                            <span className={s.accentTag}>
+                                                US
+                                            </span>
+                                            <span>Giọng Mỹ</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className={`${s.accentBtn} ${accent === 'UK' ? s.accentActive : ''}`}
+                                            onClick={() => setAccent('UK')}
+                                            title="Chuyển sang chuẩn giọng Anh (Received Pronunciation)"
+                                        >
+                                            <span className={s.accentTag}>
+                                                UK
+                                            </span>
+                                            <span>Giọng Anh</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className={s.targetHeaderActions}>
+                                    <button
+                                        type="button"
+                                        className={s.btnShuffleTarget}
+                                        onClick={handleShuffleRandom}
+                                        title="Đổi 1 từ / câu ngẫu nhiên"
+                                    >
+                                        <ShuffleIcon size={15} />
+                                        <span>Đổi 1 bài</span>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        className={s.btnListenNative}
+                                        onClick={speakTargetText}
+                                        title={`Nghe giọng đọc bản xứ (${accent})`}
+                                    >
+                                        <VolumeIcon size={15} />
+                                        <span>Nghe mẫu ({accent})</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className={s.targetTextDisplay}>
+                                &ldquo;{targetText}&rdquo;
+                            </div>
+
+                            {/* Hiển thị cả US và UK IPA cho cả từ và câu (Point 7) */}
+                            <div className={s.ipaDualContainer}>
+                                <div
+                                    className={`${s.ipaBadgeCol} ${accent === 'US' ? s.ipaBadgeActive : ''}`}
+                                    onClick={() => setAccent('US')}
+                                    title="Nhấp để chọn chuẩn giọng Mỹ"
                                 >
-                                    <ShuffleIcon size={16} />
-                                    <span>Từ / Câu tiếp theo →</span>
-                                </button>
+                                    <span className={s.ipaColLabel}>
+                                        US (Mỹ):
+                                    </span>
+                                    <strong className={s.ipaColCode}>
+                                        /
+                                        {analysisResult &&
+                                        accent === 'US' &&
+                                        analysisResult.target_ipa
+                                            ? analysisResult.target_ipa
+                                            : activeIpaData.us}
+                                        /
+                                    </strong>
+                                </div>
+
+                                <div
+                                    className={`${s.ipaBadgeCol} ${accent === 'UK' ? s.ipaBadgeActive : ''}`}
+                                    onClick={() => setAccent('UK')}
+                                    title="Nhấp để chọn chuẩn giọng Anh"
+                                >
+                                    <span className={s.ipaColLabel}>
+                                        UK (Anh):
+                                    </span>
+                                    <strong className={s.ipaColCode}>
+                                        /
+                                        {analysisResult &&
+                                        accent === 'UK' &&
+                                        analysisResult.target_ipa
+                                            ? analysisResult.target_ipa
+                                            : activeIpaData.uk}
+                                        /
+                                    </strong>
+                                </div>
                             </div>
                         </div>
-                    )}
-                </main>
-            </div>
 
-            {/* Bảng IPA tương tác (hiển thị khi bấm mở) */}
-            {showIpaModal && (
-                <div className={s.ipaBoardContainer}>
-                    <IPABoard
-                        onSelectPhoneme={(symbol) => {
-                            setSelectedPhonemeSymbol(symbol)
-                            setActiveSidebarTab('phonemes')
-                            setShowIpaModal(false)
-                        }}
-                    />
+                        {/* Bộ ghi âm tích hợp Waveform (key={targetText} và resetKey={targetText} bảo đảm reset triệt để khi đổi từ) */}
+                        <MicRecorder
+                            key={targetText}
+                            resetKey={targetText}
+                            onRecordingComplete={handleRecordingComplete}
+                            isAnalyzing={isAnalyzing}
+                            maxDurationSeconds={
+                                targetType === 'paragraph'
+                                    ? 90
+                                    : targetType === 'sentence'
+                                      ? 30
+                                      : 15
+                            }
+                            onReset={() => {
+                                setAnalysisResult(null)
+                                setErrorMsg(null)
+                            }}
+                        />
+
+                        {/* Lỗi nếu có */}
+                        {errorMsg && (
+                            <div className={s.errorAlert}>
+                                <AlertTriangleIcon size={16} />
+                                <span>{errorMsg}</span>
+                            </div>
+                        )}
+
+                        {/* Cảnh báo chất lượng thu âm kém */}
+                        {analysisResult &&
+                            (() => {
+                                const phonemes =
+                                    analysisResult.phoneme_results || []
+                                const avgConf =
+                                    phonemes.length > 0
+                                        ? phonemes.reduce(
+                                              (
+                                                  sum: number,
+                                                  p: { confidence?: number }
+                                              ) => sum + (p.confidence ?? 1),
+                                              0
+                                          ) / phonemes.length
+                                        : 1
+                                if (avgConf < 0.3 && phonemes.length > 0) {
+                                    return (
+                                        <div className={s.errorAlert}>
+                                            <AlertTriangleIcon size={16} />
+                                            <span>
+                                                Chất lượng thu âm thấp
+                                                (confidence{' '}
+                                                {Math.round(avgConf * 100)}%) —
+                                                vui lòng thử lại ở nơi yên tĩnh
+                                                hơn. Kết quả dưới đây có thể
+                                                chưa chính xác.
+                                            </span>
+                                        </div>
+                                    )
+                                }
+                                return null
+                            })()}
+
+                        {/* Khung kết quả phân tích AI */}
+                        {analysisResult && (
+                            <div className={s.resultSection}>
+                                {/* Score Overview Card */}
+                                <div className={s.scoreOverviewCard}>
+                                    <div className={s.scoreGaugeCol}>
+                                        <div className={s.circularScore}>
+                                            <span className={s.scoreNumber}>
+                                                {Math.round(
+                                                    analysisResult.overall_score
+                                                )}
+                                            </span>
+                                            <span className={s.scoreMax}>
+                                                /100
+                                            </span>
+                                        </div>
+                                        <div className={s.scoreVerdict}>
+                                            <span className={s.verdictLevel}>
+                                                {
+                                                    getBandEstimate(
+                                                        analysisResult.overall_score
+                                                    ).cefr
+                                                }
+                                            </span>
+                                            <span className={s.verdictBand}>
+                                                IELTS Speaking Band ~{' '}
+                                                {
+                                                    getBandEstimate(
+                                                        analysisResult.overall_score
+                                                    ).band
+                                                }
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* 4 chỉ số chi tiết — hiển thị "—" nếu AI không trả score */}
+                                    <div className={s.subScoresGrid}>
+                                        <div className={s.subScoreItem}>
+                                            <span className={s.subScoreLabel}>
+                                                Âm vị (Individual Sounds)
+                                            </span>
+                                            <strong className={s.subScoreVal}>
+                                                {analysisResult.component_scores
+                                                    ?.individual_sounds != null
+                                                    ? `${Math.round(analysisResult.component_scores.individual_sounds)}%`
+                                                    : '—'}
+                                            </strong>
+                                        </div>
+                                        <div className={s.subScoreItem}>
+                                            <span className={s.subScoreLabel}>
+                                                Trọng âm từ (Word Stress)
+                                            </span>
+                                            <strong className={s.subScoreVal}>
+                                                {analysisResult.component_scores
+                                                    ?.word_stress != null
+                                                    ? `${Math.round(analysisResult.component_scores.word_stress)}%`
+                                                    : '—'}
+                                            </strong>
+                                        </div>
+                                        <div className={s.subScoreItem}>
+                                            <span className={s.subScoreLabel}>
+                                                {targetType === 'sentence'
+                                                    ? 'Trọng âm câu'
+                                                    : 'Nối âm (Linking)'}
+                                            </span>
+                                            <strong className={s.subScoreVal}>
+                                                {targetType === 'sentence'
+                                                    ? analysisResult
+                                                          .component_scores
+                                                          ?.sentence_stress !=
+                                                      null
+                                                        ? `${Math.round(analysisResult.component_scores.sentence_stress)}%`
+                                                        : '—'
+                                                    : analysisResult
+                                                            .component_scores
+                                                            ?.linking != null
+                                                      ? `${Math.round(analysisResult.component_scores.linking)}%`
+                                                      : '—'}
+                                            </strong>
+                                        </div>
+                                        <div className={s.subScoreItem}>
+                                            <span className={s.subScoreLabel}>
+                                                Ngữ điệu (Intonation)
+                                            </span>
+                                            <strong className={s.subScoreVal}>
+                                                {analysisResult.component_scores
+                                                    ?.intonation != null
+                                                    ? `${Math.round(analysisResult.component_scores.intonation)}%`
+                                                    : '—'}
+                                            </strong>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Khối âm vị PhonemeHighlight */}
+                                <PhonemeHighlight
+                                    phonemes={analysisResult.phoneme_results}
+                                    targetText={analysisResult.target_text}
+                                    targetIpa={analysisResult.target_ipa}
+                                    actualIpa={analysisResult.actual_ipa}
+                                />
+
+                                {/* Nhận xét AI chuyên gia định dạng thẻ chuẩn đẹp (Point 4) */}
+                                {analysisResult.feedback_text && (
+                                    <AIFeedbackMarkdown
+                                        content={analysisResult.feedback_text}
+                                    />
+                                )}
+
+                                {/* Nút hành động sau khi có kết quả */}
+                                <div className={s.actionsRow}>
+                                    <button
+                                        type="button"
+                                        className={s.btnNextTarget}
+                                        onClick={() => {
+                                            setAnalysisResult(null)
+                                            setErrorMsg(null)
+                                        }}
+                                        title="Luyện lại từ/câu hiện tại"
+                                    >
+                                        <RefreshIcon size={16} />
+                                        <span>Thử lại</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={s.btnNextTarget}
+                                        onClick={handleNextWord}
+                                    >
+                                        <ShuffleIcon size={16} />
+                                        <span>Từ / Câu tiếp theo →</span>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </main>
                 </div>
             )}
         </div>

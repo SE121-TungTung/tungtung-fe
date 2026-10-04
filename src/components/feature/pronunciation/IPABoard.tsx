@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { IPA_PHONEMES } from './ipaData'
 import { MouthDiagram } from './MouthDiagram'
 import {
@@ -28,6 +29,26 @@ export const IPABoard: React.FC<IPABoardProps> = ({
     const [activeDetailPhoneme, setActiveDetailPhoneme] =
         useState<IPAPhonemeInfo | null>(null)
     const [playingSymbol, setPlayingSymbol] = useState<string | null>(null)
+
+    // Khóa cuộn trang khi modal mở và lắng nghe phím ESC để đóng
+    useEffect(() => {
+        if (!activeDetailPhoneme) return
+
+        const originalOverflow = document.body.style.overflow
+        document.body.style.overflow = 'hidden'
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                setActiveDetailPhoneme(null)
+            }
+        }
+        window.addEventListener('keydown', handleKeyDown)
+
+        return () => {
+            document.body.style.overflow = originalOverflow
+            window.removeEventListener('keydown', handleKeyDown)
+        }
+    }, [activeDetailPhoneme])
 
     // Phát âm thanh mẫu (thử audio file trước, fallback sang SpeechSynthesis)
     const playPhonemeSound = (
@@ -218,178 +239,187 @@ export const IPABoard: React.FC<IPABoardProps> = ({
                 })}
             </div>
 
-            {/* Modal / Card chi tiết hướng dẫn khẩu hình miệng */}
-            {activeDetailPhoneme && (
-                <div
-                    className={s.modalOverlay}
-                    onClick={() => setActiveDetailPhoneme(null)}
-                >
+            {/* Modal / Card chi tiết hướng dẫn khẩu hình miệng (Mounted qua Portal ra document.body để full viewport) */}
+            {activeDetailPhoneme &&
+                createPortal(
                     <div
-                        className={s.modalContent}
-                        onClick={(e) => e.stopPropagation()}
+                        className={s.modalOverlay}
+                        onClick={() => setActiveDetailPhoneme(null)}
                     >
-                        <div className={s.modalHeader}>
-                            <div className={s.modalTitleGroup}>
-                                <span className={s.modalSymbol}>
-                                    {activeDetailPhoneme.ipa}
-                                </span>
-                                <div>
-                                    <h4 className={s.modalTitle}>
-                                        {activeDetailPhoneme.name}
-                                    </h4>
-                                    <span className={s.modalCategoryBadge}>
-                                        {activeDetailPhoneme.category ===
-                                        'monophthong'
-                                            ? 'Nguyên âm đơn'
-                                            : activeDetailPhoneme.category ===
-                                                'diphthong'
-                                              ? 'Nguyên âm đôi'
-                                              : activeDetailPhoneme.voicing ===
-                                                  'voiced'
-                                                ? 'Phụ âm hữu thanh'
-                                                : 'Phụ âm vô thanh'}
+                        <div
+                            className={s.modalContent}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className={s.modalHeader}>
+                                <div className={s.modalTitleGroup}>
+                                    <span className={s.modalSymbol}>
+                                        {activeDetailPhoneme.ipa}
                                     </span>
+                                    <div>
+                                        <h4 className={s.modalTitle}>
+                                            {activeDetailPhoneme.name}
+                                        </h4>
+                                        <span className={s.modalCategoryBadge}>
+                                            {activeDetailPhoneme.category ===
+                                            'monophthong'
+                                                ? 'Nguyên âm đơn'
+                                                : activeDetailPhoneme.category ===
+                                                    'diphthong'
+                                                  ? 'Nguyên âm đôi'
+                                                  : activeDetailPhoneme.voicing ===
+                                                      'voiced'
+                                                    ? 'Phụ âm hữu thanh'
+                                                    : 'Phụ âm vô thanh'}
+                                        </span>
+                                    </div>
                                 </div>
+
+                                <button
+                                    type="button"
+                                    className={s.modalClose}
+                                    onClick={() => setActiveDetailPhoneme(null)}
+                                >
+                                    <CloseIcon size={18} />
+                                </button>
                             </div>
 
-                            <button
-                                type="button"
-                                className={s.modalClose}
-                                onClick={() => setActiveDetailPhoneme(null)}
-                            >
-                                <CloseIcon size={18} />
-                            </button>
-                        </div>
-
-                        <div className={s.modalBody}>
-                            {/* Cột trái: Sơ đồ mặt cắt giải phẫu khẩu hình */}
-                            <div className={s.diagramCol}>
-                                <div className={s.diagramFrame}>
-                                    <MouthDiagram
-                                        phoneme={activeDetailPhoneme}
-                                        size={220}
-                                    />
-                                </div>
-                                <div className={s.wordSampleBox}>
-                                    <span className={s.wordSampleLabel}>
-                                        Từ mẫu:
-                                    </span>
-                                    <strong className={s.wordSampleValue}>
-                                        {activeDetailPhoneme.sampleWord}
-                                    </strong>
-                                    <span className={s.transcriptionValue}>
-                                        {
-                                            activeDetailPhoneme.sampleTranscription
-                                        }
-                                    </span>
-                                    <button
-                                        type="button"
-                                        className={s.btnPlayWord}
-                                        onClick={(e) =>
-                                            playPhonemeSound(
-                                                activeDetailPhoneme,
-                                                e
-                                            )
-                                        }
-                                    >
-                                        <VolumeIcon size={14} />
-                                        <span>Nghe mẫu</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Cột phải: Hướng dẫn chi tiết môi, răng, lưỡi */}
-                            <div className={s.guideCol}>
-                                <h5 className={s.guideSectionHeader}>
-                                    <SparklesIcon size={16} />
-                                    <span>Hướng dẫn cấu âm & Khẩu hình</span>
-                                </h5>
-
-                                <div className={s.guideGrid}>
-                                    <div className={s.guideItem}>
-                                        <strong className={s.guideKey}>
-                                            Vị trí Môi (Lips):
-                                        </strong>
-                                        <p className={s.guideVal}>
-                                            {
-                                                activeDetailPhoneme.mouthGuide
-                                                    .lips
-                                            }
-                                        </p>
-                                    </div>
-                                    <div className={s.guideItem}>
-                                        <strong className={s.guideKey}>
-                                            Vị trí Lưỡi (Tongue):
-                                        </strong>
-                                        <p className={s.guideVal}>
-                                            {
-                                                activeDetailPhoneme.mouthGuide
-                                                    .tongue
-                                            }
-                                        </p>
-                                    </div>
-                                    <div className={s.guideItem}>
-                                        <strong className={s.guideKey}>
-                                            Độ mở hàm (Jaw):
-                                        </strong>
-                                        <p className={s.guideVal}>
-                                            {activeDetailPhoneme.mouthGuide.jaw}
-                                        </p>
-                                    </div>
-                                    <div className={s.guideItem}>
-                                        <strong className={s.guideKey}>
-                                            Kỹ thuật tạo âm:
-                                        </strong>
-                                        <p className={s.guideVal}>
-                                            {
-                                                activeDetailPhoneme.mouthGuide
-                                                    .technique
-                                            }
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {activeDetailPhoneme.commonMistakes && (
-                                    <div className={s.mistakeAlert}>
-                                        <AlertTriangleIcon
-                                            size={16}
-                                            className={s.alertIcon}
+                            <div className={s.modalBody}>
+                                {/* Cột trái: Sơ đồ mặt cắt giải phẫu khẩu hình */}
+                                <div className={s.diagramCol}>
+                                    <div className={s.diagramFrame}>
+                                        <MouthDiagram
+                                            phoneme={activeDetailPhoneme}
+                                            size={220}
                                         />
-                                        <div>
-                                            <strong>
-                                                Lỗi người Việt hay mắc:
+                                    </div>
+                                    <div className={s.wordSampleBox}>
+                                        <span className={s.wordSampleLabel}>
+                                            Từ mẫu:
+                                        </span>
+                                        <strong className={s.wordSampleValue}>
+                                            {activeDetailPhoneme.sampleWord}
+                                        </strong>
+                                        <span className={s.transcriptionValue}>
+                                            {
+                                                activeDetailPhoneme.sampleTranscription
+                                            }
+                                        </span>
+                                        <button
+                                            type="button"
+                                            className={s.btnPlayWord}
+                                            onClick={(e) =>
+                                                playPhonemeSound(
+                                                    activeDetailPhoneme,
+                                                    e
+                                                )
+                                            }
+                                        >
+                                            <VolumeIcon size={14} />
+                                            <span>Nghe mẫu</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Cột phải: Hướng dẫn chi tiết môi, răng, lưỡi */}
+                                <div className={s.guideCol}>
+                                    <h5 className={s.guideSectionHeader}>
+                                        <SparklesIcon size={16} />
+                                        <span>
+                                            Hướng dẫn cấu âm & Khẩu hình
+                                        </span>
+                                    </h5>
+
+                                    <div className={s.guideGrid}>
+                                        <div className={s.guideItem}>
+                                            <strong className={s.guideKey}>
+                                                Vị trí Môi (Lips):
                                             </strong>
-                                            <p className={s.alertText}>
+                                            <p className={s.guideVal}>
                                                 {
-                                                    activeDetailPhoneme.commonMistakes
+                                                    activeDetailPhoneme
+                                                        .mouthGuide.lips
+                                                }
+                                            </p>
+                                        </div>
+                                        <div className={s.guideItem}>
+                                            <strong className={s.guideKey}>
+                                                Vị trí Lưỡi (Tongue):
+                                            </strong>
+                                            <p className={s.guideVal}>
+                                                {
+                                                    activeDetailPhoneme
+                                                        .mouthGuide.tongue
+                                                }
+                                            </p>
+                                        </div>
+                                        <div className={s.guideItem}>
+                                            <strong className={s.guideKey}>
+                                                Độ mở hàm (Jaw):
+                                            </strong>
+                                            <p className={s.guideVal}>
+                                                {
+                                                    activeDetailPhoneme
+                                                        .mouthGuide.jaw
+                                                }
+                                            </p>
+                                        </div>
+                                        <div className={s.guideItem}>
+                                            <strong className={s.guideKey}>
+                                                Kỹ thuật tạo âm:
+                                            </strong>
+                                            <p className={s.guideVal}>
+                                                {
+                                                    activeDetailPhoneme
+                                                        .mouthGuide.technique
                                                 }
                                             </p>
                                         </div>
                                     </div>
-                                )}
+
+                                    {activeDetailPhoneme.commonMistakes && (
+                                        <div className={s.mistakeAlert}>
+                                            <AlertTriangleIcon
+                                                size={16}
+                                                className={s.alertIcon}
+                                            />
+                                            <div>
+                                                <strong>
+                                                    Lỗi người Việt hay mắc:
+                                                </strong>
+                                                <p className={s.alertText}>
+                                                    {
+                                                        activeDetailPhoneme.commonMistakes
+                                                    }
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Nút hành động đưa vào luyện tập */}
+                            <div className={s.modalFooter}>
+                                <button
+                                    type="button"
+                                    className={s.btnSelectPractice}
+                                    onClick={() =>
+                                        handleSelectForPractice(
+                                            activeDetailPhoneme
+                                        )
+                                    }
+                                >
+                                    <MicIcon size={16} />
+                                    <span>
+                                        Chọn từ &quot;
+                                        {activeDetailPhoneme.sampleWord}&quot;
+                                        để luyện phát âm ngay
+                                    </span>
+                                </button>
                             </div>
                         </div>
-
-                        {/* Nút hành động đưa vào luyện tập */}
-                        <div className={s.modalFooter}>
-                            <button
-                                type="button"
-                                className={s.btnSelectPractice}
-                                onClick={() =>
-                                    handleSelectForPractice(activeDetailPhoneme)
-                                }
-                            >
-                                <MicIcon size={16} />
-                                <span>
-                                    Chọn từ &quot;
-                                    {activeDetailPhoneme.sampleWord}&quot; để
-                                    luyện phát âm ngay
-                                </span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+                    </div>,
+                    document.body
+                )}
         </div>
     )
 }
