@@ -37,6 +37,11 @@ const studyMenuItems: ExtendedSideMenuItem[] = [
         label: 'Luyện phát âm',
         href: '/student/pronunciation',
     },
+    {
+        id: 'flashcards',
+        label: 'Flashcards',
+        href: '/student/flashcards',
+    },
 ]
 
 const studentNavItems: AppNavItem[] = [

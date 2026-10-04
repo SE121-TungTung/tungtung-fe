@@ -17,6 +17,7 @@ interface ToolbarProps {
           }
     onAdd: (color: string) => void
     onRemove: (id: string) => void
+    onSaveWord?: () => void
 }
 
 const HIGHLIGHT_COLORS = [
@@ -29,6 +30,7 @@ export default function HighlightToolbar({
     state,
     onAdd,
     onRemove,
+    onSaveWord,
 }: ToolbarProps) {
     return (
         <div className={s.toolbar} style={{ top: state.top, left: state.left }}>
@@ -41,7 +43,32 @@ export default function HighlightToolbar({
                         aria-label={`Highlight ${color.name}`}
                         title={`Highlight ${color.name}`}
                     />
-                ))
+                )).concat(
+                    onSaveWord ? (
+                        <button
+                            key="save-word"
+                            className={s.saveWordBtn}
+                            onClick={onSaveWord}
+                            aria-label="Lưu từ vựng"
+                            title="Lưu từ vựng vào Flashcard"
+                        >
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M12 4v16m8-8H4"
+                                />
+                            </svg>
+                        </button>
+                    ) : (
+                        []
+                    )
+                )
             ) : (
                 <button
                     className={`${s.colorButton} ${s.remove}`}
