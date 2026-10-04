@@ -926,6 +926,21 @@ export const testApi = {
     },
 
     /**
+     * Start a new test attempt for guest
+     * Endpoint: POST /tests/{test_id}/guest-start?guest_session_id={guest_session_id}
+     */
+    startGuestAttempt: async (
+        testId: string,
+        guestSessionId: string
+    ): Promise<TestAttempt> => {
+        const response = await api<BackendStartAttemptResponse>(
+            `${BASE_URL}/${testId}/guest-start?guest_session_id=${guestSessionId}`,
+            { method: 'POST' }
+        )
+        return mapTestAttempt(response)
+    },
+
+    /**
      * Submit test attempt with all answers (except Speaking)
      * Endpoint: POST /tests/{attempt_id}/submit
      *
@@ -944,6 +959,25 @@ export const testApi = {
     ): Promise<SubmitResult> => {
         const response = await api<BackendSubmitAttemptResponse>(
             `${BASE_URL}/attempts/${attemptId}/submit`,
+            {
+                method: 'POST',
+                body: JSON.stringify(payload),
+            }
+        )
+        return mapSubmitResult(response)
+    },
+
+    /**
+     * Submit test attempt for guest
+     * Endpoint: POST /tests/attempts/guest/{attempt_id}/submit?guest_session_id={guest_session_id}
+     */
+    submitGuestAttempt: async (
+        attemptId: string,
+        payload: SubmitAttemptRequest,
+        guestSessionId: string
+    ): Promise<SubmitResult> => {
+        const response = await api<BackendSubmitAttemptResponse>(
+            `${BASE_URL}/attempts/guest/${attemptId}/submit?guest_session_id=${guestSessionId}`,
             {
                 method: 'POST',
                 body: JSON.stringify(payload),
@@ -1122,6 +1156,24 @@ export const testApi = {
             { method: 'GET' }
         )
         return response
+    },
+
+    /**
+     * Get my attempts wrapped with pagination info
+     */
+    getMyAttempts: async (params?: {
+        limit?: number
+    }): Promise<{ items: any[]; total: number }> => {
+        try {
+            const history = await testApi.listMyAttemptsHistory()
+            const list = Array.isArray(history) ? history : []
+            return {
+                items: params?.limit ? list.slice(0, params.limit) : list,
+                total: list.length,
+            }
+        } catch {
+            return { items: [], total: 0 }
+        }
     },
 
     /**

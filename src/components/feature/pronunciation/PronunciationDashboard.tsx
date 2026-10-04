@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import Card from '@/components/common/card/Card'
 import {
     getDailyMissions,
@@ -33,8 +33,6 @@ interface PronunciationDashboardProps {
 export const PronunciationDashboard: React.FC<PronunciationDashboardProps> = ({
     onStartPractice,
 }) => {
-    const navigate = useNavigate()
-
     // ── Queries ──
     const { data: assessment, isLoading: loadingAssessment } = useQuery({
         queryKey: ['pronunciation-assessment-latest'],

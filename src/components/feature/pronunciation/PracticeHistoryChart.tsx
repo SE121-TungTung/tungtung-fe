@@ -12,13 +12,14 @@ export const PracticeHistoryChart: React.FC<PracticeHistoryChartProps> = ({
     height = 200,
 }) => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null)
-    const [hoveredPoint, setHoveredPoint] = useState<{
+    const [hoveredPoint, _setHoveredPoint] = useState<{
         date: string
         score: number
         count: number
         x: number
         y: number
     } | null>(null)
+    void _setHoveredPoint
 
     // Dữ liệu mẫu 7 ngày gần nhất nếu chưa có đủ lịch sử từ backend
     const defaultData: RecentTrendItem[] = [

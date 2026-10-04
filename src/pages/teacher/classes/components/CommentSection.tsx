@@ -22,16 +22,18 @@ import {
     deletePostComment,
 } from '@/lib/classes'
 import { queryKeys } from '@/lib/queryKeys'
+import { useSession } from '@/stores/session.store'
 import s from './CommentSection.module.css'
 
 interface CommentSectionProps {
     classId: string
     postId: string
-    currentUserId: string
-    currentUserRole: string
+    currentUserId?: string
+    currentUserRole?: string
     /** ID giáo viên chủ nhiệm lớp — cần để kiểm tra quyền xóa */
     teacherId?: string
-    isCommentLocked: boolean
+    isCommentLocked?: boolean
+    isLocked?: boolean
     /** Số lượng comments để hiển thị trên header */
     commentCount?: number
 }
@@ -373,12 +375,18 @@ function CommentItem({
 export function CommentSection({
     classId,
     postId,
-    currentUserId,
-    currentUserRole,
+    currentUserId: propUserId,
+    currentUserRole: propUserRole,
     teacherId,
     isCommentLocked,
+    isLocked: propIsLocked,
     commentCount,
 }: CommentSectionProps) {
+    const { user: sessionUser } = useSession()
+    const currentUserId = propUserId ?? sessionUser?.id ?? ''
+    const currentUserRole = propUserRole ?? sessionUser?.role ?? ''
+    const locked = isCommentLocked ?? propIsLocked ?? false
+
     const queryClient = useQueryClient()
     const [showAll, setShowAll] = useState(false)
 
@@ -415,7 +423,7 @@ export function CommentSection({
                     Bình luận
                     {total > 0 && <span className={s.countBadge}>{total}</span>}
                 </span>
-                {isCommentLocked && (
+                {locked && (
                     <span className={s.lockedBadge}>
                         <svg
                             viewBox="0 0 24 24"
@@ -441,7 +449,7 @@ export function CommentSection({
             </div>
 
             {/* Locked banner */}
-            {isCommentLocked && (
+            {locked && (
                 <div className={s.lockedBanner}>
                     <svg
                         viewBox="0 0 24 24"
@@ -484,7 +492,7 @@ export function CommentSection({
                                 currentUserId={currentUserId}
                                 currentUserRole={currentUserRole}
                                 teacherId={teacherId}
-                                isLocked={isCommentLocked}
+                                isLocked={locked}
                             />
                         ))}
                     </div>
@@ -503,7 +511,7 @@ export function CommentSection({
             )}
 
             {/* New comment form */}
-            {!isCommentLocked && (
+            {!locked && (
                 <div className={s.newCommentWrap}>
                     <CommentForm
                         placeholder="Viết bình luận… (Ctrl+Enter để gửi)"

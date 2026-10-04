@@ -35,6 +35,8 @@ export type Permission =
  * Ánh xạ từ Role sang mảng các Permissions
  */
 const ROLES: Record<Role, Permission[]> = {
+    guest: [],
+    guest_student: ['course:read'],
     student: ['user:read', 'room:read', 'course:read', 'class:read'],
     ta: ['user:read', 'room:read', 'course:read', 'class:read'],
     teacher: [

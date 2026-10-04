@@ -107,7 +107,10 @@ export default function GuestTestResultPage() {
                 {/* Header Card */}
                 <Card className={s.headerCard} variant="outline">
                     <div className={s.headerInner}>
-                        <h2 className={s.testTitle}>{result.testTitle}</h2>
+                        <h2 className={s.testTitle}>
+                            {(result as any).testTitle ||
+                                'Bài kiểm tra năng lực'}
+                        </h2>
                     </div>
 
                     {/* Status Badge */}

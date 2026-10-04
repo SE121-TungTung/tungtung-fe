@@ -5,6 +5,8 @@ export const ALL_ROLES = [
     'office_admin',
     'center_admin',
     'system_admin',
+    'guest',
+    'guest_student',
 ] as const
 export type Role = (typeof ALL_ROLES)[number]
 

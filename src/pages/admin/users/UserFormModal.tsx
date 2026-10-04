@@ -33,6 +33,8 @@ const roleDisplayNames: Record<Role, string> = {
     office_admin: 'Admin Văn phòng',
     center_admin: 'Admin Trung tâm',
     system_admin: 'Admin Hệ thống',
+    guest: 'Khách',
+    guest_student: 'Học viên vãng lai',
 }
 
 const roleOptions = ALL_ROLES.map((role) => ({

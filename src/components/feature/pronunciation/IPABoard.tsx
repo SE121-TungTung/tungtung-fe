@@ -4,7 +4,6 @@ import { IPA_PHONEMES } from './ipaData'
 import { MouthDiagram } from './MouthDiagram'
 import {
     VolumeIcon,
-    SearchIcon,
     CloseIcon,
     MicIcon,
     SparklesIcon,

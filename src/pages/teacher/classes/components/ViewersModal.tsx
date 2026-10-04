@@ -9,13 +9,12 @@
  * Lưu ý: Toàn bộ sử dụng icon SVG chuẩn hóa, không dùng emoji.
  */
 
-import React, { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { formatDistanceToNow } from 'date-fns'
 import { vi } from 'date-fns/locale'
 import {
     getPostViewers,
-    type ViewerInfo,
     type InteractedStudentInfo,
     type DownloadedStudentInfo,
 } from '@/lib/classes'

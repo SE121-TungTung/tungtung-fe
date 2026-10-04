@@ -91,8 +91,6 @@ export default function GuestTestListPage() {
                 setTests(data)
             } else if (data && Array.isArray(data.tests)) {
                 setTests(data.tests)
-            } else if (data && Array.isArray(data.items)) {
-                setTests(data.items)
             } else {
                 console.warn('Unexpected API response structure:', data)
                 setTests([])
@@ -139,10 +137,6 @@ export default function GuestTestListPage() {
             console.error('Failed to start exam:', error)
             alert(error.message || 'Không thể bắt đầu bài thi')
         }
-    }
-
-    const handleGradingClick = (examId: string) => {
-        navigate(`/teacher/grading/${examId}`)
     }
 
     const filteredExams = useMemo(() => {
@@ -273,68 +267,73 @@ export default function GuestTestListPage() {
             <PublicHeader />
             <div className={s.pageWrapperWithoutHeader}>
                 <main className={s.mainContent}>
-                <h1 className={s.pageTitle}>
-                    <TextType
-                        text="Luyện thi "
-                        typingSpeed={50}
-                        loop={false}
-                        showCursor={!showGradientName}
-                        onSentenceComplete={handleGreetingComplete}
-                    />
-                    {showGradientName && (
+                    <h1 className={s.pageTitle}>
                         <TextType
-                            as="span"
-                            className={s.gradientText}
-                            text="IELTS"
-                            typingSpeed={70}
+                            text="Luyện thi "
+                            typingSpeed={50}
                             loop={false}
+                            showCursor={!showGradientName}
+                            onSentenceComplete={handleGreetingComplete}
                         />
-                    )}
-                </h1>
-
-                <div className={s.controlsBar}>
-                    {(selectedSkill !== null || contentMode === 'all') && (
-                        <div className={s.searchWrapper}>
-                            <InputField
-                                placeholder="Tìm kiếm bài thi..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                leftIcon={<img src={SearchIcon} alt="search" />}
-                                variant="soft"
-                                mode="light"
-                                uiSize="sm"
-                            />
-                        </div>
-                    )}
-
-                    <div className={s.viewControls}>
-                        <SegmentedControl
-                            items={contentModeItems}
-                            value={contentMode}
-                            onChange={(value) => {
-                                setContentMode(value as 'skill' | 'all')
-                                setSelectedSkill(null)
-                                setSearchTerm('')
-                            }}
-                            size="sm"
-                        />
-
-                        {(selectedSkill !== null || contentMode === 'all') && (
-                            <SegmentedControl
-                                items={displayModeItems}
-                                value={displayMode}
-                                onChange={(value) =>
-                                    setDisplayMode(value as 'grid' | 'list')
-                                }
-                                size="sm"
+                        {showGradientName && (
+                            <TextType
+                                as="span"
+                                className={s.gradientText}
+                                text="IELTS"
+                                typingSpeed={70}
+                                loop={false}
                             />
                         )}
-                    </div>
-                </div>
+                    </h1>
 
-                <div className={s.contentArea}>{renderContent()}</div>
-            </main>
-        </div>
+                    <div className={s.controlsBar}>
+                        {(selectedSkill !== null || contentMode === 'all') && (
+                            <div className={s.searchWrapper}>
+                                <InputField
+                                    placeholder="Tìm kiếm bài thi..."
+                                    value={searchTerm}
+                                    onChange={(e) =>
+                                        setSearchTerm(e.target.value)
+                                    }
+                                    leftIcon={
+                                        <img src={SearchIcon} alt="search" />
+                                    }
+                                    variant="soft"
+                                    mode="light"
+                                    uiSize="sm"
+                                />
+                            </div>
+                        )}
+
+                        <div className={s.viewControls}>
+                            <SegmentedControl
+                                items={contentModeItems}
+                                value={contentMode}
+                                onChange={(value) => {
+                                    setContentMode(value as 'skill' | 'all')
+                                    setSelectedSkill(null)
+                                    setSearchTerm('')
+                                }}
+                                size="sm"
+                            />
+
+                            {(selectedSkill !== null ||
+                                contentMode === 'all') && (
+                                <SegmentedControl
+                                    items={displayModeItems}
+                                    value={displayMode}
+                                    onChange={(value) =>
+                                        setDisplayMode(value as 'grid' | 'list')
+                                    }
+                                    size="sm"
+                                />
+                            )}
+                        </div>
+                    </div>
+
+                    <div className={s.contentArea}>{renderContent()}</div>
+                </main>
+            </div>
         </>
     )
 }

@@ -1,12 +1,5 @@
 import { useMemo } from 'react'
-import {
-    format,
-    subDays,
-    startOfWeek,
-    addDays,
-    getDay,
-    isSameDay,
-} from 'date-fns'
+import { format, subDays, startOfWeek, addDays } from 'date-fns'
 import styles from './StudyHeatmap.module.css'
 import type { DailyActivity } from '@/types/flashcard'
 

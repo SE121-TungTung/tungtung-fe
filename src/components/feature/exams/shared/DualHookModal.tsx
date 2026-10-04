@@ -3,6 +3,7 @@ import s from './DualHookModal.module.css'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import InputField from '@/components/common/input/InputField'
 import { submitDualHook } from '@/lib/auth'
+import { getMe } from '@/lib/users'
 import { useGuestSession } from '@/stores/guestSession.store'
 import { useSession } from '@/stores/session.store'
 import { useNavigate } from 'react-router-dom'
@@ -20,7 +21,7 @@ export default function DualHookModal({
     attemptId,
 }: DualHookModalProps) {
     const { getGuestSessionId, clearGuestSessionId } = useGuestSession()
-    const { fetchUser } = useSession()
+    const { login, setUser } = useSession()
     const navigate = useNavigate()
     const { alert } = useDialog()
 
@@ -47,9 +48,13 @@ export default function DualHookModal({
             })
 
             // Log user in
-            localStorage.setItem('access_token', res.access_token)
-            localStorage.setItem('refresh_token', res.refresh_token)
-            await fetchUser()
+            login(res.access_token, res.refresh_token, true)
+            try {
+                const me = await getMe()
+                setUser(me)
+            } catch (userErr) {
+                console.error('Failed to get me:', userErr)
+            }
 
             // Clear guest session
             clearGuestSessionId()

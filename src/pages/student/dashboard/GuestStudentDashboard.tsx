@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { testApi } from '@/lib/test'
@@ -6,7 +6,6 @@ import Card from '@/components/common/card/Card'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import ButtonGhost from '@/components/common/button/ButtonGhost'
 import s from './Dashboard.module.css' // Reuse student dashboard styles
-import DualHookModal from '@/components/feature/exams/shared/DualHookModal'
 
 export default function GuestStudentDashboard() {
     const navigate = useNavigate()
@@ -121,7 +120,7 @@ export default function GuestStudentDashboard() {
                     <Card
                         variant="outline"
                         title="Lịch sử bài thi thử"
-                        action={
+                        controls={
                             <ButtonGhost
                                 onClick={() => navigate('/public/tests')}
                             >
@@ -138,7 +137,7 @@ export default function GuestStudentDashboard() {
                                         Chưa có bài thi nào.
                                     </p>
                                 ) : (
-                                    attemptsData?.items.map((attempt) => (
+                                    attemptsData?.items.map((attempt: any) => (
                                         <div
                                             key={attempt.id}
                                             className={s.classItem}

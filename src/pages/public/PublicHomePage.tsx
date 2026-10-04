@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import {
     publicApi,
     type PublicCourse,
@@ -59,7 +59,7 @@ export default function PublicHomePage() {
     const { alert } = useDialog()
 
     const [courses, setCourses] = useState<PublicCourse[]>([])
-    const [classes, setClasses] = useState<PublicClass[]>([])
+    const [, setClasses] = useState<PublicClass[]>([])
 
     const [formData, setFormData] = useState<PublicLeadPayload>({
         full_name: '',
@@ -183,14 +183,24 @@ export default function PublicHomePage() {
                             hóa giúp bạn tăng band điểm bền vững chỉ sau một
                             khóa học.
                         </p>
-                        <div style={{ display: 'flex', gap: 'var(--spacing-4)', justifyContent: 'center' }}>
+                        <div
+                            style={{
+                                display: 'flex',
+                                gap: 'var(--spacing-4)',
+                                justifyContent: 'center',
+                            }}
+                        >
                             <a href="#consultation" className={s.heroCta}>
                                 Nhận lộ trình miễn phí
                             </a>
-                            <button 
+                            <button
                                 onClick={() => navigate('/public/tests')}
                                 className={s.heroCta}
-                                style={{ background: 'transparent', border: '1px solid var(--color-primary-light)', color: 'var(--color-primary-light)' }}
+                                style={{
+                                    background: 'transparent',
+                                    border: '1px solid var(--color-primary-light)',
+                                    color: 'var(--color-primary-light)',
+                                }}
                             >
                                 Thi thử trực tuyến
                             </button>
@@ -248,18 +258,19 @@ export default function PublicHomePage() {
                                 Làm bài test chuẩn hóa miễn phí để xác định
                                 chính xác điểm yếu và trình độ hiện tại của bạn.
                             </p>
-                            <button 
+                            <button
                                 onClick={() => navigate('/public/tests')}
                                 style={{
                                     marginTop: 'var(--spacing-4)',
-                                    padding: 'var(--spacing-2) var(--spacing-4)',
+                                    padding:
+                                        'var(--spacing-2) var(--spacing-4)',
                                     background: 'var(--color-primary)',
                                     color: 'white',
                                     border: 'none',
                                     borderRadius: 'var(--radius-full)',
                                     cursor: 'pointer',
                                     fontWeight: '600',
-                                    width: '100%'
+                                    width: '100%',
                                 }}
                             >
                                 Bắt đầu Test

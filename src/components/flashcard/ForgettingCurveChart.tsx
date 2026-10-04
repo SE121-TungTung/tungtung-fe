@@ -144,7 +144,7 @@ export function ForgettingCurveChart({
                                 fontSize: '12px',
                                 boxShadow: 'var(--primitive-shadow-md)',
                             }}
-                            formatter={(value: number) => [
+                            formatter={(value: any) => [
                                 `${value}%`,
                                 'Khả năng nhớ',
                             ]}

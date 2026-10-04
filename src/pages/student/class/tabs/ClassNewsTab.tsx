@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo, useEffect } from 'react'
+import { useState, useRef, useMemo, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import s from './ClassNewsTab.module.css'
 import {
@@ -7,7 +7,6 @@ import {
     recordPostFileDownload,
     MATERIAL_CATEGORY_LABELS,
     type ClassPost,
-    type MaterialCategory,
 } from '@/lib/classes'
 import { queryKeys } from '@/lib/queryKeys'
 import { useSession } from '@/stores/session.store'

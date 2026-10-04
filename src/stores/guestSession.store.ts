@@ -5,6 +5,7 @@ type GuestSessionState = {
     guestSessionId: string
     getGuestSessionId: () => string
     clearGuestSession: () => void
+    clearGuestSessionId: () => void
 }
 
 export const useGuestSession = create<GuestSessionState>((set, get) => ({
@@ -21,5 +22,8 @@ export const useGuestSession = create<GuestSessionState>((set, get) => ({
     clearGuestSession: () => {
         localStorage.removeItem('guest_session_id')
         set({ guestSessionId: '' })
+    },
+    clearGuestSessionId: () => {
+        get().clearGuestSession()
     },
 }))
