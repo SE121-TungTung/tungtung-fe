@@ -1,3 +1,4 @@
+import { FlameIcon, SparklesIcon } from './FlashcardIcons'
 import styles from './StreakBadge.module.css'
 
 interface StreakBadgeProps {
@@ -11,9 +12,9 @@ export function StreakBadge({ streakDays }: StreakBadgeProps) {
         <div className={`${styles.badge} ${isHot ? styles.hot : ''}`}>
             <div className={styles.iconWrapper}>
                 {isHot ? (
-                    <div className={styles.fireAnimation}>🔥</div>
+                    <FlameIcon size={18} className={styles.fireAnimation} />
                 ) : (
-                    <span className={styles.normalIcon}>⚡</span>
+                    <SparklesIcon size={16} className={styles.normalIcon} />
                 )}
             </div>
             <div className={styles.content}>

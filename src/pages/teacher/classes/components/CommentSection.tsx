@@ -14,6 +14,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { formatDistanceToNow } from 'date-fns'
 import { vi } from 'date-fns/locale'
+import { UserAvatar } from '@/components/common/avatar'
 import {
     type ClassPostComment,
     getPostComments,
@@ -41,42 +42,25 @@ interface CommentSectionProps {
 // ─── Avatar ──────────────────────────────────────────────────────────────────
 
 function Avatar({
+    userId,
     name,
     avatarUrl,
     size = 32,
 }: {
+    userId?: string
     name: string
     avatarUrl?: string | null
     size?: number
 }) {
-    if (avatarUrl) {
-        return (
-            <img
-                src={avatarUrl}
-                alt={name}
-                className={s.avatar}
-                style={{ width: size, height: size, minWidth: size }}
-            />
-        )
-    }
-    const initials = name
-        .split(' ')
-        .map((p) => p[0])
-        .join('')
-        .slice(0, 2)
-        .toUpperCase()
     return (
-        <div
-            className={s.avatarInitials}
-            style={{
-                width: size,
-                height: size,
-                minWidth: size,
-                fontSize: size * 0.38,
-            }}
-        >
-            {initials}
-        </div>
+        <UserAvatar
+            userId={userId}
+            src={avatarUrl}
+            name={name}
+            alt={name}
+            className={s.avatar}
+            size={size}
+        />
     )
 }
 
@@ -251,6 +235,7 @@ function CommentItem({
     return (
         <div className={`${s.commentItem} ${isReply ? s.reply : ''}`}>
             <Avatar
+                userId={comment.author?.id}
                 name={comment.author?.full_name ?? 'Người dùng'}
                 avatarUrl={comment.author?.avatar_url}
                 size={isReply ? 28 : 34}

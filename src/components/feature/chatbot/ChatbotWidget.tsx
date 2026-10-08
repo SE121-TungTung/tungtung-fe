@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { publicApi } from '@/lib/public'
 import { useSession } from '@/stores/session.store'
 import { useNavigate } from 'react-router-dom'
+import RobotIcon from '@/assets/Robot.svg'
 import s from './ChatbotWidget.module.css'
 
 interface Message {
@@ -170,19 +171,10 @@ export default function ChatbotWidget() {
                 <button
                     onClick={() => setIsOpen(true)}
                     className={s.floatingBtn}
+                    title="Chat với AI"
+                    aria-label="Chat với AI"
                 >
-                    <svg
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    >
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                    </svg>
+                    <img src={RobotIcon} alt="Chatbot" />
                 </button>
             )}
         </div>

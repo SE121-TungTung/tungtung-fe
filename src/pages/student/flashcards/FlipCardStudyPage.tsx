@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getDueCards, submitReview } from '@/lib/flashcard'
@@ -6,7 +6,12 @@ import { FlipCard } from '@/components/flashcard/FlipCard'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import ButtonGhost from '@/components/common/button/ButtonGhost'
 import Skeleton from '@/components/effect/Skeleton'
-import type { FSRSRating } from '@/types/flashcard'
+import {
+    CheckCircleIcon,
+    ArrowLeftIcon,
+    SparklesIcon,
+} from '@/components/flashcard/FlashcardIcons'
+import type { Flashcard, FSRSRating } from '@/types/flashcard'
 
 export default function FlipCardStudyPage() {
     const { deckId } = useParams<{ deckId: string }>()
@@ -14,19 +19,25 @@ export default function FlipCardStudyPage() {
     const queryClient = useQueryClient()
     const [currentIndex, setCurrentIndex] = useState(0)
 
-    const { data: cards = [], isLoading } = useQuery({
+    const { data: dueCards, isLoading } = useQuery({
         queryKey: ['flashcards-due', deckId],
         queryFn: () => getDueCards(deckId),
+        refetchOnWindowFocus: false,
     })
+
+    const [sessionCards, setSessionCards] = useState<Flashcard[]>([])
+    const [isSessionLoaded, setIsSessionLoaded] = useState(false)
+
+    // Snapshot session cards to freeze the queue during study
+    useEffect(() => {
+        if (!isSessionLoaded && dueCards) {
+            setSessionCards(dueCards)
+            setIsSessionLoaded(true)
+        }
+    }, [dueCards, isSessionLoaded])
 
     const reviewMutation = useMutation({
         mutationFn: submitReview,
-        onSuccess: () => {
-            queryClient.invalidateQueries({
-                queryKey: ['flashcards-due', deckId],
-            })
-            queryClient.invalidateQueries({ queryKey: ['flashcards-stats'] })
-        },
     })
 
     const handleRate = async (cardId: string, rating: FSRSRating) => {
@@ -34,10 +45,20 @@ export default function FlipCardStudyPage() {
             card_id: cardId,
             rating,
         })
-        setCurrentIndex((prev) => prev + 1)
+        const nextIndex = currentIndex + 1
+        setCurrentIndex(nextIndex)
+
+        // Only invalidate queries when the full session is completed
+        if (nextIndex >= sessionCards.length) {
+            queryClient.invalidateQueries({
+                queryKey: ['flashcards-due', deckId],
+            })
+            queryClient.invalidateQueries({ queryKey: ['flashcard-decks'] })
+            queryClient.invalidateQueries({ queryKey: ['flashcards-stats'] })
+        }
     }
 
-    if (isLoading) {
+    if (isLoading || !isSessionLoaded) {
         return (
             <div
                 style={{
@@ -51,7 +72,8 @@ export default function FlipCardStudyPage() {
         )
     }
 
-    const currentCard = cards[currentIndex]
+    const currentCard = sessionCards[currentIndex]
+    const hadNoCardsInitially = sessionCards.length === 0
 
     return (
         <div
@@ -70,7 +92,16 @@ export default function FlipCardStudyPage() {
                 }}
             >
                 <ButtonGhost onClick={() => navigate('/student/flashcards')}>
-                    ← Quay lại danh sách
+                    <span
+                        style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                        }}
+                    >
+                        <ArrowLeftIcon size={14} />
+                        <span>Quay lại danh sách bộ thẻ</span>
+                    </span>
                 </ButtonGhost>
                 <span
                     style={{
@@ -78,9 +109,9 @@ export default function FlipCardStudyPage() {
                         color: 'var(--color-text-secondary)',
                     }}
                 >
-                    {cards.length > 0
-                        ? `${currentIndex + 1} / ${cards.length}`
-                        : '0 / 0'}
+                    {sessionCards.length > 0 && currentCard
+                        ? `${currentIndex + 1} / ${sessionCards.length}`
+                        : `${sessionCards.length} / ${sessionCards.length}`}
                 </span>
             </div>
 
@@ -94,8 +125,24 @@ export default function FlipCardStudyPage() {
                         border: '1px solid var(--color-border-soft)',
                     }}
                 >
-                    <div style={{ fontSize: '48px', marginBottom: '16px' }}>
-                        🎉
+                    <div
+                        style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '64px',
+                            height: '64px',
+                            borderRadius: '50%',
+                            background: 'rgba(22, 163, 74, 0.1)',
+                            color: '#16a34a',
+                            marginBottom: '16px',
+                        }}
+                    >
+                        {hadNoCardsInitially ? (
+                            <SparklesIcon size={36} />
+                        ) : (
+                            <CheckCircleIcon size={36} />
+                        )}
                     </div>
                     <h2
                         style={{
@@ -104,7 +151,9 @@ export default function FlipCardStudyPage() {
                             marginBottom: '8px',
                         }}
                     >
-                        Hoàn thành lượt học!
+                        {hadNoCardsInitially
+                            ? 'Không có thẻ nào cần ôn hôm nay!'
+                            : 'Hoàn thành lượt học!'}
                     </h2>
                     <p
                         style={{
@@ -112,7 +161,9 @@ export default function FlipCardStudyPage() {
                             marginBottom: '24px',
                         }}
                     >
-                        Bạn đã hoàn thành tất cả thẻ cần ôn tập trong phiên này.
+                        {hadNoCardsInitially
+                            ? 'Tất cả thẻ trong bộ này đã được ôn tập đúng chu kỳ. Hãy quay lại vào ngày mai!'
+                            : `Bạn đã ôn tập xong toàn bộ ${sessionCards.length} thẻ trong phiên học này.`}
                     </p>
                     <div
                         style={{
@@ -139,7 +190,7 @@ export default function FlipCardStudyPage() {
                 <FlipCard
                     card={currentCard}
                     index={currentIndex}
-                    total={cards.length}
+                    total={sessionCards.length}
                     onRate={handleRate}
                 />
             )}

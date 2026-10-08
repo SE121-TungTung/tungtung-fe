@@ -57,6 +57,24 @@ export async function getDeckList(
     }
 }
 
+export interface CreateDeckPayload {
+    title: string
+    description?: string | null
+    topic_tag?: string | null
+    level?: string | null
+    is_public?: boolean
+}
+
+export async function createDeck(
+    payload: CreateDeckPayload
+): Promise<FlashcardDeck> {
+    const res = await api<BackendFlashcardDeck>(`${BASE}/flashcard-decks`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+    })
+    return mapDeck(res)
+}
+
 /**
  * GET /flashcard-decks/:id
  * Returns deck detail.

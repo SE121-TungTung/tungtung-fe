@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useSession } from '@/stores/session.store'
 import { useUIStore } from '@/stores/ui.store'
 import { getMe } from '@/lib/users'
+import { GlobalLoadingOverlay } from '@/components/core/LoadingPage'
 
 const getToken = () =>
     localStorage.getItem('access_token') ??
@@ -29,5 +30,11 @@ export function AppBootstrap({ children }: { children: React.ReactNode }) {
             }
         })()
     }, [setUser])
-    return <>{children}</>
+
+    return (
+        <>
+            {children}
+            <GlobalLoadingOverlay />
+        </>
+    )
 }

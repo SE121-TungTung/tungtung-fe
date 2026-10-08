@@ -1,0 +1,25 @@
+.stroke-text {
+    display: block;
+    width: 100%;
+    line-height: normal;
+    overflow: visible;
+    text-align: center;
+}
+
+.stroke-text--hover {
+    cursor: pointer;
+}
+
+.stroke-text__svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: var(--stroke-text-height, 180px);
+    overflow: visible;
+}
+
+.stroke-text__stroke,
+.stroke-text__fill {
+    user-select: none;
+    overflow: visible;
+}

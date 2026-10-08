@@ -12,7 +12,7 @@ import ButtonGhost from '@/components/common/button/ButtonGhost'
 import { GroupAvatar } from './GroupAvatar'
 import { format, isSameDay, isToday, isYesterday } from 'date-fns'
 import { vi } from 'date-fns/locale'
-import AvatarImg from '@/assets/avatar-placeholder.png'
+import { UserAvatar } from '@/components/common/avatar'
 import { useDialog } from '@/hooks/useDialog'
 
 const DateSeparator = ({ dateString }: { dateString: string }) => {
@@ -369,30 +369,36 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                     <div className={s.avatarWrapper}>
                         {conversation.isGroup ? (
                             conversation.avatarUrl ? (
-                                <img
+                                <UserAvatar
+                                    userId={conversation.id}
                                     src={conversation.avatarUrl}
+                                    name={conversation.name || 'Group'}
                                     className={s.headerAvatar}
                                     alt={conversation.name}
+                                    size={40}
                                 />
                             ) : conversation.participants?.length > 0 ? (
                                 <GroupAvatar
                                     participants={conversation.participants}
                                 />
                             ) : (
-                                <img
-                                    src={AvatarImg}
+                                <UserAvatar
+                                    userId={conversation.id}
+                                    name={conversation.name || 'Group'}
                                     className={s.headerAvatar}
                                     alt="Group"
+                                    size={40}
                                 />
                             )
                         ) : (
                             <>
-                                <img
-                                    src={
-                                        otherParticipant?.avatarUrl || AvatarImg
-                                    }
+                                <UserAvatar
+                                    userId={otherParticipant?.id}
+                                    src={otherParticipant?.avatarUrl}
+                                    name={otherParticipant?.fullName || 'User'}
                                     className={s.headerAvatar}
                                     alt={otherParticipant?.fullName || 'User'}
+                                    size={40}
                                 />
                                 {otherParticipant?.isOnline && (
                                     <div className={s.onlineBadge} />

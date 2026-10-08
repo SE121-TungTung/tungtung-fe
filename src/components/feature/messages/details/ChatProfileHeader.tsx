@@ -1,6 +1,6 @@
 import React from 'react'
 import s from '../ChatDetailsPanel.module.css'
-import AvatarImg from '@/assets/avatar-placeholder.png'
+import { UserAvatar } from '@/components/common/avatar'
 import { GroupAvatar } from '../GroupAvatar'
 import type { Participant } from '@/types/message.types'
 
@@ -26,25 +26,33 @@ export const ChatProfileHeader: React.FC<ChatProfileHeaderProps> = ({
             <div className={s.avatarWrapper}>
                 {isGroup ? (
                     avatarUrl ? (
-                        <img
+                        <UserAvatar
+                            userId={displayName}
                             src={avatarUrl}
+                            name={displayName}
                             alt={displayName}
                             className={s.avatar}
+                            size={72}
                         />
                     ) : participants.length > 0 ? (
                         <GroupAvatar participants={participants} size="lg" />
                     ) : (
-                        <img
-                            src={AvatarImg}
+                        <UserAvatar
+                            userId={displayName}
+                            name={displayName}
                             alt={displayName}
                             className={s.avatar}
+                            size={72}
                         />
                     )
                 ) : (
-                    <img
-                        src={otherParticipant?.avatarUrl || AvatarImg}
+                    <UserAvatar
+                        userId={otherParticipant?.id}
+                        src={otherParticipant?.avatarUrl}
+                        name={otherParticipant?.fullName || displayName}
                         alt={displayName}
                         className={s.avatar}
+                        size={72}
                     />
                 )}
             </div>

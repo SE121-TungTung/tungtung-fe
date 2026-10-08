@@ -13,6 +13,9 @@ importers:
 
   .:
     dependencies:
+      '@doan-labs/peek':
+        specifier: ^1.0.0
+        version: 1.0.0(react@19.2.8)
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv@8.20.0)(react-hook-form@7.86.0(react@19.2.8))(zod@4.4.3)
@@ -391,6 +394,14 @@ packages:
 
   '@dimforge/rapier3d-compat@0.12.0':
     resolution: {integrity: sha512-uekIGetywIgopfD97oDL5PfeezkFpNhwlzlaEYNOA0N6ghdsOvh/HYjSMek5Q2O1PYvRSDFcqFVJl4r4ZBwOow==}
+
+  '@doan-labs/peek@1.0.0':
+    resolution: {integrity: sha512-gCRQwcxzmfGf2VN+KPFVE/fo9AKlcnfdWfjcSGT37dHKeHcctz6c7EfcENUlkyZ+abWo8VECdB/rWqA+/51gcQ==}
+    peerDependencies:
+      react: '>=19'
+    peerDependenciesMeta:
+      react:
+        optional: true
 
   '@esbuild/aix-ppc64@0.28.2':
     resolution: {integrity: sha512-XExcO+dvLKvVtNTibSTBej1NCAbaGhWn9Ww1ZPx80qsahhPFe/8jgWP0IchNe0F3HwkU7n8ejhH8bjonqht8mQ==}
@@ -3626,6 +3637,10 @@ snapshots:
   '@csstools/css-tokenizer@4.0.0': {}
 
   '@dimforge/rapier3d-compat@0.12.0': {}
+
+  '@doan-labs/peek@1.0.0(react@19.2.8)':
+    optionalDependencies:
+      react: 19.2.8
 
   '@esbuild/aix-ppc64@0.28.2':
     optional: true

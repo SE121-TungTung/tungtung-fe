@@ -5,7 +5,7 @@ import { Modal } from '@/components/core/Modal'
 import ButtonGhost from '@/components/common/button/ButtonGhost'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import InputField from '@/components/common/input/InputField'
-import AvatarImg from '@/assets/avatar-placeholder.png'
+import { UserAvatar } from '@/components/common/avatar'
 import SearchIcon from '@/assets/Action Eye Tracking.svg'
 import s from '../ChatDetailsPanel.module.css'
 
@@ -205,10 +205,15 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
                                             : '1px solid transparent',
                                     }}
                                 >
-                                    <img
-                                        src={user.avatarUrl || AvatarImg}
+                                    <UserAvatar
+                                        userId={user.id}
+                                        src={user.avatarUrl}
+                                        name={
+                                            `${user.firstName || ''} ${user.lastName || ''}`.trim() ||
+                                            user.email
+                                        }
                                         className={s.memberAvatar}
-                                        alt=""
+                                        size={36}
                                     />
                                     <div className={s.memberInfo}>
                                         <div className={s.memberName}>

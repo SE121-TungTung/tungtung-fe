@@ -1,0 +1,113 @@
+/* src/components/core/PageSkeleton.module.css */
+
+.container {
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.headerRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid rgba(23, 86, 118, 0.08);
+}
+
+:global([data-theme='dark']) .headerRow {
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.titleGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.actionGroup {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.25rem;
+}
+
+.statCard {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(23, 86, 118, 0.08);
+    border-radius: 16px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+:global([data-theme='dark']) .statCard {
+    background: rgba(15, 28, 44, 0.5);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.contentGrid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+}
+
+@media (max-width: 900px) {
+    .contentGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.mainPanel {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(23, 86, 118, 0.08);
+    border-radius: 20px;
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+:global([data-theme='dark']) .mainPanel {
+    background: rgba(15, 28, 44, 0.5);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.sidePanel {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(23, 86, 118, 0.08);
+    border-radius: 20px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+:global([data-theme='dark']) .sidePanel {
+    background: rgba(15, 28, 44, 0.5);
+    border-color: rgba(255, 255, 255, 0.08);
+}

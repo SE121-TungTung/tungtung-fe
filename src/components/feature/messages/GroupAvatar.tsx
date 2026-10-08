@@ -1,7 +1,7 @@
 import React from 'react'
 import s from './GroupAvatar.module.css'
 import type { Participant } from '@/types/message.types'
-import AvatarImg from '@/assets/avatar-placeholder.png'
+import { UserAvatar } from '@/components/common/avatar'
 
 interface GroupAvatarProps {
     participants: Participant[]
@@ -20,8 +20,10 @@ export const GroupAvatar: React.FC<GroupAvatarProps> = ({
     if (avatarsToShow.length === 1) {
         return (
             <div className={`${s.stack} ${s[size]}`}>
-                <img
-                    src={avatarsToShow[0].avatarUrl || AvatarImg}
+                <UserAvatar
+                    userId={avatarsToShow[0].id}
+                    src={avatarsToShow[0].avatarUrl}
+                    name={avatarsToShow[0].fullName}
                     alt={avatarsToShow[0].fullName}
                     className={s.avatar}
                 />
@@ -33,13 +35,17 @@ export const GroupAvatar: React.FC<GroupAvatarProps> = ({
     if (avatarsToShow.length === 2) {
         return (
             <div className={`${s.stack} ${s[size]}`}>
-                <img
-                    src={avatarsToShow[0].avatarUrl || AvatarImg}
+                <UserAvatar
+                    userId={avatarsToShow[0].id}
+                    src={avatarsToShow[0].avatarUrl}
+                    name={avatarsToShow[0].fullName}
                     alt={avatarsToShow[0].fullName}
                     className={`${s.avatar} ${s.avatar1}`}
                 />
-                <img
-                    src={avatarsToShow[1].avatarUrl || AvatarImg}
+                <UserAvatar
+                    userId={avatarsToShow[1].id}
+                    src={avatarsToShow[1].avatarUrl}
+                    name={avatarsToShow[1].fullName}
                     alt={avatarsToShow[1].fullName}
                     className={`${s.avatar} ${s.avatar2}`}
                 />
@@ -50,18 +56,24 @@ export const GroupAvatar: React.FC<GroupAvatarProps> = ({
     // 3+ participants: show 3 avatars + count if needed
     return (
         <div className={`${s.stack} ${s[size]}`}>
-            <img
-                src={avatarsToShow[0]?.avatarUrl || AvatarImg}
+            <UserAvatar
+                userId={avatarsToShow[0]?.id}
+                src={avatarsToShow[0]?.avatarUrl}
+                name={avatarsToShow[0]?.fullName || 'User'}
                 alt={avatarsToShow[0]?.fullName || 'User'}
                 className={`${s.avatar} ${s.avatar1}`}
             />
-            <img
-                src={avatarsToShow[1]?.avatarUrl || AvatarImg}
+            <UserAvatar
+                userId={avatarsToShow[1]?.id}
+                src={avatarsToShow[1]?.avatarUrl}
+                name={avatarsToShow[1]?.fullName || 'User'}
                 alt={avatarsToShow[1]?.fullName || 'User'}
                 className={`${s.avatar} ${s.avatar2}`}
             />
-            <img
-                src={avatarsToShow[2]?.avatarUrl || AvatarImg}
+            <UserAvatar
+                userId={avatarsToShow[2]?.id}
+                src={avatarsToShow[2]?.avatarUrl}
+                name={avatarsToShow[2]?.fullName || 'User'}
                 alt={avatarsToShow[2]?.fullName || 'User'}
                 className={`${s.avatar} ${s.avatar3}`}
             />

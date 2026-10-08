@@ -3,7 +3,7 @@ import s from './ConversationItem.module.css'
 import type { Conversation } from '@/types/message.types'
 import { formatDistanceToNow } from 'date-fns'
 import { vi } from 'date-fns/locale'
-import DefaultAvatar from '@/assets/avatar-placeholder.png'
+import { UserAvatar } from '@/components/common/avatar'
 import MoreIcon from '@/assets/Menu Hamburger.svg'
 import { ConversationContextMenu } from './ConversationContextMenu'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -32,7 +32,6 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
     const { alert } = useDialog()
 
     const displayName = conversation.name || 'Chưa đặt tên'
-    const displayAvatar = conversation.avatarUrl || DefaultAvatar
 
     const otherParticipant = useMemo(() => {
         if (!conversation.isGroup && conversation.participants.length > 0) {
@@ -40,6 +39,9 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
         }
         return null
     }, [conversation.isGroup, conversation.participants, currentUserId])
+
+    const displayAvatar =
+        conversation.avatarUrl || otherParticipant?.avatarUrl || null
 
     const isOnline = !conversation.isGroup && otherParticipant?.isOnline
 
@@ -118,23 +120,26 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
                 <div className={s.avatarWrapper}>
                     {conversation.isGroup ? (
                         conversation.avatarUrl ? (
-                            <img
+                            <UserAvatar
+                                userId={conversation.id}
                                 src={conversation.avatarUrl}
+                                name={displayName}
                                 alt={displayName}
                                 className={s.headerAvatar}
+                                size={48}
                             />
                         ) : (
                             <div className={s.groupAvatarPlaceholder}>👥</div>
                         )
                     ) : (
                         <>
-                            <img
+                            <UserAvatar
+                                userId={otherParticipant?.id}
                                 src={displayAvatar}
+                                name={displayName}
                                 alt={displayName}
                                 className={s.headerAvatar}
-                                onError={(e) => {
-                                    e.currentTarget.src = DefaultAvatar
-                                }}
+                                size={48}
                             />
                             {isOnline && (
                                 <span

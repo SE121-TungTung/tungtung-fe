@@ -1,0 +1,433 @@
+/* src/pages/student/flashcards/DeckListPage.module.css */
+
+.container {
+    max-width: 1380px;
+    margin: 0 auto;
+    padding: 32px 24px 64px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+/* ── Centered Hero Header (Standard from Pronunciation Page) ──────────────── */
+.pageHeaderCentered {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 4px;
+    gap: 12px;
+    width: 100%;
+}
+
+.badgeLabel {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(36, 132, 181, 0.12);
+    border: 1px solid rgba(36, 132, 181, 0.28);
+    color: var(--color-brand-primary, #175676);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 5px 14px;
+    border-radius: var(--primitive-radius-full, 9999px);
+}
+
+.pageTitle {
+    font-size: clamp(2rem, 3.8vw, 2.85rem);
+    font-weight: 800;
+    text-align: center;
+    color: var(--color-text-primary);
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.gradientText {
+    background: var(
+        --gradient-text,
+        linear-gradient(
+            135deg,
+            var(--color-brand-secondary, #d62839) 0%,
+            var(--color-brand-primary, #175676) 100%
+        )
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline;
+}
+
+.pageDescription {
+    margin: 0;
+    font-size: 15px;
+    color: var(--color-text-secondary);
+    max-width: 680px;
+    line-height: 1.6;
+    text-align: center;
+}
+
+/* ── Action Toolbar ──────────────────────────────────────────────────────── */
+.toolbar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+}
+
+.primaryBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    border-radius: 12px;
+    background: var(--color-brand-primary, #175676);
+    color: white;
+    font-size: 0.92rem;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 14px rgba(23, 86, 118, 0.25);
+}
+
+.primaryBtn:hover {
+    background: #12435c;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px -4px rgba(23, 86, 118, 0.35);
+}
+
+.secondaryBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 12px;
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-border-soft);
+    color: var(--color-text-primary);
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+.secondaryBtn:hover {
+    background: var(--color-surface-raised);
+    border-color: var(--color-brand-primary);
+    color: var(--color-brand-primary);
+    transform: translateY(-2px);
+}
+
+/* ── Overview Stats Banner ───────────────────────────────────────────────── */
+.statsBanner {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 18px;
+    width: 100%;
+}
+
+.statItem {
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-border-soft);
+    border-radius: 18px;
+    padding: 20px 22px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    transition: transform 0.2s ease;
+}
+
+.statItem:hover {
+    transform: translateY(-2px);
+}
+
+.statIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: rgba(23, 86, 118, 0.08);
+    color: var(--color-brand-primary, #175676);
+    flex-shrink: 0;
+}
+
+.statIconDue {
+    background: rgba(214, 40, 57, 0.08);
+    color: var(--color-brand-secondary, #d62839);
+}
+
+.statIconMastered {
+    background: rgba(22, 163, 74, 0.08);
+    color: #16a34a;
+}
+
+.statMeta {
+    display: flex;
+    flex-direction: column;
+}
+
+.statLabel {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 2px;
+}
+
+.statValue {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    line-height: 1.2;
+}
+
+/* ── Filter Tabs ─────────────────────────────────────────────────────────── */
+.filterRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.filterPill {
+    padding: 7px 18px;
+    border-radius: 999px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    border: 1px solid var(--color-border-soft);
+    background: var(--color-surface-card);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.filterPill:hover {
+    color: var(--color-text-primary);
+    border-color: var(--color-text-secondary);
+}
+
+.filterPillActive {
+    background: var(--color-brand-primary, #175676);
+    color: white !important;
+    border-color: var(--color-brand-primary, #175676);
+    box-shadow: 0 2px 8px rgba(23, 86, 118, 0.25);
+}
+
+/* ── Decks Grid ──────────────────────────────────────────────────────────── */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 22px;
+}
+
+.deckCard {
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-border-soft);
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.deckCard:hover {
+    transform: translateY(-4px);
+    border-color: var(--color-brand-primary, #175676);
+    box-shadow: 0 14px 30px -8px rgba(23, 86, 118, 0.18);
+}
+
+.deckCardAccent {
+    height: 5px;
+    width: 100%;
+    background: linear-gradient(
+        90deg,
+        var(--color-brand-primary, #175676) 0%,
+        var(--color-brand-secondary, #d62839) 100%
+    );
+}
+
+.deckCardBody {
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.badgeRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.topicBadge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(23, 86, 118, 0.1);
+    color: var(--color-brand-primary, #175676);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.levelBadge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: var(--color-surface-raised);
+    color: var(--color-text-secondary);
+}
+
+.deckTitle {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    margin: 0 0 8px;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+}
+
+.deckDescription {
+    font-size: 0.88rem;
+    color: var(--color-text-secondary);
+    line-height: 1.55;
+    margin: 0 0 20px;
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.deckFooter {
+    border-top: 1px solid var(--color-border-soft);
+    padding-top: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.deckStats {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cardCountBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.dueBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--color-text-tertiary);
+}
+
+.dueBadgeActive {
+    color: var(--color-brand-secondary, #d62839);
+    font-weight: 700;
+}
+
+.studyBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    border-radius: 10px;
+    background: var(--color-brand-primary, #175676);
+    color: white;
+    font-size: 0.88rem;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.studyBtn:hover {
+    background: #12435c;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(23, 86, 118, 0.3);
+}
+
+/* ── Empty State (Clean SVG, NO EMOJI) ────────────────────────────────────── */
+.emptyCard {
+    text-align: center;
+    padding: 64px 24px;
+    background: var(--color-surface-card);
+    border-radius: 20px;
+    border: 1px solid var(--color-border-soft);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.emptyIconWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    background: rgba(23, 86, 118, 0.08);
+    color: var(--color-brand-primary, #175676);
+    margin-bottom: 4px;
+}
+
+.emptyTitle {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.emptyText {
+    font-size: 0.92rem;
+    color: var(--color-text-secondary);
+    max-width: 480px;
+    margin: 0;
+    line-height: 1.55;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .container {
+        padding: 24px 16px 48px;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}

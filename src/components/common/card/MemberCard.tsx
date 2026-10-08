@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import ButtonGhost from '@/components/common/button/ButtonGhost'
 import s from './MemberCard.module.css'
 
-import AvatarPlaceholder from '@/assets/avatar-placeholder.png'
+import { UserAvatar } from '@/components/common/avatar'
 import MessageIcon from '@/assets/Send Paper Plane.svg'
 
 export interface ClassMember {
@@ -29,14 +29,16 @@ export default function MemberCard({ member }: MemberCardProps) {
     }
 
     const fullName = `${member.firstName} ${member.lastName}`
-    const avatarSrc = member.avatarUrl || AvatarPlaceholder
 
     return (
         <div className={s.card} title={member.email}>
-            <img
-                src={avatarSrc}
+            <UserAvatar
+                userId={member.id}
+                src={member.avatarUrl}
+                name={fullName}
                 alt={`${fullName}'s avatar`}
                 className={s.avatar}
+                size={48}
             />
             <div className={s.info}>
                 <div className={s.nameWrapper}>

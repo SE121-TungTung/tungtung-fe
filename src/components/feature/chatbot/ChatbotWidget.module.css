@@ -7,7 +7,7 @@
 }
 
 .floatingBtn {
-    background-color: var(--brand-primary, #2563eb);
+    background: var(--color-brand-primary, #175676);
     color: white;
     border: none;
     border-radius: 50%;
@@ -16,16 +16,27 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
+    box-shadow: 0 4px 15px rgba(23, 86, 118, 0.3);
+    border: none;
     cursor: pointer;
-    transition:
-        transform 0.2s,
-        box-shadow 0.2s;
+    z-index: 1000;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .floatingBtn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.6);
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(23, 86, 118, 0.4);
+}
+
+.floatingBtn:active {
+    transform: scale(0.95);
+}
+
+.floatingBtn img {
+    width: 32px;
+    height: 32px;
+    filter: brightness(0) invert(1);
+    display: block;
 }
 
 .chatWindow {
@@ -43,7 +54,7 @@
 }
 
 .chatHeader {
-    background: var(--brand-primary, #2563eb);
+    background: var(--bg-brand-gradient, var(--color-brand-primary, #175676));
     color: white;
     padding: 1rem;
     display: flex;

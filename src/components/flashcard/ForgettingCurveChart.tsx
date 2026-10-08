@@ -9,6 +9,7 @@ import {
     ReferenceLine,
     Dot,
 } from 'recharts'
+import { BarChartIcon } from './FlashcardIcons'
 import styles from './ForgettingCurveChart.module.css'
 
 interface ForgettingCurveChartProps {
@@ -46,9 +47,21 @@ export function ForgettingCurveChart({
     return (
         <div className={styles.container}>
             <div className={styles.header}>
-                <h3 className={styles.title}>
-                    Đường cong trí nhớ (Forgetting Curve)
-                </h3>
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                    }}
+                >
+                    <BarChartIcon
+                        size={18}
+                        style={{ color: 'var(--color-brand-primary)' }}
+                    />
+                    <h3 className={styles.title}>
+                        Đường cong trí nhớ dự đoán (Forgetting Curve)
+                    </h3>
+                </div>
                 <div className={styles.legend}>
                     <span className={styles.legendItem}>
                         <span

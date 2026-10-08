@@ -12,8 +12,7 @@ import { useMutation } from '@tanstack/react-query'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import FieldMessage from '@/components/common/typography/FieldMessage'
-
-import DefaultAvatar from '@/assets/avatar-placeholder.png'
+import { UserAvatar } from '@/components/common/avatar'
 
 interface ProfileEditorProps {
     user?: User | null
@@ -234,14 +233,19 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
                         <label className={s.label}>Ảnh đại diện</label>
 
                         <div className={s.avatarSection}>
-                            <img
-                                src={
-                                    previewUrl ||
-                                    user?.avatarUrl ||
-                                    DefaultAvatar
+                            <UserAvatar
+                                userId={user?.id}
+                                src={previewUrl || user?.avatarUrl}
+                                name={
+                                    user
+                                        ? `${user.firstName || ''} ${user.lastName || ''}`.trim() ||
+                                          user.email
+                                        : 'User'
                                 }
                                 className={s.avatar}
                                 alt="Avatar preview"
+                                size={100}
+                                animate
                             />
 
                             <div className={s.avatarControls}>

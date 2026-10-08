@@ -6,6 +6,7 @@ import {
     type AttendanceStatus,
 } from '@/lib/attendance'
 import { type ClassMember } from '@/components/common/card/MemberCard'
+import { UserAvatar } from '@/components/common/avatar'
 import { useDialog } from '@/hooks/useDialog'
 
 interface AttendanceModalProps {
@@ -164,34 +165,12 @@ export function AttendanceModal({
                                         gap: '12px',
                                     }}
                                 >
-                                    <div
-                                        style={{
-                                            width: '40px',
-                                            height: '40px',
-                                            borderRadius: '50%',
-                                            backgroundColor: '#e2e8f0',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            fontWeight: '600',
-                                            color: '#475569',
-                                            overflow: 'hidden',
-                                        }}
-                                    >
-                                        {student.avatarUrl ? (
-                                            <img
-                                                src={student.avatarUrl}
-                                                alt=""
-                                                style={{
-                                                    width: '100%',
-                                                    height: '100%',
-                                                    objectFit: 'cover',
-                                                }}
-                                            />
-                                        ) : (
-                                            `${student.lastName[0] || ''}${student.firstName[0] || ''}`
-                                        )}
-                                    </div>
+                                    <UserAvatar
+                                        userId={student.id}
+                                        src={student.avatarUrl}
+                                        name={`${student.firstName || ''} ${student.lastName || ''}`.trim()}
+                                        size={40}
+                                    />
                                     <div>
                                         <div
                                             style={{

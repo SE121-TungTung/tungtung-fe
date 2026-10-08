@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react'
 import s from './MessageBubble.module.css'
 import type { Message, Participant } from '@/types/message.types'
-import AvatarImg from '@/assets/avatar-placeholder.png'
+import { UserAvatar } from '@/components/common/avatar'
 import { MessageContextMenu } from './MessageContextMenu'
 
 import MoreIcon from '@/assets/More Circle.svg'
@@ -105,11 +105,14 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                 {/* Avatar Column */}
                 <div className={s.avatarColumn}>
                     {showAvatar && (
-                        <img
-                            src={sender?.avatarUrl || AvatarImg}
-                            alt={'Avatar'}
+                        <UserAvatar
+                            userId={sender?.id || message.senderId}
+                            src={sender?.avatarUrl}
+                            name={senderName || sender?.fullName}
+                            alt="Avatar"
                             className={s.senderAvatar}
                             title={senderName}
+                            size={28}
                         />
                     )}
                 </div>

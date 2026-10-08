@@ -1,7 +1,7 @@
 import React from 'react'
 import s from './ProfileHeaderCard.module.css'
 import Card from '@/components/common/card/Card'
-import AvatarImg from '@/assets/avatar-placeholder.png'
+import { UserAvatar } from '@/components/common/avatar'
 
 import EmailIcon from '@/assets/Mail.svg'
 import RoleIcon from '@/assets/User Circle.svg'
@@ -43,10 +43,14 @@ export const ProfileHeaderCard: React.FC<ProfileHeaderCardProps> = ({
     return (
         <Card variant="flat" mode="light" className={s.card}>
             <div className={s.header}>
-                <img
-                    src={user.avatarUrl || AvatarImg}
+                <UserAvatar
+                    userId={user.id}
+                    src={user.avatarUrl}
+                    name={fullName || user.email}
                     alt="Avatar"
                     className={s.avatar}
+                    size={80}
+                    animate
                 />
                 <h2 className={s.name}>{fullName}</h2>
                 <p className={s.email}>{user.email}</p>

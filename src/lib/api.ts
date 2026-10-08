@@ -12,26 +12,31 @@ const getStorage = () => {
 }
 
 export const getAccessToken = () => {
-    const storage = getStorage()
-    const token = storage.getItem('access_token')
-    if (!token) return null
+    const sToken = sessionStorage.getItem('access_token')
+    const lToken = localStorage.getItem('access_token')
 
-    try {
-        const payload = JSON.parse(atob(token.split('.')[1]))
-        const exp = payload.exp * 1000
-
-        if (Date.now() >= exp) {
-            console.warn('⚠️ Token expired locally')
-            // Don't clear tokens here, let the backend return 401 so the refresh logic kicks in
+    const checkToken = (tok: string | null) => {
+        if (!tok) return null
+        try {
+            const payload = JSON.parse(atob(tok.split('.')[1]))
+            const exp = payload.exp * 1000
+            return { token: tok, isExpired: Date.now() >= exp }
+        } catch {
+            return null
         }
-
-        return token
-    } catch (error) {
-        console.error('Invalid token format:', error)
-        return null
     }
+
+    const sInfo = checkToken(sToken)
+    const lInfo = checkToken(lToken)
+
+    if (sInfo && !sInfo.isExpired) return sInfo.token
+    if (lInfo && !lInfo.isExpired) return lInfo.token
+    return sInfo?.token || lInfo?.token || null
 }
-const getRefreshToken = () => getStorage().getItem('refresh_token')
+
+export const getRefreshToken = () =>
+    sessionStorage.getItem('refresh_token') ||
+    localStorage.getItem('refresh_token')
 
 let isRefreshing = false
 let refreshSubscribers: ((token: string) => void)[] = []
@@ -197,11 +202,34 @@ export async function api<T>(
                 if (!refreshToken) throw new Error('No refresh token')
 
                 const data = await refreshAccessToken(refreshToken)
-                const storage = getStorage()
-
-                storage.setItem('access_token', data.access_token)
-                if (data.refresh_token) {
-                    storage.setItem('refresh_token', data.refresh_token)
+                const newRefresh = data.refresh_token || refreshToken
+                if (
+                    sessionStorage.getItem('access_token') ||
+                    sessionStorage.getItem('refresh_token')
+                ) {
+                    sessionStorage.setItem('access_token', data.access_token)
+                    if (newRefresh) {
+                        sessionStorage.setItem('refresh_token', newRefresh)
+                    }
+                }
+                if (
+                    localStorage.getItem('access_token') ||
+                    localStorage.getItem('refresh_token')
+                ) {
+                    localStorage.setItem('access_token', data.access_token)
+                    if (newRefresh) {
+                        localStorage.setItem('refresh_token', newRefresh)
+                    }
+                }
+                // Fallback if neither had tokens
+                if (
+                    !sessionStorage.getItem('access_token') &&
+                    !localStorage.getItem('access_token')
+                ) {
+                    localStorage.setItem('access_token', data.access_token)
+                    if (newRefresh) {
+                        localStorage.setItem('refresh_token', newRefresh)
+                    }
                 }
 
                 onRefreshed(data.access_token)

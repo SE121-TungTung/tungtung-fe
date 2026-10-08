@@ -324,6 +324,14 @@ export const router = createBrowserRouter([
                         ),
                     },
                     {
+                        path: '/student/flashcards/stats',
+                        element: (
+                            <ProtectedRoute allowedRoles={['student']}>
+                                <DeckStatsPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
                         path: '/student/flashcards/:deckId/study',
                         element: (
                             <ProtectedRoute allowedRoles={['student']}>

@@ -1,6 +1,6 @@
 import React from 'react'
 import s from '../ChatDetailsPanel.module.css'
-import AvatarImg from '@/assets/avatar-placeholder.png'
+import { UserAvatar } from '@/components/common/avatar'
 import type { Participant } from '@/types/message.types'
 
 interface ChatMemberListProps {
@@ -34,10 +34,15 @@ export const ChatMemberList: React.FC<ChatMemberListProps> = ({
                 <div className={s.memberList}>
                     {participants.map((p) => (
                         <div key={p.id} className={s.memberItem}>
-                            <img
-                                src={p.avatarUrl || AvatarImg}
+                            <UserAvatar
+                                userId={p.id}
+                                src={p.avatarUrl}
+                                name={
+                                    p.fullName ||
+                                    `${p.firstName || ''} ${p.lastName || ''}`.trim()
+                                }
                                 className={s.memberAvatar}
-                                alt=""
+                                size={32}
                             />
                             <div className={s.memberInfo}>
                                 <div className={s.memberName}>

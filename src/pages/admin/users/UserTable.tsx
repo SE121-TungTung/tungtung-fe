@@ -1,7 +1,7 @@
 import React from 'react'
 import type { User, Role, UserStatus } from '@/types/user.types'
 import s from './UserTable.module.css'
-import avatarPlaceholder from '@/assets/avatar-placeholder.png'
+import { UserAvatar } from '@/components/common/avatar'
 import {
     StatusBadge,
     type StatusBadgeVariant,
@@ -172,13 +172,16 @@ export const UserTable: React.FC<UserTableProps> = ({
                             <tr key={user.id}>
                                 <td>
                                     <div className={s.userCell}>
-                                        <img
-                                            src={
-                                                user.avatarUrl ||
-                                                avatarPlaceholder
+                                        <UserAvatar
+                                            userId={user.id}
+                                            src={user.avatarUrl}
+                                            name={
+                                                `${user.firstName || ''} ${user.lastName || ''}`.trim() ||
+                                                user.email
                                             }
                                             alt={`${user.firstName} ${user.lastName}`}
                                             className={s.avatar}
+                                            size={40}
                                         />
                                         <div className={s.userInfo}>
                                             <span

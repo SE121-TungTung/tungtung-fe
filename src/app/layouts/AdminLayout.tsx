@@ -4,6 +4,7 @@ import type { Role } from '@/types/auth'
 import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
 
 import NavigationMenu from '@/components/common/menu/NavigationMenu'
+import { UserAvatar } from '@/components/common/avatar'
 
 import styles from '@/pages/profile/ProfilePage.module.css'
 import { useMemo } from 'react'
@@ -32,7 +33,18 @@ export const AdminLayout: React.FC = () => {
                     items={navItems}
                     rightSlotDropdownItems={userMenuItems}
                     rightSlot={
-                        <img src={session?.avatarUrl} alt="User Avatar" />
+                        <UserAvatar
+                            userId={session?.id}
+                            src={session?.avatarUrl}
+                            name={
+                                session
+                                    ? `${session.firstName || ''} ${session.lastName || ''}`.trim() ||
+                                      session.email
+                                    : 'Admin'
+                            }
+                            alt="User Avatar"
+                            size={36}
+                        />
                     }
                 />
             </header>

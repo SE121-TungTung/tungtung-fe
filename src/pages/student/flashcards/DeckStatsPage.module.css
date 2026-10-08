@@ -1,0 +1,356 @@
+/* src/pages/student/flashcards/DeckStatsPage.module.css */
+
+.container {
+    max-width: 1380px;
+    margin: 0 auto;
+    padding: 32px 24px 64px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+/* ── Centered Hero Header ─────────────────────────────────────────────────── */
+.pageHeaderCentered {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 4px;
+    gap: 12px;
+    width: 100%;
+}
+
+.badgeLabel {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(36, 132, 181, 0.12);
+    border: 1px solid rgba(36, 132, 181, 0.28);
+    color: var(--color-brand-primary, #175676);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 5px 14px;
+    border-radius: var(--primitive-radius-full, 9999px);
+}
+
+.pageTitle {
+    font-size: clamp(2rem, 3.8vw, 2.85rem);
+    font-weight: 800;
+    text-align: center;
+    color: var(--color-text-primary);
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.gradientText {
+    background: var(
+        --gradient-text,
+        linear-gradient(
+            135deg,
+            var(--color-brand-secondary, #d62839) 0%,
+            var(--color-brand-primary, #175676) 100%
+        )
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline;
+}
+
+.pageDescription {
+    margin: 0;
+    font-size: 15px;
+    color: var(--color-text-secondary);
+    max-width: 680px;
+    line-height: 1.6;
+    text-align: center;
+}
+
+/* ── Toolbar ─────────────────────────────────────────────────────────────── */
+.toolbar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+}
+
+.backBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 12px;
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-border-soft);
+    color: var(--color-text-secondary);
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+.backBtn:hover {
+    background: var(--color-surface-raised);
+    color: var(--color-text-primary);
+    border-color: var(--color-brand-primary);
+    transform: translateY(-2px);
+}
+
+.studyBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    border-radius: 12px;
+    background: var(--color-brand-primary, #175676);
+    color: white;
+    font-size: 0.92rem;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 14px rgba(23, 86, 118, 0.25);
+}
+
+.studyBtn:hover {
+    background: #12435c;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px -4px rgba(23, 86, 118, 0.35);
+}
+
+/* ── KPI Bento Grid ──────────────────────────────────────────────────────── */
+.kpiGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 18px;
+    width: 100%;
+}
+
+.kpiCard {
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-border-soft);
+    border-radius: 20px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.kpiCard:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px -6px rgba(0, 0, 0, 0.08);
+}
+
+.kpiHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.kpiIconWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: rgba(23, 86, 118, 0.1);
+    color: var(--color-brand-primary, #175676);
+    flex-shrink: 0;
+}
+
+.iconReviews {
+    background: rgba(23, 86, 118, 0.1);
+    color: var(--color-brand-primary, #175676);
+}
+
+.iconMastered {
+    background: rgba(22, 163, 74, 0.1);
+    color: #16a34a;
+}
+
+.iconDue {
+    background: rgba(214, 40, 57, 0.1);
+    color: var(--color-brand-secondary, #d62839);
+}
+
+.iconStreak {
+    background: rgba(234, 88, 12, 0.1);
+    color: #ea580c;
+}
+
+.kpiBadgePill {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: var(--color-surface-raised);
+    color: var(--color-text-tertiary);
+}
+
+.kpiBody {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.kpiLabel {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.kpiValue {
+    font-size: 2.1rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+
+.kpiValueMastered {
+    color: #16a34a;
+}
+
+.kpiValueDue {
+    color: var(--color-brand-secondary, #d62839);
+}
+
+.kpiSubtext {
+    font-size: 0.8rem;
+    color: var(--color-text-tertiary);
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* ── FSRS Insight Callout ─────────────────────────────────────────────────── */
+.insightBanner {
+    background: linear-gradient(
+        135deg,
+        rgba(23, 86, 118, 0.06) 0%,
+        rgba(214, 40, 57, 0.04) 100%
+    );
+    border: 1px solid rgba(23, 86, 118, 0.18);
+    border-radius: 18px;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.insightLeft {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.insightIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: var(--color-brand-primary, #175676);
+    color: white;
+    flex-shrink: 0;
+}
+
+.insightTextGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.insightTitle {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.insightDesc {
+    font-size: 0.86rem;
+    color: var(--color-text-secondary);
+    margin: 0;
+    line-height: 1.45;
+}
+
+.insightMetrics {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.metricItem {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.metricLabel {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-tertiary);
+}
+
+.metricValue {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--color-brand-primary, #175676);
+}
+
+/* ── Charts Grid ─────────────────────────────────────────────────────────── */
+.chartsGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 100%;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .container {
+        padding: 24px 16px 48px;
+    }
+
+    .kpiGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .insightBanner {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .insightMetrics {
+        justify-content: space-between;
+    }
+
+    .metricItem {
+        align-items: flex-start;
+    }
+}

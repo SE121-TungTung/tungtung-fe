@@ -4,9 +4,9 @@ import { useSession } from '@/stores/session.store'
 import { useUIStore } from '@/stores/ui.store'
 import NavigationMenu from '@/components/common/menu/NavigationMenu'
 import Chatbot from '@/components/feature/chatbot/Chatbot'
-import LoadingPage from '@/components/core/LoadingPage'
+import PageSkeleton from '@/components/core/PageSkeleton'
 import { getNavItems, getUserMenuItems } from '@/config/navigation.config'
-import DefaultAvatar from '@/assets/avatar-placeholder.png'
+import { UserAvatar } from '@/components/common/avatar'
 import type { Role } from '@/types/auth'
 import s from './MainLayout.module.css'
 import RobotIcon from '@/assets/Robot.svg'
@@ -55,10 +55,18 @@ export const MainLayout = () => {
                     items={navItems}
                     rightSlotDropdownItems={userMenuItems}
                     rightSlot={
-                        <img
-                            src={user?.avatarUrl || DefaultAvatar}
+                        <UserAvatar
+                            userId={user?.id}
+                            src={user?.avatarUrl}
+                            name={
+                                user
+                                    ? `${user.firstName || ''} ${user.lastName || ''}`.trim() ||
+                                      user.email
+                                    : 'User'
+                            }
                             alt="User"
                             className={s.avatar}
+                            size={36}
                         />
                     }
                 />
@@ -66,7 +74,7 @@ export const MainLayout = () => {
 
             {/* 2. Nội dung thay đổi của từng trang */}
             <main>
-                <Suspense fallback={<LoadingPage title="Đang tải trang..." />}>
+                <Suspense fallback={<PageSkeleton />}>
                     <Outlet />
                 </Suspense>
             </main>

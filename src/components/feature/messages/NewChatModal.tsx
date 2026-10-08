@@ -7,7 +7,7 @@ import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import ButtonGhost from '@/components/common/button/ButtonGhost'
 import s from './NewChatModal.module.css'
 import { listUsers } from '@/lib/users'
-import DefaultAvatar from '@/assets/avatar-placeholder.png'
+import { UserAvatar } from '@/components/common/avatar'
 import { useDialog } from '@/hooks/useDialog'
 
 interface UserResult {
@@ -177,14 +177,12 @@ export function NewChatModal({ onClose, onStartChat }: NewChatModalProps) {
                         <div className={s.groupForm}>
                             <div className={s.groupHeaderInput}>
                                 <div className={s.avatarUpload}>
-                                    <img
-                                        src={avatarPreview || DefaultAvatar}
+                                    <UserAvatar
+                                        src={avatarPreview}
+                                        name={groupName || 'Nhóm mới'}
                                         alt="Group Avatar"
                                         className={s.avatarPreview}
-                                        onError={(e) =>
-                                            (e.currentTarget.src =
-                                                DefaultAvatar)
-                                        }
+                                        size={48}
                                     />
 
                                     <input
@@ -249,12 +247,15 @@ export function NewChatModal({ onClose, onStartChat }: NewChatModalProps) {
                                             key={u.id}
                                             className={s.selectedTag}
                                         >
-                                            <img
-                                                src={
-                                                    u.avatarUrl || DefaultAvatar
+                                            <UserAvatar
+                                                userId={u.id}
+                                                src={u.avatarUrl}
+                                                name={
+                                                    `${u.firstName || ''} ${u.lastName || ''}`.trim() ||
+                                                    u.email
                                                 }
                                                 className={s.tagAvatar}
-                                                alt=""
+                                                size={20}
                                             />
                                             {u.lastName}
                                             <span
@@ -308,13 +309,15 @@ export function NewChatModal({ onClose, onStartChat }: NewChatModalProps) {
                                             }
                                         >
                                             <div className={s.userItemLeft}>
-                                                <img
-                                                    src={
-                                                        user.avatarUrl ||
-                                                        DefaultAvatar
+                                                <UserAvatar
+                                                    userId={user.id}
+                                                    src={user.avatarUrl}
+                                                    name={
+                                                        `${user.firstName || ''} ${user.lastName || ''}`.trim() ||
+                                                        user.email
                                                     }
-                                                    alt=""
                                                     className={s.avatar}
+                                                    size={36}
                                                 />
                                                 <div className={s.userInfo}>
                                                     <div className={s.userName}>
