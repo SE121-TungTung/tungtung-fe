@@ -1,0 +1,163 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 4px 0;
+}
+
+.statsBar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 14px;
+}
+
+@media (max-width: 500px) {
+    .statsBar {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.statItem {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #475569;
+}
+
+.indicatorDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.statItem.answered .indicatorDot {
+    background-color: #10b981;
+}
+
+.statItem.unanswered .indicatorDot {
+    background-color: #cbd5e1;
+}
+
+.statItem.flagged .indicatorDot {
+    background-color: #f59e0b;
+}
+
+.statLabel {
+    color: #64748b;
+}
+
+.statValue {
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.guideText {
+    font-size: 13px;
+    color: #64748b;
+}
+
+.gridContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+    gap: 8px;
+    max-height: 380px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.questionCard {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 52px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    transition: all 0.15s ease;
+    padding: 4px;
+}
+
+.questionCard:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08);
+}
+
+.qNum {
+    font-size: 13px;
+    font-weight: 700;
+    color: #334155;
+}
+
+.ansPreview {
+    font-size: 11px;
+    font-weight: 600;
+    color: #047857;
+    margin-top: 2px;
+    max-width: 90%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.questionCard.isAnswered {
+    background: #f0fdf4;
+    border-color: #86efac;
+}
+
+.questionCard.isAnswered .qNum {
+    color: #166534;
+}
+
+.questionCard.isUnanswered {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+}
+
+.questionCard.isUnanswered .qNum {
+    color: #64748b;
+}
+
+.questionCard.isFlagged {
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 1px #f59e0b;
+}
+
+.flagMarker {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    color: #d97706;
+}
+
+.footerContainer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    width: 100%;
+}
+
+.closeBtn {
+    padding: 8px 16px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.closeBtn:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}

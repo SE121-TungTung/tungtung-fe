@@ -15,6 +15,9 @@ interface ReadingSectionViewProps {
     attemptId: string
     testId: string
     clearHighlightsRef?: React.RefObject<(() => void) | null>
+    partIndex?: number
+    reviewed?: Set<number>
+    onToggleReview?: (num: number) => void
 }
 
 const ReadingSectionView: React.FC<ReadingSectionViewProps> = ({
@@ -25,19 +28,26 @@ const ReadingSectionView: React.FC<ReadingSectionViewProps> = ({
     attemptId,
     testId,
     clearHighlightsRef,
+    partIndex = 0,
+    reviewed,
+    onToggleReview,
 }) => {
     const internalClearRef = useRef<(() => void) | null>(null)
     const effectiveClearRef = clearHighlightsRef || internalClearRef
 
+    // Use current part passage if available, else first passage found
+    const activePart = section.parts[partIndex] || section.parts[0]
     const currentPassage =
-        section.parts.find((p: any) => p.passage)?.passage || null
+        activePart?.passage ||
+        section.parts.find((p: any) => p.passage)?.passage ||
+        null
 
     return (
         <main className={s.sectionMain}>
             {/* Passage Viewer */}
             <PassageViewer
                 passage={currentPassage}
-                sectionId={section.id}
+                sectionId={`${section.id}_part_${partIndex}`}
                 testId={testId}
                 clearHighlightsRef={effectiveClearRef}
             />
@@ -45,10 +55,13 @@ const ReadingSectionView: React.FC<ReadingSectionViewProps> = ({
             {/* Questions */}
             <QuestionGroupRenderer
                 section={section}
+                partIndex={partIndex}
                 answers={answers}
                 onAnswerChange={onAnswerChange}
                 registerRef={registerRef}
                 attemptId={attemptId}
+                reviewed={reviewed}
+                onToggleReview={onToggleReview}
             />
         </main>
     )

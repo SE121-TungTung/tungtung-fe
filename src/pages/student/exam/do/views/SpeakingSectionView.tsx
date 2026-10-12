@@ -24,8 +24,9 @@ const SpeakingSectionView: React.FC<SpeakingSectionViewProps> = ({
     partIndex,
     onSpeakingProgress,
 }) => {
-    const currentPart = section.parts[0]
-    const currentQuestions = currentPart?.questionGroups[0]?.questions || []
+    const currentPart = section.parts[partIndex] || section.parts[0]
+    const currentQuestions =
+        currentPart?.questionGroups?.flatMap((g) => g.questions) || []
     const partNumber = (partIndex + 1) as 1 | 2 | 3
     const { alert } = useDialog()
 
@@ -70,7 +71,7 @@ const SpeakingSectionView: React.FC<SpeakingSectionViewProps> = ({
             setTimeout(() => setShowSuccessMessage(false), 3000)
         } catch (error) {
             console.error('Save error:', error)
-            alert('Failed to save recordings: ' + (error as Error).message)
+            alert('Lỗi lưu bản ghi âm: ' + (error as Error).message)
         }
     }
 
@@ -90,7 +91,7 @@ const SpeakingSectionView: React.FC<SpeakingSectionViewProps> = ({
             {/* Left: Cue Card */}
             <CueCardViewer
                 partNumber={partNumber}
-                title={section.name || `Part ${partNumber}`}
+                title={currentPart?.name || `Part ${partNumber}`}
                 instructions={currentPart?.instructions || ''}
                 questions={currentQuestions.map(
                     (q: any) => q.questionText || ''
@@ -106,7 +107,8 @@ const SpeakingSectionView: React.FC<SpeakingSectionViewProps> = ({
                 <div className={s.progressSection}>
                     <div className={s.progressHeader}>
                         <span>
-                            Progress: {progress.uploaded} / {progress.total}
+                            Tiến độ thu âm: {progress.uploaded} /{' '}
+                            {progress.total}
                         </span>
                         <span>{progress.percentage}%</span>
                     </div>
@@ -146,20 +148,20 @@ const SpeakingSectionView: React.FC<SpeakingSectionViewProps> = ({
                         disabled={!canSubmit}
                         size="lg"
                     >
-                        💾 Save All Recordings
+                        Lưu bản ghi âm
                     </ButtonPrimary>
 
                     {showSuccessMessage && (
                         <div className={s.successMessage}>
-                            ✓ All recordings saved! You can now submit your
-                            test.
+                            Đã lưu tất cả bản ghi âm thành công. Bạn có thể tiếp
+                            tục làm các phần khác hoặc nộp bài.
                         </div>
                     )}
 
                     {!showSuccessMessage && (
                         <p className={s.hint}>
-                            💡 Your recordings are saved. You can re-record
-                            before final submission.
+                            Bản ghi âm được lưu an toàn. Bạn có thể thu âm lại
+                            bất cứ lúc nào trước khi nộp bài chính thức.
                         </p>
                     )}
                 </div>

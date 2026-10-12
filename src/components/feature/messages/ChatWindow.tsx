@@ -393,11 +393,17 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                         ) : (
                             <>
                                 <UserAvatar
-                                    userId={otherParticipant?.id}
-                                    src={otherParticipant?.avatarUrl}
-                                    name={otherParticipant?.fullName || 'User'}
+                                    userId={
+                                        otherParticipant?.id ||
+                                        conversation.otherUserId
+                                    }
+                                    src={
+                                        otherParticipant?.avatarUrl ||
+                                        conversation.avatarUrl
+                                    }
+                                    name={displayName}
                                     className={s.headerAvatar}
-                                    alt={otherParticipant?.fullName || 'User'}
+                                    alt={displayName}
                                     size={40}
                                 />
                                 {otherParticipant?.isOnline && (

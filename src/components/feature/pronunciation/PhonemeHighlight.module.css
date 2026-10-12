@@ -127,6 +127,34 @@
     font-weight: 600;
 }
 
+.stressTip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 4px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--color-border-soft, #e2e8f0);
+    font-size: 12px;
+    color: var(--color-text-secondary, #475569);
+}
+
+.stressBadge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    background: rgba(23, 86, 118, 0.1);
+    color: #175676;
+    font-weight: 700;
+    border-radius: 4px;
+    font-size: 11px;
+    flex-shrink: 0;
+}
+
+.stressExplanation {
+    line-height: 1.4;
+}
+
 .phonemeBadgesGrid {
     display: flex;
     flex-wrap: wrap;

@@ -8,11 +8,20 @@
     margin-bottom: 0;
 }
 
+.headerRow {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
 .questionText {
     font-size: 14px;
-    margin-bottom: 12px;
+    margin: 0;
     color: var(--color-text-primary);
     line-height: 1.6;
+    flex: 1;
 }
 
 .options {

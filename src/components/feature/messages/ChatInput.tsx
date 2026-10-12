@@ -6,7 +6,6 @@ import EmojiPicker, { type EmojiClickData } from 'emoji-picker-react'
 import SendIcon from '@/assets/Send Paper Plane.svg'
 import ClipIcon from '@/assets/Attachment.svg'
 import EmojiIcon from '@/assets/Action Favourite.svg'
-import ButtonCircle from '@/components/common/button/ButtonCircle'
 import { useDialog } from '@/hooks/useDialog'
 
 interface ChatInputProps {
@@ -32,9 +31,17 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 setShowEmoji(false)
             }
         }
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                setShowEmoji(false)
+            }
+        }
         document.addEventListener('mousedown', handleClickOutside)
-        return () =>
+        document.addEventListener('keydown', handleKeyDown)
+        return () => {
             document.removeEventListener('mousedown', handleClickOutside)
+            document.removeEventListener('keydown', handleKeyDown)
+        }
     }, [])
 
     const handleSubmit = (e?: React.FormEvent) => {
@@ -74,16 +81,16 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             )}
 
             <form className={s.inputWrapper} onSubmit={handleSubmit}>
-                <ButtonCircle
+                <button
                     type="button"
-                    variant="outline"
-                    size="lg"
                     className={s.iconBtn}
                     onClick={handleAttachClick}
                     disabled={disabled}
+                    title="Đính kèm tập tin"
+                    aria-label="Đính kèm tập tin"
                 >
                     <img src={ClipIcon} alt="Attach" />
-                </ButtonCircle>
+                </button>
 
                 {/* Input Field */}
                 <div className={s.inputFieldContainer}>
@@ -103,32 +110,32 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                         }}
                     />
 
-                    {/* Button Emoji inside Input area (optional) or outside */}
+                    {/* Button Emoji inside Input area */}
                     <button
                         type="button"
                         className={s.emojiBtn}
                         onClick={() => setShowEmoji(!showEmoji)}
+                        title="Biểu tượng cảm xúc"
+                        aria-label="Biểu tượng cảm xúc"
                     >
                         <img src={EmojiIcon} alt="Emoji" />
                     </button>
                 </div>
 
                 {/* Button Send */}
-                <ButtonCircle
-                    type="button"
-                    variant="outline"
-                    size="lg"
+                <button
+                    type="submit"
                     className={s.sendButton}
                     aria-label="Gửi tin nhắn"
+                    title="Gửi tin nhắn"
                     disabled={disabled || !text.trim()}
-                    onClick={handleSubmit}
                 >
                     <img
                         src={SendIcon}
                         alt="Send"
-                        style={{ opacity: disabled || !text.trim() ? 0.5 : 1 }}
+                        style={{ opacity: disabled || !text.trim() ? 0.4 : 1 }}
                     />
-                </ButtonCircle>
+                </button>
             </form>
         </div>
     )

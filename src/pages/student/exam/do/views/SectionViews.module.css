@@ -117,17 +117,166 @@
     overflow: hidden;
 }
 
-.transcriptSection {
-    padding-top: 20px;
-    border-top: 1px dashed #e0e0e0;
-    margin-top: 16px;
+/* ============================================
+   LISTENING SIDEBAR & LAYOUT
+   ============================================ */
+.listeningSidebar {
+    flex: 0 0 360px;
+    width: 360px;
+    max-width: 380px;
+    min-width: 300px;
+    background-color: #f8fafc;
+    border-right: 1px solid #e2e8f0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 100%;
+    box-sizing: border-box;
 }
 
-.transcriptTitle {
-    font-size: 16px;
+.sidebarInner {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.listeningHeaderCard {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.headerBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
     font-weight: 600;
-    color: #333;
-    margin-bottom: 12px;
+    color: #175676;
+    background: rgba(23, 86, 118, 0.08);
+    border-radius: 20px;
+    padding: 4px 10px;
+}
+
+.partTitle {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 10px 0 6px 0;
+    line-height: 1.4;
+}
+
+.listeningGuide {
+    font-size: 13px;
+    line-height: 1.5;
+    color: #64748b;
+    margin: 0;
+}
+
+.listeningPartTabs {
+    display: flex;
+    gap: 6px;
+    background: #e2e8f0;
+    padding: 4px;
+    border-radius: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 10px;
+}
+
+.listeningPartTab {
+    flex: 1;
+    padding: 6px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.listeningPartTab:hover {
+    color: #0f172a;
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.activeListeningPartTab {
+    background: #ffffff;
+    color: #175676;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.playerWrapper {
+    width: 100%;
+}
+
+.transcriptBlock {
+    margin-top: 4px;
+}
+
+.transcriptToggleBtn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 10px 14px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.transcriptToggleBtn:hover {
+    background: #f1f5f9;
+    color: #175676;
+    border-color: #cbd5e1;
+}
+
+.transcriptToggleBtn.active {
+    background: #175676;
+    color: #ffffff;
+    border-color: #175676;
+}
+
+.chevronIcon {
+    transition: transform 0.25s ease;
+}
+
+.chevronIcon.rotated {
+    transform: rotate(180deg);
+}
+
+.transcriptContent {
+    margin-top: 10px;
+    padding: 14px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.questionsArea {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 /* ============================================
@@ -157,6 +306,73 @@
 }
 
 /* ============================================
+   WRITING TASK TABS
+   ============================================ */
+.writingWrapper {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    height: 100%;
+    overflow: hidden;
+}
+
+.taskTabBar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: #f1f5f9;
+    border-bottom: 1px solid #e2e8f0;
+    flex-shrink: 0;
+}
+
+.taskTabBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.taskTabBtn:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    color: #0f172a;
+}
+
+.taskTabBtn.activeTaskTab {
+    background: #175676;
+    border-color: #175676;
+    color: #ffffff;
+    box-shadow: 0 2px 4px rgba(23, 86, 118, 0.2);
+}
+
+.taskTabName {
+    white-space: nowrap;
+}
+
+.taskTabBadge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.08);
+    color: inherit;
+}
+
+.taskTabBtn.activeTaskTab .taskTabBadge {
+    background: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+}
+
+/* ============================================
    RESPONSIVE
    ============================================ */
 
@@ -165,16 +381,19 @@
         flex-direction: column;
     }
 
-    .mediaContainer {
+    .mediaContainer,
+    .listeningSidebar {
         flex: 0 0 auto;
+        width: 100%;
         max-width: 100%;
-        max-height: 40%;
+        max-height: 45%;
         border-right: none;
         border-bottom: 1px solid #e0e0e0;
     }
 
     .editorContainer,
-    .recordingContainer {
+    .recordingContainer,
+    .questionsArea {
         flex: 1;
     }
 }

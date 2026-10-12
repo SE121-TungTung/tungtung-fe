@@ -364,8 +364,20 @@ export function AdminTransactionModerator({
                                                             }
                                                             className={`${s.actionBtn} ${s.actionBtnApprove}`}
                                                             title="Duyệt giao dịch"
+                                                            aria-label="Duyệt giao dịch"
                                                         >
-                                                            ✓
+                                                            <svg
+                                                                width="18"
+                                                                height="18"
+                                                                viewBox="0 0 24 24"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                strokeWidth="2.5"
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                            >
+                                                                <polyline points="20 6 9 17 4 12" />
+                                                            </svg>
                                                         </button>
                                                         <button
                                                             onClick={() =>
@@ -374,9 +386,32 @@ export function AdminTransactionModerator({
                                                                 )
                                                             }
                                                             className={`${s.actionBtn} ${s.actionBtnReject}`}
-                                                            title="Từ chối"
+                                                            title="Từ chối giao dịch"
+                                                            aria-label="Từ chối giao dịch"
                                                         >
-                                                            ✗
+                                                            <svg
+                                                                width="18"
+                                                                height="18"
+                                                                viewBox="0 0 24 24"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                strokeWidth="2.5"
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                            >
+                                                                <line
+                                                                    x1="18"
+                                                                    y1="6"
+                                                                    x2="6"
+                                                                    y2="18"
+                                                                />
+                                                                <line
+                                                                    x1="6"
+                                                                    y1="6"
+                                                                    x2="18"
+                                                                    y2="18"
+                                                                />
+                                                            </svg>
                                                         </button>
                                                     </div>
                                                 ) : (

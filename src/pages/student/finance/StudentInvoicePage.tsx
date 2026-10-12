@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Card from '@/components/common/card/Card'
 import { EmptyState } from '@/components/common/state/EmptyState'
 import {
@@ -19,16 +20,30 @@ function PaymentModal({
     invoice: InvoiceResponse
     onClose: () => void
 }) {
+    const navigate = useNavigate()
     const { mutate: processPayment, isPending } = useProcessPayment()
     const { data: wallet } = useMyWalletBalance()
     const balance =
         wallet?.wallet_balance !== undefined ? Number(wallet.wallet_balance) : 0
     const { alert, confirm } = useDialog()
     const queryClient = useQueryClient()
-    const [gateway, setGateway] = useState<PaymentGateway>('INTERNAL_WALLET')
+    const [gateway] = useState<PaymentGateway>('INTERNAL_WALLET')
+
+    const isInsufficient = balance < invoice.final_amount
+    const shortage = invoice.final_amount - balance
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                onClose()
+            }
+        }
+        window.addEventListener('keydown', handleKeyDown)
+        return () => window.removeEventListener('keydown', handleKeyDown)
+    }, [onClose])
 
     const handlePay = () => {
-        if (gateway === 'INTERNAL_WALLET' && balance < invoice.final_amount) {
+        if (gateway === 'INTERNAL_WALLET' && isInsufficient) {
             alert('Số dư ví không đủ. Vui lòng nạp thêm tiền.', 'Lỗi số dư')
             return
         }
@@ -108,153 +123,121 @@ function PaymentModal({
 
     return (
         <div
-            style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: 'var(--color-surface-overlay)',
-                zIndex: 1000,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+            className={s.modalOverlay}
+            onMouseDown={(e) => {
+                if (e.target === e.currentTarget) onClose()
             }}
         >
-            <Card variant="glass" style={{ width: '400px', padding: '24px' }}>
-                <h3 style={{ marginTop: 0, fontSize: '20px' }}>
-                    Thanh toán Hóa đơn
-                </h3>
-                <p style={{ color: 'var(--color-text-secondary)' }}>
+            <Card variant="glass" className={s.modalCard}>
+                <div className={s.modalHeader}>
+                    <h3 className={s.modalTitle}>Thanh toán Hóa đơn</h3>
+                </div>
+                <p className={s.modalCourse}>
                     Khóa học: {invoice.course_name || '—'}
                 </p>
-                <div
-                    style={{
-                        margin: '20px 0',
-                        padding: '16px',
-                        background: 'rgba(var(--primitive-blue-500), 0.1)',
-                        borderRadius: '8px',
-                    }}
-                >
-                    <div
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            marginBottom: '8px',
-                        }}
-                    >
+
+                <div className={s.amountSummaryBox}>
+                    <div className={s.amountRow}>
                         <span>Học phí gốc:</span>
                         <span>
                             {invoice.original_amount.toLocaleString()} đ
                         </span>
                     </div>
-                    <div
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            marginBottom: '8px',
-                            color: 'var(--color-brand-secondary)',
-                        }}
-                    >
-                        <span>Giảm giá:</span>
-                        <span>
-                            - {invoice.discount_amount.toLocaleString()} đ
-                        </span>
-                    </div>
-                    <hr
-                        style={{
-                            border: 0,
-                            borderTop: '1px solid var(--color-border-soft)',
-                        }}
-                    />
-                    <div
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            marginTop: '8px',
-                            fontWeight: 'bold',
-                            fontSize: '18px',
-                        }}
-                    >
+                    {invoice.discount_amount > 0 && (
+                        <div className={`${s.amountRow} ${s.amountDiscount}`}>
+                            <span>Giảm giá:</span>
+                            <span>
+                                - {invoice.discount_amount.toLocaleString()} đ
+                            </span>
+                        </div>
+                    )}
+                    <hr className={s.amountDivider} />
+                    <div className={s.amountTotalRow}>
                         <span>Cần thanh toán:</span>
-                        <span style={{ color: 'var(--color-brand-primary)' }}>
+                        <span className={s.amountTotalValue}>
                             {invoice.final_amount.toLocaleString()} đ
                         </span>
                     </div>
                 </div>
 
-                <div style={{ marginBottom: '24px' }}>
-                    <label
-                        style={{
-                            display: 'block',
-                            marginBottom: '8px',
-                            fontWeight: 500,
-                        }}
-                    >
+                <div className={s.paymentMethodSection}>
+                    <label className={s.methodLabel}>
                         Phương thức thanh toán:
                     </label>
-                    <select
-                        value={gateway}
-                        onChange={(e) =>
-                            setGateway(e.target.value as PaymentGateway)
-                        }
-                        style={{
-                            width: '100%',
-                            padding: '10px',
-                            borderRadius: 'var(--input-radius)',
-                            border: '1px solid var(--input-border)',
-                            background: 'var(--input-bg)',
-                            color: 'var(--input-text)',
-                        }}
-                    >
-                        <option value="INTERNAL_WALLET">
-                            Ví điện tử nội bộ (Số dư: {balance.toLocaleString()}{' '}
-                            đ)
-                        </option>
-                        <option value="VNPAY" disabled>
-                            VNPay (Đã dừng hỗ trợ checkout trực tiếp)
-                        </option>
-                        <option value="MOMO" disabled>
-                            Ví MoMo (Đã dừng hỗ trợ checkout trực tiếp)
-                        </option>
-                    </select>
+                    <div className={s.walletOptionCard}>
+                        <div className={s.walletOptionHeader}>
+                            <div className={s.walletOptionTitle}>
+                                <svg
+                                    width="18"
+                                    height="18"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="var(--color-brand-primary)"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4" />
+                                    <path d="M4 6v12a2 2 0 0 0 2 2h14v-4" />
+                                    <path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z" />
+                                </svg>
+                                <span>Ví điện tử nội bộ</span>
+                            </div>
+                            <span className={s.walletBalanceTag}>
+                                Khả dụng:{' '}
+                                <strong className={s.walletBalanceValue}>
+                                    {balance.toLocaleString()} đ
+                                </strong>
+                            </span>
+                        </div>
+
+                        {isInsufficient && (
+                            <div className={s.insufficientWarning}>
+                                <span>
+                                    Số dư ví không đủ (thiếu{' '}
+                                    <strong>
+                                        {shortage.toLocaleString()} đ
+                                    </strong>
+                                    )
+                                </span>
+                                <span
+                                    className={s.topUpLink}
+                                    onClick={() => {
+                                        onClose()
+                                        navigate('/finance/wallet')
+                                    }}
+                                >
+                                    Nạp thêm ví &rarr;
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                    <p className={s.otherMethodsHint}>
+                        * Cổng thanh toán VNPay / MoMo được hỗ trợ nạp tiền trực
+                        tiếp vào Ví nội bộ.
+                    </p>
                 </div>
 
-                <div
-                    style={{
-                        display: 'flex',
-                        gap: '12px',
-                        justifyContent: 'flex-end',
-                    }}
-                >
+                <div className={s.modalActions}>
                     <button
                         onClick={onClose}
                         disabled={isPending}
-                        style={{
-                            padding: '8px 16px',
-                            borderRadius: '8px',
-                            border: 'none',
-                            background: 'transparent',
-                            cursor: 'pointer',
-                            color: 'var(--color-text-secondary)',
-                        }}
+                        className={s.cancelBtn}
+                        type="button"
                     >
                         Hủy
                     </button>
                     <button
                         onClick={handlePay}
-                        disabled={isPending}
-                        style={{
-                            padding: '8px 24px',
-                            borderRadius: '8px',
-                            border: 'none',
-                            background: 'var(--color-brand-primary)',
-                            color: 'white',
-                            fontWeight: 600,
-                            cursor: isPending ? 'not-allowed' : 'pointer',
-                        }}
+                        disabled={isPending || isInsufficient}
+                        className={s.confirmBtn}
+                        type="button"
                     >
-                        {isPending ? 'Đang xử lý...' : 'Xác nhận thanh toán'}
+                        {isPending
+                            ? 'Đang xử lý...'
+                            : isInsufficient
+                              ? 'Số dư không đủ'
+                              : 'Xác nhận thanh toán'}
                     </button>
                 </div>
             </Card>
@@ -272,20 +255,14 @@ export default function StudentInvoicePage() {
     const totalPages = invoicesRes?.meta?.total_pages || 1
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <div>
-                <h1
-                    style={{
-                        fontSize: '24px',
-                        fontWeight: 700,
-                        margin: '0 0 8px 0',
-                    }}
-                >
-                    Hóa đơn của tôi
-                </h1>
-                <p style={{ color: 'var(--color-text-secondary)', margin: 0 }}>
-                    Theo dõi lịch sử đóng học phí và thanh toán trực tuyến.
-                </p>
+        <div className={s.container}>
+            <div className={s.header}>
+                <div>
+                    <h1 className={s.title}>Hóa đơn của tôi</h1>
+                    <p className={s.subtitle}>
+                        Theo dõi lịch sử đóng học phí và thanh toán trực tuyến.
+                    </p>
+                </div>
             </div>
 
             <Card
@@ -418,7 +395,7 @@ export default function StudentInvoicePage() {
                                                     onClick={() =>
                                                         setSelectedInvoice(inv)
                                                     }
-                                                    className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-white bg-brand-primary rounded-md hover:bg-brand-primary-hover transition-colors"
+                                                    className={s.payBtn}
                                                 >
                                                     <svg
                                                         width="16"
@@ -458,25 +435,15 @@ export default function StudentInvoicePage() {
             </Card>
 
             {totalPages > 1 && (
-                <div
-                    style={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        gap: '8px',
-                    }}
-                >
+                <div className={s.pagination}>
                     <button
                         onClick={() => setPage((p) => Math.max(1, p - 1))}
                         disabled={page === 1}
-                        style={{
-                            padding: '8px 16px',
-                            borderRadius: '8px',
-                            border: '1px solid var(--color-border-soft)',
-                        }}
+                        className={s.paginationBtn}
                     >
                         Trước
                     </button>
-                    <span style={{ padding: '8px 16px' }}>
+                    <span className={s.paginationText}>
                         Trang {page} / {totalPages}
                     </span>
                     <button
@@ -484,11 +451,7 @@ export default function StudentInvoicePage() {
                             setPage((p) => Math.min(totalPages, p + 1))
                         }
                         disabled={page === totalPages}
-                        style={{
-                            padding: '8px 16px',
-                            borderRadius: '8px',
-                            border: '1px solid var(--color-border-soft)',
-                        }}
+                        className={s.paginationBtn}
                     >
                         Sau
                     </button>

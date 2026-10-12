@@ -8,15 +8,16 @@ interface TestHeaderProps {
     timeLeft: number
     formattedTime: string
     isLowTime: boolean
+    onPauseExit?: () => void
 }
 
 export const TestHeader = React.memo(
     ({
         skillName,
         icon,
-        // timeLeft,
         formattedTime,
         isLowTime,
+        onPauseExit,
     }: TestHeaderProps) => {
         const timerStyle = isLowTime
             ? { color: '#ef4444', animation: 'pulse 1s infinite' }
@@ -28,13 +29,47 @@ export const TestHeader = React.memo(
                     {icon && <span>{icon}</span>}
                     {skillName}
                 </span>
-                <div
-                    className={s.timer}
-                    title="Time remaining"
-                    style={timerStyle}
-                >
-                    <img src={ClockIcon} alt="time left" />
-                    {formattedTime}
+                <div className={s.rightActions}>
+                    <div
+                        className={s.timer}
+                        title="Thời gian còn lại"
+                        style={timerStyle}
+                    >
+                        <img src={ClockIcon} alt="time left" />
+                        {formattedTime}
+                    </div>
+
+                    {onPauseExit && (
+                        <button
+                            type="button"
+                            onClick={onPauseExit}
+                            className={s.pauseBtn}
+                            title="Tạm dừng bài thi và lưu tiến trình"
+                        >
+                            <svg
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                            >
+                                <rect
+                                    x="6"
+                                    y="4"
+                                    width="4"
+                                    height="16"
+                                    rx="1"
+                                />
+                                <rect
+                                    x="14"
+                                    y="4"
+                                    width="4"
+                                    height="16"
+                                    rx="1"
+                                />
+                            </svg>
+                            <span>Tạm dừng</span>
+                        </button>
+                    )}
                 </div>
             </header>
         )

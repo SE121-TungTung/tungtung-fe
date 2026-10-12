@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { MicRecorder } from '@/components/feature/pronunciation/MicRecorder'
 import { PhonemeHighlight } from '@/components/feature/pronunciation/PhonemeHighlight'
+import { AIFeedbackMarkdown } from '@/components/feature/pronunciation/AIFeedbackMarkdown'
 import Button from '@/components/common/button/Button'
 import Card from '@/components/common/card/Card'
 import {
@@ -388,6 +389,104 @@ export default function PronunciationAssessmentPage() {
         ? getScoreInfo(currentAnalysis.overall_score)
         : null
 
+    const allPhonemesGood =
+        currentAnalysis?.phoneme_results &&
+        currentAnalysis.phoneme_results.length > 0 &&
+        currentAnalysis.phoneme_results.every(
+            (p) =>
+                p.is_correct ||
+                (p.score ?? Math.round((p.confidence || 0) * 100)) >= 80
+        )
+
+    const wordStressScore =
+        currentAnalysis?.component_scores?.word_stress ??
+        currentAnalysis?.component_scores?.stress
+
+    const scoreHintText = (() => {
+        if (!currentAnalysis) return ''
+        if (currentAnalysis.overall_score >= 85) {
+            return 'Phát âm rất tốt! Cả âm vị và ngữ điệu đều đạt chuẩn.'
+        }
+        if (
+            allPhonemesGood &&
+            (wordStressScore !== undefined
+                ? wordStressScore < 75
+                : currentAnalysis.overall_score < 80)
+        ) {
+            return 'Tất cả các âm đơn lẻ đều đạt 100%! Điểm tổng thể chưa tối đa do Trọng âm từ (Word Stress) hoặc Ngữ điệu chưa đạt chuẩn. Hãy chú ý nhấn mạnh vào âm tiết chính có dấu (ˈ).'
+        }
+        if (currentAnalysis.overall_score >= 70) {
+            return 'Phát âm khá tốt! Chú ý điều chỉnh thêm trọng âm hoặc các âm màu vàng/đỏ để đạt điểm tối đa.'
+        }
+        return 'Lưu ý các âm vị chưa đạt màu đỏ/vàng hoặc tiêu chí trọng âm bên dưới để điều chỉnh khẩu hình.'
+    })()
+
+    const componentMetrics = (() => {
+        if (!currentAnalysis?.component_scores) return []
+        const cs = currentAnalysis.component_scores
+        const list: { key: string; label: string; value: number }[] = []
+
+        const accuracyVal = cs.individual_sounds ?? cs.accuracy
+        if (accuracyVal != null) {
+            list.push({
+                key: 'accuracy',
+                label: 'Âm vị (Phonemes)',
+                value: Math.round(accuracyVal),
+            })
+        }
+
+        const stressVal = cs.word_stress ?? cs.stress
+        if (stressVal != null) {
+            list.push({
+                key: 'word_stress',
+                label: 'Trọng âm từ (Word Stress)',
+                value: Math.round(stressVal),
+            })
+        }
+
+        if (cs.sentence_stress != null) {
+            list.push({
+                key: 'sentence_stress',
+                label: 'Trọng âm câu',
+                value: Math.round(cs.sentence_stress),
+            })
+        }
+
+        if (cs.fluency != null) {
+            list.push({
+                key: 'fluency',
+                label: 'Độ lưu loát (Fluency)',
+                value: Math.round(cs.fluency),
+            })
+        }
+
+        if (cs.intonation != null) {
+            list.push({
+                key: 'intonation',
+                label: 'Ngữ điệu (Intonation)',
+                value: Math.round(cs.intonation),
+            })
+        }
+
+        if (cs.linking != null) {
+            list.push({
+                key: 'linking',
+                label: 'Nối âm (Linking)',
+                value: Math.round(cs.linking),
+            })
+        }
+
+        if (cs.completeness != null) {
+            list.push({
+                key: 'completeness',
+                label: 'Độ hoàn thiện',
+                value: Math.round(cs.completeness),
+            })
+        }
+
+        return list
+    })()
+
     return (
         <div className={s.page}>
             {/* Top Progress bar */}
@@ -412,8 +511,8 @@ export default function PronunciationAssessmentPage() {
                     </div>
                     <span className={s.testType}>
                         {currentItem?.target_type === 'sentence'
-                            ? '📝 Câu giao tiếp'
-                            : '📖 Từ vựng'}
+                            ? 'Câu giao tiếp'
+                            : 'Từ vựng'}
                     </span>
                 </div>
 
@@ -489,12 +588,40 @@ export default function PronunciationAssessmentPage() {
                                     {scoreInfo?.label}
                                 </span>
                                 <span className={s.scoreHint}>
-                                    {currentAnalysis.overall_score >= 70
-                                        ? 'Phát âm tốt! Giữ vững phong độ cho các câu tiếp theo.'
-                                        : 'Lưu ý các âm vị chưa đạt màu đỏ/vàng bên dưới để điều chỉnh khẩu hình.'}
+                                    {scoreHintText}
                                 </span>
                             </div>
                         </div>
+
+                        {/* Special Stress Explanation when all phonemes are 100% but overall score is not 100% */}
+                        {allPhonemesGood &&
+                            (wordStressScore !== undefined
+                                ? wordStressScore < 75
+                                : currentAnalysis.overall_score < 80) && (
+                                <div className={s.stressExplanationCard}>
+                                    <div className={s.stressCardHeader}>
+                                        <SparklesIcon size={16} />
+                                        <strong>
+                                            Giải thích điểm số: Tại sao đúng hết
+                                            âm nhưng chưa đạt 100%?
+                                        </strong>
+                                    </div>
+                                    <p className={s.stressCardBody}>
+                                        Bạn đã phát âm chính xác 100% tất cả các
+                                        âm vị đơn lẻ (/k/, /ʌ/, /m/, /f/, /t/,
+                                        /ə/, /b/, /l/). Tuy nhiên, điểm tổng thể
+                                        bị giảm do{' '}
+                                        <strong>
+                                            Trọng âm từ (Word Stress)
+                                        </strong>{' '}
+                                        chưa được nhấn rõ ở âm tiết chính mang
+                                        dấu <strong>ˈ</strong> trong mẫu chuẩn
+                                        (ví dụ: <em>ˈkʌmftəbl</em> cần nhấn mạnh
+                                        âm tiết đầu). Hãy kiểm tra bảng tiêu chí
+                                        chi tiết bên dưới!
+                                    </p>
+                                </div>
+                            )}
 
                         {/* Spoken IPA vs Expected IPA Comparison */}
                         <div className={s.ipaComparisonBox}>
@@ -547,79 +674,76 @@ export default function PronunciationAssessmentPage() {
                                 </div>
                             )}
 
-                        {/* Component Metric Scores */}
-                        {currentAnalysis.component_scores && (
-                            <div className={s.componentsGrid}>
-                                {currentAnalysis.component_scores.accuracy !==
-                                    undefined && (
-                                    <div className={s.compMetric}>
-                                        <span className={s.metricLabel}>
-                                            Độ chính xác
-                                        </span>
-                                        <div className={s.metricBar}>
+                        {/* Component Metric Scores (Multi-criteria: Stress, Sounds, Fluency, etc.) */}
+                        {componentMetrics.length > 0 && (
+                            <div className={s.componentsSection}>
+                                <div className={s.componentsHeader}>
+                                    <TargetIcon size={16} />
+                                    <span>
+                                        Chi tiết các tiêu chí chấm điểm:
+                                    </span>
+                                </div>
+                                <div className={s.componentsGrid}>
+                                    {componentMetrics.map((metric) => {
+                                        const barColor =
+                                            metric.value >= 80
+                                                ? '#10b981'
+                                                : metric.value >= 60
+                                                  ? '#f59e0b'
+                                                  : '#ef4444'
+                                        return (
                                             <div
-                                                className={s.metricFill}
-                                                style={{
-                                                    width: `${Math.min(100, currentAnalysis.component_scores.accuracy)}%`,
-                                                }}
-                                            />
-                                        </div>
-                                        <span className={s.metricVal}>
-                                            {Math.round(
-                                                currentAnalysis.component_scores
-                                                    .accuracy
-                                            )}
-                                            %
-                                        </span>
-                                    </div>
-                                )}
-                                {currentAnalysis.component_scores.fluency !==
-                                    undefined && (
-                                    <div className={s.compMetric}>
-                                        <span className={s.metricLabel}>
-                                            Độ lưu loát
-                                        </span>
-                                        <div className={s.metricBar}>
-                                            <div
-                                                className={s.metricFill}
-                                                style={{
-                                                    width: `${Math.min(100, currentAnalysis.component_scores.fluency)}%`,
-                                                }}
-                                            />
-                                        </div>
-                                        <span className={s.metricVal}>
-                                            {Math.round(
-                                                currentAnalysis.component_scores
-                                                    .fluency
-                                            )}
-                                            %
-                                        </span>
-                                    </div>
-                                )}
-                                {currentAnalysis.component_scores
-                                    .completeness !== undefined && (
-                                    <div className={s.compMetric}>
-                                        <span className={s.metricLabel}>
-                                            Độ hoàn thiện
-                                        </span>
-                                        <div className={s.metricBar}>
-                                            <div
-                                                className={s.metricFill}
-                                                style={{
-                                                    width: `${Math.min(100, currentAnalysis.component_scores.completeness)}%`,
-                                                }}
-                                            />
-                                        </div>
-                                        <span className={s.metricVal}>
-                                            {Math.round(
-                                                currentAnalysis.component_scores
-                                                    .completeness
-                                            )}
-                                            %
-                                        </span>
-                                    </div>
-                                )}
+                                                key={metric.key}
+                                                className={s.compMetric}
+                                            >
+                                                <div className={s.metricTopRow}>
+                                                    <span
+                                                        className={
+                                                            s.metricLabel
+                                                        }
+                                                    >
+                                                        {metric.label}
+                                                    </span>
+                                                    {metric.key ===
+                                                        'word_stress' &&
+                                                        metric.value < 70 && (
+                                                            <span
+                                                                className={
+                                                                    s.stressWarningTag
+                                                                }
+                                                            >
+                                                                Cần nhấn mạnh
+                                                            </span>
+                                                        )}
+                                                </div>
+                                                <div className={s.metricBar}>
+                                                    <div
+                                                        className={s.metricFill}
+                                                        style={{
+                                                            width: `${Math.min(100, Math.max(5, metric.value))}%`,
+                                                            background:
+                                                                barColor,
+                                                        }}
+                                                    />
+                                                </div>
+                                                <span
+                                                    className={s.metricVal}
+                                                    style={{ color: barColor }}
+                                                >
+                                                    {metric.value}%
+                                                </span>
+                                            </div>
+                                        )
+                                    })}
+                                </div>
                             </div>
+                        )}
+
+                        {/* AI Feedback & Coaching Tips */}
+                        {currentAnalysis.feedback_text && (
+                            <AIFeedbackMarkdown
+                                content={currentAnalysis.feedback_text}
+                            />
                         )}
 
                         {/* Action buttons: Retry or Proceed */}

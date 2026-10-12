@@ -446,10 +446,10 @@ export default function ExamPracticePage() {
                 ) : (
                     <div className={s.attemptsList}>
                         {historyAttempts.map((attempt, index) => {
-                            const isGraded = attempt.status === 'GRADED'
-                            const isInProgress =
-                                attempt.status === 'IN_PROGRESS'
-                            const isSubmitted = attempt.status === 'SUBMITTED'
+                            const status = (attempt.status || '').toLowerCase()
+                            const isGraded = status === 'graded'
+                            const isInProgress = status === 'in_progress'
+                            const isSubmitted = status === 'submitted'
 
                             return (
                                 <div key={attempt.id} className={s.attemptItem}>

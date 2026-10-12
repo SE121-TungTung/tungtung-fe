@@ -29,8 +29,10 @@ export interface EnhancedQuestion extends Question {
     globalNumber: number
 }
 
-export interface EnhancedQuestionGroup
-    extends Omit<QuestionGroup, 'questions'> {
+export interface EnhancedQuestionGroup extends Omit<
+    QuestionGroup,
+    'questions'
+> {
     questions: EnhancedQuestion[]
 }
 
@@ -52,11 +54,21 @@ interface UniversalQuestionRendererProps {
     registerRef: (id: string, el: HTMLElement | null) => void
     attemptId: string
     onUploadSpeaking?: (qid: string, blob: Blob, dur: number) => Promise<void>
+    reviewed?: Set<number>
+    onToggleReview?: (num: number) => void
 }
 
 export const UniversalQuestionRenderer =
     React.memo<UniversalQuestionRendererProps>(
-        ({ group, answers, onAnswerChange, registerRef, onUploadSpeaking }) => {
+        ({
+            group,
+            answers,
+            onAnswerChange,
+            registerRef,
+            onUploadSpeaking,
+            reviewed,
+            onToggleReview,
+        }) => {
             if (!group.questions.length) return null
 
             const groupType: QuestionType = group.questionType
@@ -120,6 +132,10 @@ export const UniversalQuestionRenderer =
                         const commonProps = {
                             question: { ...q, number: q.globalNumber } as any,
                             registerRef: registerRef,
+                            isReviewed: reviewed?.has(q.globalNumber),
+                            onToggleReview: onToggleReview
+                                ? () => onToggleReview(q.globalNumber)
+                                : undefined,
                         }
 
                         switch (q.questionType) {
@@ -233,89 +249,112 @@ interface QuestionGroupRendererProps {
     onAnswerChange: (id: string, val: any) => void
     registerRef: (id: string, el: HTMLElement | null) => void
     attemptId: string
+    hidePartAudio?: boolean
+    partIndex?: number
+    reviewed?: Set<number>
+    onToggleReview?: (num: number) => void
 }
 
 export const QuestionGroupRenderer = React.memo<QuestionGroupRendererProps>(
-    ({ section, answers, onAnswerChange, registerRef, attemptId }) => (
-        <div className={s.questionContainer}>
-            <div className={s.questionScrollArea}>
-                {section.parts.map((part) => (
-                    <React.Fragment key={part.id}>
-                        {/* Part Instructions */}
-                        {part.instructions && (
-                            <div className={s.partInstructions}>
-                                {part.instructions}
-                            </div>
-                        )}
+    ({
+        section,
+        answers,
+        onAnswerChange,
+        registerRef,
+        attemptId,
+        hidePartAudio = false,
+        partIndex,
+        reviewed,
+        onToggleReview,
+    }) => {
+        const partsToRender =
+            partIndex !== undefined && section.parts[partIndex]
+                ? [section.parts[partIndex]]
+                : section.parts
 
-                        {/* Part Audio */}
-                        {part.audioUrl && (
-                            <audio
-                                src={part.audioUrl}
-                                controls
-                                className={s.partAudio}
-                            />
-                        )}
+        return (
+            <div className={s.questionContainer}>
+                <div className={s.questionScrollArea}>
+                    {partsToRender.map((part) => (
+                        <React.Fragment key={part.id}>
+                            {/* Part Instructions */}
+                            {part.instructions && (
+                                <div className={s.partInstructions}>
+                                    {part.instructions}
+                                </div>
+                            )}
 
-                        {/* Part Image */}
-                        {part.imageUrl && (
-                            <img
-                                src={part.imageUrl}
-                                alt="Visual"
-                                className={s.partImage}
-                            />
-                        )}
-
-                        {/* Question Groups */}
-                        {part.questionGroups.map((group) => (
-                            <div
-                                key={group.id}
-                                className={s.questionGroupBlock}
-                            >
-                                {/* Group Instructions */}
-                                {group.instructions && (
-                                    <div
-                                        className={
-                                            group.questionType ===
-                                                QuestionType.SUMMARY_COMPLETION ||
-                                            group.questionType ===
-                                                QuestionType.NOTE_COMPLETION
-                                                ? s.summaryInstruction
-                                                : s.questionInstruction
-                                        }
-                                    >
-                                        <ReactMarkdown
-                                            remarkPlugins={[remarkGfm]}
-                                        >
-                                            {group.instructions}
-                                        </ReactMarkdown>
-                                    </div>
-                                )}
-
-                                {/* Group Image */}
-                                {group.imageUrl && (
-                                    <img
-                                        src={group.imageUrl}
-                                        alt="Group visual"
-                                        className={s.groupImage}
-                                    />
-                                )}
-
-                                {/* Questions */}
-                                <UniversalQuestionRenderer
-                                    group={group}
-                                    answers={answers}
-                                    onAnswerChange={onAnswerChange}
-                                    registerRef={registerRef}
-                                    attemptId={attemptId}
+                            {/* Part Audio - only show if not hidden */}
+                            {!hidePartAudio && part.audioUrl && (
+                                <audio
+                                    src={part.audioUrl}
+                                    controls
+                                    className={s.partAudio}
                                 />
-                            </div>
-                        ))}
-                    </React.Fragment>
-                ))}
+                            )}
+
+                            {/* Part Image */}
+                            {part.imageUrl && (
+                                <img
+                                    src={part.imageUrl}
+                                    alt="Visual"
+                                    className={s.partImage}
+                                />
+                            )}
+
+                            {/* Question Groups */}
+                            {part.questionGroups.map((group) => (
+                                <div
+                                    key={group.id}
+                                    className={s.questionGroupBlock}
+                                >
+                                    {/* Group Instructions */}
+                                    {group.instructions && (
+                                        <div
+                                            className={
+                                                group.questionType ===
+                                                    QuestionType.SUMMARY_COMPLETION ||
+                                                group.questionType ===
+                                                    QuestionType.NOTE_COMPLETION
+                                                    ? s.summaryInstruction
+                                                    : s.questionInstruction
+                                            }
+                                        >
+                                            <ReactMarkdown
+                                                remarkPlugins={[remarkGfm]}
+                                            >
+                                                {group.instructions}
+                                            </ReactMarkdown>
+                                        </div>
+                                    )}
+
+                                    {/* Group Image */}
+                                    {group.imageUrl && (
+                                        <img
+                                            src={group.imageUrl}
+                                            alt="Group visual"
+                                            className={s.groupImage}
+                                        />
+                                    )}
+
+                                    {/* Questions */}
+                                    <UniversalQuestionRenderer
+                                        group={group}
+                                        answers={answers}
+                                        onAnswerChange={onAnswerChange}
+                                        registerRef={registerRef}
+                                        attemptId={attemptId}
+                                        reviewed={reviewed}
+                                        onToggleReview={onToggleReview}
+                                    />
+                                </div>
+                            ))}
+                        </React.Fragment>
+                    ))}
+                </div>
             </div>
-        </div>
-    )
+        )
+    }
 )
 
 QuestionGroupRenderer.displayName = 'QuestionGroupRenderer'

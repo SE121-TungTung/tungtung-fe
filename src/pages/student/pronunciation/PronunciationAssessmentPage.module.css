@@ -398,9 +398,24 @@
 }
 
 /* ── Component Metrics Grid ── */
+.componentsSection {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.componentsHeader {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
 .componentsGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     gap: 0.75rem;
 }
 
@@ -414,10 +429,27 @@
     gap: 6px;
 }
 
+.metricTopRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
 .metricLabel {
     font-size: 0.76rem;
     color: var(--color-text-muted);
     font-weight: 600;
+}
+
+.stressWarningTag {
+    font-size: 10px;
+    font-weight: 700;
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+    padding: 1px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
 }
 
 .metricBar {
@@ -430,19 +462,41 @@
 
 .metricFill {
     height: 100%;
-    background: linear-gradient(
-        90deg,
-        var(--color-brand-primary),
-        var(--color-brand-accent)
-    );
     border-radius: 3px;
+    transition: width 0.4s ease;
 }
 
 .metricVal {
     font-size: 0.85rem;
     font-weight: 700;
-    color: var(--color-text-primary);
     text-align: right;
+}
+
+/* ── Stress Explanation Card ── */
+.stressExplanationCard {
+    background: rgba(23, 86, 118, 0.05);
+    border: 1px solid rgba(23, 86, 118, 0.2);
+    border-radius: 12px;
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.stressCardHeader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #175676;
+}
+
+.stressCardBody {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--color-text-primary, #1e293b);
 }
 
 /* ── Action Controls ── */

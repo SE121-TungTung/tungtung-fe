@@ -64,10 +64,54 @@
     gap: 24px;
 }
 
+@media (max-width: 768px) {
+    .mainGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
 .leftCol {
     display: flex;
     flex-direction: column;
     gap: 24px;
+}
+
+.actionCardWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.actionTabsHeader {
+    display: flex;
+    background: var(--color-surface-raised);
+    padding: 4px;
+    border-radius: 10px;
+    border: 1px solid var(--color-border-soft);
+    gap: 4px;
+}
+
+.actionTabBtn {
+    flex: 1;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.actionTabBtn:hover {
+    color: var(--color-text-primary);
+}
+
+.actionTabBtnActive {
+    background: var(--color-surface-page);
+    color: var(--color-brand-primary);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 /* Balance Card */
@@ -311,7 +355,7 @@
 .amountCredit {
     font-family: var(--primitive-font-mono);
     font-weight: 700;
-    color: var(--color-status-success-dark, #02bc2a);
+    color: var(--color-status-success, #16a34a);
 }
 
 .amountDebit {
@@ -330,18 +374,18 @@
 }
 
 .badgeSuccess {
-    background: rgba(34, 197, 94, 0.15);
-    color: #16a34a;
+    background: var(--color-status-success-bg, rgba(34, 197, 94, 0.15));
+    color: var(--color-status-success, #16a34a);
 }
 
 .badgePending {
-    background: rgba(234, 179, 8, 0.15);
-    color: #ca8a04;
+    background: var(--color-status-warning-bg, rgba(234, 179, 8, 0.15));
+    color: var(--color-status-warning, #ca8a04);
 }
 
 .badgeRejected {
-    background: rgba(239, 68, 68, 0.15);
-    color: #dc2626;
+    background: var(--color-status-danger-bg, rgba(239, 68, 68, 0.15));
+    color: var(--color-status-danger, #dc2626);
 }
 
 .noteCell {
@@ -421,37 +465,39 @@
 }
 
 .actionBtn {
-    width: 32px;
-    height: 32px;
-    border-radius: 6px;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
     border: none;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     font-weight: 700;
     font-size: 14px;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
 }
 
 .actionBtnApprove {
-    background: rgba(34, 197, 94, 0.15);
-    color: #16a34a;
+    background: var(--color-status-success-bg, rgba(34, 197, 94, 0.15));
+    color: var(--color-status-success, #16a34a);
 }
 
 .actionBtnApprove:hover {
-    background: #16a34a;
+    background: var(--color-status-success, #16a34a);
     color: white;
+    transform: translateY(-1px);
 }
 
 .actionBtnReject {
-    background: rgba(239, 68, 68, 0.15);
-    color: #dc2626;
+    background: var(--color-status-danger-bg, rgba(239, 68, 68, 0.15));
+    color: var(--color-status-danger, #dc2626);
 }
 
 .actionBtnReject:hover {
-    background: #dc2626;
+    background: var(--color-status-danger, #dc2626);
     color: white;
+    transform: translateY(-1px);
 }
 
 .skeletonRow {

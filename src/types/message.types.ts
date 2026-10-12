@@ -37,6 +37,7 @@ export interface BackendConversationResponse {
     room_type: 'direct' | 'group' | 'class'
     title: string
     avatar_url?: string | null
+    other_user_id?: string | null
     unread_count: number
     last_message_at?: string | null
     last_message?: BackendLastMessage | null
@@ -136,6 +137,7 @@ export interface Conversation {
     isGroup: boolean
     type: 'direct' | 'group' | 'class'
     avatarUrl?: string | null
+    otherUserId?: string | null
     unreadCount: number
     description?: string | null
     participants: Participant[]
@@ -283,9 +285,7 @@ export interface WSOutgoingSendMessage {
 }
 
 export type WSOutgoingMessage =
-    | WSOutgoingPing
-    | WSOutgoingTyping
-    | WSOutgoingSendMessage
+    WSOutgoingPing | WSOutgoingTyping | WSOutgoingSendMessage
 
 // ============================================
 // USER SEARCH TYPES

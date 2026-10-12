@@ -1,73 +1,190 @@
 .questionBlock {
     margin-bottom: 24px;
-    padding-bottom: 16px;
-    border-bottom: 1px dashed #eee;
+    padding: 16px 20px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.03);
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
 }
+
+.questionBlock:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
 .questionBlock:last-child {
-    border-bottom: none;
     margin-bottom: 0;
 }
 
+.questionHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.questionHeaderLeft {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    flex: 1;
+}
+
+.numberBadge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 6px;
+    background: #175676;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 8px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 4px rgba(23, 86, 118, 0.2);
+}
+
 .questionText {
-    font-size: 14px;
-    margin-bottom: 12px;
-    color: var(--color-text-primary);
+    font-size: 15px;
+    font-weight: 500;
+    color: #0f172a;
     line-height: 1.6;
+    padding-top: 2px;
 }
 
 .optionsList {
-    list-style: none;
-    padding: 0;
-    margin: 0;
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
-.optionItem {
+.optionCard {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 14px;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
     cursor: pointer;
-    padding: 8px 12px;
-    border-radius: var(--primitive-radius-sm);
-    border: 1px solid transparent;
-    transition:
-        background-color 0.2s ease,
-        border-color 0.2s ease;
+    outline: none;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    user-select: none;
 }
 
-.optionItem:hover {
-    background-color: #f7f7f7;
+.optionCard:hover {
+    background: #ffffff;
+    border-color: #94a3b8;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(15, 23, 42, 0.05);
 }
 
-.optionItem.selected {
-    background-color: color-mix(
-        in srgb,
-        var(--color-brand-secondary) 60%,
-        transparent
-    );
-    border-color: var(--color-brand-secondary);
+.optionCard:focus-visible {
+    box-shadow: 0 0 0 3px rgba(23, 86, 118, 0.2);
 }
 
-.optionLabel {
-    font-weight: 600;
+.optionCard.selected {
+    background: rgba(23, 86, 118, 0.05);
+    border-color: #175676;
+    box-shadow: 0 2px 8px rgba(23, 86, 118, 0.12);
+}
+
+.optionKeyBadge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    color: #475569;
+    font-size: 13px;
+    font-weight: 700;
     flex-shrink: 0;
-    width: 20px;
-    text-align: center;
-    color: var(--color-text-secondary);
+    transition: all 0.2s ease;
 }
-.optionItem.selected .optionLabel {
-    color: var(--color-brand-primary);
+
+.optionCard:hover .optionKeyBadge {
+    border-color: #175676;
+    color: #175676;
+}
+
+.optionCard.selected .optionKeyBadge {
+    background: #175676;
+    border-color: #175676;
+    color: #ffffff;
+    box-shadow: 0 2px 4px rgba(23, 86, 118, 0.25);
 }
 
 .optionText {
+    flex: 1;
     font-size: 14px;
-    color: var(--color-text-primary);
     line-height: 1.5;
+    color: #334155;
+    font-weight: 400;
+    transition: color 0.15s ease;
 }
 
-.optionInput {
-    margin-right: 5px;
-    accent-color: var(--color-brand-primary);
+.optionCard.selected .optionText {
+    color: #0f172a;
+    font-weight: 500;
+}
+
+.selectionIndicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.radioCircle {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid #cbd5e1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    transition: border-color 0.2s ease;
+}
+
+.optionCard:hover .radioCircle {
+    border-color: #94a3b8;
+}
+
+.optionCard.selected .radioCircle {
+    border-color: #175676;
+}
+
+.radioDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #175676;
+    animation: scaleIn 0.15s ease-out;
+}
+
+@keyframes scaleIn {
+    0% {
+        transform: scale(0);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.emptyNotice {
+    padding: 16px;
+    text-align: center;
+    color: #64748b;
+    font-size: 14px;
+    font-style: italic;
 }

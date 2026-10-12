@@ -113,9 +113,10 @@ export function useTextHighlighter(
 
     const applyHighlights = useCallback(() => {
         const container = passageContainerRef.current
-        if (!container || highlights.length === 0) return
+        if (!container) return
 
         clearHighlightSpans()
+        if (highlights.length === 0) return
 
         highlights.forEach((hl) => {
             const startNode = getNodeFromXPath(hl.startContainerPath, document)
@@ -245,6 +246,20 @@ export function useTextHighlighter(
 
     const removeHighlight = useCallback(
         (id: string) => {
+            const el = passageContainerRef.current
+            if (el) {
+                const targetSpan = el.querySelector(
+                    `span[data-highlight-id="${id}"]`
+                )
+                if (targetSpan && targetSpan.parentNode) {
+                    const parent = targetSpan.parentNode
+                    while (targetSpan.firstChild) {
+                        parent.insertBefore(targetSpan.firstChild, targetSpan)
+                    }
+                    parent.removeChild(targetSpan)
+                    parent.normalize()
+                }
+            }
             setHighlights((prev) => {
                 const updated = prev.filter((h) => h.id !== id)
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
@@ -252,7 +267,7 @@ export function useTextHighlighter(
             })
             setToolbarState(null)
         },
-        [STORAGE_KEY]
+        [STORAGE_KEY, passageContainerRef]
     )
 
     const clearAllHighlights = useCallback(() => {

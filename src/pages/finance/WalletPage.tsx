@@ -29,6 +29,7 @@ export default function WalletPage() {
     )
     const [adminFilterStatus, setAdminFilterStatus] =
         useState<string>('pending')
+    const [actionTab, setActionTab] = useState<'topup' | 'withdraw'>('topup')
 
     // Fetch queries
     const { data: walletRes, isLoading: loadingWallet } = useMyWalletBalance()
@@ -82,9 +83,38 @@ export default function WalletPage() {
                             isLoading={loadingWallet}
                         />
 
-                        {isStudent && <TopUpSection />}
-
-                        {!isAdmin && <WithdrawSection balance={balance} />}
+                        {isStudent && !isAdmin ? (
+                            <div className={s.actionCardWrapper}>
+                                <div className={s.actionTabsHeader}>
+                                    <button
+                                        type="button"
+                                        className={`${s.actionTabBtn} ${actionTab === 'topup' ? s.actionTabBtnActive : ''}`}
+                                        onClick={() => setActionTab('topup')}
+                                    >
+                                        Nạp tiền
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`${s.actionTabBtn} ${actionTab === 'withdraw' ? s.actionTabBtnActive : ''}`}
+                                        onClick={() => setActionTab('withdraw')}
+                                    >
+                                        Rút tiền
+                                    </button>
+                                </div>
+                                {actionTab === 'topup' ? (
+                                    <TopUpSection />
+                                ) : (
+                                    <WithdrawSection balance={balance} />
+                                )}
+                            </div>
+                        ) : (
+                            <>
+                                {isStudent && <TopUpSection />}
+                                {!isAdmin && (
+                                    <WithdrawSection balance={balance} />
+                                )}
+                            </>
+                        )}
                     </div>
 
                     {/* RIGHT PANEL - My transaction history */}

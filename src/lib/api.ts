@@ -6,11 +6,6 @@ export const API =
     import.meta.env.VITE_API_URL ||
     'https://tungtung-be-production.up.railway.app'
 
-const getStorage = () => {
-    if (sessionStorage.getItem('access_token')) return sessionStorage
-    return localStorage
-}
-
 export const getAccessToken = () => {
     const sToken = sessionStorage.getItem('access_token')
     const lToken = localStorage.getItem('access_token')

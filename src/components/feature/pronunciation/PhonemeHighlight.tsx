@@ -130,6 +130,18 @@ export const PhonemeHighlight: React.FC<PhonemeHighlightProps> = ({
                         <span className={s.ipaActual}>/{actualIpa}/</span>
                     </div>
                 )}
+                {targetIpa && targetIpa.includes('ˈ') && (
+                    <div className={s.stressTip}>
+                        <span className={s.stressBadge}>
+                            Lưu ý trọng âm (ˈ)
+                        </span>
+                        <span className={s.stressExplanation}>
+                            Ký hiệu <strong>ˈ</strong> biểu thị trọng âm chính.
+                            Âm tiết ngay sau dấu này cần được nhấn mạnh và rõ
+                            hơn.
+                        </span>
+                    </div>
+                )}
             </div>
 
             {/* Dải các thẻ âm vị tương tác */}

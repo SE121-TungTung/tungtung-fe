@@ -2,15 +2,20 @@
     margin-bottom: 20px;
 }
 
+.headerRow {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
 .questionText {
     font-size: 14px;
-    margin-bottom: 8px;
+    margin: 0;
     color: var(--color-text-primary);
     line-height: 1.6;
-    display: flex; /* Để input nằm cùng dòng */
-    align-items: center;
-    gap: 8px; /* Khoảng cách giữa text và input */
-    flex-wrap: wrap; /* Cho phép xuống dòng nếu cần */
+    flex: 1;
 }
 
 .inputField {

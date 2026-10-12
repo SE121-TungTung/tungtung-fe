@@ -102,6 +102,7 @@ function mapConversation(dto: BackendConversationResponse): Conversation {
         type: dto.room_type,
         isGroup: dto.room_type === 'group' || dto.room_type === 'class',
         avatarUrl: dto.avatar_url || null,
+        otherUserId: dto.other_user_id || (dto as any).other_user_id || null,
         description: dto.description || null,
         unreadCount: dto.unread_count,
         updatedAt: dto.last_message_at || new Date().toISOString(),
@@ -279,12 +280,17 @@ export const messageApi = {
         const isGroup =
             response.room_type === 'group' || response.room_type === 'class'
 
+        const otherMember = !isGroup
+            ? response.members?.find((m) => m.user_id !== currentUserId)
+            : null
+
         return {
             id: response.id,
             name: response.title,
             type: response.room_type as 'direct' | 'group' | 'class',
             isGroup: isGroup,
             avatarUrl: response.avatar_url || null,
+            otherUserId: otherMember?.user_id || null,
             description: response.description || null,
             unreadCount: 0,
             updatedAt: response.created_at,

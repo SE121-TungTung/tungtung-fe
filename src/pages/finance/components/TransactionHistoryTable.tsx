@@ -28,6 +28,15 @@ const formatRefType = (ref: string) => {
     }
 }
 
+const formatStatus = (status: string) => {
+    const st = status.toLowerCase()
+    if (st === 'approved' || st === 'completed' || st === 'success')
+        return 'Đã duyệt'
+    if (st === 'pending') return 'Chờ duyệt'
+    if (st === 'rejected' || st === 'failed') return 'Bị từ chối'
+    return status
+}
+
 export function TransactionHistoryTable({
     transactions,
     isLoading,
@@ -67,10 +76,18 @@ export function TransactionHistoryTable({
                         <tbody>
                             {transactions.map((tx) => {
                                 const isCredit = tx.type === 'credit'
+                                const st = tx.status.toLowerCase()
                                 let statusClass = s.badgePending
-                                if (tx.status === 'approved') {
+                                if (
+                                    st === 'approved' ||
+                                    st === 'completed' ||
+                                    st === 'success'
+                                ) {
                                     statusClass = s.badgeSuccess
-                                } else if (tx.status === 'rejected') {
+                                } else if (
+                                    st === 'rejected' ||
+                                    st === 'failed'
+                                ) {
                                     statusClass = s.badgeRejected
                                 }
 
@@ -101,7 +118,7 @@ export function TransactionHistoryTable({
                                             <span
                                                 className={`${s.badge} ${statusClass}`}
                                             >
-                                                {tx.status}
+                                                {formatStatus(tx.status)}
                                             </span>
                                         </td>
                                         <td className={s.noteCell}>

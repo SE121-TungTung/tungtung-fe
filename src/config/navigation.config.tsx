@@ -56,11 +56,6 @@ const studentNavItems: AppNavItem[] = [
         dropdownItems: studyMenuItems,
     },
     {
-        id: 'notifications',
-        label: 'Thông báo',
-        href: '/notifications',
-    },
-    {
         id: 'messages',
         label: 'Tin nhắn',
         href: '/messages',

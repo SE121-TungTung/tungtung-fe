@@ -34,6 +34,13 @@ import { SubmitConfirmationDialog } from '../student/exam/do/SubmitConfirmationD
 // Types
 import type { EnhancedSection } from '../student/exam/QuestionGroupRenderer'
 
+// SVG Icons
+import HeadphoneIcon from '@/assets/Headphone.svg'
+import BookOpenIcon from '@/assets/Book Open.svg'
+import PenIcon from '@/assets/Pen.svg'
+import MicrophoneIcon from '@/assets/Microphone.svg'
+import FileIcon from '@/assets/File.svg'
+
 // ============================================
 // MAIN WRAPPER COMPONENT
 // ============================================
@@ -93,6 +100,19 @@ export default function GuestTestTakerWrapper() {
         },
         enabled: !!startTime && !testFinished && !isSubmitting,
     })
+
+    const handlePauseExit = async () => {
+        const confirmed = await showConfirm({
+            title: 'Tạm dừng bài thi?',
+            message:
+                'Tiến trình làm bài và câu trả lời của bạn đã được lưu tự động. Bạn có thể quay lại làm tiếp bất kỳ lúc nào từ danh sách bài thi.',
+            confirmText: 'Lưu & Thoát',
+            cancelText: 'Tiếp tục làm bài',
+        })
+        if (confirmed) {
+            navigate('/public/tests')
+        }
+    }
 
     // --- DATA INITIALIZATION ---
     useEffect(() => {
@@ -195,7 +215,10 @@ export default function GuestTestTakerWrapper() {
         }
 
         const confirmed = await showConfirm({
+            title: 'Nộp bài kiểm tra',
             message: '',
+            confirmText: 'Xác nhận nộp bài',
+            cancelText: 'Tiếp tục làm bài',
             renderConfirm: () => (
                 <SubmitConfirmationDialog
                     answers={answers}
@@ -262,16 +285,8 @@ export default function GuestTestTakerWrapper() {
         const currentSection = sections[currentSectionIndex]
         if (!currentSection) return null
 
-        const currentPart = currentSection.parts[currentPartIndex]
-        if (!currentPart) return null
-
-        const sectionWithCurrentPart: EnhancedSection = {
-            ...currentSection,
-            parts: [currentPart],
-        }
-
         const commonProps = {
-            section: sectionWithCurrentPart,
+            section: currentSection,
             answers,
             onAnswerChange,
             registerRef: (id: string, el: HTMLElement | null) =>
@@ -280,6 +295,8 @@ export default function GuestTestTakerWrapper() {
                     : questionElementRefs.current.delete(id),
             attemptId: attemptId!,
             testId: testId!,
+            reviewed: reviewedQuestions,
+            onToggleReview: handleToggleReview,
         }
 
         switch (currentSection.skillArea) {
@@ -288,6 +305,8 @@ export default function GuestTestTakerWrapper() {
                     <ListeningSectionView
                         {...commonProps}
                         clearHighlightsRef={clearHighlightsRef}
+                        partIndex={currentPartIndex}
+                        onPartChange={handlePartChange}
                     />
                 )
 
@@ -296,11 +315,18 @@ export default function GuestTestTakerWrapper() {
                     <ReadingSectionView
                         {...commonProps}
                         clearHighlightsRef={clearHighlightsRef}
+                        partIndex={currentPartIndex}
                     />
                 )
 
             case SkillArea.WRITING:
-                return <WritingSectionView {...commonProps} />
+                return (
+                    <WritingSectionView
+                        {...commonProps}
+                        partIndex={currentPartIndex}
+                        onPartChange={handlePartChange}
+                    />
+                )
 
             case SkillArea.SPEAKING:
                 return (
@@ -344,14 +370,14 @@ export default function GuestTestTakerWrapper() {
     const currentSection = sections[currentSectionIndex]
     const skillName = currentSection?.skillArea || test.title
 
-    const skillIcons: Record<SkillArea, string> = {
-        [SkillArea.LISTENING]: '🎧',
-        [SkillArea.READING]: '📖',
-        [SkillArea.WRITING]: '✏️',
-        [SkillArea.SPEAKING]: '🎤',
-        [SkillArea.GRAMMAR]: '',
-        [SkillArea.VOCABULARY]: '',
-        [SkillArea.PRONUNCIATION]: '',
+    const skillIcons: Record<SkillArea, React.ReactNode> = {
+        [SkillArea.LISTENING]: <img src={HeadphoneIcon} width={18} alt="" />,
+        [SkillArea.READING]: <img src={BookOpenIcon} width={18} alt="" />,
+        [SkillArea.WRITING]: <img src={PenIcon} width={18} alt="" />,
+        [SkillArea.SPEAKING]: <img src={MicrophoneIcon} width={18} alt="" />,
+        [SkillArea.GRAMMAR]: <img src={FileIcon} width={18} alt="" />,
+        [SkillArea.VOCABULARY]: <img src={FileIcon} width={18} alt="" />,
+        [SkillArea.PRONUNCIATION]: <img src={FileIcon} width={18} alt="" />,
     }
 
     // --- MAIN RENDER ---
@@ -360,11 +386,14 @@ export default function GuestTestTakerWrapper() {
             <TestHeader
                 skillName={`IELTS ${skillName}`}
                 icon={
-                    skillIcons[currentSection?.skillArea as SkillArea] || '📝'
+                    skillIcons[currentSection?.skillArea as SkillArea] || (
+                        <img src={FileIcon} width={18} alt="" />
+                    )
                 }
                 timeLeft={timeLeft}
                 formattedTime={formattedTime}
                 isLowTime={isLowTime}
+                onPauseExit={handlePauseExit}
             />
 
             <div className={s.contentWrapper}>{renderSectionView()}</div>

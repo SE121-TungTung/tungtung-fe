@@ -101,6 +101,19 @@ export default function TestTakerWrapper() {
         enabled: !!startTime && !testFinished && !isSubmitting,
     })
 
+    const handlePauseExit = async () => {
+        const confirmed = await showConfirm({
+            title: 'Tạm dừng bài thi?',
+            message:
+                'Tiến trình làm bài và câu trả lời của bạn đã được tự động lưu. Bạn có thể quay lại làm tiếp bất kỳ lúc nào từ danh sách bài thi.',
+            confirmText: 'Lưu & Thoát',
+            cancelText: 'Tiếp tục làm bài',
+        })
+        if (confirmed) {
+            navigate('/student/tests')
+        }
+    }
+
     // --- DATA INITIALIZATION ---
     useEffect(() => {
         const initData = async () => {
@@ -215,7 +228,10 @@ export default function TestTakerWrapper() {
         }
 
         const confirmed = await showConfirm({
+            title: 'Nộp bài kiểm tra',
             message: '',
+            confirmText: 'Xác nhận nộp bài',
+            cancelText: 'Tiếp tục làm bài',
             renderConfirm: () => (
                 <SubmitConfirmationDialog
                     answers={answers}
@@ -291,13 +307,8 @@ export default function TestTakerWrapper() {
         const currentPart = currentSection.parts[currentPartIndex]
         if (!currentPart) return null
 
-        const sectionWithCurrentPart: EnhancedSection = {
-            ...currentSection,
-            parts: [currentPart],
-        }
-
         const commonProps = {
-            section: sectionWithCurrentPart,
+            section: currentSection,
             answers,
             onAnswerChange,
             registerRef: (id: string, el: HTMLElement | null) =>
@@ -306,6 +317,8 @@ export default function TestTakerWrapper() {
                     : questionElementRefs.current.delete(id),
             attemptId: attemptId!,
             testId: testId!,
+            reviewed: reviewedQuestions,
+            onToggleReview: handleToggleReview,
         }
 
         switch (currentSection.skillArea) {
@@ -314,6 +327,8 @@ export default function TestTakerWrapper() {
                     <ListeningSectionView
                         {...commonProps}
                         clearHighlightsRef={clearHighlightsRef}
+                        partIndex={currentPartIndex}
+                        onPartChange={handlePartChange}
                     />
                 )
 
@@ -322,11 +337,18 @@ export default function TestTakerWrapper() {
                     <ReadingSectionView
                         {...commonProps}
                         clearHighlightsRef={clearHighlightsRef}
+                        partIndex={currentPartIndex}
                     />
                 )
 
             case SkillArea.WRITING:
-                return <WritingSectionView {...commonProps} />
+                return (
+                    <WritingSectionView
+                        {...commonProps}
+                        partIndex={currentPartIndex}
+                        onPartChange={handlePartChange}
+                    />
+                )
 
             case SkillArea.SPEAKING:
                 return (
@@ -393,6 +415,7 @@ export default function TestTakerWrapper() {
                 timeLeft={timeLeft}
                 formattedTime={formattedTime}
                 isLowTime={isLowTime}
+                onPauseExit={handlePauseExit}
             />
 
             <div className={s.contentWrapper}>{renderSectionView()}</div>

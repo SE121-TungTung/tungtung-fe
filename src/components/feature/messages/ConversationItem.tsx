@@ -134,7 +134,10 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
                     ) : (
                         <>
                             <UserAvatar
-                                userId={otherParticipant?.id}
+                                userId={
+                                    otherParticipant?.id ||
+                                    conversation.otherUserId
+                                }
                                 src={displayAvatar}
                                 name={displayName}
                                 alt={displayName}

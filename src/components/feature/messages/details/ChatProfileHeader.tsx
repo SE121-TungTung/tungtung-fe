@@ -11,6 +11,7 @@ interface ChatProfileHeaderProps {
     displayStatus: string
     participants: Participant[]
     otherParticipant?: Participant | null
+    otherUserId?: string | null
 }
 
 export const ChatProfileHeader: React.FC<ChatProfileHeaderProps> = ({
@@ -20,39 +21,44 @@ export const ChatProfileHeader: React.FC<ChatProfileHeaderProps> = ({
     displayStatus,
     participants,
     otherParticipant,
+    otherUserId,
 }) => {
+    const targetUserId = isGroup
+        ? displayName
+        : otherParticipant?.id || otherUserId || undefined
+
     return (
         <div className={s.profileSection}>
             <div className={s.avatarWrapper}>
                 {isGroup ? (
                     avatarUrl ? (
                         <UserAvatar
-                            userId={displayName}
+                            userId={targetUserId}
                             src={avatarUrl}
                             name={displayName}
                             alt={displayName}
                             className={s.avatar}
-                            size={72}
+                            size={96}
                         />
                     ) : participants.length > 0 ? (
                         <GroupAvatar participants={participants} size="lg" />
                     ) : (
                         <UserAvatar
-                            userId={displayName}
+                            userId={targetUserId}
                             name={displayName}
                             alt={displayName}
                             className={s.avatar}
-                            size={72}
+                            size={96}
                         />
                     )
                 ) : (
                     <UserAvatar
-                        userId={otherParticipant?.id}
-                        src={otherParticipant?.avatarUrl}
-                        name={otherParticipant?.fullName || displayName}
+                        userId={targetUserId}
+                        src={otherParticipant?.avatarUrl || avatarUrl}
+                        name={displayName}
                         alt={displayName}
                         className={s.avatar}
-                        size={72}
+                        size={96}
                     />
                 )}
             </div>

@@ -208,6 +208,10 @@ export const ChatDetailsPanel: React.FC<ChatDetailsPanelProps> = ({
                     displayStatus={displayStatus}
                     participants={participants}
                     otherParticipant={otherParticipant}
+                    otherUserId={
+                        currentConversationData.otherUserId ||
+                        otherParticipant?.id
+                    }
                 />
 
                 <div className={s.content}>

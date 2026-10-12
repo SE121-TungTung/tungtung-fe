@@ -33,7 +33,14 @@ export default function HighlightToolbar({
     onSaveWord,
 }: ToolbarProps) {
     return (
-        <div className={s.toolbar} style={{ top: state.top, left: state.left }}>
+        <div
+            className={s.toolbar}
+            style={{ top: state.top, left: state.left }}
+            onMouseDown={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+            }}
+        >
             {state.mode === 'add' ? (
                 HIGHLIGHT_COLORS.map((color) => (
                     <button
