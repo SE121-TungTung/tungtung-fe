@@ -1,0 +1,210 @@
+.card {
+    background: var(--bg-card, #ffffff);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
+    padding-bottom: 1rem;
+}
+
+.tags {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.skillPill {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+    background: rgba(37, 99, 235, 0.1);
+    color: #2563eb;
+}
+
+.typePill {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+    background: rgba(100, 116, 139, 0.1);
+    color: var(--text-muted, #475569);
+}
+
+.questionTitle {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--text-main, #0f172a);
+    margin: 0;
+}
+
+.mediaSection {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background: var(--bg-muted, #f8fafc);
+    padding: 1rem;
+    border-radius: 0.75rem;
+}
+
+.audioPlayer {
+    width: 100%;
+    outline: none;
+}
+
+.questionImage {
+    max-width: 100%;
+    max-height: 340px;
+    object-fit: contain;
+    border-radius: 0.5rem;
+}
+
+.questionText {
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    color: var(--text-main, #1e293b);
+    font-weight: 500;
+}
+
+.optionsList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.optionItem {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border: 1.5px solid var(--border-color, #e2e8f0);
+    border-radius: 0.75rem;
+    background: var(--bg-card, #ffffff);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    outline: none;
+    font-family: inherit;
+    font-size: 0.9375rem;
+    color: var(--text-main, #0f172a);
+}
+
+.optionItem:hover:not(:disabled) {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.04);
+}
+
+.optionSelected {
+    border-color: #2563eb;
+    background: rgba(37, 99, 235, 0.06);
+    box-shadow: 0 0 0 1px #2563eb;
+}
+
+.optionKey {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--bg-muted, #f1f5f9);
+    color: var(--text-muted, #64748b);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.875rem;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.optionSelected .optionKey {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.optionText {
+    flex: 1;
+    line-height: 1.4;
+}
+
+.footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--border-color, #e2e8f0);
+    padding-top: 1.25rem;
+    margin-top: 0.5rem;
+}
+
+.hintText {
+    font-size: 0.8125rem;
+    color: var(--text-muted, #64748b);
+}
+
+.submitBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #2563eb;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    padding: 0.75rem 1.75rem;
+    border-radius: 0.625rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.submitBtn:hover:not(:disabled) {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+.submitBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.feedbackBanner {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.25rem;
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    animation: fadeIn 0.3s ease;
+}
+
+.feedbackCorrect {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.feedbackWrong {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

@@ -82,6 +82,15 @@ const PronunciationHistoryPage = lazy(
 const PronunciationAssessmentPage = lazy(
     () => import('@/pages/student/pronunciation/PronunciationAssessmentPage')
 )
+const AdaptiveQuizPage = lazy(
+    () => import('@/pages/student/adaptive-quiz/AdaptiveQuizPage')
+)
+const AdaptiveQuizRoomPage = lazy(
+    () => import('@/pages/student/adaptive-quiz/AdaptiveQuizRoomPage')
+)
+const PlacementTestPage = lazy(
+    () => import('@/pages/student/placement-test/PlacementTestPage')
+)
 
 // Teacher Pages
 const TeacherClassPage = lazy(
@@ -432,6 +441,36 @@ export const router = createBrowserRouter([
                         element: (
                             <ProtectedRoute allowedRoles={['student']}>
                                 <PaymentCallbackPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/student/adaptive-quiz',
+                        element: (
+                            <ProtectedRoute
+                                allowedRoles={['student', 'guest_student']}
+                            >
+                                <AdaptiveQuizPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/student/adaptive-quiz/:id',
+                        element: (
+                            <ProtectedRoute
+                                allowedRoles={['student', 'guest_student']}
+                            >
+                                <AdaptiveQuizRoomPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/student/placement-test',
+                        element: (
+                            <ProtectedRoute
+                                allowedRoles={['student', 'guest_student']}
+                            >
+                                <PlacementTestPage />
                             </ProtectedRoute>
                         ),
                     },

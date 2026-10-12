@@ -26,3 +26,4 @@ dist-ssr
 *.txt
 .agents/
 skills-lock.json
+.vercel

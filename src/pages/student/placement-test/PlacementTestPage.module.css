@@ -1,0 +1,152 @@
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+}
+
+.hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 1rem;
+    border-radius: 9999px;
+    background: rgba(13, 148, 136, 0.1);
+    color: #0d9488;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.title {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: var(--text-main, #0f172a);
+    margin: 0;
+}
+
+.subtitle {
+    max-width: 650px;
+    font-size: 1.0625rem;
+    color: var(--text-muted, #64748b);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.card {
+    background: var(--bg-card, #ffffff);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 1rem;
+    padding: 2.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.rulesSection {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.25rem;
+}
+
+.ruleBox {
+    background: var(--bg-muted, #f8fafc);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.ruleHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 700;
+    font-size: 0.9375rem;
+    color: var(--text-main, #0f172a);
+}
+
+.ruleText {
+    font-size: 0.8125rem;
+    color: var(--text-muted, #64748b);
+    line-height: 1.5;
+    margin: 0;
+}
+
+.limitAlert {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    color: #92400e;
+}
+
+.limitTitle {
+    font-weight: 700;
+    font-size: 0.9375rem;
+    margin-bottom: 0.25rem;
+}
+
+.limitText {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.actionRow {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.startBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #0d9488;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 1rem 2.5rem;
+    border-radius: 0.75rem;
+    border: none;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.startBtn:hover:not(:disabled) {
+    background: #0f766e;
+    transform: translateY(-1px);
+}
+
+.startBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.contactAdvisorBox {
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--text-muted, #64748b);
+    border-top: 1px dashed var(--border-color, #e2e8f0);
+    padding-top: 1.5rem;
+}
