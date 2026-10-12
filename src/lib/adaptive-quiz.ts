@@ -12,6 +12,7 @@ import type {
     NextQuestion,
     PaginatedResult,
     QuestionIRT,
+    SessionResponseDetail,
     SubmitResponsePayload,
     SubmitResponseResult,
     UpdateQuestionIRTPayload,
@@ -100,6 +101,15 @@ export const adaptiveQuizApi = {
     },
 
     /**
+     * Get detailed administered responses with IRT parameters
+     */
+    getSessionResponses(sessionId: string): Promise<SessionResponseDetail[]> {
+        return api<SessionResponseDetail[]>(
+            `${BASE_URL}/sessions/${sessionId}/responses`
+        )
+    },
+
+    /**
      * List questions with psychometric IRT parameters (Teacher/Admin)
      */
     listQuestions(params?: {
@@ -146,9 +156,7 @@ export const adaptiveQuizApi = {
     /**
      * Trigger batch recalibration job (System Admin only)
      */
-    triggerBatchCalibration(
-        minResponses: number = 50
-    ): Promise<{
+    triggerBatchCalibration(minResponses: number = 50): Promise<{
         calibrated_items_count: number
         message: string
         timestamp: string

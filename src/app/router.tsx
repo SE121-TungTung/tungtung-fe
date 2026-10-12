@@ -88,6 +88,9 @@ const AdaptiveQuizPage = lazy(
 const AdaptiveQuizRoomPage = lazy(
     () => import('@/pages/student/adaptive-quiz/AdaptiveQuizRoomPage')
 )
+const AdaptiveQuizResultPage = lazy(
+    () => import('@/pages/student/adaptive-quiz/AdaptiveQuizResultPage')
+)
 const PlacementTestPage = lazy(
     () => import('@/pages/student/placement-test/PlacementTestPage')
 )
@@ -189,6 +192,9 @@ const AdminPayrollRunDetailPage = lazy(
 )
 const AdminSalaryDetailPage = lazy(
     () => import('@/pages/admin/salary/AdminSalaryDetailPage')
+)
+const CalibrationDashboardPage = lazy(
+    () => import('@/pages/admin/adaptive-quiz/CalibrationDashboardPage')
 )
 
 // ============================================================================
@@ -461,6 +467,16 @@ export const router = createBrowserRouter([
                                 allowedRoles={['student', 'guest_student']}
                             >
                                 <AdaptiveQuizRoomPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/student/adaptive-quiz/:id/result',
+                        element: (
+                            <ProtectedRoute
+                                allowedRoles={['student', 'guest_student']}
+                            >
+                                <AdaptiveQuizResultPage />
                             </ProtectedRoute>
                         ),
                     },
@@ -879,6 +895,21 @@ export const router = createBrowserRouter([
                                 ]}
                             >
                                 <AdminSalaryDetailPage />
+                            </ProtectedRoute>
+                        ),
+                    },
+                    {
+                        path: '/admin/adaptive-quiz/calibration',
+                        element: (
+                            <ProtectedRoute
+                                allowedRoles={[
+                                    'system_admin',
+                                    'center_admin',
+                                    'office_admin',
+                                    'teacher',
+                                ]}
+                            >
+                                <CalibrationDashboardPage />
                             </ProtectedRoute>
                         ),
                     },

@@ -140,3 +140,15 @@ export interface PaginatedResult<T> {
         total_pages: number
     }
 }
+
+export interface SessionResponseDetail {
+    id: string
+    item_position: number
+    question_id: string
+    question_title?: string | null
+    irt_a_used: number
+    irt_b_used: number
+    irt_c_used: number
+    is_correct: boolean
+    time_spent_seconds?: number | null
+}
