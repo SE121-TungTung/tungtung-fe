@@ -79,11 +79,11 @@ const BASE_URL = '/api/v1/tests'
 /**
  * Map backend question option to frontend
  */
-function mapQuestionOption(option: BackendQuestionOption): QuestionOption {
+function mapQuestionOption(option: any): QuestionOption {
     return {
-        key: option.key,
-        text: option.text,
-        isCorrect: option.is_correct,
+        key: option.key || option.id || option.label || '',
+        text: option.text || option.content || option.value || '',
+        isCorrect: Boolean(option.is_correct ?? option.isCorrect),
     }
 }
 
@@ -116,6 +116,7 @@ function parseEnum<T extends Record<string, string>>(
  * Normalize options from backend into a consistent array format.
  * Backend may return:
  *   - An array of {key, text, is_correct} objects (standard)
+ *   - An array of {id, text} or {label, text} objects
  *   - A dict like {"A": "text", "B": "text"} (legacy/seed data)
  *   - null/undefined
  */
@@ -124,7 +125,13 @@ function normalizeOptions(raw: any): QuestionOption[] | null {
 
     // Already an array of option objects
     if (Array.isArray(raw)) {
-        return raw.map(mapQuestionOption)
+        return raw.map((item, idx) => {
+            const mapped = mapQuestionOption(item)
+            if (!mapped.key) {
+                mapped.key = String.fromCharCode(65 + idx)
+            }
+            return mapped
+        })
     }
 
     // Dict format: {"A": "text", "B": "text", ...}

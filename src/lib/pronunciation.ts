@@ -5,6 +5,9 @@ import type {
     PronunciationStatsResponse,
     PronunciationStreakResponse,
     TargetType,
+    PronunciationWordListItem,
+    PronunciationWordListResponse,
+    WordListAddPayload,
 } from '@/types/pronunciation.types'
 
 /**
@@ -21,7 +24,11 @@ export async function submitPronunciationPractice(
     // Đặt tên file là practice.webm hoặc audio file phù hợp
     formData.append('audio', audioBlob, 'practice.webm')
     formData.append('target', target)
-    formData.append('target_type', targetType)
+    // Backend chỉ hỗ trợ word | phrase | sentence | ipa — 'paragraph' quy về 'sentence'
+    formData.append(
+        'target_type',
+        targetType === 'paragraph' ? 'sentence' : targetType
+    )
     formData.append('accent', accent)
 
     return api<PronunciationPracticeResponse>(
@@ -114,6 +121,129 @@ export async function getDrillSuggestions(
             method: 'GET',
         }
     )
+}
+
+// ── IPA từ điển + bộ luyện tập do AI sinh ──────────────
+
+export interface IpaLookupItem {
+    text: string
+    ipa_us: string | null
+    ipa_uk: string | null
+    source: 'cache' | 'dictionary' | 'ai' | 'none'
+}
+
+/** Tra IPA US/UK cho danh sách từ/câu (tối đa 20). */
+export async function lookupIpaBatch(
+    texts: string[]
+): Promise<IpaLookupItem[]> {
+    const res = await api<{ items: IpaLookupItem[] }>(
+        '/api/v1/dictionary/ipa',
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ texts }),
+        }
+    )
+    return res.items
+}
+
+export type PracticeSetKind = 'roadmap' | 'phoneme' | 'drill'
+
+export interface PracticeSetItem {
+    id: string
+    text: string
+    target_type: 'word' | 'phrase' | 'sentence'
+    ipa_us: string | null
+    ipa_uk: string | null
+    hint: string | null
+}
+
+export interface PracticeSetPayload {
+    kind: PracticeSetKind
+    level?: number
+    phoneme?: string
+    topic?: string
+    count?: number
+    exclude?: string[]
+}
+
+export interface PracticeSetResult {
+    kind: PracticeSetKind
+    context_key: string
+    items: PracticeSetItem[]
+    generated_new: number
+    from_pool: number
+}
+
+/** Sinh (hoặc lấy từ kho dùng chung) một bộ từ luyện phát âm mới. */
+export async function generatePracticeSet(
+    payload: PracticeSetPayload
+): Promise<PracticeSetResult> {
+    return api<PracticeSetResult>(
+        '/api/v1/pronunciation/practice-sets/generate',
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        }
+    )
+}
+
+export interface DrillTopic {
+    key: string
+    label: string
+}
+
+export async function getDrillTopics(): Promise<DrillTopic[]> {
+    const res = await api<{ topics: DrillTopic[] }>(
+        '/api/v1/pronunciation/drill-topics',
+        { method: 'GET' }
+    )
+    return res.topics
+}
+
+// ── Word List (liên kết Flashcard <-> Pronunciation) ──────────────
+
+/**
+ * Lấy danh sách từ/câu luyện phát âm cá nhân (kèm điểm luyện tập).
+ */
+export async function getPronunciationWordList(): Promise<PronunciationWordListResponse> {
+    return api<PronunciationWordListResponse>(
+        '/api/v1/pronunciation/word-list',
+        { method: 'GET' }
+    )
+}
+
+/**
+ * Thêm từ/câu hoặc thẻ flashcard vào danh sách luyện phát âm (idempotent).
+ */
+export async function addToPronunciationWordList(
+    payload: WordListAddPayload
+): Promise<PronunciationWordListItem> {
+    return api<PronunciationWordListItem>('/api/v1/pronunciation/word-list', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+    })
+}
+
+/**
+ * Xóa một mục khỏi danh sách luyện phát âm.
+ */
+export async function removeFromPronunciationWordList(
+    itemId: string
+): Promise<void> {
+    await api<null>(`/api/v1/pronunciation/word-list/${itemId}`, {
+        method: 'DELETE',
+    })
+}
+
+/** Tạo deep link tới trang luyện phát âm cho một từ/câu. */
+export function buildPracticeLink(
+    text: string,
+    type: 'word' | 'phrase' | 'sentence' = 'word'
+): string {
+    const qs = new URLSearchParams({ text, type })
+    return `/student/pronunciation?${qs.toString()}`
 }
 
 // ── Phase 2: Assessment + Mastery + Missions ──────────────

@@ -42,6 +42,7 @@ export default function ReadingTestPage() {
     const [test, setTest] = useState<Test | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [currentSectionIndex, setCurrentSectionIndex] = useState(0)
+    const [currentPartIndex, setCurrentPartIndex] = useState(0)
     const [currentQuestionNumber, setCurrentQuestionNumber] = useState(1)
     const [reviewedQuestions, setReviewedQuestions] = useState<Set<number>>(
         new Set()
@@ -137,21 +138,26 @@ export default function ReadingTestPage() {
             setCurrentQuestionNumber(qNum)
 
             let targetId: string | undefined
-            const sectionIdx = sections.findIndex((s) =>
-                s.parts.some((p) =>
-                    p.questionGroups.some((g) =>
-                        g.questions.some((q) => {
+            let targetSectionIdx = -1
+            let targetPartIdx = -1
+
+            sections.forEach((s, sIdx) => {
+                s.parts.forEach((p, pIdx) => {
+                    p.questionGroups.forEach((g) => {
+                        g.questions.forEach((q) => {
                             if (q.globalNumber === qNum) {
                                 targetId = q.id
-                                return true
+                                targetSectionIdx = sIdx
+                                targetPartIdx = pIdx
                             }
-                            return false
                         })
-                    )
-                )
-            )
+                    })
+                })
+            })
 
-            if (sectionIdx !== -1) setCurrentSectionIndex(sectionIdx)
+            if (targetSectionIdx !== -1)
+                setCurrentSectionIndex(targetSectionIdx)
+            if (targetPartIdx !== -1) setCurrentPartIndex(targetPartIdx)
 
             setTimeout(() => {
                 const el = targetId
@@ -173,8 +179,9 @@ export default function ReadingTestPage() {
     }
 
     const currentSection = sections[currentSectionIndex]
-    const currentPassage =
-        currentSection?.parts.find((p: any) => p.passage)?.passage || null
+    const currentPart =
+        currentSection?.parts[currentPartIndex] || currentSection?.parts[0]
+    const currentPassage = currentPart?.passage || null
 
     return (
         <div className={`${s.pageWrapper} lightMode`}>
@@ -188,6 +195,7 @@ export default function ReadingTestPage() {
 
             <main className={s.mainContent}>
                 <PassageViewer
+                    key={`passage-${currentPart?.id || currentSectionIndex}`}
                     passage={currentPassage}
                     sectionId={sections[currentSectionIndex].id}
                     testId={testId!}
@@ -197,6 +205,7 @@ export default function ReadingTestPage() {
                 {/* Sử dụng QuestionGroupRenderer đã tách */}
                 <QuestionGroupRenderer
                     section={sections[currentSectionIndex]}
+                    partIndex={currentPartIndex}
                     answers={answers}
                     onAnswerChange={onAnswerChange}
                     registerRef={(id, el) =>
@@ -211,7 +220,12 @@ export default function ReadingTestPage() {
             <TestFooter
                 sections={sections}
                 currentIndex={currentSectionIndex}
-                onSectionChange={setCurrentSectionIndex}
+                onSectionChange={(idx) => {
+                    setCurrentSectionIndex(idx)
+                    setCurrentPartIndex(0)
+                }}
+                currentPartIndex={currentPartIndex}
+                onPartChange={(partIdx) => setCurrentPartIndex(partIdx)}
                 currentQNum={currentQuestionNumber}
                 reviewed={reviewedQuestions}
                 answers={answers}

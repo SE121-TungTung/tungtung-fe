@@ -3,17 +3,19 @@ import s from './RoadmapStageItem.module.css'
 // import type { RoadmapStage } from '@/types/roadmap.types'
 
 // Icons
-import CheckIcon from '@/assets/Check.svg'
-import PendingIcon from '@/assets/History.svg'
-import CurrentIcon from '@/assets/Action Eye Tracking.svg'
+import {
+    CheckCircleIcon,
+    TargetIcon,
+    HistoryIcon,
+} from '@/components/feature/adaptive-quiz/AdaptiveIcons'
 
-// Định nghĩa kiểu tạm thời (Sẽ chuyển vào /types/roadmap.types.ts sau)
+// Định nghĩa kiểu giai đoạn lộ trình
 export interface RoadmapStage {
     id: string
     stage_order: number
     title: string
     description: string
-    focus_skills: string[] // ['grammar', 'writing_task_2']
+    focus_skills: string[]
     status: 'completed' | 'in_progress' | 'pending'
     rationale?: string
     tasks?: string[]
@@ -27,17 +29,17 @@ const getStatusProps = (status: RoadmapStage['status']) => {
     switch (status) {
         case 'completed':
             return {
-                icon: <img src={CheckIcon} alt="Hoàn thành" />,
+                icon: <CheckCircleIcon size={18} />,
                 className: s.completed,
             }
         case 'in_progress':
             return {
-                icon: <img src={CurrentIcon} alt="Đang học" />,
+                icon: <TargetIcon size={18} />,
                 className: s.inProgress,
             }
         case 'pending':
             return {
-                icon: <img src={PendingIcon} alt="Chưa bắt đầu" />,
+                icon: <HistoryIcon size={18} />,
                 className: s.pending,
             }
     }

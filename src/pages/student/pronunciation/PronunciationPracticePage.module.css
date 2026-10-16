@@ -25,7 +25,7 @@
     background: rgba(36, 132, 181, 0.12);
     border: 1px solid rgba(36, 132, 181, 0.28);
     color: var(--color-brand-primary, #175676);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -204,7 +204,7 @@
 }
 
 .toggleChevron {
-    font-size: 10px;
+    font-size: 12px;
     color: var(--color-text-muted);
 }
 
@@ -381,13 +381,14 @@
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
 }
 
-/* Tab Switcher: Tiêu chuẩn vs Drill Mode */
+/* Tab Switcher: 6 chế độ luyện tập dạng lưới 3 cột cân đối */
 .tabSwitcher {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     background: var(--color-surface-raised, #f1f5f9);
     border: 1px solid var(--color-border-soft, #e2e8f0);
-    border-radius: 10px;
-    padding: 3px;
+    border-radius: 12px;
+    padding: 4px;
     gap: 4px;
 }
 
@@ -397,13 +398,12 @@
 }
 
 .tabSwitchBtn {
-    flex: 1;
     background: none;
     border: none;
     color: var(--color-text-secondary, #64748b);
     font-size: 12px;
     font-weight: 600;
-    padding: 8px 10px;
+    padding: 7px 8px;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.15s;
@@ -412,6 +412,7 @@
     align-items: center;
     justify-content: center;
     gap: 6px;
+    white-space: nowrap;
 }
 
 :global([data-theme='dark']) .tabSwitchBtn {
@@ -419,7 +420,7 @@
 }
 
 .tabSwitchBtn:hover {
-    color: var(--color-brand-primary, #0284c7);
+    color: var(--color-brand-primary, #2484b5);
 }
 
 :global([data-theme='dark']) .tabSwitchBtn:hover {
@@ -427,9 +428,9 @@
 }
 
 .tabSwitchActive {
-    background: #0284c7 !important;
+    background: var(--color-brand-primary, #2484b5) !important;
     color: #ffffff !important;
-    box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
+    box-shadow: 0 2px 8px rgba(36, 132, 181, 0.35);
 }
 
 /* Drill Mode Section */
@@ -446,10 +447,10 @@
 }
 
 .drillBadge {
-    font-size: 11px;
-    color: #0284c7;
-    background: rgba(14, 165, 233, 0.1);
-    border: 1px solid rgba(14, 165, 233, 0.25);
+    font-size: 12px;
+    color: var(--color-brand-primary, #2484b5);
+    background: rgba(36, 132, 181, 0.1);
+    border: 1px solid rgba(36, 132, 181, 0.25);
     padding: 2px 8px;
     border-radius: 6px;
     font-weight: 600;
@@ -487,14 +488,14 @@
 }
 
 .topicBtn:hover {
-    border-color: #38bdf8;
-    color: #0284c7;
+    border-color: var(--color-brand-primary, #2484b5);
+    color: var(--color-brand-primary, #2484b5);
 }
 
 .topicActive {
-    background: rgba(14, 165, 233, 0.12) !important;
-    border-color: #0284c7 !important;
-    color: #0284c7 !important;
+    background: rgba(36, 132, 181, 0.12) !important;
+    border-color: var(--color-brand-primary, #2484b5) !important;
+    color: var(--color-brand-primary, #2484b5) !important;
     font-weight: 700;
 }
 
@@ -527,7 +528,7 @@
 }
 
 .drillItemsTitle {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--color-text-muted, #64748b);
     text-transform: uppercase;
     font-weight: 600;
@@ -536,7 +537,7 @@
 .btnRefreshDrill {
     background: none;
     border: none;
-    color: #0284c7;
+    color: var(--color-brand-primary, #2484b5);
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
@@ -591,7 +592,7 @@
 }
 
 .drillPill:hover {
-    border-color: #0284c7;
+    border-color: var(--color-brand-primary, #2484b5);
     transform: translateX(2px);
 }
 
@@ -638,13 +639,13 @@
 }
 
 .presetTargetTypeBtn:hover {
-    color: var(--color-brand-primary, #0284c7);
+    color: var(--color-brand-primary, #2484b5);
 }
 
 .presetTargetTypeActive {
-    background: rgba(14, 165, 233, 0.12) !important;
-    border-color: #0284c7 !important;
-    color: #0284c7 !important;
+    background: rgba(36, 132, 181, 0.12) !important;
+    border-color: var(--color-brand-primary, #2484b5) !important;
+    color: var(--color-brand-primary, #2484b5) !important;
     font-weight: 700;
 }
 
@@ -662,7 +663,7 @@
     width: 100%;
     background: var(--color-surface-raised, #f8fafc);
     border: 1px dashed var(--color-border-soft, #cbd5e1);
-    color: #0284c7;
+    color: var(--color-brand-primary, #2484b5);
     font-size: 12px;
     font-weight: 600;
     padding: 8px 12px;
@@ -683,8 +684,8 @@
 }
 
 .btnToggleCustom:hover {
-    background: rgba(14, 165, 233, 0.1);
-    border-color: #0284c7;
+    background: rgba(36, 132, 181, 0.1);
+    border-color: var(--color-brand-primary, #2484b5);
 }
 
 .customForm {
@@ -712,8 +713,8 @@
 }
 
 .customTextarea:focus {
-    border-color: #0284c7;
-    box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2);
+    border-color: var(--color-brand-primary, #2484b5);
+    box-shadow: 0 0 0 2px rgba(36, 132, 181, 0.2);
 }
 
 .customFormActions {
@@ -732,7 +733,7 @@
 }
 
 .btnApplyCustom {
-    background: #0284c7;
+    background: var(--color-brand-primary, #2484b5);
     border: none;
     color: #ffffff;
     font-size: 12px;
@@ -758,7 +759,7 @@
 }
 
 .groupHeader {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--color-text-muted, #64748b);
     text-transform: uppercase;
     font-weight: 600;
@@ -789,14 +790,14 @@
 }
 
 .presetPill:hover {
-    border-color: #38bdf8;
-    color: #0284c7;
+    border-color: var(--color-brand-primary, #2484b5);
+    color: var(--color-brand-primary, #2484b5);
 }
 
 .pillActive {
-    background: rgba(14, 165, 233, 0.12) !important;
-    border-color: #0284c7 !important;
-    color: #0284c7 !important;
+    background: rgba(36, 132, 181, 0.12) !important;
+    border-color: var(--color-brand-primary, #2484b5) !important;
+    color: var(--color-brand-primary, #2484b5) !important;
     font-weight: 600;
 }
 
@@ -841,13 +842,13 @@
 }
 
 .targetTypeBadge {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: #0284c7;
-    background: rgba(14, 165, 233, 0.1);
-    border: 1px solid rgba(14, 165, 233, 0.25);
+    color: var(--color-brand-primary, #2484b5);
+    background: rgba(36, 132, 181, 0.1);
+    border: 1px solid rgba(36, 132, 181, 0.25);
     padding: 3px 8px;
     border-radius: 6px;
 }
@@ -884,7 +885,7 @@
     align-items: center;
     gap: 5px;
     padding: 3px 8px;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     border-radius: 6px;
     border: none;
@@ -908,22 +909,22 @@
 
 .accentActive {
     background: #ffffff !important;
-    color: #0284c7 !important;
+    color: var(--color-brand-primary, #2484b5) !important;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 :global([data-theme='dark']) .accentActive {
-    background: #0284c7 !important;
+    background: var(--color-brand-primary, #2484b5) !important;
     color: #ffffff !important;
 }
 
 .accentTag {
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 800;
     padding: 1px 4px;
     border-radius: 4px;
-    background: rgba(2, 132, 199, 0.12);
-    color: #0284c7;
+    background: rgba(36, 132, 181, 0.12);
+    color: var(--color-brand-primary, #2484b5);
 }
 
 :global([data-theme='dark']) .accentActive .accentTag {
@@ -935,9 +936,9 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: rgba(14, 165, 233, 0.1);
-    border: 1px solid rgba(14, 165, 233, 0.3);
-    color: #0284c7;
+    background: rgba(36, 132, 181, 0.1);
+    border: 1px solid rgba(36, 132, 181, 0.3);
+    color: var(--color-brand-primary, #2484b5);
     font-size: 13px;
     font-weight: 600;
     padding: 6px 12px;
@@ -976,7 +977,7 @@
 .ipaSubtitle strong {
     font-family: monospace;
     font-size: 16px;
-    color: #0284c7;
+    color: var(--color-brand-primary, #2484b5);
 }
 
 :global([data-theme='dark']) .ipaSubtitle strong {
@@ -1014,9 +1015,9 @@
 }
 
 .ipaBadgeActive {
-    border-color: #0284c7 !important;
-    background: rgba(14, 165, 233, 0.08) !important;
-    box-shadow: 0 0 0 1px #0284c7;
+    border-color: var(--color-brand-primary, #2484b5) !important;
+    background: rgba(36, 132, 181, 0.08) !important;
+    box-shadow: 0 0 0 1px var(--color-brand-primary, #2484b5);
 }
 
 :global([data-theme='dark']) .ipaBadgeActive {
@@ -1026,7 +1027,7 @@
 }
 
 .ipaColLabel {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -1038,7 +1039,7 @@
 }
 
 .ipaBadgeActive .ipaColLabel {
-    color: #0284c7;
+    color: var(--color-brand-primary, #2484b5);
 }
 
 :global([data-theme='dark']) .ipaBadgeActive .ipaColLabel {
@@ -1063,7 +1064,7 @@
 }
 
 .ipaBadgeActive .ipaColCode {
-    color: #0284c7;
+    color: var(--color-brand-primary, #2484b5);
     font-weight: 700;
 }
 
@@ -1154,11 +1155,11 @@
     border-radius: 50%;
     background: radial-gradient(
         circle,
-        rgba(14, 165, 233, 0.15) 0%,
+        rgba(36, 132, 181, 0.15) 0%,
         var(--color-surface-raised, #f0f9ff) 100%
     );
-    border: 4px solid #0284c7;
-    box-shadow: 0 0 16px rgba(14, 165, 233, 0.25);
+    border: 4px solid var(--color-brand-primary, #2484b5);
+    box-shadow: 0 0 16px rgba(36, 132, 181, 0.25);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1187,7 +1188,7 @@
 }
 
 .scoreMax {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--color-text-muted, #64748b);
     margin-top: 2px;
 }
@@ -1201,7 +1202,7 @@
 .verdictLevel {
     font-size: 14px;
     font-weight: 700;
-    color: #0284c7;
+    color: var(--color-brand-primary, #2484b5);
 }
 
 :global([data-theme='dark']) .verdictLevel {
@@ -1235,7 +1236,7 @@
 }
 
 .subScoreLabel {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--color-text-muted, #64748b);
     text-transform: uppercase;
     font-weight: 600;
@@ -1270,7 +1271,7 @@
 .feedbackHeader {
     font-size: 14px;
     font-weight: 700;
-    color: #0284c7;
+    color: var(--color-brand-primary, #2484b5);
     display: flex;
     align-items: center;
     gap: 8px;
@@ -1301,7 +1302,11 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    background: linear-gradient(
+        135deg,
+        #38bdf8 0%,
+        var(--color-brand-primary, #2484b5) 100%
+    );
     color: #ffffff;
     font-size: 14px;
     font-weight: 600;
@@ -1309,7 +1314,7 @@
     border-radius: 12px;
     border: none;
     cursor: pointer;
-    box-shadow: 0 4px 14px rgba(14, 165, 233, 0.35);
+    box-shadow: 0 4px 14px rgba(36, 132, 181, 0.35);
     transition: all 0.2s;
 }
 
@@ -1356,9 +1361,9 @@
 }
 
 .btnShuffleTarget:hover {
-    border-color: #0284c7;
-    color: #0284c7;
-    background: rgba(14, 165, 233, 0.08);
+    border-color: var(--color-brand-primary, #2484b5);
+    color: var(--color-brand-primary, #2484b5);
+    background: rgba(36, 132, 181, 0.08);
 }
 
 :global([data-theme='dark']) .btnShuffleTarget {
@@ -1387,8 +1392,8 @@
     gap: 4px;
     background: none;
     border: 1px solid var(--color-border-soft, #e2e8f0);
-    color: #0284c7;
-    font-size: 11px;
+    color: var(--color-brand-primary, #2484b5);
+    font-size: 12px;
     font-weight: 600;
     padding: 4px 8px;
     border-radius: 6px;
@@ -1397,8 +1402,8 @@
 }
 
 .btnMiniShuffle:hover {
-    background: rgba(14, 165, 233, 0.08);
-    border-color: #0284c7;
+    background: rgba(36, 132, 181, 0.08);
+    border-color: var(--color-brand-primary, #2484b5);
 }
 
 :global([data-theme='dark']) .btnMiniShuffle {
@@ -1443,13 +1448,13 @@
 }
 
 .levelPillBtn:hover {
-    border-color: #0284c7;
+    border-color: var(--color-brand-primary, #2484b5);
     transform: translateX(2px);
 }
 
 .levelPillActive {
-    background: rgba(14, 165, 233, 0.1) !important;
-    border-color: #0284c7 !important;
+    background: rgba(36, 132, 181, 0.1) !important;
+    border-color: var(--color-brand-primary, #2484b5) !important;
 }
 
 :global([data-theme='dark']) .levelPillActive {
@@ -1458,10 +1463,10 @@
 }
 
 .levelBadgeNum {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
-    color: #0284c7;
-    background: rgba(14, 165, 233, 0.12);
+    color: var(--color-brand-primary, #2484b5);
+    background: rgba(36, 132, 181, 0.12);
     padding: 2px 6px;
     border-radius: 4px;
     white-space: nowrap;
@@ -1538,13 +1543,13 @@
 }
 
 .phonemeGridBtn:hover {
-    border-color: #0284c7;
+    border-color: var(--color-brand-primary, #2484b5);
     transform: translateY(-1px);
 }
 
 .phonemeGridActive {
-    background: rgba(14, 165, 233, 0.12) !important;
-    border-color: #0284c7 !important;
+    background: rgba(36, 132, 181, 0.12) !important;
+    border-color: var(--color-brand-primary, #2484b5) !important;
 }
 
 :global([data-theme='dark']) .phonemeGridActive {
@@ -1555,7 +1560,7 @@
 .phonemeSym {
     font-size: 14px;
     font-family: 'Times New Roman', serif;
-    color: #0284c7;
+    color: var(--color-brand-primary, #2484b5);
 }
 
 :global([data-theme='dark']) .phonemeSym {
@@ -1563,7 +1568,7 @@
 }
 
 .phonemeSample {
-    font-size: 10px;
+    font-size: 12px;
     color: var(--color-text-muted, #64748b);
 }
 
@@ -1592,8 +1597,8 @@
     font-size: 18px;
     font-family: 'Times New Roman', serif;
     font-weight: 700;
-    color: #0284c7;
-    background: rgba(14, 165, 233, 0.12);
+    color: var(--color-brand-primary, #2484b5);
+    background: rgba(36, 132, 181, 0.12);
     padding: 2px 8px;
     border-radius: 6px;
 }
@@ -1618,13 +1623,13 @@
 }
 
 .activePhonemeType {
-    font-size: 10px;
+    font-size: 12px;
     color: var(--color-text-muted, #64748b);
 }
 
 .activePhonemeTip {
     margin: 0;
-    font-size: 11px;
+    font-size: 12px;
     color: var(--color-text-secondary, #475569);
     line-height: 1.45;
 }
@@ -1674,7 +1679,7 @@
 }
 
 .dailyProgressVal {
-    color: #0284c7;
+    color: var(--color-brand-primary, #2484b5);
     font-weight: 700;
 }
 
@@ -1695,7 +1700,11 @@
 
 .progressBarFill {
     height: 100%;
-    background: linear-gradient(90deg, #38bdf8, #0284c7);
+    background: linear-gradient(
+        90deg,
+        #38bdf8,
+        var(--color-brand-primary, #2484b5)
+    );
     border-radius: 999px;
     transition: width 0.3s ease;
 }
@@ -1725,13 +1734,13 @@
 }
 
 .dailyTaskCard:hover {
-    border-color: #0284c7;
+    border-color: var(--color-brand-primary, #2484b5);
     transform: translateY(-1px);
 }
 
 .dailyTaskCurrent {
-    border-color: #0284c7 !important;
-    background: rgba(14, 165, 233, 0.06) !important;
+    border-color: var(--color-brand-primary, #2484b5) !important;
+    background: rgba(36, 132, 181, 0.06) !important;
 }
 
 :global([data-theme='dark']) .dailyTaskCurrent {
@@ -1750,9 +1759,9 @@
 }
 
 .dailyTaskBadge {
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 700;
-    color: #0284c7;
+    color: var(--color-brand-primary, #2484b5);
     text-transform: uppercase;
     letter-spacing: 0.04em;
 }
@@ -1765,7 +1774,7 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    font-size: 11px;
+    font-size: 12px;
     color: #10b981;
     font-weight: 600;
 }
@@ -1781,7 +1790,88 @@
 }
 
 .dailyTaskHint {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--color-text-muted, #64748b);
     line-height: 1.4;
+}
+
+/* Tooltip wrapper trong tab switcher + IPA/AI additions */
+.tabSwitcher > div {
+    display: flex;
+    min-width: 0;
+}
+.tabSwitcher > div > button {
+    width: 100%;
+}
+.pillIpa {
+    display: block;
+    font-size: 12px;
+    font-weight: 400;
+    opacity: 0.75;
+    margin-top: 2px;
+}
+.phonemeGroupLabel {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-secondary, #64748b);
+    margin: 10px 0 6px;
+}
+.phonemeFilterRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+.phonemeFilterBtn {
+    background: var(--color-surface-raised, #f1f5f9);
+    border: 1px solid var(--color-border-soft, #e2e8f0);
+    color: var(--color-text-secondary, #475569);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+}
+.phonemeFilterActive {
+    background: var(--color-brand-primary, #2484b5);
+    border-color: var(--color-brand-primary, #2484b5);
+    color: #fff;
+}
+.aiErrorBox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #b91c1c;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin: 8px 0;
+}
+.aiLoadingBox {
+    font-size: 12px;
+    color: var(--color-text-secondary, #64748b);
+    padding: 8px 0;
+}
+.customTopicForm {
+    display: flex;
+    gap: 6px;
+    margin: 8px 0;
+}
+.customTopicInput {
+    flex: 1;
+    min-width: 0;
+    font-size: 12px;
+    padding: 7px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border-soft, #e2e8f0);
+    background: var(--color-surface-card, #fff);
+    color: var(--color-text-primary, #0f172a);
+}
+.ipaMissing {
+    font-size: 12px;
+    font-weight: 500;
+    opacity: 0.7;
 }

@@ -27,7 +27,7 @@
     background: rgba(36, 132, 181, 0.12);
     border: 1px solid rgba(36, 132, 181, 0.28);
     color: var(--color-brand-primary, #175676);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -124,7 +124,7 @@
 }
 
 .studyBtn:hover {
-    background: #12435c;
+    background: var(--color-brand-primary-hover, #1d6a92);
     transform: translateY(-2px);
     box-shadow: 0 8px 20px -4px rgba(23, 86, 118, 0.35);
 }

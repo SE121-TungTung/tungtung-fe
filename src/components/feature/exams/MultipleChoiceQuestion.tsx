@@ -47,26 +47,25 @@ export default function MultipleChoiceQuestion({
                 role="radiogroup"
                 aria-label={`Câu hỏi ${globalNumber}`}
             >
-                {options.map((option) => {
-                    const isSelected = selectedValue === option.key
+                {options.map((option, idx) => {
+                    const optKey = option.key || String.fromCharCode(65 + idx)
+                    const isSelected = selectedValue === optKey
                     return (
                         <div
-                            key={option.key}
+                            key={optKey || `opt-${idx}`}
                             role="radio"
                             aria-checked={isSelected}
                             tabIndex={0}
                             className={`${s.optionCard} ${isSelected ? s.selected : ''}`}
-                            onClick={() => onChange(option.key)}
+                            onClick={() => onChange(optKey)}
                             onKeyDown={(e) => {
                                 if (e.key === ' ' || e.key === 'Enter') {
                                     e.preventDefault()
-                                    onChange(option.key)
+                                    onChange(optKey)
                                 }
                             }}
                         >
-                            <span className={s.optionKeyBadge}>
-                                {option.key}
-                            </span>
+                            <span className={s.optionKeyBadge}>{optKey}</span>
                             <span className={s.optionText}>{option.text}</span>
                             <div className={s.selectionIndicator}>
                                 <div className={s.radioCircle}>

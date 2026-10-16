@@ -132,7 +132,10 @@ export const PlacementTestPage: React.FC = () => {
                     <div className={styles.rulesSection}>
                         <div className={styles.ruleBox}>
                             <div className={styles.ruleHeader}>
-                                <ClockIcon size={18} color="#0d9488" />
+                                <ClockIcon
+                                    size={18}
+                                    color="var(--color-brand-primary, #2484b5)"
+                                />
                                 15–20 Phút
                             </div>
                             <p className={styles.ruleText}>
@@ -143,7 +146,10 @@ export const PlacementTestPage: React.FC = () => {
 
                         <div className={styles.ruleBox}>
                             <div className={styles.ruleHeader}>
-                                <CheckCircleIcon size={18} color="#0d9488" />
+                                <CheckCircleIcon
+                                    size={18}
+                                    color="var(--color-brand-primary, #2484b5)"
+                                />
                                 Đánh Giá Khách Quan
                             </div>
                             <p className={styles.ruleText}>
@@ -154,7 +160,10 @@ export const PlacementTestPage: React.FC = () => {
 
                         <div className={styles.ruleBox}>
                             <div className={styles.ruleHeader}>
-                                <CalendarIcon size={18} color="#0d9488" />
+                                <CalendarIcon
+                                    size={18}
+                                    color="var(--color-brand-primary, #2484b5)"
+                                />
                                 Giới Hạn 30 Ngày
                             </div>
                             <p className={styles.ruleText}>

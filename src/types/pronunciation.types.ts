@@ -104,6 +104,36 @@ export interface DrillSuggestionsResponse {
     items: string[]
 }
 
+/** Mục trong danh sách luyện phát âm cá nhân (liên kết Flashcard) */
+export interface PronunciationWordListItem {
+    id: string
+    target_text: string
+    target_type: string
+    ipa: string | null
+    ipa_us?: string | null
+    ipa_uk?: string | null
+    source: 'manual' | 'flashcard'
+    flashcard_id: string | null
+    deck_id: string | null
+    created_at: string
+    practice_count: number
+    best_score: number | null
+    last_score: number | null
+    last_practiced_at: string | null
+}
+
+export interface PronunciationWordListResponse {
+    items: PronunciationWordListItem[]
+    total: number
+}
+
+export interface WordListAddPayload {
+    target_text?: string
+    target_type?: 'word' | 'phrase' | 'sentence'
+    ipa?: string | null
+    flashcard_id?: string
+}
+
 export interface IPAPhonemeInfo {
     symbol: string
     ipa: string

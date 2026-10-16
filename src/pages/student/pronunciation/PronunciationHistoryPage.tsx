@@ -12,6 +12,7 @@ import { PhonemeHighlight } from '@/components/feature/pronunciation/PhonemeHigh
 import {
     HistoryIcon,
     ArrowLeftIcon,
+    ArrowRightIcon,
     EyeIcon,
     MicIcon,
     CalendarIcon,
@@ -277,7 +278,8 @@ export default function PronunciationHistoryPage() {
                                     disabled={page <= 1}
                                     onClick={() => setPage(page - 1)}
                                 >
-                                    ← Trang trước
+                                    <ArrowLeftIcon size={14} />
+                                    <span>Trang trước</span>
                                 </button>
                                 <span className={s.pageInfo}>
                                     Trang {page} / {totalPages}
@@ -288,7 +290,8 @@ export default function PronunciationHistoryPage() {
                                     disabled={page >= totalPages}
                                     onClick={() => setPage(page + 1)}
                                 >
-                                    Trang sau →
+                                    <span>Trang sau</span>
+                                    <ArrowRightIcon size={14} />
                                 </button>
                             </div>
                         )}

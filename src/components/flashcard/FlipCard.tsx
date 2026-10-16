@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import styles from './FlipCard.module.css'
 import { AudioButton } from './AudioButton'
 import { RatingBar } from './RatingBar'
+import { PronunciationLinkBar } from './PronunciationLinkBar'
 import {
     BookOpenIcon,
     RotateCwIcon,
@@ -11,6 +12,8 @@ import {
     CheckCircleIcon,
 } from './FlashcardIcons'
 import { type Flashcard, FSRSRating } from '@/types/flashcard'
+
+import { Tooltip } from '@/components/core/Tooltip'
 
 // ── State Machine ─────────────────────────────────────────────────────────────
 type CardPhase = 'idle' | 'flipped' | 'rated'
@@ -26,7 +29,7 @@ interface FlipCardProps {
     estimatedIntervals?: Partial<Record<FSRSRating, number>>
 }
 
-const SWIPE_THRESHOLD = 80 // px drag required to trigger swipe rating
+const SWIPE_THRESHOLD = 75 // px drag required to trigger swipe rating
 
 export function FlipCard({
     card,
@@ -37,6 +40,7 @@ export function FlipCard({
 }: FlipCardProps) {
     const [phase, setPhase] = useState<CardPhase>('idle')
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [swipeExit, setSwipeExit] = useState<'left' | 'right' | null>(null)
     const cardRef = useRef<HTMLDivElement>(null)
 
     // Gesture & Drag state
@@ -51,30 +55,17 @@ export function FlipCard({
         setIsSubmitting(false)
         setDragOffset({ x: 0, y: 0 })
         setIsDragging(false)
-    }, [card.id])
-
-    // Focus card for keyboard handling
-    useEffect(() => {
-        cardRef.current?.focus()
+        setSwipeExit(null)
     }, [card.id])
 
     const handleFlip = useCallback(() => {
-        if (isDragging) return
-        if (phase === 'idle') {
-            setPhase('flipped')
-        } else if (phase === 'flipped') {
-            setPhase('idle')
-        }
-    }, [phase, isDragging])
+        if (isDragging || isSubmitting) return
+        setPhase((prev) => (prev === 'idle' ? 'flipped' : 'idle'))
+    }, [isDragging, isSubmitting])
 
     const handleRate = useCallback(
         async (rating: FSRSRating) => {
             if (isSubmitting) return
-            // Must flip to back face first so user can check meaning and example
-            if (phase === 'idle') {
-                setPhase('flipped')
-                return
-            }
             setIsSubmitting(true)
             setPhase('rated')
             try {
@@ -83,17 +74,26 @@ export function FlipCard({
                 setIsSubmitting(false)
             }
         },
-        [isSubmitting, onRate, card.id, phase]
+        [isSubmitting, onRate, card.id]
     )
 
     // ── Gesture / Pointer Handlers ────────────────────────────────────────────
     const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-        // Do not intercept audio button, flip button or other interactive controls
-        if ((e.target as HTMLElement).closest('button, a, input')) return
+        // Do not intercept interactive controls
+        if (
+            (e.target as HTMLElement).closest(
+                'button, a, input, [role="button"]:not([tabIndex="0"])'
+            )
+        )
+            return
         dragStartRef.current = { x: e.clientX, y: e.clientY }
         hasDraggedPastClickRef.current = false
         setIsDragging(true)
-        ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+        try {
+            ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+        } catch {
+            // Ignore capture error if unsupported
+        }
     }
 
     const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -118,97 +118,81 @@ export function FlipCard({
         setIsDragging(false)
         dragStartRef.current = null
 
-        // If card is on front face (idle), any swipe or click MUST flip the card to show definition
-        if (phase === 'idle') {
-            setDragOffset({ x: 0, y: 0 })
-            handleFlip()
-            return
-        }
-
-        // On flipped face: check if swipe threshold was reached to rate
+        // Check if swipe threshold was reached to rate
         if (dx < -SWIPE_THRESHOLD) {
             // Swiped Left = Quên rồi (Again)
-            void handleRate(FSRSRating.AGAIN)
+            setSwipeExit('left')
+            setTimeout(() => {
+                void handleRate(FSRSRating.AGAIN)
+            }, 180)
         } else if (dx > SWIPE_THRESHOLD) {
             // Swiped Right = Nhớ tốt (Good)
-            void handleRate(FSRSRating.GOOD)
+            setSwipeExit('right')
+            setTimeout(() => {
+                void handleRate(FSRSRating.GOOD)
+            }, 180)
         } else {
             // Snap back
             setDragOffset({ x: 0, y: 0 })
-            // If it was just a tap without significant movement, flip back to front
-            if (!hasDraggedPastClickRef.current) {
+            // Tap without significant drag flips card
+            if (!hasDraggedPastClickRef.current || Math.abs(dx) < 12) {
                 handleFlip()
             }
         }
     }
 
-    // ── Keyboard Navigation ───────────────────────────────────────────────────
-    const handleKeyDown = useCallback(
-        (e: React.KeyboardEvent<HTMLDivElement>) => {
-            if (e.target !== cardRef.current) return
+    // ── Global Keyboard Navigation (Always active) ───────────────────────────
+    useEffect(() => {
+        const handleGlobalKeyDown = (e: KeyboardEvent) => {
+            const activeElem = document.activeElement as HTMLElement | null
+            if (
+                activeElem &&
+                ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeElem.tagName)
+            ) {
+                return
+            }
+            if (isSubmitting) return
 
+            // Space to flip
             if (e.code === 'Space' || e.key === ' ') {
                 e.preventDefault()
                 handleFlip()
                 return
             }
 
-            // If front face, pressing any key flips the card to reveal answer first
-            if (phase !== 'flipped') {
-                if (
-                    [
-                        'ArrowLeft',
-                        'ArrowRight',
-                        'ArrowDown',
-                        'ArrowUp',
-                        '1',
-                        '2',
-                        '3',
-                        '4',
-                    ].includes(e.key)
-                ) {
-                    e.preventDefault()
-                    handleFlip()
-                }
-                return
-            }
-
-            // ArrowLeft / ArrowRight quick rating when flipped
-            if (e.key === 'ArrowLeft') {
-                e.preventDefault()
-                void handleRate(FSRSRating.AGAIN)
-                return
-            }
-            if (e.key === 'ArrowRight') {
-                e.preventDefault()
-                void handleRate(FSRSRating.GOOD)
-                return
-            }
-            if (e.key === 'ArrowDown') {
-                e.preventDefault()
-                void handleRate(FSRSRating.HARD)
-                return
-            }
-            if (e.key === 'ArrowUp') {
-                e.preventDefault()
-                void handleRate(FSRSRating.EASY)
-                return
-            }
-
-            // Rating keys 1 - 4
+            // Quick rating keys (1: Again, 2: Hard, 3: Good, 4: Easy)
             const ratingMap: Record<string, FSRSRating> = {
                 '1': FSRSRating.AGAIN,
                 '2': FSRSRating.HARD,
                 '3': FSRSRating.GOOD,
                 '4': FSRSRating.EASY,
+                ArrowLeft: FSRSRating.AGAIN,
+                ArrowDown: FSRSRating.HARD,
+                ArrowRight: FSRSRating.GOOD,
+                ArrowUp: FSRSRating.EASY,
             }
+
             if (e.key in ratingMap) {
                 e.preventDefault()
-                void handleRate(ratingMap[e.key])
+                const rating = ratingMap[e.key]
+                if (rating === FSRSRating.AGAIN) {
+                    setSwipeExit('left')
+                    setTimeout(() => void handleRate(rating), 160)
+                } else if (
+                    rating === FSRSRating.GOOD ||
+                    rating === FSRSRating.EASY
+                ) {
+                    setSwipeExit('right')
+                    setTimeout(() => void handleRate(rating), 160)
+                } else {
+                    void handleRate(rating)
+                }
             }
-        },
-        [handleFlip, handleRate, phase]
-    )
+        }
+
+        window.addEventListener('keydown', handleGlobalKeyDown)
+        return () => window.removeEventListener('keydown', handleGlobalKeyDown)
+    }, [handleFlip, handleRate, isSubmitting])
 
     const isFlipped = phase === 'flipped' || phase === 'rated'
 
@@ -219,9 +203,11 @@ export function FlipCard({
           ? 'rotateY(180deg)'
           : 'none'
 
-    // Stamp Opacity
-    const stampAgainOpacity = Math.min(1, Math.max(0, -dragOffset.x / 70))
-    const stampGoodOpacity = Math.min(1, Math.max(0, dragOffset.x / 70))
+    // Stamp Opacity (Visible when dragging or exiting)
+    const stampAgainOpacity =
+        swipeExit === 'left' ? 1 : Math.min(1, Math.max(0, -dragOffset.x / 60))
+    const stampGoodOpacity =
+        swipeExit === 'right' ? 1 : Math.min(1, Math.max(0, dragOffset.x / 60))
 
     return (
         <div className={styles.wrapper}>
@@ -261,27 +247,32 @@ export function FlipCard({
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
                 onPointerCancel={handlePointerUp}
-                onKeyDown={handleKeyDown}
             >
-                {/* Floating Stamps during swipe (only active when flipped) */}
+                {/* Floating Stamps during swipe */}
                 <div
                     className={`${styles.swipeStamp} ${styles.swipeStampAgain}`}
-                    style={{ opacity: isFlipped ? stampAgainOpacity : 0 }}
+                    style={{ opacity: stampAgainOpacity }}
                 >
                     <XIcon size={18} />
                     <span>QUÊN RỒI</span>
                 </div>
                 <div
                     className={`${styles.swipeStamp} ${styles.swipeStampGood}`}
-                    style={{ opacity: isFlipped ? stampGoodOpacity : 0 }}
+                    style={{ opacity: stampGoodOpacity }}
                 >
                     <CheckCircleIcon size={18} />
                     <span>ĐÃ NHỚ</span>
                 </div>
 
                 <div
-                    className={`${styles.card} ${isDragging ? styles.noTransition : ''}`}
-                    style={{ transform: cardTransform }}
+                    className={`${styles.card} ${isDragging ? styles.noTransition : ''} ${
+                        swipeExit === 'left'
+                            ? styles.cardSwipingLeft
+                            : swipeExit === 'right'
+                              ? styles.cardSwipingRight
+                              : ''
+                    }`}
+                    style={{ transform: swipeExit ? undefined : cardTransform }}
                 >
                     {/* ── FRONT FACE ──────────────────────────────────────── */}
                     <div
@@ -327,7 +318,7 @@ export function FlipCard({
                                     size={14}
                                     className={styles.flipIcon}
                                 />
-                                <span>Nhấn để lật xem đáp án</span>
+                                <span>Nhấn để lật xem đáp án (Space)</span>
                             </button>
                         </div>
                     </div>
@@ -402,35 +393,33 @@ export function FlipCard({
                                 </p>
                             </div>
                         )}
+
+                        {isFlipped && <PronunciationLinkBar card={card} />}
                     </div>
                 </div>
             </div>
 
             {/* ── Gesture Guidance / Quick Swipe Actions ──────────────────── */}
             <div className={styles.gestureBar}>
-                <button
-                    type="button"
-                    className={`${styles.swipeActionBtn} ${styles.swipeBtnAgain}`}
-                    onClick={() => {
-                        if (phase === 'flipped') {
-                            void handleRate(FSRSRating.AGAIN)
-                        } else {
-                            handleFlip()
-                        }
-                    }}
-                    title={
-                        phase === 'flipped'
-                            ? 'Vuốt trái hoặc bấm để đánh dấu chưa nhớ'
-                            : 'Lật xem đáp án'
-                    }
+                <Tooltip
+                    content="Vuốt trái hoặc bấm số 1 để đánh dấu Quên rồi"
+                    placement="top"
                 >
-                    <ArrowLeftIcon size={14} />
-                    <span>
-                        {phase === 'flipped'
-                            ? 'Vuốt trái: Quên'
-                            : 'Lật xem nghĩa'}
-                    </span>
-                </button>
+                    <button
+                        type="button"
+                        className={`${styles.swipeActionBtn} ${styles.swipeBtnAgain}`}
+                        onClick={() => {
+                            setSwipeExit('left')
+                            setTimeout(
+                                () => void handleRate(FSRSRating.AGAIN),
+                                160
+                            )
+                        }}
+                    >
+                        <ArrowLeftIcon size={14} />
+                        <span>Vuốt trái: Quên (1)</span>
+                    </button>
+                </Tooltip>
 
                 <div
                     className={styles.flipPill}
@@ -443,29 +432,25 @@ export function FlipCard({
                     {isFlipped ? 'quay lại từ vựng' : 'lật xem đáp án'}
                 </div>
 
-                <button
-                    type="button"
-                    className={`${styles.swipeActionBtn} ${styles.swipeBtnGood}`}
-                    onClick={() => {
-                        if (phase === 'flipped') {
-                            void handleRate(FSRSRating.GOOD)
-                        } else {
-                            handleFlip()
-                        }
-                    }}
-                    title={
-                        phase === 'flipped'
-                            ? 'Vuốt phải hoặc bấm để đánh dấu đã nhớ'
-                            : 'Lật xem đáp án'
-                    }
+                <Tooltip
+                    content="Vuốt phải hoặc bấm số 3 để đánh dấu Đã nhớ"
+                    placement="top"
                 >
-                    <span>
-                        {phase === 'flipped'
-                            ? 'Vuốt phải: Đã nhớ'
-                            : 'Lật xem nghĩa'}
-                    </span>
-                    <ArrowRightIcon size={14} />
-                </button>
+                    <button
+                        type="button"
+                        className={`${styles.swipeActionBtn} ${styles.swipeBtnGood}`}
+                        onClick={() => {
+                            setSwipeExit('right')
+                            setTimeout(
+                                () => void handleRate(FSRSRating.GOOD),
+                                160
+                            )
+                        }}
+                    >
+                        <span>Vuốt phải: Đã nhớ (3)</span>
+                        <ArrowRightIcon size={14} />
+                    </button>
+                </Tooltip>
             </div>
 
             {/* ── Rating Bar (Visible after flip) ─────────────────────────── */}

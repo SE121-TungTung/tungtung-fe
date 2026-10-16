@@ -22,6 +22,8 @@ export const AdaptiveQuizRoomPage: React.FC = () => {
     )
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+    const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false)
+    const [isFinishing, setIsFinishing] = useState<boolean>(false)
     const [lastFeedback, setLastFeedback] = useState<{
         isCorrect: boolean
         correctAnswer?: string | null
@@ -124,18 +126,16 @@ export const AdaptiveQuizRoomPage: React.FC = () => {
         }
     }
 
-    const handleFinishEarly = async () => {
-        if (!sessionId) return
-        const confirmed = window.confirm(
-            'Bạn có chắc chắn muốn nộp bài sớm và xem kết quả hiện tại?'
-        )
-        if (!confirmed) return
-
+    const handleConfirmFinishEarly = async () => {
+        if (!sessionId || isFinishing) return
+        setIsFinishing(true)
         try {
             await adaptiveQuizApi.finishSession(sessionId)
             navigate(`/student/adaptive-quiz/${sessionId}/result`)
         } catch (err) {
             console.error('Failed to finish session early', err)
+            setIsFinishing(false)
+            setShowConfirmModal(false)
         }
     }
 
@@ -165,7 +165,7 @@ export const AdaptiveQuizRoomPage: React.FC = () => {
 
                 <button
                     className={styles.finishEarlyBtn}
-                    onClick={handleFinishEarly}
+                    onClick={() => setShowConfirmModal(true)}
                     type="button"
                 >
                     <LogOutIcon size={16} />
@@ -199,14 +199,14 @@ export const AdaptiveQuizRoomPage: React.FC = () => {
                         </div>
                         <p className={styles.hintDesc}>
                             Câu hỏi tiếp theo được thuật toán chọn lọc tự động
-                            sao pro cung cấp nhiều thông tin nhất về mức năng
+                            sao cho cung cấp nhiều thông tin nhất về mức năng
                             lực hiện tại của bạn.
                         </p>
                     </div>
                 </div>
 
                 {/* Main: Question Card */}
-                <div>
+                <div className={styles.questionArea}>
                     {currentQuestion ? (
                         <AdaptiveQuestionCard
                             question={currentQuestion}
@@ -222,6 +222,48 @@ export const AdaptiveQuizRoomPage: React.FC = () => {
                     )}
                 </div>
             </div>
+
+            {/* Confirmation Modal */}
+            {showConfirmModal && (
+                <div
+                    className={styles.modalBackdrop}
+                    onClick={() => !isFinishing && setShowConfirmModal(false)}
+                >
+                    <div
+                        className={styles.modalContent}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h3 className={styles.modalTitle}>
+                            Xác nhận nộp bài sớm
+                        </h3>
+                        <p className={styles.modalDesc}>
+                            Bạn có chắc chắn muốn kết thúc bài thi ngay bây giờ?
+                            Hệ thống sẽ tổng kết năng lực IELTS dựa trên các câu
+                            hỏi bạn đã hoàn thành.
+                        </p>
+                        <div className={styles.modalActions}>
+                            <button
+                                type="button"
+                                className={styles.cancelBtn}
+                                onClick={() => setShowConfirmModal(false)}
+                                disabled={isFinishing}
+                            >
+                                Tiếp tục làm bài
+                            </button>
+                            <button
+                                type="button"
+                                className={styles.confirmBtn}
+                                onClick={handleConfirmFinishEarly}
+                                disabled={isFinishing}
+                            >
+                                {isFinishing
+                                    ? 'Đang kết thúc...'
+                                    : 'Xác nhận nộp bài'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

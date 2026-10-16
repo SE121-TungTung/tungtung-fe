@@ -61,6 +61,8 @@ function formatInterval(days: number): string {
     return `${Math.round(days / 30)} tháng`
 }
 
+import { Tooltip } from '@/components/core/Tooltip'
+
 export function RatingBar({
     onRate,
     disabled = false,
@@ -95,30 +97,36 @@ export function RatingBar({
                             ? formatInterval(interval)
                             : DEFAULT_INTERVALS[rating]
 
+                    const tooltipText = `${RATING_VN_LABELS[rating]} (${RATING_LABELS[rating]}): ${RATING_DESCRIPTIONS[rating]}`
+
                     return (
-                        <button
+                        <Tooltip
                             key={rating}
-                            type="button"
-                            className={`${styles.btn} ${styles[RATING_COLORS[rating]]} ${disabled ? styles.disabled : ''}`}
-                            onClick={() => !disabled && onRate(rating)}
-                            disabled={disabled}
-                            title={`${RATING_VN_LABELS[rating]} (${RATING_LABELS[rating]}): ${RATING_DESCRIPTIONS[rating]}`}
-                            aria-label={`${RATING_VN_LABELS[rating]} — ôn lại sau ${intervalText}`}
+                            content={tooltipText}
+                            placement="top"
                         >
-                            <span className={styles.keyHint}>{rating}</span>
-                            <span className={styles.icon}>
-                                {renderRatingIcon(rating)}
-                            </span>
-                            <span className={styles.label}>
-                                {RATING_VN_LABELS[rating]}
-                            </span>
-                            <span className={styles.subLabel}>
-                                {RATING_LABELS[rating]}
-                            </span>
-                            <span className={styles.interval}>
-                                {intervalText}
-                            </span>
-                        </button>
+                            <button
+                                type="button"
+                                className={`${styles.btn} ${styles[RATING_COLORS[rating]]} ${disabled ? styles.disabled : ''}`}
+                                onClick={() => !disabled && onRate(rating)}
+                                disabled={disabled}
+                                aria-label={`${RATING_VN_LABELS[rating]} — ôn lại sau ${intervalText}`}
+                            >
+                                <span className={styles.keyHint}>{rating}</span>
+                                <span className={styles.icon}>
+                                    {renderRatingIcon(rating)}
+                                </span>
+                                <span className={styles.label}>
+                                    {RATING_VN_LABELS[rating]}
+                                </span>
+                                <span className={styles.subLabel}>
+                                    {RATING_LABELS[rating]}
+                                </span>
+                                <span className={styles.interval}>
+                                    {intervalText}
+                                </span>
+                            </button>
+                        </Tooltip>
                     )
                 })}
             </div>

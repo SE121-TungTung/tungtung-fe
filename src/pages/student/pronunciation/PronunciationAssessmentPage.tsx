@@ -12,6 +12,8 @@ import {
     TargetIcon,
     VolumeIcon,
     RefreshIcon,
+    ArrowRightIcon,
+    ArrowLeftIcon,
 } from '@/components/feature/pronunciation/PronunciationIcons'
 import {
     getAssessmentItems,
@@ -239,7 +241,8 @@ export default function PronunciationAssessmentPage() {
                         </Button>
                     </div>
                     <Link to="/student/pronunciation" className={s.backLink}>
-                        ← Quay lại phòng luyện phát âm
+                        <ArrowLeftIcon size={14} />
+                        <span>Quay lại phòng luyện phát âm</span>
                     </Link>
                 </Card>
             </div>
@@ -376,7 +379,16 @@ export default function PronunciationAssessmentPage() {
                             shape="rounded"
                             onClick={() => navigate('/student/pronunciation')}
                         >
-                            Vào Lộ Trình Luyện Tập Cá Nhân Hóa →
+                            <span
+                                style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: 8,
+                                }}
+                            >
+                                <span>Vào Lộ Trình Luyện Tập Cá Nhân Hóa</span>
+                                <ArrowRightIcon size={16} />
+                            </span>
                         </Button>
                     </div>
                 </Card>
@@ -766,9 +778,20 @@ export default function PronunciationAssessmentPage() {
                                 shape="pill"
                                 onClick={handleNextOrFinish}
                             >
-                                {isLastItem
-                                    ? 'Hoàn Thành Bài Đánh Giá →'
-                                    : 'Từ Tiếp Theo →'}
+                                <span
+                                    style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: 6,
+                                    }}
+                                >
+                                    <span>
+                                        {isLastItem
+                                            ? 'Hoàn Thành Bài Đánh Giá'
+                                            : 'Từ Tiếp Theo'}
+                                    </span>
+                                    <ArrowRightIcon size={16} />
+                                </span>
                             </Button>
                         </div>
                     </div>

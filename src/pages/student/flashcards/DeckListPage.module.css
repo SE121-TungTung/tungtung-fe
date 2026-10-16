@@ -27,7 +27,7 @@
     background: rgba(36, 132, 181, 0.12);
     border: 1px solid rgba(36, 132, 181, 0.28);
     color: var(--color-brand-primary, #175676);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -101,7 +101,7 @@
 }
 
 .primaryBtn:hover {
-    background: #12435c;
+    background: var(--color-brand-primary-hover, #1d6a92);
     transform: translateY(-2px);
     box-shadow: 0 8px 20px -4px rgba(23, 86, 118, 0.35);
 }
@@ -359,6 +359,31 @@
     font-weight: 700;
 }
 
+.deckActionGroup {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.manageDeckBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 10px;
+    background: var(--color-surface-raised, rgba(0, 0, 0, 0.04));
+    border: 1px solid var(--color-border-soft);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.manageDeckBtn:hover {
+    background: rgba(36, 132, 181, 0.1);
+    color: var(--color-brand-primary, #2484b5);
+    border-color: rgba(36, 132, 181, 0.3);
+}
+
 .studyBtn {
     display: inline-flex;
     align-items: center;
@@ -375,9 +400,21 @@
 }
 
 .studyBtn:hover {
-    background: #12435c;
+    background: var(--color-brand-primary-hover, #1d6a92);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(23, 86, 118, 0.3);
+}
+
+.addCardsBtn {
+    background: rgba(36, 132, 181, 0.12);
+    color: var(--color-brand-primary, #2484b5);
+    border: 1px dashed rgba(36, 132, 181, 0.4);
+}
+
+.addCardsBtn:hover {
+    background: var(--color-brand-primary, #2484b5);
+    color: white;
+    border-style: solid;
 }
 
 /* ── Empty State (Clean SVG, NO EMOJI) ────────────────────────────────────── */

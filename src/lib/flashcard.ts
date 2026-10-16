@@ -87,6 +87,42 @@ export async function getDeckDetail(deckId: string): Promise<FlashcardDeck> {
 }
 
 /**
+ * PUT /flashcard-decks/:id
+ * Updates deck details.
+ */
+export async function updateDeck(
+    deckId: string,
+    payload: Partial<CreateDeckPayload>
+): Promise<FlashcardDeck> {
+    const res = await api<BackendFlashcardDeck>(
+        `${BASE}/flashcard-decks/${deckId}`,
+        {
+            method: 'PUT',
+            body: JSON.stringify(payload),
+        }
+    )
+    return mapDeck(res)
+}
+
+/**
+ * DELETE /flashcard-decks/:id
+ * Soft deletes a deck.
+ */
+export async function deleteDeck(deckId: string): Promise<void> {
+    await api<void>(`${BASE}/flashcard-decks/${deckId}`, {
+        method: 'DELETE',
+    })
+}
+
+/** Kiểm duyệt: Teacher/TA/Admin ẩn deck đã publish của người khác. */
+export async function hideDeck(deckId: string, reason: string): Promise<void> {
+    await api<void>(`${BASE}/flashcard-decks/${deckId}/hide`, {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+    })
+}
+
+/**
  * GET /flashcard-decks/:id/cards
  * Returns paginated list of cards in deck.
  */
@@ -104,20 +140,22 @@ export async function getDeckCards(
     }
 }
 
+export interface CardPayload {
+    word: string
+    ipa?: string | null
+    word_type?: string | null
+    definition_en?: string | null
+    definition_vi?: string | null
+    example_sentence?: string | null
+}
+
 /**
  * POST /flashcard-decks/:id/cards
  * Create a new card in the deck.
  */
 export async function createCard(
     deckId: string,
-    payload: {
-        word: string
-        ipa?: string | null
-        word_type?: string | null
-        definition_en?: string | null
-        definition_vi?: string | null
-        example_sentence?: string | null
-    }
+    payload: CardPayload
 ): Promise<Flashcard> {
     const res = await api<BackendFlashcard>(
         `${BASE}/flashcard-decks/${deckId}/cards`,
@@ -127,6 +165,80 @@ export async function createCard(
         }
     )
     return mapCard(res)
+}
+
+/**
+ * PUT /flashcard-decks/:id/cards/:cardId
+ * Update an existing card in the deck.
+ */
+export async function updateCard(
+    deckId: string,
+    cardId: string,
+    payload: Partial<CardPayload>
+): Promise<Flashcard> {
+    const res = await api<BackendFlashcard>(
+        `${BASE}/flashcard-decks/${deckId}/cards/${cardId}`,
+        {
+            method: 'PUT',
+            body: JSON.stringify(payload),
+        }
+    )
+    return mapCard(res)
+}
+
+/**
+ * DELETE /flashcard-decks/:id/cards/:cardId
+ * Soft delete a card from the deck.
+ */
+export async function deleteCard(
+    deckId: string,
+    cardId: string
+): Promise<void> {
+    await api<void>(`${BASE}/flashcard-decks/${deckId}/cards/${cardId}`, {
+        method: 'DELETE',
+    })
+}
+
+export interface AICardSuggestion {
+    word: string
+    ipa: string | null
+    word_type: string | null
+    definition_vi: string | null
+    definition_en: string | null
+    example_sentence: string | null
+}
+
+export type AIGenerateParams =
+    | { mode: 'extract'; text: string; max_items?: number }
+    | { mode: 'enrich'; words: string[] }
+
+/**
+ * POST /flashcard-decks/:id/ai/generate
+ * AI suggests card content (not persisted).
+ */
+export async function aiGenerateCards(
+    deckId: string,
+    params: AIGenerateParams
+): Promise<AICardSuggestion[]> {
+    const res = await api<{ suggestions: AICardSuggestion[] }>(
+        `${BASE}/flashcard-decks/${deckId}/ai/generate`,
+        { method: 'POST', body: JSON.stringify(params) }
+    )
+    return res.suggestions ?? []
+}
+
+/**
+ * POST /flashcard-decks/:id/cards/bulk
+ * Persist many cards at once; duplicates are skipped by the server.
+ */
+export async function bulkCreateCards(
+    deckId: string,
+    cards: CardPayload[]
+): Promise<{ created: number; skipped: number }> {
+    return api<{ created: number; skipped: number }>(
+        `${BASE}/flashcard-decks/${deckId}/cards/bulk`,
+        { method: 'POST', body: JSON.stringify({ cards }) }
+    )
 }
 
 /**

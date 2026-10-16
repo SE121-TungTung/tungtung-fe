@@ -14,8 +14,8 @@
 .tooltip {
     position: absolute;
     transform: translate(-50%, -100%);
-    background: #0f172a;
-    color: #f8fafc;
+    background: var(--color-surface-tooltip, #0f172a);
+    color: var(--color-text-on-tooltip, #f8fafc);
     font-size: 12px;
     line-height: 1.4;
     font-weight: 500;
@@ -30,7 +30,7 @@
 }
 
 .tooltipCount {
-    color: #4ade80;
+    color: var(--color-success, #22c55e);
     font-weight: 700;
 }
 
@@ -42,7 +42,8 @@
     transform: translateX(-50%);
     border-width: 5px;
     border-style: solid;
-    border-color: #0f172a transparent transparent transparent;
+    border-color: var(--color-surface-tooltip, #0f172a) transparent transparent
+        transparent;
 }
 
 @keyframes tooltipFadeIn {
@@ -79,12 +80,12 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    font-size: 10px;
+    font-size: 12px;
     color: var(--color-text-muted);
     height: 106px; /* 7 cells * (12px + 2px gap) + some extra */
     padding-top: 14px;
     padding-bottom: 14px;
-    margin-right: 4px;
+    margin-right: 6px;
 }
 
 .weeks {
@@ -142,7 +143,7 @@
     align-items: center;
     justify-content: flex-end;
     gap: 8px;
-    font-size: 11px;
+    font-size: 12px;
     color: var(--color-text-secondary);
 }
 

@@ -1,3 +1,5 @@
+/* src/pages/student/placement-test/PlacementTestPage.module.css */
+
 .container {
     max-width: 960px;
     margin: 0 auto;
@@ -21,8 +23,9 @@
     gap: 0.5rem;
     padding: 0.375rem 1rem;
     border-radius: 9999px;
-    background: rgba(13, 148, 136, 0.1);
-    color: #0d9488;
+    background: rgba(36, 132, 181, 0.1);
+    color: var(--color-brand-primary, #2484b5);
+    border: 1px solid rgba(36, 132, 181, 0.25);
     font-size: 0.8125rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -31,21 +34,21 @@
 .title {
     font-size: 2.25rem;
     font-weight: 800;
-    color: var(--text-main, #0f172a);
+    color: var(--color-text-primary, #0f172a);
     margin: 0;
 }
 
 .subtitle {
     max-width: 650px;
     font-size: 1.0625rem;
-    color: var(--text-muted, #64748b);
+    color: var(--color-text-secondary, #64748b);
     line-height: 1.6;
     margin: 0;
 }
 
 .card {
-    background: var(--bg-card, #ffffff);
-    border: 1px solid var(--border-color, #e2e8f0);
+    background: var(--color-surface-card, #ffffff);
+    border: 1px solid var(--color-border-soft, #e2e8f0);
     border-radius: 1rem;
     padding: 2.5rem;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
@@ -61,8 +64,8 @@
 }
 
 .ruleBox {
-    background: var(--bg-muted, #f8fafc);
-    border: 1px solid var(--border-color, #e2e8f0);
+    background: var(--color-surface-raised, #f8fafc);
+    border: 1px solid var(--color-border-soft, #e2e8f0);
     border-radius: 0.75rem;
     padding: 1.25rem;
     display: flex;
@@ -76,12 +79,12 @@
     gap: 0.5rem;
     font-weight: 700;
     font-size: 0.9375rem;
-    color: var(--text-main, #0f172a);
+    color: var(--color-text-primary, #0f172a);
 }
 
 .ruleText {
     font-size: 0.8125rem;
-    color: var(--text-muted, #64748b);
+    color: var(--color-text-secondary, #64748b);
     line-height: 1.5;
     margin: 0;
 }
@@ -120,7 +123,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    background: #0d9488;
+    background: var(--color-brand-primary, #2484b5);
     color: #ffffff;
     font-weight: 700;
     font-size: 1rem;
@@ -134,7 +137,7 @@
 }
 
 .startBtn:hover:not(:disabled) {
-    background: #0f766e;
+    background: var(--color-brand-primary-hover, #1d6a92);
     transform: translateY(-1px);
 }
 
@@ -146,7 +149,7 @@
 .contactAdvisorBox {
     text-align: center;
     font-size: 0.875rem;
-    color: var(--text-muted, #64748b);
-    border-top: 1px dashed var(--border-color, #e2e8f0);
+    color: var(--color-text-secondary, #64748b);
+    border-top: 1px dashed var(--color-border-soft, #e2e8f0);
     padding-top: 1.5rem;
 }

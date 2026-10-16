@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react'
 import type { RecentTrendItem } from '@/types/pronunciation.types'
+import { TrendingUpIcon } from './PronunciationIcons'
 import s from './PracticeHistoryChart.module.css'
 
 interface PracticeHistoryChartProps {
@@ -146,7 +147,9 @@ export const PracticeHistoryChart: React.FC<PracticeHistoryChartProps> = ({
         <div className={s.chartWrapper}>
             <div className={s.header}>
                 <div className={s.titleRow}>
-                    <span className={s.icon}>📈</span>
+                    <span className={s.icon}>
+                        <TrendingUpIcon size={18} />
+                    </span>
                     <h4 className={s.title}>Xu Hướng Điểm 7 Ngày Gần Nhất</h4>
                 </div>
                 <div className={s.legend}>

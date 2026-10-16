@@ -130,11 +130,7 @@ export const AdaptiveQuizPage: React.FC = () => {
                 {/* Listening Card */}
                 <div className={styles.skillCard}>
                     <div
-                        className={styles.cardIconHeader}
-                        style={{
-                            background: 'rgba(13, 148, 136, 0.1)',
-                            color: '#0d9488',
-                        }}
+                        className={`${styles.cardIconHeader} ${styles.cardIconListening}`}
                     >
                         <HeadphonesIcon size={24} />
                     </div>
@@ -175,8 +171,7 @@ export const AdaptiveQuizPage: React.FC = () => {
                     </div>
 
                     <button
-                        className={styles.startBtn}
-                        style={{ background: '#0d9488' }}
+                        className={`${styles.startBtn} ${styles.startBtnListening}`}
                         onClick={() => handleStartSession('listening')}
                         disabled={isStarting !== null}
                     >

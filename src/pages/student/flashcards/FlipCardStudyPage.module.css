@@ -1,0 +1,322 @@
+/* src/pages/student/flashcards/FlipCardStudyPage.module.css */
+
+.container {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 32px 16px 64px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.loadingContainer {
+    max-width: 760px;
+    margin: 40px auto;
+    padding: 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ── Top Bar ─────────────────────────────────────────────────────────────── */
+.topBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.backBtnContent {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.progressGroup {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.progressBarTrack {
+    width: 120px;
+    height: 6px;
+    background: var(--color-surface-sunken, rgba(0, 0, 0, 0.06));
+    border-radius: 9999px;
+    overflow: hidden;
+}
+
+.progressBarFill {
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        var(--color-brand-primary, #2484b5),
+        var(--color-brand-secondary, #d62839)
+    );
+    border-radius: 9999px;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.progressCounter {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    min-width: 45px;
+    text-align: right;
+}
+
+/* ── Completion / Empty State Card ───────────────────────────────────────── */
+.completedCard {
+    text-align: center;
+    padding: 60px 24px;
+    background: var(--color-surface-card);
+    border-radius: 20px;
+    border: 1px solid var(--color-border-soft);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.iconWrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: rgba(34, 197, 94, 0.12);
+    color: var(--color-success, #22c55e);
+    margin-bottom: 20px;
+}
+
+.completedTitle {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    margin: 0 0 10px;
+    line-height: 1.3;
+}
+
+.completedText {
+    font-size: 0.95rem;
+    color: var(--color-text-secondary);
+    max-width: 480px;
+    margin: 0 0 28px;
+    line-height: 1.6;
+}
+
+.actionGroup {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.modeToggleBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--color-surface-raised, rgba(0, 0, 0, 0.04));
+    border: 1px solid var(--color-border-soft);
+    color: var(--color-text-secondary);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.modeToggleBtn:hover {
+    background: rgba(36, 132, 181, 0.1);
+    color: var(--color-brand-primary, #2484b5);
+    border-color: rgba(36, 132, 181, 0.3);
+}
+
+.modeBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: rgba(36, 132, 181, 0.1);
+    color: var(--color-brand-primary, #2484b5);
+    border: 1px solid rgba(36, 132, 181, 0.25);
+}
+
+/* ── Word List Preview Section ───────────────────────────────────────────── */
+.wordListSection {
+    margin-top: 32px;
+    width: 100%;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    animation: fadeIn 0.3s ease;
+}
+
+.wordListHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--color-border-soft);
+    flex-wrap: wrap;
+}
+
+.wordListTitle {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.wordListCount {
+    font-size: 0.82rem;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(36, 132, 181, 0.1);
+    color: var(--color-brand-primary, #2484b5);
+}
+
+.wordSearchInput {
+    padding: 7px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border-soft);
+    background: var(--color-surface-card);
+    color: var(--color-text-primary);
+    font-size: 0.84rem;
+    outline: none;
+    min-width: 220px;
+    transition: border-color 0.2s;
+}
+
+.wordSearchInput:focus {
+    border-color: var(--color-brand-primary, #2484b5);
+}
+
+.wordTable {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.wordRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-border-soft);
+    border-radius: 14px;
+    gap: 16px;
+    transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
+}
+
+.wordRow:hover {
+    border-color: rgba(36, 132, 181, 0.4);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.wordMainCol {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.wordHeadline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.wordText {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.wordIpa {
+    font-family: var(--primitive-font-mono, monospace);
+    font-size: 0.85rem;
+    color: var(--color-text-tertiary);
+}
+
+.wordTypeTag {
+    font-size: 0.72rem;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: rgba(36, 132, 181, 0.1);
+    color: var(--color-brand-primary, #2484b5);
+    font-weight: 600;
+    text-transform: lowercase;
+}
+
+.wordDef {
+    font-size: 0.88rem;
+    color: var(--color-text-secondary);
+}
+
+.wordExample {
+    font-size: 0.82rem;
+    font-style: italic;
+    color: var(--color-text-tertiary);
+}
+
+.wordActionCol {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+    .container {
+        padding: 20px 12px 48px;
+    }
+
+    .completedCard {
+        padding: 40px 16px;
+    }
+
+    .progressBarTrack {
+        width: 80px;
+    }
+
+    .wordRow {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .wordActionCol {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}

@@ -5,13 +5,20 @@ export interface RecommendationTip {
     description: string
 }
 
+export interface RecommendationMaterial {
+    source?: string
+    title: string
+    relevance_score: number
+    url?: string
+}
+
 export interface RecommendationData {
     title: string
     skill: string
     difficulty: string
     suggested_test_ids: string[]
-    tips: string[]
-    materials: any[]
+    tips: string[] | Record<string, string[]>
+    materials: RecommendationMaterial[]
     suggested_course?: {
         id: string
         name: string

@@ -1,0 +1,121 @@
+.backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--primitive-z-modal, 1050);
+    padding: 16px;
+}
+
+.modal {
+    width: 100%;
+    max-width: 460px;
+    background: var(--color-surface-card, #fff);
+    border: 1px solid var(--color-border-soft, #e2e8f0);
+    border-radius: 18px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.25);
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.title {
+    margin: 0;
+    font-size: 18px;
+    color: var(--color-text-primary, #1e293b);
+}
+
+.closeBtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-primary, #1e293b);
+    padding: 4px;
+    border-radius: 8px;
+}
+
+.desc {
+    margin: 0;
+    font-size: 14px;
+    color: var(--color-text-primary, #1e293b);
+    opacity: 0.8;
+}
+
+.label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-primary, #1e293b);
+}
+
+.textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    border: 1px solid var(--color-border-soft, #e2e8f0);
+    border-radius: 10px;
+    background: var(--color-surface-card, #fff);
+    color: var(--color-text-primary, #1e293b);
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.textarea:focus {
+    outline: 2px solid var(--color-brand-primary, #2484b5);
+    outline-offset: 1px;
+}
+
+.error {
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(220, 38, 38, 0.08);
+    color: #b91c1c;
+    font-size: 13px;
+}
+
+.footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.cancelBtn,
+.confirmBtn {
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.cancelBtn {
+    background: transparent;
+    border: 1px solid var(--color-border-soft, #e2e8f0);
+    color: var(--color-text-primary, #1e293b);
+}
+
+.confirmBtn {
+    background: var(--color-brand-primary, #2484b5);
+    border: none;
+    color: #fff;
+}
+
+.confirmBtn:hover:not(:disabled) {
+    background: var(--color-brand-primary-hover, #1c6d96);
+}
+
+.confirmBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

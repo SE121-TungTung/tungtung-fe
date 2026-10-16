@@ -1,0 +1,226 @@
+.wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.modeRow {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.modeBtn {
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--color-border-soft, #e2e8f0);
+    background: var(--color-surface-card, #fff);
+    color: var(--color-text-primary, #1e293b);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+        background 0.15s,
+        border-color 0.15s,
+        color 0.15s;
+}
+
+.modeBtn:hover {
+    border-color: var(--color-brand-primary, #2484b5);
+}
+
+.modeBtnActive {
+    background: var(--color-brand-primary, #2484b5);
+    border-color: var(--color-brand-primary, #2484b5);
+    color: #fff;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-primary, #1e293b);
+}
+
+.textarea,
+.input,
+.numberInput {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px 12px;
+    border: 1px solid var(--color-border-soft, #e2e8f0);
+    border-radius: 10px;
+    background: var(--color-surface-card, #fff);
+    color: var(--color-text-primary, #1e293b);
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.textarea {
+    resize: vertical;
+    min-height: 110px;
+}
+
+.textarea:focus,
+.input:focus,
+.numberInput:focus {
+    outline: 2px solid var(--color-brand-primary, #2484b5);
+    outline-offset: 1px;
+}
+
+.numberInput {
+    width: 80px;
+}
+
+.inlineRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.error {
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(220, 38, 38, 0.08);
+    color: #b91c1c;
+    font-size: 13px;
+}
+
+.generateBtn,
+.saveBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 18px;
+    border: none;
+    border-radius: 10px;
+    background: var(--color-brand-primary, #2484b5);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        background 0.15s,
+        opacity 0.15s;
+}
+
+.generateBtn:hover:not(:disabled),
+.saveBtn:hover:not(:disabled) {
+    background: var(--color-brand-primary-hover, #1c6d96);
+}
+
+.generateBtn:disabled,
+.saveBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.results {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.resultsHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.resultsTitle {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-primary, #1e293b);
+}
+
+.linkGroup {
+    display: flex;
+    gap: 12px;
+}
+
+.linkBtn {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--color-brand-primary, #2484b5);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 340px;
+    overflow-y: auto;
+}
+
+.item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 12px;
+    border: 1px solid var(--color-border-soft, #e2e8f0);
+    border-radius: 12px;
+    background: var(--color-surface-card, #fff);
+}
+
+.itemDisabled {
+    opacity: 0.6;
+}
+
+.itemHead {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.word {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-text-primary, #1e293b);
+}
+
+.ipa {
+    font-size: 13px;
+    color: var(--color-brand-secondary, #64748b);
+}
+
+.badge,
+.badgeMuted {
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.badge {
+    background: rgba(36, 132, 181, 0.12);
+    color: var(--color-brand-primary, #2484b5);
+}
+
+.badgeMuted {
+    background: rgba(100, 116, 139, 0.15);
+    color: var(--color-text-primary, #1e293b);
+}
+
+@media (max-width: 480px) {
+    .generateBtn,
+    .saveBtn {
+        width: 100%;
+    }
+}

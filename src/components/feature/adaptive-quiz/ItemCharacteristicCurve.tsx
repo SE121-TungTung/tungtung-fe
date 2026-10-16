@@ -102,16 +102,16 @@ export const ItemCharacteristicCurve: React.FC<
                             dataKey="theta"
                             domain={[-4, 4]}
                             type="number"
-                            tick={{ fontSize: 11, fill: '#94a3b8' }}
+                            tick={{ fontSize: 12, fill: '#64748b' }}
                             tickCount={9}
                         />
                         <YAxis
                             domain={[0, 1]}
-                            tick={{ fontSize: 11, fill: '#94a3b8' }}
+                            tick={{ fontSize: 12, fill: '#64748b' }}
                             tickFormatter={(v) => `${(v * 100).toFixed(0)}%`}
                         />
                         <Tooltip
-                            formatter={(value: any) => [
+                            formatter={(value) => [
                                 `${(Number(value) * 100).toFixed(1)}%`,
                                 'Xác suất P(θ)',
                             ]}
@@ -129,14 +129,14 @@ export const ItemCharacteristicCurve: React.FC<
                             label={{
                                 value: `b=${b.toFixed(1)}`,
                                 position: 'insideTopLeft',
-                                fontSize: 10,
+                                fontSize: 12,
                                 fill: '#64748b',
                             }}
                         />
                         <Line
                             type="monotone"
                             dataKey="probability"
-                            stroke="#0284c7"
+                            stroke="var(--color-brand-primary, #2484b5)"
                             strokeWidth={2.5}
                             dot={false}
                             isAnimationActive={false}

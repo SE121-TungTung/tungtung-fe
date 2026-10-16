@@ -567,13 +567,31 @@ export default function StudentDashboard() {
                                         style={{
                                             margin: 0,
                                             fontSize: '16px',
-                                            color: '#1e293b',
+                                            color: 'var(--color-text-primary, #1e293b)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
                                         }}
                                     >
-                                        📚 Tài liệu luyện tập gợi ý (RAG):
+                                        <img
+                                            src={BookOpenIcon}
+                                            width={18}
+                                            height={18}
+                                            alt=""
+                                        />
+                                        <span>
+                                            Tài liệu luyện tập gợi ý (RAG):
+                                        </span>
                                     </h4>
                                     {recData.recommendation_data.materials.map(
-                                        (mat: any, idx: number) => (
+                                        (
+                                            mat: {
+                                                source?: string
+                                                title: string
+                                                relevance_score: number
+                                            },
+                                            idx: number
+                                        ) => (
                                             <TemplateCard
                                                 key={idx}
                                                 image={TemplateImg}

@@ -157,10 +157,7 @@ export function ForgettingCurveChart({
                                 fontSize: '12px',
                                 boxShadow: 'var(--primitive-shadow-md)',
                             }}
-                            formatter={(value: any) => [
-                                `${value}%`,
-                                'Khả năng nhớ',
-                            ]}
+                            formatter={(value) => [`${value}%`, 'Khả năng nhớ']}
                             labelFormatter={(label) => `Ngày ${label}`}
                         />
 
@@ -172,7 +169,7 @@ export function ForgettingCurveChart({
                                 position: 'insideTopLeft',
                                 value: 'Ngưỡng quên 90%',
                                 fill: '#ea580c',
-                                fontSize: 11,
+                                fontSize: 12,
                             }}
                         />
 

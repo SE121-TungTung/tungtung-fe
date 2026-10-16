@@ -18,11 +18,12 @@ export default function MatchingHeadingsQuestion({
     onAnswerChange,
     registerRef,
 }: MatchingHeadingsQuestionProps) {
-    // Headings list cần lấy từ metadata hoặc instructions
-    const headings = (group as any).metadata?.headings || []
+    // Headings list lấy từ metadata hoặc questions options
+    const headings =
+        (group as any).metadata?.headings || group.questions[0]?.options || []
 
     if (headings.length === 0) {
-        return <div>Missing headings list</div>
+        return <div className={s.emptyNotice}>Missing headings list</div>
     }
 
     return (
@@ -31,16 +32,21 @@ export default function MatchingHeadingsQuestion({
             <div className={s.headingsListCard}>
                 <h4 className={s.headingsListTitle}>List of Headings</h4>
                 <ul className={s.headingsList}>
-                    {headings.map((heading: any) => (
-                        <li key={heading.key} className={s.headingItem}>
-                            <span className={s.headingLabel}>
-                                {heading.key}
-                            </span>
-                            <span className={s.headingText}>
-                                {heading.text}
-                            </span>
-                        </li>
-                    ))}
+                    {headings.map((heading: any, idx: number) => {
+                        const hKey =
+                            heading.key || heading.id || String(idx + 1)
+                        return (
+                            <li
+                                key={hKey || `head-${idx}`}
+                                className={s.headingItem}
+                            >
+                                <span className={s.headingLabel}>{hKey}</span>
+                                <span className={s.headingText}>
+                                    {heading.text}
+                                </span>
+                            </li>
+                        )
+                    })}
                 </ul>
             </div>
 
@@ -64,11 +70,18 @@ export default function MatchingHeadingsQuestion({
                             }
                         >
                             <option value="">Choose heading...</option>
-                            {headings.map((heading: any) => (
-                                <option key={heading.key} value={heading.key}>
-                                    {heading.key}
-                                </option>
-                            ))}
+                            {headings.map((heading: any, idx: number) => {
+                                const hKey =
+                                    heading.key || heading.id || String(idx + 1)
+                                return (
+                                    <option
+                                        key={hKey || `hopt-${idx}`}
+                                        value={hKey}
+                                    >
+                                        {hKey} - {heading.text}
+                                    </option>
+                                )
+                            })}
                         </select>
                     </div>
                 ))}

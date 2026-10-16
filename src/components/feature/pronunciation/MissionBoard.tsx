@@ -7,6 +7,7 @@ import {
     CheckCircleIcon,
     AlertTriangleIcon,
     BookOpenIcon,
+    FlameIcon,
 } from './PronunciationIcons'
 import s from './MissionBoard.module.css'
 
@@ -107,7 +108,9 @@ export const MissionBoard: React.FC<MissionBoardProps> = ({
                         <ZapIcon size={14} />
                         <span className={s.xpText}>{xpEarned} XP earned</span>
                         {streakBonus && (
-                            <span className={s.streakBadge}>🔥 Streak ×3</span>
+                            <span className={s.streakBadge}>
+                                <FlameIcon size={13} /> Streak ×3
+                            </span>
                         )}
                     </div>
                 </div>

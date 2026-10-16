@@ -78,41 +78,32 @@
     text-transform: capitalize;
 }
 
-.pending {
-    /* (Mặc định) */
-}
 .pending .iconWrapper {
     background-color: var(--color-surface-raised);
+    border-color: var(--color-border-soft);
+    color: var(--color-text-secondary);
 }
 
 .inProgress .iconWrapper {
-    background-color: var(--brand-primary-light-accent);
-    border-color: var(--color-brand-primary);
-}
-.inProgress .iconWrapper img {
-    opacity: 1;
-    filter: invert(39%) sepia(57%) saturate(6869%) hue-rotate(211deg)
-        brightness(100%) contrast(104%);
+    background-color: rgba(36, 132, 181, 0.12);
+    border-color: var(--color-brand-primary, #2484b5);
+    color: var(--color-brand-primary, #2484b5);
 }
 .inProgress .title {
-    color: var(--color-brand-primary);
+    color: var(--color-brand-primary, #2484b5);
 }
 
 .completed {
-    opacity: 0.7;
+    opacity: 0.85;
 }
 .completed .title {
     text-decoration: line-through;
     color: var(--color-text-secondary);
 }
 .completed .iconWrapper {
-    background-color: var(--status-success-light-accent);
-    border-color: var(--color-status-success);
-}
-.completed .iconWrapper img {
-    opacity: 1;
-    filter: invert(61%) sepia(91%) saturate(353%) hue-rotate(85deg)
-        brightness(89%) contrast(92%);
+    background-color: rgba(34, 197, 94, 0.12);
+    border-color: var(--color-success, #22c55e);
+    color: var(--color-success, #22c55e);
 }
 
 .expandButton {

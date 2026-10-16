@@ -66,6 +66,24 @@ export const TestFooter = React.memo(
         const showPartNavigation =
             currentSection?.parts && currentSection.parts.length > 1
 
+        const getPartLabel = (part: any, index: number) => {
+            const qNums =
+                part.questionGroups?.flatMap(
+                    (g: any) =>
+                        g.questions?.map((q: any) => q.globalNumber) || []
+                ) || []
+            const rangeStr =
+                qNums.length > 0
+                    ? ` (${Math.min(...qNums)}–${Math.max(...qNums)})`
+                    : ''
+            const rawName = part.name || `Part ${index + 1}`
+            const match = rawName.match(
+                /^(Passage\s+\d+|Part\s+\d+|Section\s+\d+)/i
+            )
+            const baseName = match ? match[1] : rawName
+            return `${baseName}${rangeStr}`
+        }
+
         return (
             <footer className={styles.footer}>
                 {/* Row 1: Section/Part Navigation */}
@@ -92,7 +110,7 @@ export const TestFooter = React.memo(
                                             className={`${styles.partButton} ${i === currentPartIndex ? styles.active : ''}`}
                                             onClick={() => onPartChange(i)}
                                         >
-                                            {part.name || `Part ${i + 1}`}
+                                            {getPartLabel(part, i)}
                                         </button>
                                     )
                                 )}

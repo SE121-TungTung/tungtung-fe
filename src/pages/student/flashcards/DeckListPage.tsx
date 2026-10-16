@@ -5,6 +5,7 @@ import {
     getDeckList,
     getStats,
     createDeck,
+    hideDeck,
     type CreateDeckPayload,
 } from '@/lib/flashcard'
 import Skeleton from '@/components/effect/Skeleton'
@@ -20,16 +21,28 @@ import {
     BarChartIcon,
     ArrowRightIcon,
     InboxIcon,
+    SettingsIcon,
+    EyeOffIcon,
 } from '@/components/flashcard/FlashcardIcons'
 import { CreateDeckModal } from '@/components/flashcard/CreateDeckModal'
+import { ManageDeckModal } from '@/components/flashcard/ManageDeckModal'
+import { HideDeckModal } from '@/components/flashcard/HideDeckModal'
+import { Tooltip } from '@/components/core/Tooltip'
+import { useSession } from '@/stores/session.store'
 import styles from './DeckListPage.module.css'
 
 export default function DeckListPage() {
+    const currentUserId = useSession((s) => s.user?.id)
+    const userRole = useSession((s) => s.user?.role as string | undefined)
+    const isModerator =
+        !!userRole &&
+        ['teacher', 'ta', 'center_admin', 'system_admin'].includes(userRole)
     const navigate = useNavigate()
     const queryClient = useQueryClient()
     const [page] = useState(1)
     const [selectedTopic, setSelectedTopic] = useState<string>('all')
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+    const [managingDeck, setManagingDeck] = useState<FlashcardDeck | null>(null)
 
     const { data, isLoading } = useQuery({
         queryKey: ['flashcard-decks', page],
@@ -43,15 +56,27 @@ export default function DeckListPage() {
 
     const createMutation = useMutation({
         mutationFn: (payload: CreateDeckPayload) => createDeck(payload),
-        onSuccess: () => {
+        onSuccess: (newDeck) => {
             queryClient.invalidateQueries({ queryKey: ['flashcard-decks'] })
             queryClient.invalidateQueries({ queryKey: ['flashcards-stats'] })
+            setManagingDeck(newDeck)
         },
     })
 
     const handleCreateDeck = async (payload: CreateDeckPayload) => {
         await createMutation.mutateAsync(payload)
     }
+
+    const [hidingDeck, setHidingDeck] = useState<FlashcardDeck | null>(null)
+
+    const hideMutation = useMutation({
+        mutationFn: ({ deckId, reason }: { deckId: string; reason: string }) =>
+            hideDeck(deckId, reason),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['flashcard-decks'] })
+            setHidingDeck(null)
+        },
+    })
 
     const decks = data?.decks ?? []
 
@@ -257,18 +282,95 @@ export default function DeckListPage() {
                                             </span>
                                         </div>
 
-                                        <button
-                                            type="button"
-                                            className={styles.studyBtn}
-                                            onClick={() =>
-                                                navigate(
-                                                    `/student/flashcards/${deck.id}/study`
-                                                )
-                                            }
-                                        >
-                                            <span>Học Ngay</span>
-                                            <ArrowRightIcon size={14} />
-                                        </button>
+                                        <div className={styles.deckActionGroup}>
+                                            {deck.createdBy ===
+                                                currentUserId && (
+                                                <Tooltip
+                                                    content="Quản lý từ vựng & cài đặt bộ thẻ"
+                                                    placement="top"
+                                                >
+                                                    <button
+                                                        type="button"
+                                                        className={
+                                                            styles.manageDeckBtn
+                                                        }
+                                                        onClick={() =>
+                                                            setManagingDeck(
+                                                                deck
+                                                            )
+                                                        }
+                                                        aria-label={`Quản lý bộ thẻ ${deck.title}`}
+                                                    >
+                                                        <SettingsIcon
+                                                            size={16}
+                                                        />
+                                                    </button>
+                                                </Tooltip>
+                                            )}
+
+                                            {isModerator &&
+                                                deck.createdBy !==
+                                                    currentUserId &&
+                                                deck.isPublic && (
+                                                    <Tooltip
+                                                        content="Ẩn bộ thẻ đã publish (kiểm duyệt)"
+                                                        placement="top"
+                                                    >
+                                                        <button
+                                                            type="button"
+                                                            className={
+                                                                styles.manageDeckBtn
+                                                            }
+                                                            disabled={
+                                                                hideMutation.isPending
+                                                            }
+                                                            onClick={() =>
+                                                                setHidingDeck(
+                                                                    deck
+                                                                )
+                                                            }
+                                                            aria-label={`Ẩn bộ thẻ ${deck.title}`}
+                                                        >
+                                                            <EyeOffIcon
+                                                                size={16}
+                                                            />
+                                                        </button>
+                                                    </Tooltip>
+                                                )}
+
+                                            {deck.cardCount === 0 &&
+                                            deck.createdBy === currentUserId ? (
+                                                <button
+                                                    type="button"
+                                                    className={`${styles.studyBtn} ${styles.addCardsBtn}`}
+                                                    onClick={() =>
+                                                        setManagingDeck(deck)
+                                                    }
+                                                >
+                                                    <PlusIcon size={14} />
+                                                    <span>Thêm Từ</span>
+                                                </button>
+                                            ) : deck.cardCount === 0 ? (
+                                                <span
+                                                    className={styles.dueBadge}
+                                                >
+                                                    Chưa có thẻ
+                                                </span>
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    className={styles.studyBtn}
+                                                    onClick={() =>
+                                                        navigate(
+                                                            `/student/flashcards/${deck.id}/study`
+                                                        )
+                                                    }
+                                                >
+                                                    <span>Học Ngay</span>
+                                                    <ArrowRightIcon size={14} />
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -282,6 +384,42 @@ export default function DeckListPage() {
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
                 onSubmit={handleCreateDeck}
+            />
+
+            {/* ── Manage Deck Modal (Thêm/Sửa/Xóa từ & Cài đặt bộ thẻ) ────────── */}
+            <ManageDeckModal
+                deck={managingDeck}
+                isOpen={!!managingDeck}
+                onClose={() => setManagingDeck(null)}
+                onUpdated={() => {
+                    queryClient.invalidateQueries({
+                        queryKey: ['flashcard-decks'],
+                    })
+                    queryClient.invalidateQueries({
+                        queryKey: ['flashcards-stats'],
+                    })
+                }}
+            />
+
+            {/* ── Hide Deck Modal (Kiểm duyệt: nhập lý do) ───────────────── */}
+            <HideDeckModal
+                deckTitle={hidingDeck?.title ?? null}
+                isOpen={!!hidingDeck}
+                isPending={hideMutation.isPending}
+                error={
+                    hideMutation.error
+                        ? (hideMutation.error as Error).message
+                        : null
+                }
+                onClose={() => {
+                    setHidingDeck(null)
+                    hideMutation.reset()
+                }}
+                onConfirm={(reason) => {
+                    if (hidingDeck) {
+                        hideMutation.mutate({ deckId: hidingDeck.id, reason })
+                    }
+                }}
             />
         </div>
     )

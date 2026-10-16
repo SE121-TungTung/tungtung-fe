@@ -21,7 +21,7 @@
 }
 
 .backLink {
-    color: var(--color-brand-primary, #0284c7);
+    color: var(--color-brand-primary, #2484b5);
     font-size: 13px;
     font-weight: 600;
     text-decoration: none;
@@ -163,13 +163,13 @@
 }
 
 .filterBtn:hover {
-    color: var(--color-brand-primary, #0284c7);
+    color: var(--color-brand-primary, #2484b5);
 }
 
 .filterActive {
-    background: rgba(14, 165, 233, 0.12) !important;
-    border-color: #0284c7 !important;
-    color: #0284c7 !important;
+    background: rgba(36, 132, 181, 0.12) !important;
+    border-color: var(--color-brand-primary, #2484b5) !important;
+    color: var(--color-brand-primary, #2484b5) !important;
     font-weight: 700;
 }
 
@@ -225,7 +225,7 @@
 
 .btnGoPractice {
     margin-top: 8px;
-    background: #0284c7;
+    background: var(--color-brand-primary, #2484b5);
     color: #ffffff;
     font-size: 13px;
     font-weight: 600;
@@ -236,7 +236,7 @@
 }
 
 .btnGoPractice:hover {
-    background: #0369a1;
+    background: var(--color-brand-primary-hover, #1d6a92);
 }
 
 .listContainer {
@@ -288,12 +288,12 @@
 }
 
 .typeBadge {
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
-    color: #0284c7;
-    background: rgba(14, 165, 233, 0.1);
-    border: 1px solid rgba(14, 165, 233, 0.25);
+    color: var(--color-brand-primary, #2484b5);
+    background: rgba(36, 132, 181, 0.1);
+    border: 1px solid rgba(36, 132, 181, 0.25);
     padding: 2px 6px;
     border-radius: 4px;
 }
@@ -321,7 +321,7 @@
 
 .targetIpaText {
     font-family: monospace;
-    color: #0284c7;
+    color: var(--color-brand-primary, #2484b5);
     font-weight: 600;
 }
 
@@ -414,9 +414,9 @@
 }
 
 .btnViewDetail:hover {
-    background: rgba(14, 165, 233, 0.12);
-    color: #0284c7;
-    border-color: #38bdf8;
+    background: rgba(36, 132, 181, 0.12);
+    color: var(--color-brand-primary, #2484b5);
+    border-color: var(--color-brand-primary, #2484b5);
 }
 
 /* Pagination */
@@ -435,6 +435,9 @@
 }
 
 .pageBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     background: var(--color-surface-raised, #f1f5f9);
     border: 1px solid var(--color-border-soft, #e2e8f0);
     color: var(--color-text-primary, #0f172a);
@@ -586,7 +589,7 @@
 .scoreBig {
     font-size: 32px;
     font-weight: 800;
-    color: #0284c7;
+    color: var(--color-brand-primary, #2484b5);
     line-height: 1;
 }
 
@@ -595,7 +598,7 @@
 }
 
 .scoreDesc {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--color-text-muted, #64748b);
     margin-top: 4px;
 }
@@ -646,7 +649,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    color: #0284c7;
+    color: var(--color-brand-primary, #2484b5);
 }
 
 :global([data-theme='dark']) .aiFeedbackHeader {

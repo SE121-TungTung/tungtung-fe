@@ -4,6 +4,8 @@ import { DeckTopic, DeckLevel } from '@/types/flashcard'
 import type { CreateDeckPayload } from '@/lib/flashcard'
 import styles from './CreateDeckModal.module.css'
 
+import { Tooltip } from '@/components/core/Tooltip'
+
 interface CreateDeckModalProps {
     isOpen: boolean
     onClose: () => void
@@ -45,8 +47,12 @@ export function CreateDeckModal({
             setTitle('')
             setDescription('')
             onClose()
-        } catch (err: any) {
-            setError(err?.message || 'Không thể tạo bộ thẻ. Vui lòng thử lại.')
+        } catch (err: unknown) {
+            const message =
+                err instanceof Error
+                    ? err.message
+                    : 'Không thể tạo bộ thẻ. Vui lòng thử lại.'
+            setError(message)
         } finally {
             setIsSubmitting(false)
         }
@@ -62,14 +68,15 @@ export function CreateDeckModal({
                         </div>
                         <h2 className={styles.title}>Tạo Bộ Thẻ Ghi Nhớ Mới</h2>
                     </div>
-                    <button
-                        type="button"
-                        className={styles.closeBtn}
-                        onClick={onClose}
-                        title="Đóng"
-                    >
-                        <XIcon size={18} />
-                    </button>
+                    <Tooltip content="Đóng" placement="left">
+                        <button
+                            type="button"
+                            className={styles.closeBtn}
+                            onClick={onClose}
+                        >
+                            <XIcon size={18} />
+                        </button>
+                    </Tooltip>
                 </div>
 
                 <form onSubmit={handleSubmit} className={styles.form}>

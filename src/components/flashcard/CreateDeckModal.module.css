@@ -209,7 +209,7 @@
 }
 
 .submitBtn:hover:not(:disabled) {
-    background: #12435c;
+    background: var(--color-brand-primary-hover, #1d6a92);
     box-shadow: 0 4px 12px rgba(23, 86, 118, 0.3);
 }
 

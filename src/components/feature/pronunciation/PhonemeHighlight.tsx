@@ -1,7 +1,13 @@
 import React, { useState } from 'react'
 import type { PhonemeItem, ErrorType } from '@/types/pronunciation.types'
 import { getDetailedArticulatoryAdvice } from '@/data/phoneticCoaching'
-import { CloseIcon, SparklesIcon } from './PronunciationIcons'
+import {
+    CloseIcon,
+    SparklesIcon,
+    CheckIcon,
+    AlertTriangleIcon,
+    PlusIcon,
+} from './PronunciationIcons'
 import s from './PhonemeHighlight.module.css'
 
 interface PhonemeHighlightProps {
@@ -29,12 +35,15 @@ export const PhonemeHighlight: React.FC<PhonemeHighlightProps> = ({
         )
     }
 
-    const getErrorBadgeInfo = (errorType: ErrorType, isCorrect: boolean) => {
+    const getErrorBadgeInfo = (
+        errorType: ErrorType,
+        isCorrect: boolean
+    ): { label: string; colorClass: string; icon: React.ReactNode } => {
         if (isCorrect || errorType === 'correct') {
             return {
                 label: 'Chính xác',
                 colorClass: s.badgeCorrect,
-                icon: '✓',
+                icon: <CheckIcon size={12} />,
             }
         }
         switch (errorType) {
@@ -42,31 +51,31 @@ export const PhonemeHighlight: React.FC<PhonemeHighlightProps> = ({
                 return {
                     label: 'Thay thế nhầm âm',
                     colorClass: s.badgeSubstitution,
-                    icon: '≠',
+                    icon: <AlertTriangleIcon size={12} />,
                 }
             case 'deletion':
                 return {
                     label: 'Bị nuốt / Bỏ sót âm',
                     colorClass: s.badgeDeletion,
-                    icon: '∅',
+                    icon: <CloseIcon size={12} />,
                 }
             case 'insertion':
                 return {
                     label: 'Thừa âm không cần thiết',
                     colorClass: s.badgeInsertion,
-                    icon: '+',
+                    icon: <PlusIcon size={12} />,
                 }
             case 'stress_error':
                 return {
                     label: 'Sai trọng âm',
                     colorClass: s.badgeStress,
-                    icon: 'ˈ',
+                    icon: <SparklesIcon size={12} />,
                 }
             default:
                 return {
                     label: 'Cần cải thiện',
                     colorClass: s.badgeWarning,
-                    icon: '!',
+                    icon: <AlertTriangleIcon size={12} />,
                 }
         }
     }

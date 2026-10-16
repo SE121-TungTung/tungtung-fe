@@ -51,14 +51,19 @@ export const AbilityHistoryChart: React.FC<AbilityHistoryChartProps> = ({
                     <div className={styles.legendItem}>
                         <div
                             className={styles.legendIndicator}
-                            style={{ background: '#2563eb' }}
+                            style={{
+                                background:
+                                    'var(--color-brand-primary, #2484b5)',
+                            }}
                         />
                         <span>Năng lực ước lượng (&theta;)</span>
                     </div>
                     <div className={styles.legendItem}>
                         <div
                             className={styles.legendIndicator}
-                            style={{ background: 'rgba(59, 130, 246, 0.15)' }}
+                            style={{
+                                background: 'rgba(36, 132, 181, 0.15)',
+                            }}
                         />
                         <span>Khoảng tin cậy (&plusmn;1 SE)</span>
                     </div>
@@ -102,8 +107,9 @@ export const AbilityHistoryChart: React.FC<AbilityHistoryChartProps> = ({
                                     return (
                                         <div
                                             style={{
-                                                background: '#ffffff',
-                                                border: '1px solid #e2e8f0',
+                                                background:
+                                                    'var(--color-surface-card, #ffffff)',
+                                                border: '1px solid var(--color-border-soft, #e2e8f0)',
                                                 borderRadius: 8,
                                                 padding: '0.75rem',
                                                 boxShadow:
@@ -115,7 +121,7 @@ export const AbilityHistoryChart: React.FC<AbilityHistoryChartProps> = ({
                                                 style={{
                                                     margin: '0 0 4px 0',
                                                     fontWeight: 700,
-                                                    color: '#0f172a',
+                                                    color: 'var(--color-text-primary, #0f172a)',
                                                 }}
                                             >
                                                 Câu hỏi #{point.itemIndex}
@@ -125,8 +131,8 @@ export const AbilityHistoryChart: React.FC<AbilityHistoryChartProps> = ({
                                                         style={{
                                                             marginLeft: 8,
                                                             color: point.isCorrect
-                                                                ? '#16a34a'
-                                                                : '#dc2626',
+                                                                ? 'var(--color-success, #16a34a)'
+                                                                : 'var(--color-brand-secondary, #dc2626)',
                                                         }}
                                                     >
                                                         (
@@ -140,7 +146,7 @@ export const AbilityHistoryChart: React.FC<AbilityHistoryChartProps> = ({
                                             <p
                                                 style={{
                                                     margin: '0 0 2px 0',
-                                                    color: '#2563eb',
+                                                    color: 'var(--color-brand-primary, #2484b5)',
                                                 }}
                                             >
                                                 Năng lực &theta;:{' '}
@@ -149,7 +155,7 @@ export const AbilityHistoryChart: React.FC<AbilityHistoryChartProps> = ({
                                             <p
                                                 style={{
                                                     margin: '0 0 2px 0',
-                                                    color: '#64748b',
+                                                    color: 'var(--color-text-secondary, #64748b)',
                                                 }}
                                             >
                                                 Sai số SE:{' '}
@@ -160,7 +166,7 @@ export const AbilityHistoryChart: React.FC<AbilityHistoryChartProps> = ({
                                             <p
                                                 style={{
                                                     margin: 0,
-                                                    color: '#94a3b8',
+                                                    color: 'var(--color-text-tertiary, #94a3b8)',
                                                 }}
                                             >
                                                 Khoảng tin cậy: [
@@ -178,25 +184,25 @@ export const AbilityHistoryChart: React.FC<AbilityHistoryChartProps> = ({
                             type="monotone"
                             dataKey="thetaUpper"
                             stroke="none"
-                            fill="#3b82f6"
+                            fill="var(--color-brand-primary, #2484b5)"
                             fillOpacity={0.15}
                         />
                         <Area
                             type="monotone"
                             dataKey="thetaLower"
                             stroke="none"
-                            fill="#ffffff"
+                            fill="var(--color-surface-card, #ffffff)"
                             fillOpacity={1}
                         />
                         {/* Ability Line */}
                         <Line
                             type="monotone"
                             dataKey="theta"
-                            stroke="#2563eb"
+                            stroke="var(--color-brand-primary, #2484b5)"
                             strokeWidth={3}
                             dot={{
                                 r: 4,
-                                fill: '#2563eb',
+                                fill: 'var(--color-brand-primary, #2484b5)',
                                 strokeWidth: 2,
                                 stroke: '#ffffff',
                             }}

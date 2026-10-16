@@ -4,15 +4,15 @@ import { useQuery } from '@tanstack/react-query'
 import {
     getTodayRecommendation,
     getRecommendationHistory,
+    type Milestone,
 } from '@/lib/recommendations'
 import Skeleton from '@/components/effect/Skeleton'
-
 import Card from '@/components/common/card/Card'
 import {
     RoadmapStageItem,
     type RoadmapStage,
 } from '@/components/feature/roadmap/RoadmapStageItem'
-
+import { CalendarIcon } from '@/components/feature/adaptive-quiz/AdaptiveIcons'
 import { useSession } from '@/stores/session.store'
 
 export default function RoadmapPage() {
@@ -172,18 +172,14 @@ export default function RoadmapPage() {
 
     const roadmapStages = useMemo(() => {
         if (!recData?.learning_path?.milestones) return []
-        return recData.learning_path.milestones.map((m: any) => ({
+        return recData.learning_path.milestones.map((m: Milestone) => ({
             id: `milestone_${m.month}`,
             stage_order: m.month,
             title: `Tháng ${m.month}: Mục tiêu Band ${m.target_band} (${m.target_cefr})`,
             description: m.focus,
             focus_skills: [m.focus],
             status: (m.month === 1 ? 'in_progress' : 'pending') as
-                | 'completed'
-                | 'in_progress'
-                | 'pending',
-            rationale: m.rationale,
-            tasks: m.tasks,
+                'completed' | 'in_progress' | 'pending',
         })) as RoadmapStage[]
     }, [recData])
 
@@ -219,38 +215,20 @@ export default function RoadmapPage() {
         <div className={s.pageWrapper}>
             {/* --- Main Content --- */}
             <main className={s.mainContent}>
-                {/* Tiêu đề trang */}
-                <div
-                    style={{
-                        marginBottom: '20px',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        flexWrap: 'wrap',
-                        gap: '12px',
-                    }}
-                >
-                    <h1 className={s.pageTitle} style={{ margin: 0 }}>
+                {/* Tiêu đề trang & Ngày thi */}
+                <div className={s.headerRow}>
+                    <h1 className={s.pageTitle}>
                         Lộ trình <span className={s.gradientText}>của bạn</span>
                     </h1>
                     {expectedExamDate && (
-                        <div
-                            style={{
-                                padding: '8px 16px',
-                                background:
-                                    'rgba(var(--color-brand-rgb, 99, 102, 241), 0.1)',
-                                borderRadius: '8px',
-                                border: '1px solid rgba(var(--color-brand-rgb, 99, 102, 241), 0.2)',
-                                fontSize: '0.9rem',
-                                color: 'var(--color-brand)',
-                                fontWeight: 500,
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '6px',
-                            }}
-                        >
-                            📅 Ngày thi dự kiến:{' '}
-                            <strong>{expectedExamDate}</strong>
+                        <div className={s.examDateBadge}>
+                            <CalendarIcon size={16} />
+                            <span>
+                                Ngày thi dự kiến:{' '}
+                                <strong className={s.examDateValue}>
+                                    {expectedExamDate}
+                                </strong>
+                            </span>
                         </div>
                     )}
                 </div>
@@ -263,67 +241,25 @@ export default function RoadmapPage() {
                         variant="outline"
                         className={s.chartCard}
                     >
-                        <div
-                            style={{
-                                display: 'flex',
-                                gap: '16px',
-                                fontSize: '0.8rem',
-                                color: 'var(--color-text-secondary)',
-                                marginBottom: '12px',
-                            }}
-                        >
-                            <div
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '6px',
-                                }}
-                            >
+                        <div className={s.chartLegend}>
+                            <div className={s.chartLegendItem}>
                                 <span
-                                    style={{
-                                        display: 'inline-block',
-                                        width: '12px',
-                                        height: '3px',
-                                        background: 'var(--color-brand)',
-                                        borderRadius: '2px',
-                                    }}
-                                ></span>
-                                Điểm dự kiến
+                                    className={`${s.legendBar} ${s.legendBarPrimary}`}
+                                />
+                                <span>Điểm dự kiến</span>
                             </div>
-                            <div
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '6px',
-                                }}
-                            >
+                            <div className={s.chartLegendItem}>
                                 <span
-                                    style={{
-                                        display: 'inline-block',
-                                        width: '12px',
-                                        height: '3px',
-                                        background: '#e11d48',
-                                        borderRadius: '2px',
-                                        strokeDasharray: '3,3',
-                                    }}
-                                ></span>
-                                Điểm mục tiêu
+                                    className={`${s.legendBar} ${s.legendBarSecondary}`}
+                                />
+                                <span>Điểm mục tiêu</span>
                             </div>
                         </div>
-                        <div
-                            style={{
-                                position: 'relative',
-                                width: '100%',
-                                overflow: 'hidden',
-                            }}
-                        >
+
+                        <div className={s.chartSvgContainer}>
                             <svg
                                 viewBox={`0 0 ${chartData.width} ${chartData.height}`}
-                                style={{
-                                    width: '100%',
-                                    height: 'auto',
-                                    display: 'block',
-                                }}
+                                className={s.chartSvg}
                             >
                                 <defs>
                                     <linearGradient
@@ -335,12 +271,12 @@ export default function RoadmapPage() {
                                     >
                                         <stop
                                             offset="0%"
-                                            stopColor="var(--color-brand)"
+                                            stopColor="var(--color-brand-primary, #2484b5)"
                                             stopOpacity="0.25"
                                         />
                                         <stop
                                             offset="100%"
-                                            stopColor="var(--color-brand)"
+                                            stopColor="var(--color-brand-primary, #2484b5)"
                                             stopOpacity="0.0"
                                         />
                                     </linearGradient>
@@ -357,15 +293,15 @@ export default function RoadmapPage() {
                                                 chartData.paddingRight
                                             }
                                             y2={line.y}
-                                            stroke="rgba(0,0,0,0.06)"
+                                            stroke="var(--color-border-soft, rgba(0,0,0,0.06))"
                                             strokeWidth="1"
                                         />
                                         <text
-                                            x={chartData.paddingLeft - 10}
+                                            x={chartData.paddingLeft - 8}
                                             y={line.y + 4}
                                             textAnchor="end"
-                                            fontSize="10"
-                                            fill="var(--color-text-secondary)"
+                                            fontSize="12"
+                                            fill="var(--color-text-secondary, #64748b)"
                                         >
                                             {line.val.toFixed(1)}
                                         </text>
@@ -376,7 +312,7 @@ export default function RoadmapPage() {
                                 <path
                                     d={`M ${chartData.pointsBand.map((p) => `${p.x} ${p.yTarget}`).join(' L ')}`}
                                     fill="none"
-                                    stroke="#e11d48"
+                                    stroke="var(--color-brand-secondary, #d62839)"
                                     strokeWidth="2"
                                     strokeDasharray="4,4"
                                 />
@@ -396,7 +332,7 @@ export default function RoadmapPage() {
                                 <path
                                     d={`M ${chartData.pointsBand.map((p) => `${p.x} ${p.y}`).join(' L ')}`}
                                     fill="none"
-                                    stroke="var(--color-brand)"
+                                    stroke="var(--color-brand-primary, #2484b5)"
                                     strokeWidth="3"
                                 />
 
@@ -409,16 +345,16 @@ export default function RoadmapPage() {
                                             cy={p.y}
                                             r="5"
                                             fill="#ffffff"
-                                            stroke="var(--color-brand)"
+                                            stroke="var(--color-brand-primary, #2484b5)"
                                             strokeWidth="2.5"
                                         />
                                         <text
                                             x={p.x}
                                             y={p.y - 10}
                                             textAnchor="middle"
-                                            fontSize="10"
-                                            fontWeight="600"
-                                            fill="var(--color-brand)"
+                                            fontSize="12"
+                                            fontWeight="700"
+                                            fill="var(--color-brand-primary, #2484b5)"
                                         >
                                             {p.pred.toFixed(1)}
                                         </text>
@@ -427,8 +363,8 @@ export default function RoadmapPage() {
                                         <circle
                                             cx={p.x}
                                             cy={p.yTarget}
-                                            r="3"
-                                            fill="#e11d48"
+                                            r="3.5"
+                                            fill="var(--color-brand-secondary, #d62839)"
                                         />
 
                                         {/* X-Axis date label */}
@@ -436,8 +372,8 @@ export default function RoadmapPage() {
                                             x={p.x}
                                             y={chartData.height - 8}
                                             textAnchor="middle"
-                                            fontSize="10"
-                                            fill="var(--color-text-secondary)"
+                                            fontSize="12"
+                                            fill="var(--color-text-secondary, #64748b)"
                                         >
                                             {p.date}
                                         </text>
@@ -453,48 +389,19 @@ export default function RoadmapPage() {
                         variant="outline"
                         className={s.chartCard}
                     >
-                        <div
-                            style={{
-                                display: 'flex',
-                                gap: '16px',
-                                fontSize: '0.8rem',
-                                color: 'var(--color-text-secondary)',
-                                marginBottom: '12px',
-                            }}
-                        >
-                            <div
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '6px',
-                                }}
-                            >
+                        <div className={s.chartLegend}>
+                            <div className={s.chartLegendItem}>
                                 <span
-                                    style={{
-                                        display: 'inline-block',
-                                        width: '12px',
-                                        height: '3px',
-                                        background: '#10b981',
-                                        borderRadius: '2px',
-                                    }}
-                                ></span>
-                                Chuyên cần (%)
+                                    className={`${s.legendBar} ${s.legendBarSuccess}`}
+                                />
+                                <span>Chuyên cần (%)</span>
                             </div>
                         </div>
-                        <div
-                            style={{
-                                position: 'relative',
-                                width: '100%',
-                                overflow: 'hidden',
-                            }}
-                        >
+
+                        <div className={s.chartSvgContainer}>
                             <svg
                                 viewBox={`0 0 ${chartData.width} ${chartData.height}`}
-                                style={{
-                                    width: '100%',
-                                    height: 'auto',
-                                    display: 'block',
-                                }}
+                                className={s.chartSvg}
                             >
                                 <defs>
                                     <linearGradient
@@ -506,12 +413,12 @@ export default function RoadmapPage() {
                                     >
                                         <stop
                                             offset="0%"
-                                            stopColor="#10b981"
+                                            stopColor="var(--color-success, #10b981)"
                                             stopOpacity="0.25"
                                         />
                                         <stop
                                             offset="100%"
-                                            stopColor="#10b981"
+                                            stopColor="var(--color-success, #10b981)"
                                             stopOpacity="0.0"
                                         />
                                     </linearGradient>
@@ -528,15 +435,15 @@ export default function RoadmapPage() {
                                                 chartData.paddingRight
                                             }
                                             y2={line.y}
-                                            stroke="rgba(0,0,0,0.06)"
+                                            stroke="var(--color-border-soft, rgba(0,0,0,0.06))"
                                             strokeWidth="1"
                                         />
                                         <text
-                                            x={chartData.paddingLeft - 10}
+                                            x={chartData.paddingLeft - 8}
                                             y={line.y + 4}
                                             textAnchor="end"
-                                            fontSize="10"
-                                            fill="var(--color-text-secondary)"
+                                            fontSize="12"
+                                            fill="var(--color-text-secondary, #64748b)"
                                         >
                                             {line.val}
                                         </text>
@@ -558,7 +465,7 @@ export default function RoadmapPage() {
                                 <path
                                     d={`M ${chartData.pointsAtt.map((p) => `${p.x} ${p.y}`).join(' L ')}`}
                                     fill="none"
-                                    stroke="#10b981"
+                                    stroke="var(--color-success, #10b981)"
                                     strokeWidth="3"
                                 />
 
@@ -570,16 +477,16 @@ export default function RoadmapPage() {
                                             cy={p.y}
                                             r="5"
                                             fill="#ffffff"
-                                            stroke="#10b981"
+                                            stroke="var(--color-success, #10b981)"
                                             strokeWidth="2.5"
                                         />
                                         <text
                                             x={p.x}
                                             y={p.y - 10}
                                             textAnchor="middle"
-                                            fontSize="10"
-                                            fontWeight="600"
-                                            fill="#10b981"
+                                            fontSize="12"
+                                            fontWeight="700"
+                                            fill="var(--color-success, #10b981)"
                                         >
                                             {p.att.toFixed(0)}%
                                         </text>
@@ -589,8 +496,8 @@ export default function RoadmapPage() {
                                             x={p.x}
                                             y={chartData.height - 8}
                                             textAnchor="middle"
-                                            fontSize="10"
-                                            fill="var(--color-text-secondary)"
+                                            fontSize="12"
+                                            fill="var(--color-text-secondary, #64748b)"
                                         >
                                             {p.date}
                                         </text>
@@ -612,12 +519,7 @@ export default function RoadmapPage() {
                         {recLoading ? (
                             <Skeleton height={20} width="80%" />
                         ) : (
-                            <p
-                                style={{
-                                    fontStyle: 'italic',
-                                    color: 'var(--color-text-secondary)',
-                                }}
-                            >
+                            <p>
                                 {recData?.learning_path?.narrative ||
                                     'Dựa trên kết quả học tập và các bài thi gần đây, đây là lộ trình AI đề xuất để bạn đạt được mục tiêu.'}
                             </p>
@@ -635,13 +537,7 @@ export default function RoadmapPage() {
                                 />
                             ))
                         ) : (
-                            <p
-                                style={{
-                                    textAlign: 'center',
-                                    padding: '20px',
-                                    color: 'var(--color-text-secondary)',
-                                }}
-                            >
+                            <p className={s.emptyRoadmap}>
                                 Chưa có lộ trình học tập được tạo. Hãy hoàn
                                 thành ít nhất một bài kiểm tra để hệ thống phân
                                 tích.

@@ -108,7 +108,7 @@
 }
 
 .thetaLabel {
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: var(--text-muted, #64748b);
     text-transform: uppercase;
@@ -134,7 +134,7 @@
 }
 
 .statLabel {
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     color: var(--text-muted, #64748b);
     font-weight: 500;
 }
@@ -147,7 +147,7 @@
 }
 
 .confidenceRange {
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     color: #0284c7;
     background: rgba(2, 132, 199, 0.08);
     padding: 0.125rem 0.5rem;
