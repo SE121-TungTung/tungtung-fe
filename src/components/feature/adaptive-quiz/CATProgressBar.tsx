@@ -15,17 +15,29 @@ export const CATProgressBar: React.FC<CATProgressBarProps> = ({
     seCurrent,
     targetSE = 0.3,
 }) => {
+    const answeredCount = Math.max(0, currentPosition - 1)
     const itemPercent = Math.min(
         100,
         Math.round((currentPosition / maxItems) * 100)
     )
-    // Standard error convergence: SE goes from 1.0 (or higher) down towards targetSE
-    // When SE <= targetSE, convergence = 100%
-    const seConvergence = Math.min(
-        100,
-        Math.max(0, Math.round(((1.0 - seCurrent) / (1.0 - targetSE)) * 100))
+
+    // Standard error convergence: SE goes from 1.0 down towards targetSE (0.3)
+    // Also factor in answered items so legacy unregularized SE or flat 3PL tails
+    // still show monotonic progress after each answered question.
+    const rawSePercent = Math.round(
+        ((1.0 - seCurrent) / (1.0 - targetSE)) * 100
     )
-    const isConverged = seCurrent <= targetSE
+    const itemBasedFloor =
+        answeredCount > 0
+            ? Math.min(95, Math.round((answeredCount / maxItems) * 85) + 8)
+            : 0
+
+    const isConverged = answeredCount > 0 && seCurrent <= targetSE
+    const seConvergence = isConverged
+        ? 100
+        : answeredCount === 0
+          ? 0
+          : Math.min(99, Math.max(itemBasedFloor, rawSePercent))
 
     return (
         <div className={styles.container}>
@@ -45,12 +57,14 @@ export const CATProgressBar: React.FC<CATProgressBarProps> = ({
                     {isConverged ? (
                         <>
                             <CheckCircleIcon size={14} />
-                            Đã đạt độ hội tụ (SE = {seCurrent.toFixed(3)})
+                            Đã xác định rõ trình độ (Độ tin cậy đạt chuẩn)
                         </>
+                    ) : answeredCount === 0 ? (
+                        <>Đang khởi tạo đánh giá năng lực</>
                     ) : (
                         <>
-                            Đang đo đạc (SE: {seCurrent.toFixed(3)} → mục tiêu ≤{' '}
-                            {targetSE.toFixed(2)})
+                            Đang phân tích trình độ (Độ tin cậy: {seConvergence}
+                            %)
                         </>
                     )}
                 </div>
@@ -64,8 +78,12 @@ export const CATProgressBar: React.FC<CATProgressBarProps> = ({
                     />
                 </div>
                 <div className={styles.labels}>
-                    <span>Tiến độ bài thi ({itemPercent}%)</span>
-                    <span>Độ chính xác đo lường: {seConvergence}%</span>
+                    <span>Tiến độ câu hỏi ({itemPercent}%)</span>
+                    <span>
+                        {answeredCount === 0
+                            ? 'Bắt đầu phân tích sau câu 1'
+                            : `Độ tin cậy kết quả: ${seConvergence}%`}
+                    </span>
                 </div>
             </div>
         </div>

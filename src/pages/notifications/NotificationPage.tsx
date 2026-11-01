@@ -1,10 +1,11 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import s from './NotificationPage.module.css'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 import {
     getNotifications,
+    getUnreadCount,
     markAsRead,
     markAllAsRead,
 } from '@/lib/notifications'
@@ -18,11 +19,6 @@ import Pagination from '@/components/common/menu/Pagination'
 import MarkReadIcon from '@/assets/Check.svg'
 import type { Notification, NotificationUI } from '@/types/notification.types'
 
-const tabItems: TabItem[] = [
-    { label: 'Tất cả', value: 'all' },
-    { label: 'Chưa đọc', value: 'unread' },
-]
-
 const ITEMS_PER_PAGE = 10
 
 export default function NotificationPage() {
@@ -33,10 +29,21 @@ export default function NotificationPage() {
     const [activeTab, setActiveTab] = useState('all')
     const [currentPage, setCurrentPage] = useState(0)
 
+    const isUnreadTab = activeTab === 'unread'
+
+    const { data: unreadCount = 0 } = useQuery({
+        queryKey: ['notifications', 'unread-count'],
+        queryFn: getUnreadCount,
+    })
+
     const { data, isLoading } = useQuery({
-        queryKey: ['notifications', 'list', currentPage],
+        queryKey: ['notifications', 'list', currentPage, isUnreadTab],
         queryFn: () =>
-            getNotifications(currentPage * ITEMS_PER_PAGE, ITEMS_PER_PAGE),
+            getNotifications(
+                currentPage * ITEMS_PER_PAGE,
+                ITEMS_PER_PAGE,
+                isUnreadTab
+            ),
         placeholderData: (previousData) => previousData,
     })
 
@@ -46,16 +53,39 @@ export default function NotificationPage() {
     )
     const totalCount = data?.total || 0
 
+    const tabItems = useMemo<TabItem[]>(
+        () => [
+            { label: 'Tất cả', value: 'all' },
+            {
+                label:
+                    unreadCount > 0 ? `Chưa đọc (${unreadCount})` : 'Chưa đọc',
+                value: 'unread',
+            },
+        ],
+        [unreadCount]
+    )
+
     const markAllMutation = useMutation({
         mutationFn: markAllAsRead,
-        onSuccess: () => {
+        onMutate: async () => {
+            await queryClient.cancelQueries({ queryKey: ['notifications'] })
+            queryClient.setQueryData(['notifications', 'unread-count'], 0)
+        },
+        onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ['notifications'] })
         },
     })
 
     const markReadMutation = useMutation({
         mutationFn: markAsRead,
-        onSuccess: () => {
+        onMutate: async () => {
+            await queryClient.cancelQueries({ queryKey: ['notifications'] })
+            queryClient.setQueryData<number>(
+                ['notifications', 'unread-count'],
+                (old = 0) => Math.max(0, old - 1)
+            )
+        },
+        onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ['notifications'] })
         },
     })
@@ -74,27 +104,37 @@ export default function NotificationPage() {
         }
     }
 
+    const handleMarkItemAsRead = (
+        e: React.MouseEvent,
+        notificationId: string
+    ) => {
+        e.stopPropagation()
+        markReadMutation.mutate(notificationId)
+    }
+
     const handleMarkAllAsRead = () => {
         markAllMutation.mutate()
     }
 
     const mappedNotifications = useMemo((): NotificationUI[] => {
-        let data = notifications.map(
+        return notifications.map(
             (n): NotificationUI => ({
                 ...n,
                 isRead: !!n.read_at,
                 timestamp: formatTime(n.created_at),
             })
         )
-
-        if (activeTab === 'unread') {
-            data = data.filter((n) => !n.isRead)
-        }
-        return data
-    }, [notifications, activeTab])
+    }, [notifications])
 
     const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
-    const hasUnreadNotifications = notifications.some((n) => !n.read_at)
+    const hasUnreadNotifications =
+        unreadCount > 0 || notifications.some((n) => !n.read_at)
+
+    useEffect(() => {
+        if (currentPage > 0 && totalPages > 0 && currentPage >= totalPages) {
+            setCurrentPage(totalPages - 1)
+        }
+    }, [currentPage, totalPages])
 
     return (
         <div className={s.pageWrapperWithoutHeader}>
@@ -163,6 +203,9 @@ export default function NotificationPage() {
                                         key={item.id}
                                         notification={item}
                                         onClick={() => handleItemClick(item)}
+                                        onMarkAsRead={(e) =>
+                                            handleMarkItemAsRead(e, item.id)
+                                        }
                                     />
                                 ))
                             ) : (

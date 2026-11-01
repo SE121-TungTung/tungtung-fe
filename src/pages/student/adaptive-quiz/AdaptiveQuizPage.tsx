@@ -10,36 +10,53 @@ import {
     LoaderIcon,
     CalendarIcon,
     TargetIcon,
+    GraduationCapIcon,
 } from '@/components/feature/adaptive-quiz/AdaptiveIcons'
+import { AdaptiveHelpButton } from '@/components/feature/adaptive-quiz/AdaptiveExplanationModal'
 import { adaptiveQuizApi } from '@/lib/adaptive-quiz'
+import { getMyClasses } from '@/lib/users'
+import { useSession } from '@/stores/session.store'
 import type { AdaptiveSession, AdaptiveSkillArea } from '@/types/adaptive-quiz'
 import styles from './AdaptiveQuizPage.module.css'
 
 export const AdaptiveQuizPage: React.FC = () => {
     const navigate = useNavigate()
+    const user = useSession((state) => state.user)
     const [history, setHistory] = useState<AdaptiveSession[]>([])
+    const [canTakePlacement, setCanTakePlacement] = useState<boolean>(false)
     const [isLoadingHistory, setIsLoadingHistory] = useState<boolean>(true)
     const [isStarting, setIsStarting] = useState<AdaptiveSkillArea | null>(null)
 
     useEffect(() => {
-        const fetchHistory = async () => {
+        const fetchInitialData = async () => {
             try {
-                const res = await adaptiveQuizApi.listSessions(undefined, 1, 10)
+                const [res, classes] = await Promise.all([
+                    adaptiveQuizApi.listSessions(undefined, 1, 10),
+                    getMyClasses().catch(() => []),
+                ])
                 setHistory(res.data || [])
+                const isAdminAssigned = Boolean(
+                    user?.preferences?.placement_test_assigned ||
+                        user?.preferences?.require_placement_test
+                )
+                const hasNoClass = !Array.isArray(classes) || classes.length === 0
+                setCanTakePlacement(hasNoClass || isAdminAssigned)
             } catch (err) {
                 console.error('Failed to load adaptive quiz sessions', err)
             } finally {
                 setIsLoadingHistory(false)
             }
         }
-        fetchHistory()
-    }, [])
+        fetchInitialData()
+    }, [user])
 
     const handleStartSession = async (skill: AdaptiveSkillArea) => {
         setIsStarting(skill)
         try {
             const session = await adaptiveQuizApi.startSession(skill, 20)
-            navigate(`/student/adaptive-quiz/${session.id}`)
+            if (session && session.id) {
+                navigate(`/student/adaptive-quiz/${session.id}`)
+            }
         } catch (err) {
             console.error('Failed to start session', err)
         } finally {
@@ -53,18 +70,85 @@ export const AdaptiveQuizPage: React.FC = () => {
             <div className={styles.hero}>
                 <div className={styles.heroBadge}>
                     <SparklesIcon size={14} />
-                    Hệ Thống Đánh Giá Thích Ứng (CAT & IRT)
+                    Hệ Thống Đánh Giá Năng Lực Thông Minh
                 </div>
-                <h1 className={styles.heroTitle}>
-                    Kiểm Tra Thích Ứng Năng Lực IELTS
+                <h1
+                    className={styles.heroTitle}
+                    style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.625rem',
+                        flexWrap: 'wrap',
+                    }}
+                >
+                    <span>Kiểm Tra Năng Lực IELTS Thích Ứng</span>
+                    <AdaptiveHelpButton />
                 </h1>
                 <p className={styles.heroSubtitle}>
-                    Thuật toán Item Response Theory (3PL IRT) tối ưu hóa từng
-                    câu hỏi theo thời gian thực. Xác định chuẩn xác Band điểm
-                    IELTS của bạn chỉ sau 15–20 câu hỏi thay vì 40 câu truyền
-                    thống.
+                    Hệ thống tự động điều chỉnh độ khó từng câu hỏi theo năng
+                    lực thực tế của bạn ngay trong lúc làm bài. Xác định chính
+                    xác Band điểm IELTS chỉ sau 15–20 câu hỏi thay vì 40 câu
+                    truyền thống.
                 </p>
             </div>
+
+            {canTakePlacement && (
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '1rem',
+                        flexWrap: 'wrap',
+                        padding: '1rem 1.25rem',
+                        marginBottom: '1.5rem',
+                        borderRadius: '12px',
+                        background: 'rgba(36, 132, 181, 0.08)',
+                        border: '1px solid rgba(36, 132, 181, 0.25)',
+                    }}
+                >
+                    <div
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.75rem',
+                        }}
+                    >
+                        <GraduationCapIcon
+                            size={22}
+                            color="var(--color-brand-primary, #2484b5)"
+                        />
+                        <div>
+                            <div
+                                style={{
+                                    fontWeight: 700,
+                                    color: 'var(--color-text-primary, #0f172a)',
+                                }}
+                            >
+                                Kiểm tra xếp lớp đầu vào dành cho học viên mới
+                            </div>
+                            <div
+                                style={{
+                                    fontSize: '0.875rem',
+                                    color: 'var(--color-text-secondary, #475569)',
+                                }}
+                            >
+                                Bạn chưa có lớp học hoặc được học vụ chỉ định
+                                kiểm tra trình độ đầu vào để xếp lớp phù hợp.
+                            </div>
+                        </div>
+                    </div>
+                    <Link
+                        to="/student/placement-test"
+                        className={styles.actionLink}
+                        style={{ fontWeight: 600 }}
+                    >
+                        Làm bài kiểm tra xếp lớp
+                        <ArrowRightIcon size={16} />
+                    </Link>
+                </div>
+            )}
 
             {/* Assessment Skill Cards */}
             <div className={styles.skillCardsGrid}>
@@ -74,11 +158,13 @@ export const AdaptiveQuizPage: React.FC = () => {
                         <BookOpenIcon size={24} />
                     </div>
                     <div>
-                        <h2 className={styles.cardTitle}>IELTS Reading CAT</h2>
+                        <h2 className={styles.cardTitle}>
+                            Đánh Giá Kỹ Năng Đọc (IELTS Reading)
+                        </h2>
                         <p className={styles.cardDescription}>
-                            Đánh giá kỹ năng đọc hiểu học thuật, suy luận và
-                            nhận diện thông tin qua thuật toán Fisher
-                            Information.
+                            Đánh giá khả năng đọc hiểu học thuật, suy luận và
+                            nhận diện thông tin với độ khó câu hỏi tự động điều
+                            chỉnh theo trình độ của bạn.
                         </p>
                     </div>
 
@@ -88,7 +174,10 @@ export const AdaptiveQuizPage: React.FC = () => {
                                 size={16}
                                 className={styles.featureIcon}
                             />
-                            <span>15–20 câu hỏi tự động thích ứng độ khó</span>
+                            <span>
+                                15–20 câu hỏi tự động tăng/giảm độ khó theo câu
+                                trả lời
+                            </span>
                         </div>
                         <div className={styles.featureItem}>
                             <CheckCircleIcon
@@ -96,7 +185,8 @@ export const AdaptiveQuizPage: React.FC = () => {
                                 className={styles.featureIcon}
                             />
                             <span>
-                                Độ chính xác cao (sai số chuẩn SE &lt; 0.3)
+                                Tự động hoàn thành sớm khi đã xác định rõ trình
+                                độ
                             </span>
                         </div>
                         <div className={styles.featureItem}>
@@ -136,11 +226,12 @@ export const AdaptiveQuizPage: React.FC = () => {
                     </div>
                     <div>
                         <h2 className={styles.cardTitle}>
-                            IELTS Listening CAT
+                            Đánh Giá Kỹ Năng Nghe (IELTS Listening)
                         </h2>
                         <p className={styles.cardDescription}>
-                            Kiểm tra khả năng bắt từ, nắm bắt ý chính và phân
-                            tích ngữ điệu qua ngân hàng audio thích ứng.
+                            Kiểm tra khả năng nghe hiểu, nắm bắt ý chính và phân
+                            tích ngữ điệu qua ngân hàng bài nghe theo từng cấp
+                            độ.
                         </p>
                     </div>
 
@@ -150,7 +241,7 @@ export const AdaptiveQuizPage: React.FC = () => {
                                 size={16}
                                 className={styles.featureIcon}
                             />
-                            <span>Audio bản xứ chuẩn Cambridge IELTS</span>
+                            <span>Audio bản xứ chuẩn định dạng thi IELTS</span>
                         </div>
                         <div className={styles.featureItem}>
                             <CheckCircleIcon
@@ -158,7 +249,7 @@ export const AdaptiveQuizPage: React.FC = () => {
                                 className={styles.featureIcon}
                             />
                             <span>
-                                Cập nhật mức năng lực theta sau từng câu
+                                Cập nhật ước lượng Band điểm ngay sau từng câu
                             </span>
                         </div>
                         <div className={styles.featureItem}>

@@ -14,7 +14,7 @@ export const AbilityGauge: React.FC<AbilityGaugeProps> = ({
     theta,
     se,
     estimatedBand,
-    title = 'Năng Lực Thích Ứng (IRT Theta)',
+    title = 'Năng Lực Hiện Tại',
     showDetails = true,
 }) => {
     // Clamp theta to [-3.0, 3.0] for gauge angle calculation
@@ -22,16 +22,17 @@ export const AbilityGauge: React.FC<AbilityGaugeProps> = ({
     // Normalize to [0, 1] range: -3 -> 0, 0 -> 0.5, 3 -> 1.0
     const normalized = (clampedTheta + 3.0) / 6.0
     // Angle in degrees from -90deg (left) to +90deg (right)
-    const angle = normalized * 180 - 90
+    const angle = Number((normalized * 180 - 90).toFixed(2))
 
     // Arc radius and circumference for a half-circle (pi * r)
-    const r = 90
-    const arcLength = Math.PI * r // ~282.74
+    const r = 84
+    const arcLength = Math.PI * r // ~263.89
     const strokeDashoffset = arcLength * (1 - normalized)
 
-    // Calculate confidence band [theta - SE, theta + SE]
-    const lowerTheta = (theta - se).toFixed(2)
-    const upperTheta = (theta + se).toFixed(2)
+    // Clamp displayed SE so legacy unregularized values stay readable
+    const displaySE = Math.min(1.5, Math.max(0.05, se))
+    const lowerTheta = Math.max(-3.0, theta - displaySE).toFixed(2)
+    const upperTheta = Math.min(3.0, theta + displaySE).toFixed(2)
 
     // Compute band fallback if not provided
     const displayBand =
@@ -43,17 +44,21 @@ export const AbilityGauge: React.FC<AbilityGaugeProps> = ({
         <div className={styles.container}>
             <div className={styles.header}>
                 <span className={styles.title}>
-                    <ActivityIcon size={16} />
+                    <ActivityIcon size={15} />
                     {title}
                 </span>
                 <span className={styles.badge}>
-                    <AwardIcon size={14} />
-                    IELTS Band {displayBand}
+                    <AwardIcon size={13} />
+                    Band {displayBand}
                 </span>
             </div>
 
             <div className={styles.gaugeWrapper}>
-                <svg className={styles.gaugeSvg} viewBox="0 0 220 120">
+                <svg
+                    className={styles.gaugeSvg}
+                    viewBox="0 0 220 122"
+                    aria-hidden="true"
+                >
                     <defs>
                         <linearGradient
                             id="gaugeGradient"
@@ -68,15 +73,41 @@ export const AbilityGauge: React.FC<AbilityGaugeProps> = ({
                         </linearGradient>
                     </defs>
 
-                    {/* Background Arc */}
+                    {/* Scale labels */}
+                    <text
+                        x="22"
+                        y="118"
+                        textAnchor=" middle"
+                        className={styles.scaleLabel}
+                    >
+                        -3.0
+                    </text>
+                    <text
+                        x="110"
+                        y="11"
+                        textAnchor="middle"
+                        className={styles.scaleLabel}
+                    >
+                        0.0
+                    </text>
+                    <text
+                        x="198"
+                        y="118"
+                        textAnchor="middle"
+                        className={styles.scaleLabel}
+                    >
+                        +3.0
+                    </text>
+
+                    {/* Background Arc (center 110, 102, radius 84) */}
                     <path
-                        d="M 20 110 A 90 90 0 0 1 200 110"
+                        d="M 26 102 A 84 84 0 0 1 194 102"
                         className={styles.arcBg}
                     />
 
                     {/* Filled Value Arc */}
                     <path
-                        d="M 20 110 A 90 90 0 0 1 200 110"
+                        d="M 26 102 A 84 84 0 0 1 194 102"
                         className={styles.arcFill}
                         style={{
                             strokeDasharray: arcLength,
@@ -84,46 +115,49 @@ export const AbilityGauge: React.FC<AbilityGaugeProps> = ({
                         }}
                     />
 
-                    {/* Pivot center dot */}
-                    <circle cx="110" cy="110" r="6" fill="#0f172a" />
-
-                    {/* Needle pointer */}
+                    {/* Needle pointer using explicit SVG rotate(angle, cx, cy) */}
                     <g
                         className={styles.needle}
-                        style={{
-                            transform: `rotate(${angle}deg)`,
-                        }}
+                        transform={`rotate(${angle}, 110, 102)`}
                     >
                         <line
                             x1="110"
-                            y1="110"
+                            y1="102"
                             x2="110"
-                            y2="30"
-                            stroke="#0f172a"
+                            y2="28"
+                            stroke="var(--color-text-primary, #0f172a)"
                             strokeWidth="3"
                             strokeLinecap="round"
                         />
                     </g>
+
+                    {/* Pivot center ring & dot */}
+                    <circle
+                        cx="110"
+                        cy="102"
+                        r="7"
+                        fill="var(--color-surface-card, #ffffff)"
+                        stroke="var(--color-text-primary, #0f172a)"
+                        strokeWidth="3"
+                    />
                 </svg>
 
                 <div className={styles.centerValue}>
                     <span className={styles.thetaVal}>
                         {theta >= 0 ? `+${theta.toFixed(2)}` : theta.toFixed(2)}
                     </span>
-                    <span className={styles.thetaLabel}>Theta (θ)</span>
+                    <span className={styles.thetaLabel}>Điểm năng lực</span>
                 </div>
             </div>
 
             {showDetails && (
                 <div className={styles.statsFooter}>
                     <div className={styles.statItem}>
-                        <span className={styles.statLabel}>
-                            Sai số chuẩn (SE)
-                        </span>
+                        <span className={styles.statLabel}>Độ dao động</span>
                         <span className={styles.statValue}>
-                            ±{se.toFixed(3)}
+                            &plusmn;{displaySE.toFixed(2)}
                         </span>
-                        {se <= 0.3 ? (
+                        {displaySE <= 0.3 ? (
                             <span
                                 className={styles.confidenceRange}
                                 style={{
@@ -131,23 +165,23 @@ export const AbilityGauge: React.FC<AbilityGaugeProps> = ({
                                     background: 'rgba(5, 150, 105, 0.1)',
                                 }}
                             >
-                                Độ tin cậy cao (SE ≤ 0.3)
+                                Độ tin cậy cao
                             </span>
                         ) : (
                             <span className={styles.confidenceRange}>
-                                Đang hội tụ
+                                Đang phân tích
                             </span>
                         )}
                     </div>
                     <div className={styles.statItem}>
                         <span className={styles.statLabel}>
-                            Khoảng năng lực 68%
+                            Khoảng ước tính
                         </span>
                         <span className={styles.statValue}>
                             [{lowerTheta}, {upperTheta}]
                         </span>
                         <span className={styles.confidenceRange}>
-                            Logit scale [-3, +3]
+                            Thang [-3, +3]
                         </span>
                     </div>
                 </div>

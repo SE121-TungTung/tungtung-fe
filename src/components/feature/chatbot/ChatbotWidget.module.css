@@ -3,7 +3,7 @@
     bottom: 2rem;
     right: 2rem;
     z-index: 9999;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--primitive-font-sans, 'Inter', sans-serif);
 }
 
 .floatingBtn {
@@ -16,16 +16,15 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 15px rgba(23, 86, 118, 0.3);
-    border: none;
+    box-shadow: 0 4px 15px rgba(23, 86, 118, 0.32);
     cursor: pointer;
     z-index: 1000;
     transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .floatingBtn:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 20px rgba(23, 86, 118, 0.4);
+    transform: scale(1.08);
+    box-shadow: 0 6px 20px rgba(23, 86, 118, 0.42);
 }
 
 .floatingBtn:active {
@@ -33,39 +32,56 @@
 }
 
 .floatingBtn img {
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
     filter: brightness(0) invert(1);
     display: block;
 }
 
 .chatWindow {
-    width: 350px;
-    height: 500px;
-    background: white;
-    border-radius: 12px;
+    width: 380px;
+    max-width: calc(100vw - 32px);
+    height: 530px;
+    max-height: calc(100vh - 100px);
+    background: var(--color-surface-card, #ffffff);
+    border-radius: 16px;
     box-shadow:
-        0 20px 25px -5px rgba(0, 0, 0, 0.1),
-        0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        0 20px 25px -5px rgba(5, 17, 24, 0.14),
+        0 10px 10px -5px rgba(5, 17, 24, 0.06);
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    border: 1px solid var(--border-color, #e5e7eb);
+    border: 1px solid var(--color-border-soft, #e2e8f0);
 }
 
 .chatHeader {
     background: var(--bg-brand-gradient, var(--color-brand-primary, #175676));
     color: white;
-    padding: 1rem;
+    padding: 0.875rem 1rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
+.headerTitleWrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .chatHeader h4 {
     margin: 0;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 600;
+}
+
+.headerBadge {
+    font-size: 0.68rem;
+    font-weight: 500;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
 }
 
 .closeBtn {
@@ -83,16 +99,17 @@
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    background-color: #f9fafb;
+    gap: 0.875rem;
+    background-color: var(--color-surface-page, #f5fafd);
     position: relative;
 }
 
 .emptyState {
     text-align: center;
-    color: var(--text-secondary, #6b7280);
+    color: var(--color-text-secondary, #0e3448);
     font-size: 0.875rem;
     margin-top: 2rem;
+    line-height: 1.5;
 }
 
 .messageWrapper {
@@ -109,46 +126,161 @@
 }
 
 .messageBubble {
-    max-width: 80%;
-    padding: 0.75rem 1rem;
+    max-width: 85%;
+    padding: 0.75rem 0.95rem;
     border-radius: 12px;
     font-size: 0.875rem;
-    line-height: 1.4;
+    line-height: 1.5;
     word-break: break-word;
 }
 
 .userMsg .messageBubble {
-    background-color: var(--brand-primary, #2563eb);
+    background-color: var(--color-brand-primary, #175676);
     color: white;
     border-bottom-right-radius: 4px;
 }
 
 .aiMsg .messageBubble {
-    background-color: white;
-    color: var(--text-primary, #111827);
-    border: 1px solid var(--border-color, #e5e7eb);
+    background-color: #ffffff;
+    color: var(--color-text-primary, #051118);
+    border: 1px solid var(--color-border-soft, #e2e8f0);
     border-bottom-left-radius: 4px;
 }
 
+.markdownBody p {
+    margin: 0 0 6px 0;
+}
+
+.markdownBody p:last-child {
+    margin-bottom: 0;
+}
+
+.markdownBody ul,
+.markdownBody ol {
+    margin: 4px 0 8px 18px;
+    padding: 0;
+}
+
+.markdownBody strong {
+    font-weight: 600;
+    color: var(--color-brand-primary, #175676);
+}
+
+.markdownBody code {
+    background: rgba(23, 86, 118, 0.08);
+    padding: 1px 4px;
+    border-radius: 4px;
+    font-family: var(--primitive-font-mono, monospace);
+    font-size: 0.82rem;
+}
+
+.markdownBody table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 6px 0;
+    font-size: 0.78rem;
+}
+
+.markdownBody th,
+.markdownBody td {
+    border: 1px solid var(--color-border-soft, #e2e8f0);
+    padding: 4px 6px;
+}
+
+/* Citation Badge & Dropdown */
+.citationBox {
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px dashed var(--color-border-soft, #e2e8f0);
+}
+
+.citationBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-brand-primary, #175676);
+    background: rgba(23, 86, 118, 0.08);
+    border: 1px solid rgba(75, 163, 195, 0.35);
+    cursor: pointer;
+}
+
+.citationIcon {
+    width: 12px;
+    height: 12px;
+    opacity: 0.8;
+}
+
+.citationDropdown {
+    margin-top: 6px;
+    padding: 8px;
+    border-radius: 8px;
+    background: var(--color-surface-page, #f5fafd);
+    border: 1px solid var(--color-border-soft, #e2e8f0);
+}
+
+.citationPills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 6px;
+}
+
+.citationPillItem {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--color-border-soft, #cbd5e1);
+    background: #ffffff;
+    color: var(--color-text-secondary, #0e3448);
+    cursor: pointer;
+}
+
+.citationPillActive {
+    background: var(--color-brand-primary, #175676);
+    color: #ffffff;
+    border-color: var(--color-brand-primary, #175676);
+}
+
+.citationCard {
+    font-size: 0.75rem;
+}
+
+.citationCardTitle {
+    font-weight: 600;
+    color: var(--color-text-primary, #051118);
+    margin-bottom: 3px;
+}
+
+.citationCardSnippet {
+    margin: 0;
+    color: var(--color-text-secondary, #0e3448);
+    font-style: italic;
+    line-height: 1.4;
+}
+
 .chatFooter {
-    padding: 1rem;
+    padding: 0.875rem;
     background: white;
-    border-top: 1px solid var(--border-color, #e5e7eb);
+    border-top: 1px solid var(--color-border-soft, #e2e8f0);
     display: flex;
     gap: 0.5rem;
 }
 
 .inputField {
     flex: 1;
-    padding: 0.75rem;
-    border: 1px solid var(--border-color, #d1d5db);
+    padding: 0.65rem 0.75rem;
+    border: 1px solid var(--color-border-soft, #cbd5e1);
     border-radius: 8px;
     font-size: 0.875rem;
     outline: none;
 }
 
 .inputField:focus {
-    border-color: var(--brand-primary, #2563eb);
+    border-color: var(--color-brand-primary, #175676);
 }
 
 .inputField:disabled {
@@ -157,7 +289,7 @@
 }
 
 .sendBtn {
-    background-color: var(--brand-primary, #2563eb);
+    background-color: var(--color-brand-primary, #175676);
     color: white;
     border: none;
     border-radius: 8px;
@@ -168,12 +300,12 @@
 }
 
 .sendBtn:disabled {
-    background-color: #9ca3af;
+    background-color: #94a3b8;
     cursor: not-allowed;
 }
 
 .sendBtn:not(:disabled):hover {
-    background-color: #1d4ed8;
+    background-color: var(--color-brand-primary-hover, #2484b5);
 }
 
 /* QUOTA EXCEEDED CTA OVERLAY */
@@ -199,14 +331,14 @@
     background: white;
     padding: 1rem;
     border-radius: 8px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px -1px rgba(5, 17, 24, 0.1);
     text-align: center;
-    border: 1px solid #fee2e2;
+    border: 1px solid rgba(214, 40, 57, 0.25);
     width: 100%;
 }
 
 .ctaMessage {
-    color: #dc2626;
+    color: var(--color-brand-secondary, #d62839);
     font-weight: 600;
     font-size: 0.875rem;
     margin: 0 0 0.75rem 0;
@@ -214,7 +346,7 @@
 
 .ctaButton {
     width: 100%;
-    background-color: #dc2626;
+    background-color: var(--color-brand-secondary, #d62839);
     color: white;
     border: none;
     padding: 0.75rem;
@@ -226,5 +358,5 @@
 }
 
 .ctaButton:hover {
-    background-color: #b91c1c;
+    background-color: var(--color-brand-secondary-hover, #df5361);
 }

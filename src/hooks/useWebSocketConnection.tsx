@@ -74,6 +74,11 @@ export function useWebSocketConnection(options: UseWebSocketOptions = {}) {
                     })
                     break
                 }
+                case 'NEW_NOTIFICATION':
+                    queryClient.invalidateQueries({
+                        queryKey: ['notifications'],
+                    })
+                    break
                 case 'system_message':
                 case 'member_added':
                 case 'member_removed':

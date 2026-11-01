@@ -8,15 +8,18 @@ import {
     YAxis,
     CartesianGrid,
     Tooltip,
+    ReferenceLine,
 } from 'recharts'
 import styles from './AbilityHistoryChart.module.css'
 
 export interface AbilityHistoryPoint {
     itemIndex: number
+    itemLabel: string
     theta: number
     se: number
     thetaUpper: number
     thetaLower: number
+    thetaBand: [number, number]
     isCorrect?: boolean
 }
 
@@ -32,20 +35,31 @@ export interface AbilityHistoryChartProps {
 export const AbilityHistoryChart: React.FC<AbilityHistoryChartProps> = ({
     history,
 }) => {
-    const data: AbilityHistoryPoint[] = history.map((h) => ({
-        itemIndex: h.item_sequence,
-        theta: Number(h.theta_after.toFixed(2)),
-        se: Number(h.se_after.toFixed(2)),
-        thetaUpper: Number((h.theta_after + h.se_after).toFixed(2)),
-        thetaLower: Number((h.theta_after - h.se_after).toFixed(2)),
-        isCorrect: h.is_correct,
-    }))
+    const data: AbilityHistoryPoint[] = history.map((h) => {
+        const clampedTheta = Math.max(-3.0, Math.min(3.0, h.theta_after))
+        // Cap displayed SE at 1.2 so legacy unregularized points don't blow up the chart
+        const displaySE = Math.min(1.2, Math.max(0.05, h.se_after))
+        const lower = Number(
+            Math.max(-3.4, clampedTheta - displaySE).toFixed(2)
+        )
+        const upper = Number(Math.min(3.4, clampedTheta + displaySE).toFixed(2))
+        return {
+            itemIndex: h.item_sequence,
+            itemLabel: `Câu ${h.item_sequence}`,
+            theta: Number(clampedTheta.toFixed(2)),
+            se: Number(displaySE.toFixed(2)),
+            thetaUpper: upper,
+            thetaLower: lower,
+            thetaBand: [lower, upper],
+            isCorrect: h.is_correct,
+        }
+    })
 
     return (
         <div className={styles.chartWrapper}>
             <div className={styles.chartHeader}>
                 <h3 className={styles.chartTitle}>
-                    Tiến Trình Hội Tụ Năng Lực (&theta;) & Sai Số (SE)
+                    Biểu Đồ Thay Đổi Mức Năng Lực Qua Từng Câu Hỏi
                 </h3>
                 <div className={styles.chartLegend}>
                     <div className={styles.legendItem}>
@@ -56,48 +70,61 @@ export const AbilityHistoryChart: React.FC<AbilityHistoryChartProps> = ({
                                     'var(--color-brand-primary, #2484b5)',
                             }}
                         />
-                        <span>Năng lực ước lượng (&theta;)</span>
+                        <span>Điểm năng lực ước tính</span>
                     </div>
                     <div className={styles.legendItem}>
                         <div
                             className={styles.legendIndicator}
                             style={{
-                                background: 'rgba(36, 132, 181, 0.15)',
+                                background: 'rgba(36, 132, 181, 0.18)',
+                                border: '1px dashed rgba(36, 132, 181, 0.45)',
                             }}
                         />
-                        <span>Khoảng tin cậy (&plusmn;1 SE)</span>
+                        <span>Khoảng dao động ước tính</span>
                     </div>
                 </div>
             </div>
 
-            <div style={{ width: '100%', height: 280 }}>
+            <div style={{ width: '100%', height: 300 }}>
                 <ResponsiveContainer width="100%" height="100%">
                     <ComposedChart
                         data={data}
-                        margin={{ top: 10, right: 20, left: -10, bottom: 5 }}
+                        margin={{ top: 12, right: 20, left: 4, bottom: 8 }}
                     >
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                        <CartesianGrid
+                            vertical={false}
+                            strokeDasharray="3 3"
+                            stroke="var(--color-border-soft, #e2e8f0)"
+                        />
                         <XAxis
-                            dataKey="itemIndex"
-                            tick={{ fontSize: 12, fill: '#64748b' }}
-                            label={{
-                                value: 'Thứ tự câu hỏi',
-                                position: 'insideBottom',
-                                offset: -4,
+                            dataKey="itemLabel"
+                            axisLine={false}
+                            tickLine={false}
+                            tickMargin={10}
+                            tick={{
                                 fontSize: 12,
-                                fill: '#94a3b8',
+                                fill: 'var(--color-text-secondary, #64748b)',
                             }}
                         />
                         <YAxis
-                            domain={[-4, 4]}
-                            tick={{ fontSize: 12, fill: '#64748b' }}
-                            label={{
-                                value: 'Năng lực θ',
-                                angle: -90,
-                                position: 'insideLeft',
+                            domain={[-3.5, 3.5]}
+                            ticks={[-3, -1.5, 0, 1.5, 3]}
+                            allowDataOverflow={true}
+                            axisLine={false}
+                            tickLine={false}
+                            width={44}
+                            tickFormatter={(val: number) =>
+                                val > 0 ? `+${val.toFixed(1)}` : val.toFixed(1)
+                            }
+                            tick={{
                                 fontSize: 12,
-                                fill: '#94a3b8',
+                                fill: 'var(--color-text-secondary, #64748b)',
                             }}
+                        />
+                        <ReferenceLine
+                            y={0}
+                            stroke="var(--color-border-medium, #cbd5e1)"
+                            strokeDasharray="4 4"
                         />
                         <Tooltip
                             content={({ active, payload }) => {
@@ -110,16 +137,16 @@ export const AbilityHistoryChart: React.FC<AbilityHistoryChartProps> = ({
                                                 background:
                                                     'var(--color-surface-card, #ffffff)',
                                                 border: '1px solid var(--color-border-soft, #e2e8f0)',
-                                                borderRadius: 8,
-                                                padding: '0.75rem',
+                                                borderRadius: 10,
+                                                padding: '0.75rem 0.875rem',
                                                 boxShadow:
-                                                    '0 4px 6px -1px rgba(0,0,0,0.1)',
+                                                    '0 10px 15px -3px rgba(0,0,0,0.08)',
                                                 fontSize: 12,
                                             }}
                                         >
                                             <p
                                                 style={{
-                                                    margin: '0 0 4px 0',
+                                                    margin: '0 0 6px 0',
                                                     fontWeight: 700,
                                                     color: 'var(--color-text-primary, #0f172a)',
                                                 }}
@@ -145,33 +172,46 @@ export const AbilityHistoryChart: React.FC<AbilityHistoryChartProps> = ({
                                             </p>
                                             <p
                                                 style={{
-                                                    margin: '0 0 2px 0',
+                                                    margin: '0 0 3px 0',
                                                     color: 'var(--color-brand-primary, #2484b5)',
+                                                    fontVariantNumeric:
+                                                        'tabular-nums',
                                                 }}
                                             >
-                                                Năng lực &theta;:{' '}
-                                                <strong>{point.theta}</strong>
+                                                Điểm năng lực:{' '}
+                                                <strong>
+                                                    {point.theta >= 0
+                                                        ? `+${point.theta.toFixed(2)}`
+                                                        : point.theta.toFixed(
+                                                              2
+                                                          )}
+                                                </strong>
                                             </p>
                                             <p
                                                 style={{
-                                                    margin: '0 0 2px 0',
+                                                    margin: '0 0 3px 0',
                                                     color: 'var(--color-text-secondary, #64748b)',
+                                                    fontVariantNumeric:
+                                                        'tabular-nums',
                                                 }}
                                             >
-                                                Sai số SE:{' '}
+                                                Độ dao động:{' '}
                                                 <strong>
-                                                    &plusmn;{point.se}
+                                                    &plusmn;
+                                                    {point.se.toFixed(2)}
                                                 </strong>
                                             </p>
                                             <p
                                                 style={{
                                                     margin: 0,
                                                     color: 'var(--color-text-tertiary, #94a3b8)',
+                                                    fontVariantNumeric:
+                                                        'tabular-nums',
                                                 }}
                                             >
-                                                Khoảng tin cậy: [
-                                                {point.thetaLower},{' '}
-                                                {point.thetaUpper}]
+                                                Khoảng ước tính: [
+                                                {point.thetaLower.toFixed(2)},{' '}
+                                                {point.thetaUpper.toFixed(2)}]
                                             </p>
                                         </div>
                                     )
@@ -179,27 +219,23 @@ export const AbilityHistoryChart: React.FC<AbilityHistoryChartProps> = ({
                                 return null
                             }}
                         />
-                        {/* Shaded Confidence Interval ±1 SE */}
+                        {/* Range Area Confidence Interval [thetaLower, thetaUpper] */}
                         <Area
                             type="monotone"
-                            dataKey="thetaUpper"
-                            stroke="none"
+                            dataKey="thetaBand"
+                            stroke="rgba(36, 132, 181, 0.3)"
+                            strokeWidth={1}
+                            strokeDasharray="3 3"
                             fill="var(--color-brand-primary, #2484b5)"
-                            fillOpacity={0.15}
-                        />
-                        <Area
-                            type="monotone"
-                            dataKey="thetaLower"
-                            stroke="none"
-                            fill="var(--color-surface-card, #ffffff)"
-                            fillOpacity={1}
+                            fillOpacity={0.14}
+                            isAnimationActive={false}
                         />
                         {/* Ability Line */}
                         <Line
                             type="monotone"
                             dataKey="theta"
                             stroke="var(--color-brand-primary, #2484b5)"
-                            strokeWidth={3}
+                            strokeWidth={2.5}
                             dot={{
                                 r: 4,
                                 fill: 'var(--color-brand-primary, #2484b5)',
@@ -207,6 +243,7 @@ export const AbilityHistoryChart: React.FC<AbilityHistoryChartProps> = ({
                                 stroke: '#ffffff',
                             }}
                             activeDot={{ r: 6 }}
+                            isAnimationActive={false}
                         />
                     </ComposedChart>
                 </ResponsiveContainer>

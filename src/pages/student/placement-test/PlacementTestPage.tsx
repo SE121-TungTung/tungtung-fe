@@ -9,22 +9,38 @@ import {
     LoaderIcon,
     CalendarIcon,
 } from '@/components/feature/adaptive-quiz/AdaptiveIcons'
+import { AdaptiveHelpButton } from '@/components/feature/adaptive-quiz/AdaptiveExplanationModal'
 import { adaptiveQuizApi } from '@/lib/adaptive-quiz'
+import { getMyClasses } from '@/lib/users'
+import { useSession } from '@/stores/session.store'
 import type { AdaptiveSession } from '@/types/adaptive-quiz'
 import styles from './PlacementTestPage.module.css'
 
 export const PlacementTestPage: React.FC = () => {
     const navigate = useNavigate()
+    const user = useSession((state) => state.user)
     const [recentSession, setRecentSession] = useState<AdaptiveSession | null>(
         null
     )
+    const [hasActiveClass, setHasActiveClass] = useState<boolean>(false)
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const [isStarting, setIsStarting] = useState<boolean>(false)
+
+    const isAdminAssigned = Boolean(
+        user?.preferences?.placement_test_assigned ||
+            user?.preferences?.require_placement_test
+    )
 
     useEffect(() => {
         const checkEligibility = async () => {
             try {
-                const res = await adaptiveQuizApi.listSessions('reading', 1, 1)
+                const [res, classes] = await Promise.all([
+                    adaptiveQuizApi.listSessions('reading', 1, 1),
+                    getMyClasses().catch(() => []),
+                ])
+                if (Array.isArray(classes) && classes.length > 0) {
+                    setHasActiveClass(true)
+                }
                 if (res.data && res.data.length > 0) {
                     const latest = res.data[0]
                     const daysAgo =
@@ -47,7 +63,9 @@ export const PlacementTestPage: React.FC = () => {
         setIsStarting(true)
         try {
             const session = await adaptiveQuizApi.startSession('reading', 20)
-            navigate(`/student/adaptive-quiz/${session.id}`)
+            if (session && session.id) {
+                navigate(`/student/adaptive-quiz/${session.id}`)
+            }
         } catch (err) {
             console.error('Failed to start placement test', err)
         } finally {
@@ -70,8 +88,11 @@ export const PlacementTestPage: React.FC = () => {
         )
     }
 
-    const isLocked =
-        recentSession !== null && recentSession.status === 'completed'
+    const isAlreadyEnrolledNotAssigned = hasActiveClass && !isAdminAssigned
+    const isCooldownLocked =
+        !isAdminAssigned &&
+        recentSession !== null &&
+        recentSession.status === 'completed'
     const daysRemaining = recentSession
         ? Math.max(
               0,
@@ -92,24 +113,52 @@ export const PlacementTestPage: React.FC = () => {
                     <GraduationCapIcon size={16} />
                     Bài Kiểm Tra Đầu Vào Chính Thức
                 </div>
-                <h1 className={styles.title}>
-                    Placement Test Thích Ứng Năng Lực
+                <h1
+                    className={styles.title}
+                    style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.625rem',
+                        flexWrap: 'wrap',
+                    }}
+                >
+                    <span>Kiểm Tra Xếp Lớp Đầu Vào</span>
+                    <AdaptiveHelpButton />
                 </h1>
                 <p className={styles.subtitle}>
-                    Bài thi đầu vào ứng dụng mô hình Item Response Theory để xác
-                    định chuẩn xác trình độ IELTS hiện tại của bạn, phục vụ xếp
-                    lớp tối ưu tại Lotus English Center.
+                    Bài thi đầu vào tự động điều chỉnh độ khó câu hỏi theo từng
+                    câu trả lời để xác định chuẩn xác trình độ IELTS hiện tại
+                    của bạn, phục vụ xếp lớp tối ưu tại Lotus English Center.
                 </p>
             </div>
 
             {/* Content Card */}
             <div className={styles.card}>
-                {isLocked ? (
+                {isAlreadyEnrolledNotAssigned ? (
                     <div className={styles.limitAlert}>
                         <ShieldAlertIcon size={24} style={{ flexShrink: 0 }} />
                         <div>
                             <div className={styles.limitTitle}>
-                                Bạn đã hoàn thành Placement Test gần đây
+                                Bài kiểm tra này chỉ dành cho học viên mới chưa
+                                xếp lớp
+                            </div>
+                            <p className={styles.limitText}>
+                                Hiện tại bạn đã có lớp học chính thức trên hệ
+                                thống và chưa có yêu cầu kiểm tra xếp lớp lại từ
+                                Quản trị viên (Office Admin). Để tự đánh giá
+                                trình độ và theo dõi tiến bộ định kỳ bất kỳ lúc
+                                nào, vui lòng sử dụng tính năng{' '}
+                                <strong>Đánh giá năng lực thích ứng</strong>.
+                            </p>
+                        </div>
+                    </div>
+                ) : isCooldownLocked ? (
+                    <div className={styles.limitAlert}>
+                        <ShieldAlertIcon size={24} style={{ flexShrink: 0 }} />
+                        <div>
+                            <div className={styles.limitTitle}>
+                                Bạn đã hoàn thành bài kiểm tra xếp lớp gần đây
                             </div>
                             <p className={styles.limitText}>
                                 Kết quả ngày{' '}
@@ -124,7 +173,8 @@ export const PlacementTestPage: React.FC = () => {
                                 </strong>
                                 . Theo quy định học vụ, mỗi học viên chỉ được
                                 làm lại bài kiểm tra xếp lớp sau 30 ngày (còn{' '}
-                                {daysRemaining} ngày).
+                                {daysRemaining} ngày) trừ khi được Quản trị viên
+                                phân công làm lại.
                             </p>
                         </div>
                     </div>
@@ -139,8 +189,9 @@ export const PlacementTestPage: React.FC = () => {
                                 15–20 Phút
                             </div>
                             <p className={styles.ruleText}>
-                                Số lượng câu hỏi tự động rút ngắn dựa trên tốc
-                                độ hội tụ độ tin cậy năng lực của bạn.
+                                Số lượng câu hỏi được tối ưu tự động và hoàn
+                                thành sớm ngay khi hệ thống xác định rõ trình độ
+                                của bạn.
                             </p>
                         </div>
 
@@ -153,8 +204,9 @@ export const PlacementTestPage: React.FC = () => {
                                 Đánh Giá Khách Quan
                             </div>
                             <p className={styles.ruleText}>
-                                Ngân hàng câu hỏi chuẩn học thuật 3PL IRT đo
-                                lường chính xác từ Band 3.5 đến 9.0.
+                                Đánh giá dựa trên mức độ khó của từng câu hỏi
+                                bạn vượt qua, đo lường chính xác từ Band 3.5 đến
+                                9.0.
                             </p>
                         </div>
 
@@ -164,18 +216,28 @@ export const PlacementTestPage: React.FC = () => {
                                     size={18}
                                     color="var(--color-brand-primary, #2484b5)"
                                 />
-                                Giới Hạn 30 Ngày
+                                Dành Cho Học Viên Mới
                             </div>
                             <p className={styles.ruleText}>
-                                Kết quả được gửi trực tiếp đến Office Admin để
-                                đề xuất lộ trình và xếp lớp học phù hợp.
+                                Dành cho học viên mới chưa có lớp hoặc được
+                                Admin chỉ định kiểm tra để tư vấn xếp lớp phù
+                                hợp.
                             </p>
                         </div>
                     </div>
                 )}
 
                 <div className={styles.actionRow}>
-                    {isLocked ? (
+                    {isAlreadyEnrolledNotAssigned ? (
+                        <button
+                            type="button"
+                            className={styles.startBtn}
+                            onClick={() => navigate('/student/adaptive-quiz')}
+                        >
+                            Chuyển đến Đánh giá năng lực thích ứng
+                            <ArrowRightIcon size={18} />
+                        </button>
+                    ) : isCooldownLocked && recentSession ? (
                         <button
                             type="button"
                             className={styles.startBtn}
@@ -185,7 +247,7 @@ export const PlacementTestPage: React.FC = () => {
                                 )
                             }
                         >
-                            Xem lại báo cáo Placement Test
+                            Xem lại báo cáo xếp lớp đầu vào
                             <ArrowRightIcon size={18} />
                         </button>
                     ) : (
@@ -202,7 +264,7 @@ export const PlacementTestPage: React.FC = () => {
                                 </>
                             ) : (
                                 <>
-                                    Bắt đầu làm bài Placement Test
+                                    Bắt đầu làm bài kiểm tra xếp lớp
                                     <ArrowRightIcon size={18} />
                                 </>
                             )}

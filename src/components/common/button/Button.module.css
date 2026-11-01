@@ -331,10 +331,17 @@
     --btn-text: var(--color-text-primary);
 }
 
-.tone-neutral.variant-outline,
-.tone-neutral.variant-ghost {
+.tone-neutral.variant-outline {
     --btn-text: var(--color-text-primary);
     --btn-border: var(--color-border-medium);
+}
+
+.tone-neutral.variant-ghost {
+    --btn-bg: transparent;
+    --btn-bg-hover: var(--color-border-soft);
+    --btn-bg-active: var(--color-border-medium);
+    --btn-text: var(--color-text-primary);
+    --btn-border: transparent;
 }
 
 /* ---------- SUCCESS ---------- */
@@ -440,6 +447,8 @@
     --button-gap: var(--primitive-space-2);
     --button-radius: var(--primitive-radius-sm);
     font-size: var(--primitive-text-sm);
+    min-height: 32px;
+    min-width: 32px;
 }
 
 .size-md {
@@ -631,7 +640,12 @@
 
 [data-theme='dark'] .tone-neutral {
     --btn-bg: var(--color-surface-card);
-    --btn-bg-hover: var(--color-surface-raised);
+    --btn-bg-hover: var(--color-border-medium);
+}
+
+[data-theme='dark'] .tone-neutral.variant-ghost {
+    --btn-bg: transparent;
+    --btn-bg-hover: var(--color-border-medium);
 }
 
 /* ============================================================================
@@ -671,7 +685,7 @@
 
 /* Focus visible for keyboard navigation */
 @supports selector(:focus-visible) {
-    .btn:focus {
+    .btn:focus:not(:focus-visible) {
         outline: none;
     }
 }

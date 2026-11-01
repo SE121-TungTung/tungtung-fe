@@ -9,17 +9,31 @@ const BASE_URL = '/api/v1/notifications'
 
 export async function getNotifications(
     skip = 0,
-    limit = 50
+    limit = 50,
+    unreadOnly = false
 ): Promise<NotificationListResponse> {
+    const page = limit > 0 ? Math.floor(skip / limit) + 1 : 1
     const qs = new URLSearchParams()
+    qs.set('page', String(page))
     qs.set('skip', String(skip))
     qs.set('limit', String(limit))
+    if (unreadOnly) {
+        qs.set('unread_only', 'true')
+    }
 
     // api() auto-unwraps {success, data} but returns the full object when 'meta' key exists.
-    // BE now returns {success, data: Notification[], message, meta: null}
-    const res = await api<any>(`${BASE_URL}/?${qs.toString()}`, {
-        method: 'GET',
-    })
+    // BE now returns {success, data: Notification[], message, meta}
+    const res = await api<NotificationListResponse | Notification[]>(
+        `${BASE_URL}?${qs.toString()}`,
+        {
+            method: 'GET',
+        }
+    )
+
+    // Fallback: api() already unwrapped, res IS the array
+    if (Array.isArray(res)) {
+        return { data: res, notifications: res, total: res.length }
+    }
 
     // Handle both old shape {notifications, total} and new shape {data: [...], meta: {total}}
     if (Array.isArray(res?.data)) {
@@ -37,10 +51,6 @@ export async function getNotifications(
             notifications: res.notifications,
             total: res.total ?? 0,
         }
-    }
-    // Fallback: api() already unwrapped, res IS the array
-    if (Array.isArray(res)) {
-        return { data: res, notifications: res, total: res.length }
     }
     return { data: [], notifications: [], total: 0 }
 }

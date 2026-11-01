@@ -13,6 +13,7 @@ import {
     ActivityIcon,
     LoaderIcon,
 } from '@/components/feature/adaptive-quiz/AdaptiveIcons'
+import { AdaptiveHelpButton } from '@/components/feature/adaptive-quiz/AdaptiveExplanationModal'
 import styles from './AdaptiveQuizResultPage.module.css'
 
 export const AdaptiveQuizResultPage: React.FC = () => {
@@ -87,15 +88,16 @@ export const AdaptiveQuizResultPage: React.FC = () => {
             <div className={styles.hero}>
                 <div className={styles.badge}>
                     <SparklesIcon size={16} />
-                    Báo Cáo Phân Tích Năng Lực CAT &amp; IRT
+                    Báo Cáo Kết Quả Đánh Giá Năng Lực
                 </div>
                 <h1 className={styles.title}>
-                    Kết Quả Đánh Giá Năng Lực IELTS
+                    <span>Kết Quả Đánh Giá Năng Lực IELTS</span>
+                    <AdaptiveHelpButton />
                 </h1>
                 <p className={styles.subtitle}>
-                    Bài kiểm tra thích ứng đã hội tụ sai số chuẩn SE = &plusmn;
-                    {finalSE.toFixed(2)} sau {totalCount} câu hỏi, xác thực
-                    chuẩn xác trình độ học thuật hiện tại của bạn.
+                    Hệ thống đã hoàn tất đánh giá trình độ của bạn sau{' '}
+                    {totalCount} câu hỏi với độ dao động ước tính &plusmn;
+                    {Math.min(1.5, finalSE).toFixed(2)}.
                 </p>
             </div>
 
@@ -124,7 +126,7 @@ export const AdaptiveQuizResultPage: React.FC = () => {
 
                 <div className={styles.scoreCard}>
                     <span className={styles.scoreLabel}>
-                        Chỉ Số Năng Lực (&theta;)
+                        Điểm Năng Lực Tổng Hợp
                     </span>
                     <span className={`${styles.scoreVal} ${styles.bandGreen}`}>
                         {finalTheta > 0
@@ -132,12 +134,14 @@ export const AdaptiveQuizResultPage: React.FC = () => {
                             : finalTheta.toFixed(2)}
                     </span>
                     <span className={styles.scoreSub}>
-                        Thang đo latent trait [-4.0, +4.0]
+                        Thang điểm năng lực [-4.0, +4.0]
                     </span>
                 </div>
 
                 <div className={styles.scoreCard}>
-                    <span className={styles.scoreLabel}>Độ Chính Xác</span>
+                    <span className={styles.scoreLabel}>
+                        Tỷ Lệ Trả Lời Đúng
+                    </span>
                     <span className={`${styles.scoreVal} ${styles.bandAmber}`}>
                         {accuracyPercent}%
                     </span>
@@ -147,7 +151,9 @@ export const AdaptiveQuizResultPage: React.FC = () => {
                 </div>
 
                 <div className={styles.scoreCard}>
-                    <span className={styles.scoreLabel}>Sai Số Chuẩn (SE)</span>
+                    <span className={styles.scoreLabel}>
+                        Độ Dao Động Ước Tính
+                    </span>
                     <span
                         className={styles.scoreVal}
                         style={{ color: '#475569' }}
@@ -156,8 +162,8 @@ export const AdaptiveQuizResultPage: React.FC = () => {
                     </span>
                     <span className={styles.scoreSub}>
                         {session.stop_reason === 'se_threshold'
-                            ? 'Dừng do hội tụ SE <= 0.3'
-                            : 'Dừng do đạt giới hạn câu'}
+                            ? 'Đã đạt độ tin cậy tối ưu'
+                            : 'Hoàn thành đủ số câu hỏi'}
                     </span>
                 </div>
             </div>
@@ -172,8 +178,7 @@ export const AdaptiveQuizResultPage: React.FC = () => {
                 <div className={styles.section}>
                     <h3 className={styles.sectionTitle}>
                         <ActivityIcon size={20} />
-                        Đặc Tuyến Trắc Lượng Từng Câu Hỏi (Item Characteristic
-                        Curves - 3PL IRT)
+                        Phân Tích Mức Độ Khó Từng Câu Hỏi Đã Làm
                     </h3>
                     <div className={styles.iccGrid}>
                         {responses.map((resp) => (

@@ -72,19 +72,21 @@ export const ItemCharacteristicCurve: React.FC<
 
             <div className={styles.paramRow}>
                 <span>
-                    Độ khó (b):{' '}
+                    Mức độ khó:{' '}
                     <span className={styles.paramValue}>{b.toFixed(2)}</span>
                 </span>
                 <span>
-                    Độ phân biệt (a):{' '}
+                    Độ phân loại:{' '}
                     <span className={styles.paramValue}>{a.toFixed(2)}</span>
                 </span>
                 <span>
-                    Đoán mò (c):{' '}
-                    <span className={styles.paramValue}>{c.toFixed(2)}</span>
+                    Tỷ lệ đoán ngẫu nhiên:{' '}
+                    <span className={styles.paramValue}>
+                        {Math.round(c * 100)}%
+                    </span>
                 </span>
                 <span>
-                    P(&theta;):{' '}
+                    Khả năng làm đúng:{' '}
                     <span className={styles.paramValue}>
                         {(studentP * 100).toFixed(1)}%
                     </span>
@@ -113,9 +115,11 @@ export const ItemCharacteristicCurve: React.FC<
                         <Tooltip
                             formatter={(value) => [
                                 `${(Number(value) * 100).toFixed(1)}%`,
-                                'Xác suất P(θ)',
+                                'Khả năng làm đúng',
                             ]}
-                            labelFormatter={(label) => `Năng lực θ = ${label}`}
+                            labelFormatter={(label) =>
+                                `Điểm năng lực: ${label}`
+                            }
                             contentStyle={{
                                 borderRadius: 8,
                                 fontSize: 12,
@@ -127,7 +131,7 @@ export const ItemCharacteristicCurve: React.FC<
                             stroke="#94a3b8"
                             strokeDasharray="3 3"
                             label={{
-                                value: `b=${b.toFixed(1)}`,
+                                value: `Độ khó ${b.toFixed(1)}`,
                                 position: 'insideTopLeft',
                                 fontSize: 12,
                                 fill: '#64748b',

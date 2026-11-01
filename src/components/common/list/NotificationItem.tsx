@@ -8,6 +8,7 @@ import PromotionIcon from '@/assets/Action Favourite.svg'
 interface NotificationItemProps {
     notification: NotificationUI
     onClick: () => void
+    onMarkAsRead?: (e: React.MouseEvent) => void
 }
 
 const getIcon = (notificationType: string) => {
@@ -20,8 +21,8 @@ const getIcon = (notificationType: string) => {
 export const NotificationItem: React.FC<NotificationItemProps> = ({
     notification,
     onClick,
+    onMarkAsRead,
 }) => {
-    // ✅ Updated: Use correct field names from NotificationUI
     const { notification_type, title, content, timestamp, isRead } =
         notification
     const icon = getIcon(notification_type)
@@ -37,7 +38,20 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
                 <p className={s.content}>{content}</p>
                 <span className={s.timestamp}>{timestamp}</span>
             </div>
-            {!isRead && <span className={s.unreadDot} title="Chưa đọc"></span>}
+            {!isRead &&
+                (onMarkAsRead ? (
+                    <button
+                        type="button"
+                        className={s.markReadAction}
+                        onClick={onMarkAsRead}
+                        title="Đánh dấu đã đọc"
+                        aria-label="Đánh dấu đã đọc"
+                    >
+                        <span className={s.unreadDot} />
+                    </button>
+                ) : (
+                    <span className={s.unreadDot} title="Chưa đọc" />
+                ))}
         </li>
     )
 }

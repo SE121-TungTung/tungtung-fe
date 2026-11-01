@@ -229,7 +229,7 @@ export default function AdminDashboard() {
                             title="Cấu hình hệ thống"
                             description="Điều chỉnh tham số và phân quyền"
                             mode="light"
-                            onClick={() => navigate('/admin/settings')}
+                            onClick={() => navigate('/admin/system')}
                         />
                         <TextHorizontal
                             icon={<img src={DangerIcon} alt="" />}

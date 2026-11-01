@@ -15,6 +15,7 @@
     position: relative;
     display: inline-flex;
     align-items: center;
+    min-height: 36px;
     gap: var(--gap);
     padding: var(--py) var(--px);
     border-radius: var(--radius);
@@ -174,11 +175,19 @@
 .dark {
     --btn-fg: var(--color-text-primary);
 }
-.dark.glass {
-    --btn-bg: linear-gradient(180deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.2));
-    --btn-bd: var(--color-container-border);
+.dark.glass,
+:global([data-theme='dark']) .glass {
+    --btn-bg: var(--color-brand-primary);
+    --btn-bd: rgba(255, 255, 255, 0.22);
+    --btn-fg: #ffffff;
 }
-.dark.solid {
+.dark.glass:hover,
+:global([data-theme='dark']) .glass:hover {
+    --btn-bg: var(--color-brand-primary-hover);
+    --btn-fg: #ffffff;
+}
+.dark.solid,
+:global([data-theme='dark']) .solid {
     --btn-bg: var(--color-surface-raised);
     --btn-bd: var(--color-border-soft);
 }
@@ -186,16 +195,18 @@
     opacity: 0.3;
 }
 /* Style riêng cho outline dark mode */
-.dark.outline::after {
+.dark.outline::after,
+:global([data-theme='dark']) .outline::after {
     background: var(--color-surface-page);
 }
 
 /* --- Sizes --- */
 .sm {
-    --px: 12px;
-    --py: 4px;
+    --px: 14px;
+    --py: 6px;
     --gap: 8px;
     --fs: 13px;
+    min-height: 32px;
 }
 .md {
     /* default */

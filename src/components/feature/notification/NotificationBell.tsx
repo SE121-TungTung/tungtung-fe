@@ -5,6 +5,7 @@ import {
     getNotifications,
     getUnreadCount,
     markAsRead,
+    markAllAsRead,
 } from '@/lib/notifications'
 import { createPortal } from 'react-dom'
 import s from './NotificationBell.module.css'
@@ -35,27 +36,35 @@ export default function NotificationBell({
         queryKey: ['notifications', 'recent'],
         queryFn: () => getNotifications(0, 10),
         enabled: isOpen,
-        select: (data) => data.notifications,
+        select: (data) => data.notifications ?? [],
     })
+
+    const hasAnyUnread =
+        unreadCount > 0 ||
+        notificationList.some((n: Notification) => !n.read_at)
 
     const markReadMutation = useMutation({
         mutationFn: markAsRead,
-        onSuccess: () => {
+        onMutate: async (notificationId: string) => {
+            await queryClient.cancelQueries({ queryKey: ['notifications'] })
+            queryClient.setQueryData<number>(
+                ['notifications', 'unread-count'],
+                (old = 0) => Math.max(0, old - 1)
+            )
+            return { notificationId }
+        },
+        onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ['notifications'] })
         },
     })
 
     const markAllMutation = useMutation({
-        mutationFn: async () => {
-            const unreadIds = notificationList
-                .filter((n: Notification) => !n.read_at)
-                .map((n: Notification) => n.id)
-
-            if (unreadIds.length > 0) {
-                await Promise.all(unreadIds.map((id: string) => markAsRead(id)))
-            }
+        mutationFn: markAllAsRead,
+        onMutate: async () => {
+            await queryClient.cancelQueries({ queryKey: ['notifications'] })
+            queryClient.setQueryData(['notifications', 'unread-count'], 0)
         },
-        onSuccess: () => {
+        onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ['notifications'] })
         },
     })
@@ -119,7 +128,7 @@ export default function NotificationBell({
 
     const handleMarkAllRead = (e: React.MouseEvent) => {
         e.stopPropagation() // Ngăn đóng popup
-        if (unreadCount > 0) {
+        if (hasAnyUnread) {
             markAllMutation.mutate()
         }
     }
@@ -197,7 +206,7 @@ export default function NotificationBell({
                                 className={s.markAllBtn}
                                 onClick={handleMarkAllRead}
                                 disabled={
-                                    unreadCount === 0 ||
+                                    !hasAnyUnread ||
                                     markAllMutation.isPending
                                 }
                                 title="Đánh dấu tất cả đã đọc"
@@ -283,20 +292,67 @@ export default function NotificationBell({
 }
 
 function getNotificationIcon(type: string) {
-    const iconProps = { width: 20, height: 20, fill: 'currentColor' }
-    // Giữ nguyên logic switch case cũ
+    const strokeProps = {
+        width: 18,
+        height: 18,
+        viewBox: '0 0 24 24',
+        fill: 'none',
+        stroke: 'currentColor',
+        strokeWidth: 2,
+        strokeLinecap: 'round' as const,
+        strokeLinejoin: 'round' as const,
+    }
+
     switch (type) {
-        case 'system':
+        case 'schedule_change':
+        case 'attendance_reminder':
             return (
-                <svg {...iconProps} viewBox="0 0 24 24" fill="none">
-                    <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z" />
+                <svg {...strokeProps}>
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
                 </svg>
             )
-        // ... Các icon khác
+        case 'grade':
+        case 'grade_available':
+        case 'achievement':
+            return (
+                <svg {...strokeProps}>
+                    <circle cx="12" cy="8" r="6" />
+                    <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11" />
+                </svg>
+            )
+        case 'message_received':
+            return (
+                <svg {...strokeProps}>
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+            )
+        case 'payment':
+        case 'payment_due':
+            return (
+                <svg {...strokeProps}>
+                    <rect x="2" y="5" width="20" height="14" rx="2" />
+                    <line x1="2" y1="10" x2="22" y2="10" />
+                </svg>
+            )
+        case 'assignment_due':
+        case 'class_announcement':
+        case 'announcement':
+        case 'class_alert':
+            return (
+                <svg {...strokeProps}>
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                </svg>
+            )
         default:
             return (
-                <svg {...iconProps} viewBox="0 0 20 20">
-                    <circle cx="10" cy="10" r="8" />
+                <svg {...strokeProps}>
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="16" x2="12" y2="12" />
+                    <line x1="12" y1="8" x2="12.01" y2="8" />
                 </svg>
             )
     }

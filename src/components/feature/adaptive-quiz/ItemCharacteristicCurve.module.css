@@ -1,8 +1,10 @@
+/* src/components/feature/adaptive-quiz/ItemCharacteristicCurve.module.css */
+
 .iccContainer {
-    background: #ffffff;
+    background: var(--color-surface-card, #ffffff);
     border-radius: 12px;
     padding: 1.25rem;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border-soft, #e2e8f0);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
@@ -10,13 +12,14 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 0.5rem;
     margin-bottom: 0.75rem;
 }
 
 .itemTitle {
     font-size: 0.95rem;
     font-weight: 600;
-    color: #1e293b;
+    color: var(--color-text-primary, #1e293b);
     margin: 0;
 }
 
@@ -28,27 +31,29 @@
     border-radius: 9999px;
     font-size: 0.8rem;
     font-weight: 600;
+    flex-shrink: 0;
 }
 
 .correctBadge {
-    background: #dcfce7;
+    background: rgba(22, 163, 74, 0.12);
     color: #15803d;
 }
 
 .incorrectBadge {
-    background: #fee2e2;
+    background: rgba(214, 40, 57, 0.12);
     color: #b91c1c;
 }
 
 .paramRow {
     display: flex;
+    flex-wrap: wrap;
     gap: 1rem;
     font-size: 0.8rem;
-    color: #64748b;
+    color: var(--color-text-secondary, #64748b);
     margin-bottom: 0.75rem;
 }
 
 .paramValue {
     font-weight: 600;
-    color: #0f172a;
+    color: var(--color-text-primary, #0f172a);
 }

@@ -146,15 +146,24 @@
 }
 
 /* Dark Mode Overrides */
-.dark {
-    --fg: #fff;
-    --muted: rgba(255, 255, 255, 0.6);
-    --bg: rgba(255, 255, 255, 0.08);
+.dark,
+:global([data-theme='dark']) .root {
+    --fg: var(--color-text-primary, #f5fafd);
+    --muted: rgba(235, 245, 251, 0.62);
+    --bg: rgba(255, 255, 255, 0.06);
 }
-.dark .indicator {
-    background: rgba(255, 255, 255, 0.15);
+.dark.glass,
+:global([data-theme='dark']) .glass {
+    background: rgba(9, 35, 48, 0.65);
+    border-color: rgba(132, 198, 231, 0.16);
+}
+.dark .indicator,
+:global([data-theme='dark']) .indicator {
+    background: rgba(36, 132, 181, 0.38);
+    border: 1px solid rgba(132, 198, 231, 0.24);
     box-shadow: none;
 }
-.dark.flat .indicator {
+.dark.flat .indicator,
+:global([data-theme='dark']) .flat .indicator {
     background: rgba(60, 60, 60, 1);
 }

@@ -108,25 +108,6 @@
     overflow-x: auto;
     padding: 4px;
     scrollbar-width: thin;
-    scrollbar-color: #ccc #eee;
-}
-
-.questionNav::-webkit-scrollbar {
-    height: 6px;
-}
-
-.questionNav::-webkit-scrollbar-track {
-    background: #eee;
-    border-radius: 3px;
-}
-
-.questionNav::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 3px;
-}
-
-.questionNav::-webkit-scrollbar-thumb:hover {
-    background: #bbb;
 }
 
 /* Question Number Buttons */

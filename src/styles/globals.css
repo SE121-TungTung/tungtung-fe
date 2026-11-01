@@ -356,28 +356,29 @@ canvas {
 
 /* Custom scrollbar for webkit browsers */
 ::-webkit-scrollbar {
-    width: 12px;
-    height: 12px;
+    width: 4px;
+    height: 4px;
 }
 
 ::-webkit-scrollbar-track {
-    background: var(--color-surface-page);
+    background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--color-border-medium);
+    background: transparent;
     border-radius: var(--primitive-radius-full);
-    border: 3px solid var(--color-surface-page);
 }
 
-::-webkit-scrollbar-thumb:hover {
-    background: var(--color-border-strong);
+*:hover > ::-webkit-scrollbar-thumb,
+::-webkit-scrollbar-thumb:hover,
+::-webkit-scrollbar-thumb:active {
+    background: var(--color-border-medium);
 }
 
 /* Firefox scrollbar */
 * {
     scrollbar-width: thin;
-    scrollbar-color: var(--color-border-medium) var(--color-surface-page);
+    scrollbar-color: var(--color-border-medium) transparent;
 }
 
 /* ============================================================================

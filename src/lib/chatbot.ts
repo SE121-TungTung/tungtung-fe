@@ -9,9 +9,21 @@ export interface PaginationResponse<T> {
 
 const BASE_URL = '/api/v1/chatbot'
 
+export type RetrievalMode = 'standard' | 'hybrid' | 'hybrid_rerank'
+
+export interface ChatbotSourceCitation {
+    filename: string
+    title: string
+    doc_id: string
+    doc_category: string
+    score: number
+    snippet: string
+}
+
 export interface ChatbotResponse {
     reply: string
-    sources?: string[]
+    sources?: ChatbotSourceCitation[]
+    retrieval_mode?: RetrievalMode
 }
 
 export interface UploadResponse {
@@ -32,6 +44,31 @@ export interface ChatbotDocument {
     uploaded_by_name: string
     created_at: string
     updated_at: string
+}
+
+export interface RagasMetricsSummary {
+    faithfulness: number
+    answer_relevance: number
+    context_precision: number
+    context_recall: number
+    overall_ragas_score: number
+}
+
+export interface RagasConfigEvaluation {
+    config_id: string
+    name: string
+    retrieval_mode: RetrievalMode
+    reranker: string
+    embedding_model: string
+    evaluated_questions: number
+    metrics: RagasMetricsSummary
+}
+
+export interface RagasEvaluationPayload {
+    benchmark_name: string
+    evaluated_at: string
+    dataset_size: number
+    configurations: RagasConfigEvaluation[]
 }
 
 export const chatbotApi = {
@@ -108,10 +145,34 @@ export const chatbotApi = {
         )
     },
 
-    askBot: async (message: string, history: any[] = []) => {
+    askBot: async (
+        message: string,
+        history: Array<{ role: string; content: string }> = [],
+        retrievalMode: RetrievalMode = 'hybrid_rerank'
+    ) => {
         return api<ChatbotResponse>(`${BASE_URL}/ask`, {
             method: 'POST',
-            body: JSON.stringify({ message, history }),
+            body: JSON.stringify({
+                message,
+                history,
+                retrieval_mode: retrievalMode,
+            }),
         })
+    },
+
+    getRagasResults: async (): Promise<RagasEvaluationPayload> => {
+        return api<RagasEvaluationPayload>(`${BASE_URL}/evaluation/results`, {
+            method: 'GET',
+        })
+    },
+
+    triggerRagasBenchmark: async (
+        sampleSize?: number
+    ): Promise<RagasEvaluationPayload> => {
+        const qs = sampleSize ? `?sample_size=${sampleSize}` : ''
+        return api<RagasEvaluationPayload>(
+            `${BASE_URL}/evaluation/ragas-benchmark${qs}`,
+            { method: 'POST' }
+        )
     },
 }

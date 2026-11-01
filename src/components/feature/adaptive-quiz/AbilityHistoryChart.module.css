@@ -1,8 +1,10 @@
+/* src/components/feature/adaptive-quiz/AbilityHistoryChart.module.css */
+
 .chartWrapper {
-    background: #ffffff;
+    background: var(--color-surface-card, #ffffff);
     border-radius: 12px;
     padding: 1.5rem;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border-soft, #e2e8f0);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
@@ -10,13 +12,15 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
     margin-bottom: 1.25rem;
 }
 
 .chartTitle {
     font-size: 1.1rem;
     font-weight: 700;
-    color: #0f172a;
+    color: var(--color-text-primary, #0f172a);
     margin: 0;
 }
 
@@ -24,7 +28,7 @@
     display: flex;
     gap: 1.25rem;
     font-size: 0.85rem;
-    color: #64748b;
+    color: var(--color-text-secondary, #64748b);
 }
 
 .legendItem {

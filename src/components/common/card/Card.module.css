@@ -55,8 +55,8 @@
     width: 36px;
     height: 4px;
     border-radius: 8px;
-    background: var(--text-primary);
-    opacity: 0.8;
+    background: var(--bg-brand-gradient, var(--text-primary));
+    opacity: 0.9;
     margin-top: 8px;
 }
 
@@ -68,6 +68,7 @@
     flex: 1;
     display: flex;
     flex-direction: column;
+    gap: 16px;
 }
 .footer {
     margin-top: 12px;
@@ -75,15 +76,22 @@
 }
 
 .glass {
-    --bg: rgba(255, 255, 255, 0.6);
-    --bd: rgba(255, 255, 255, 0.2);
-    background:
+    --bg: rgba(255, 255, 255, 0.68);
+    --bd: var(--glass-panel-border, rgba(255, 255, 255, 0.78));
+    background: var(
+        --glass-panel-bg,
         linear-gradient(
             180deg,
-            rgba(255, 255, 255, 0.6) 0%,
-            rgba(255, 255, 255, 0.5) 100%
-        ),
-        var(--bg);
+            rgba(255, 255, 255, 0.72) 0%,
+            rgba(235, 245, 251, 0.56) 100%
+        )
+    );
+    border-color: var(--bd);
+    box-shadow:
+        var(--glass-panel-shadow, 0 10px 28px -6px rgba(14, 52, 72, 0.07)),
+        0 0 0 1px var(--glass-panel-ring, rgba(23, 86, 118, 0.08));
+    backdrop-filter: var(--glass-blur, blur(20px) saturate(140%));
+    -webkit-backdrop-filter: var(--glass-blur, blur(20px) saturate(140%));
 }
 .outline {
     background: var(--bg);
@@ -111,15 +119,20 @@
 
 /* Dark theme: glass cards become dark-tinted */
 :global([data-theme='dark']) .glass {
-    --bg: rgba(12, 28, 44, 0.85);
-    --bd: rgba(255, 255, 255, 0.08);
-    background:
+    --bg: rgba(12, 28, 44, 0.82);
+    --bd: var(--glass-panel-border, rgba(132, 198, 231, 0.16));
+    background: var(
+        --glass-panel-bg,
         linear-gradient(
             180deg,
-            rgba(15, 30, 50, 0.75) 0%,
-            rgba(10, 22, 38, 0.85) 100%
-        ),
-        var(--bg);
+            rgba(14, 52, 72, 0.72) 0%,
+            rgba(9, 35, 48, 0.82) 100%
+        )
+    );
+    border-color: var(--bd);
+    box-shadow:
+        var(--glass-panel-shadow, 0 16px 38px -10px rgba(0, 0, 0, 0.55)),
+        0 0 0 1px var(--glass-panel-ring, rgba(255, 255, 255, 0.08));
 }
 
 @media (max-width: 640px) {

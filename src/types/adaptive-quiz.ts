@@ -38,7 +38,9 @@ export interface AdaptiveSession {
 
 export interface QuestionOption {
     id: string
+    key?: string
     text: string
+    label?: string
 }
 
 export interface NextQuestion {
@@ -48,7 +50,10 @@ export interface NextQuestion {
     question_text: string
     question_type: string
     skill_area: AdaptiveSkillArea
-    options?: QuestionOption[] | string[] | null
+    passage_title?: string | null
+    passage_text?: string | null
+    instructions?: string | null
+    options?: Array<QuestionOption | Record<string, unknown> | string> | null
     audio_url?: string | null
     image_url?: string | null
     current_theta: number

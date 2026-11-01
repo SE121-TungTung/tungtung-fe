@@ -10,6 +10,7 @@ export type WebSocketMessageType =
     | 'member_removed'
     | 'group_updated'
     | 'you_were_removed'
+    | 'NEW_NOTIFICATION'
 
 export interface WebSocketMessage {
     type: WebSocketMessageType
@@ -90,10 +91,10 @@ export class WebSocketManager {
                 // Timeout safety
                 const connectionTimeout = setTimeout(() => {
                     if (this.ws?.readyState !== WebSocket.OPEN) {
-                        console.error('Connection timeout')
+                        console.warn('WebSocket connection timeout, retrying...')
                         this.ws?.close()
                     }
-                }, 10000)
+                }, 20000)
 
                 this.ws.onopen = () => {
                     clearTimeout(connectionTimeout)

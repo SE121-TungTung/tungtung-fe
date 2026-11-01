@@ -1,474 +1,892 @@
-.pageWrapperWithoutHeader {
+/* ============================================================================
+   STUDENT DASHBOARD — MINIMALIST GLASSMORPHISM (BRAND RED - BLUE TOKENS)
+   ============================================================================ */
+
+.dashboard {
+    position: relative;
+    min-height: 100vh;
     width: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
-.header {
-    margin-bottom: 40px;
-    position: relative;
-    z-index: 10;
-    width: 70%;
-    align-self: center;
-}
-
-.avatarWrapper {
-    position: relative;
-}
-
-.avatarButton {
-    padding: 0;
-    border: 2px solid transparent;
-    border-radius: 50%;
-    background: transparent;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    object-fit: cover;
-    display: block;
-}
-
-.avatarButton[data-active='true'] {
-    transform: scale(1.1);
-    box-shadow: 0 0 20px rgba(100, 150, 255, 0.5);
-    border-color: var(--color-brand-primary-hover);
-}
-.avatarButton[data-active='true']::before {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    border-radius: 50%;
-    background: var(--bg-avatar-gradient);
-    z-index: -1;
-}
-
-.menusContainer {
-    position: absolute;
-    top: 100%;
-    margin-top: 12px;
-    z-index: 100;
-    pointer-events: none;
-}
-
-.menusContainer > * {
-    pointer-events: auto;
-    animation: slideDownFade 0.2s ease-out;
-}
-
-.menuPopover {
-    position: absolute;
-    z-index: 100;
-    animation: slideDownFade 0.2s ease-out;
-}
-
-@keyframes slideDownFade {
-    from {
-        opacity: 0;
-        transform: translateY(-8px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.userMenu {
-    position: absolute;
-    right: 0;
-}
-
-.studyMenu {
-    position: absolute;
-    left: 0;
-}
-
-.welcomeMessage {
-    font-size: clamp(2.2rem, 5vw, 3rem);
-    font-weight: 700;
-    text-align: center;
+    padding-bottom: 48px;
+    background: var(--bg-page-gradient);
+    font-family: var(--primitive-font-sans);
     color: var(--color-text-primary);
-    letter-spacing: -0.04em;
-    margin: 0 auto 40px;
-    overflow: visible;
-    display: block;
-    min-height: 1em;
-    line-height: 1.15;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    isolation: isolate;
 }
 
-.gradientText {
-    background: var(--bg-brand-gradient);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    display: inline;
-    line-height: 1.15;
+/* Soft ambient backdrop orbs for glass refraction (strictly tokens.css Red-Blue) */
+.ambientBackdrop {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.ambientOrb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(88px);
+    opacity: 0.45;
+}
+
+.orbPrimary {
+    width: 460px;
+    height: 460px;
+    top: -90px;
+    right: -60px;
+    background: radial-gradient(
+        circle,
+        rgba(36, 132, 181, 0.36) 0%,
+        rgba(75, 163, 195, 0.14) 55%,
+        transparent 75%
+    );
+}
+
+.orbSecondary {
+    width: 420px;
+    height: 420px;
+    top: 40px;
+    left: -80px;
+    background: radial-gradient(
+        circle,
+        rgba(214, 40, 57, 0.24) 0%,
+        rgba(209, 81, 109, 0.1) 55%,
+        transparent 75%
+    );
+}
+
+.orbCyan {
+    width: 480px;
+    height: 480px;
+    bottom: -120px;
+    left: 34%;
+    background: radial-gradient(
+        circle,
+        rgba(75, 163, 195, 0.3) 0%,
+        rgba(204, 230, 244, 0.12) 55%,
+        transparent 75%
+    );
+}
+
+:global([data-theme='dark']) .ambientOrb {
+    opacity: 0.28;
+}
+
+:global([data-theme='monochrome']) .ambientOrb {
+    display: none;
 }
 
 .mainContent {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-    align-items: stretch;
-    width: 100%;
+    position: relative;
+    z-index: 1;
+    max-width: 1340px;
+    margin: 0 auto;
+    padding: 8px 24px 0;
 }
 
-.mainRow {
+/* 1. Typing Welcome Header (Restored as original) */
+.welcomeMessage {
+    text-align: center;
+    margin: 4px 0 24px;
+    font-family: var(--primitive-font-sans);
+    font-size: clamp(1.75rem, 2.8vw, 2.35rem);
+    font-weight: var(--primitive-font-bold);
+    letter-spacing: -0.025em;
+    line-height: 1.25;
+    color: var(--color-text-primary);
+    min-height: 3rem;
+}
+
+.gradientText {
+    background: var(--gradient-text);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+}
+
+/* 2-Column Main Grid (Left Main + Right Sidebar) */
+.dashboardLayout {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-    align-items: stretch;
-    width: 100%;
+    grid-template-columns: minmax(0, 1fr) 330px;
+    gap: 20px;
+    align-items: start;
 }
 
-.statsGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
-}
-
-.tipsList {
-    width: 100%;
-    text-align: left;
+.leftColumn {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 20px;
+    min-width: 0;
 }
 
-.courseSuggestionCard {
-    margin-bottom: 16px;
-    background: #eef2ff;
-    padding: 16px;
-    border-radius: 12px;
-    border: 1px solid #c7d2fe;
+.rightColumn {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    transition: all 0.2s ease;
+    gap: 20px;
+    min-width: 0;
 }
 
-:global([data-theme='dark']) .courseSuggestionCard {
-    background: #1e1b4b;
-    border-color: #312e81;
+/* Shared Glass Card refinements (wrapping portal Card component) */
+.summaryCard,
+.glassSection {
+    border-radius: 20px !important;
+    padding: 22px 24px !important;
+    background: var(--glass-panel-bg) !important;
+    border: 1px solid var(--glass-panel-border) !important;
+    box-shadow: var(--glass-panel-shadow) !important;
+    backdrop-filter: var(--glass-blur) !important;
+    -webkit-backdrop-filter: var(--glass-blur) !important;
 }
 
-.courseSuggestionHeader {
+/* Section Header & Typography (with padding/divider before content) */
+.sectionHeader {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding-bottom: 12px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid rgba(23, 86, 118, 0.08);
+}
+
+:global([data-theme='dark']) .sectionHeader {
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.sectionLabel {
+    margin: 0;
+    font-family: var(--primitive-font-sans);
+    font-size: 13px;
+    font-weight: var(--primitive-font-semibold);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    line-height: 1.4;
+}
+
+.textLinkBtn {
+    appearance: none;
+    border: none;
+    background: transparent;
+    padding: 2px 4px;
+    font-family: var(--primitive-font-sans);
+    font-size: 13.5px;
+    font-weight: var(--primitive-font-medium);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.textLinkBtn:hover {
+    color: var(--color-brand-primary);
+}
+
+:global([data-theme='dark']) .textLinkBtn:hover {
+    color: var(--primitive-cyan-500);
+}
+
+/* ============================================================================
+   1. TOP SUMMARY ROW (4 KPI Cards with clean icons)
+   ============================================================================ */
+
+.topSummaryRow {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.kpiCardInner {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+    height: 100%;
+    min-height: 98px;
+}
+
+.kpiTopRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     gap: 8px;
 }
 
-.courseSuggestionIcon {
+.kpiHeaderIcon {
     width: 20px;
     height: 20px;
+    flex-shrink: 0;
+    opacity: 0.72;
 }
 
-:global([data-theme='dark']) .courseSuggestionIcon {
-    filter: invert(1) brightness(2);
+:global([data-theme='dark']) .kpiHeaderIcon {
+    filter: invert(1) brightness(1.8);
+    opacity: 0.85;
 }
 
-.courseSuggestionTitle {
-    margin: 0;
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #3730a3;
-}
-
-:global([data-theme='dark']) .courseSuggestionTitle {
-    color: #e0e7ff;
-}
-
-.courseSuggestionText {
-    margin: 0;
-    font-size: 0.875rem;
-    color: #4f46e5;
-}
-
-:global([data-theme='dark']) .courseSuggestionText {
-    color: #a5b4fc;
-}
-
-.courseName {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #1e1b4b;
-}
-
-:global([data-theme='dark']) .courseName {
-    color: #f8fafc;
-}
-
-.courseTarget {
-    margin: 0;
-    font-size: 0.8125rem;
-    color: #6366f1;
-}
-
-:global([data-theme='dark']) .courseTarget {
-    color: #818cf8;
-}
-
-.tipsSectionHeader {
+.kpiValue {
+    font-family: var(--primitive-font-sans);
+    font-size: 32px;
+    font-weight: var(--primitive-font-semibold);
+    color: var(--color-text-primary);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
     display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 8px;
-    margin-bottom: 16px;
-}
-
-.tipsSectionIcon {
-    width: 22px;
-    height: 22px;
-}
-
-:global([data-theme='dark']) .tipsSectionIcon {
-    filter: invert(1) brightness(2);
-}
-
-.skillGroup {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 12px;
-}
-
-.skillHeader {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--color-text-secondary);
-    padding-bottom: 6px;
-    border-bottom: 1px solid var(--color-border-soft, rgba(0, 0, 0, 0.06));
-}
-
-:global([data-theme='dark']) .skillHeader {
-    border-bottom-color: rgba(255, 255, 255, 0.1);
-}
-
-.skillIcon {
-    width: 16px;
-    height: 16px;
-}
-
-:global([data-theme='dark']) .skillIcon {
-    filter: invert(1) brightness(2);
-}
-
-.skillTipsUl {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
+    align-items: baseline;
     gap: 6px;
 }
 
-.skillTipLi {
-    font-size: 0.875rem;
-    line-height: 1.5;
-    padding: 10px 14px;
-    background-color: var(--color-bg-card, rgba(0, 0, 0, 0.02));
-    border-left: 4px solid var(--color-brand-primary, #3182ce);
-    border-radius: 0 8px 8px 0;
+.kpiUnit {
+    font-size: 15px;
+    font-weight: var(--primitive-font-normal);
     color: var(--color-text-secondary);
-    transition: all 0.2s ease;
 }
 
-.skillTipLi:hover {
-    transform: translateX(4px);
-    background-color: var(--color-bg-card-hover, rgba(0, 0, 0, 0.04));
+.kpiFootRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 2px;
 }
 
-:global([data-theme='dark']) .skillTipLi {
-    background-color: rgba(255, 255, 255, 0.03);
+.kpiFootText {
+    font-size: 13.5px;
+    font-weight: var(--primitive-font-normal);
+    color: var(--color-text-secondary);
 }
 
-:global([data-theme='dark']) .skillTipLi:hover {
-    background-color: rgba(255, 255, 255, 0.06);
+.kpiTrend {
+    font-size: 13.5px;
+    font-weight: var(--primitive-font-medium);
 }
 
-.skillTipLi[data-skill='reading'] {
-    border-left-color: #3b82f6;
-}
-.skillTipLi[data-skill='listening'] {
-    border-left-color: #10b981;
-}
-.skillTipLi[data-skill='writing'] {
-    border-left-color: #f59e0b;
-}
-.skillTipLi[data-skill='speaking'] {
-    border-left-color: #ef4444;
-}
-.skillTipLi[data-skill='overall'] {
-    border-left-color: #8b5cf6;
+.trendPrimary {
+    color: var(--color-brand-primary);
 }
 
-/* Legacy flat tips (backward compat) */
-.tipsTitle {
-    font-size: 1.1rem;
-    font-weight: 600;
+.trendSecondary {
+    color: var(--color-brand-secondary);
+}
+
+:global([data-theme='dark']) .trendPrimary {
+    color: var(--primitive-cyan-500);
+}
+
+:global([data-theme='dark']) .trendSecondary {
+    color: var(--primitive-rose-600);
+}
+
+/* ============================================================================
+   2. AI SUGGESTED LEARNING (Simple, clean glass subcards)
+   ============================================================================ */
+
+.aiGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.aiSubCard {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 18px 20px;
+    border-radius: 14px;
+    background: var(--glass-subcard-bg);
+    border: 1px solid var(--glass-panel-border);
+    transition:
+        transform 0.18s ease,
+        border-color 0.18s ease;
+}
+
+.aiSubCard:hover {
+    transform: translateY(-2px);
+    border-color: var(--color-border-medium);
+}
+
+/* Middle Card Inverted (White - Brand Red - White) */
+.aiSubCardFeatured,
+.aiGrid > .aiSubCard:nth-child(2) {
+    background: linear-gradient(
+        145deg,
+        rgba(214, 40, 57, 0.9) 0%,
+        rgba(186, 50, 79, 0.94) 100%
+    );
+    border-color: rgba(255, 255, 255, 0.35);
+    box-shadow:
+        0 14px 30px -8px rgba(186, 50, 79, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    color: var(--primitive-white);
+}
+
+.aiSubCardFeatured:hover,
+.aiGrid > .aiSubCard:nth-child(2):hover {
+    border-color: rgba(255, 255, 255, 0.55);
+}
+
+:global([data-theme='dark']) .aiSubCardFeatured,
+:global([data-theme='dark']) .aiGrid > .aiSubCard:nth-child(2) {
+    background: linear-gradient(
+        145deg,
+        rgba(186, 50, 79, 0.82) 0%,
+        rgba(129, 24, 34, 0.9) 100%
+    );
+    border-color: rgba(243, 211, 218, 0.28);
+    box-shadow:
+        0 16px 34px -8px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+:global([data-theme='monochrome']) .aiSubCardFeatured,
+:global([data-theme='monochrome']) .aiGrid > .aiSubCard:nth-child(2) {
+    background: var(--primitive-gray-200);
+    border-color: var(--primitive-gray-300);
+    box-shadow: none;
+}
+
+.aiSubCardFeatured .itemTitle,
+.aiGrid > .aiSubCard:nth-child(2) .itemTitle {
+    color: var(--primitive-white);
+}
+
+.aiSubCardFeatured .itemText,
+.aiSubCardFeatured .cleanTipItem,
+.aiSubCardFeatured .aiProgressLabels,
+.aiGrid > .aiSubCard:nth-child(2) .itemText,
+.aiGrid > .aiSubCard:nth-child(2) .cleanTipItem,
+.aiGrid > .aiSubCard:nth-child(2) .aiProgressLabels {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.featuredCtaBtn {
+    --btn-bg: rgba(255, 255, 255, 0.92) !important;
+    --btn-bd: rgba(255, 255, 255, 0.95) !important;
+    --btn-fg: var(--primitive-crimson-400) !important;
+}
+
+.featuredCtaBtn:hover {
+    --btn-bg: #ffffff !important;
+}
+
+:global([data-theme='dark']) .featuredCtaBtn {
+    --btn-bg: rgba(255, 255, 255, 0.16) !important;
+    --btn-bd: rgba(255, 255, 255, 0.34) !important;
+    --btn-fg: #ffffff !important;
+}
+
+:global([data-theme='dark']) .featuredCtaBtn:hover {
+    --btn-bg: rgba(255, 255, 255, 0.24) !important;
+}
+
+.itemTitle {
     margin: 0;
+    font-family: var(--primitive-font-sans);
+    font-size: 16.5px;
+    font-weight: var(--primitive-font-semibold);
     color: var(--color-text-primary);
+    line-height: 1.35;
 }
 
-.tipsUl {
-    list-style: none;
-    padding: 0;
+.itemText {
     margin: 0;
+    font-size: 14px;
+    font-weight: var(--primitive-font-normal);
+    color: var(--color-text-secondary);
+    line-height: 1.55;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.cleanTipList {
+    margin: 0;
+    padding-left: 18px;
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-.tipLi {
-    font-size: 0.9rem;
-    line-height: 1.4;
-    padding: 10px 14px;
-    background-color: var(--color-bg-card, rgba(0, 0, 0, 0.02));
-    border-left: 4px solid var(--color-brand-primary, #3182ce);
-    border-radius: 0 8px 8px 0;
+.cleanTipItem {
+    font-size: 14px;
+    font-weight: var(--primitive-font-normal);
     color: var(--color-text-secondary);
-    transition: all 0.2s ease;
+    line-height: 1.5;
 }
 
-.tipLi:hover {
-    transform: translateX(4px);
-    background-color: var(--color-bg-card-hover, rgba(0, 0, 0, 0.04));
+.aiProgressWrap {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 2px;
 }
 
-:global([data-theme='dark']) .tipLi {
-    background-color: rgba(255, 255, 255, 0.03);
+.aiProgressLabels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: var(--primitive-font-normal);
+    color: var(--color-text-secondary);
 }
 
-:global([data-theme='dark']) .tipLi:hover {
-    background-color: rgba(255, 255, 255, 0.06);
+.thinTrack {
+    width: 100%;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(23, 86, 118, 0.1);
+    overflow: hidden;
 }
 
-.suggestionBody {
+:global([data-theme='dark']) .thinTrack {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.thinFill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.35s ease;
+}
+
+.fillPrimary {
+    background: var(--color-brand-primary);
+}
+
+.fillSecondary {
+    background: var(--color-brand-secondary);
+}
+
+.tagGroup {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.softBadge {
+    font-size: 13px;
+    font-weight: var(--primitive-font-normal);
+    color: var(--color-text-secondary);
+    background: rgba(23, 86, 118, 0.06);
+    border: 1px solid rgba(23, 86, 118, 0.12);
+    padding: 4px 12px;
+    border-radius: 999px;
+}
+
+:global([data-theme='dark']) .softBadge {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.cardActionRow {
+    margin-top: auto;
+    padding-top: 8px;
+    display: flex;
+    justify-content: flex-start;
+}
+
+/* ============================================================================
+   3. BOTTOM SPLIT (4-Skill Breakdown & AI Roadmap Milestones)
+   ============================================================================ */
+
+.bottomSplit {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+/* Left: 4-Skill Breakdown (Vertical bars + Legend list) */
+.skillBreakdownWrap {
+    display: grid;
+    grid-template-columns: 1fr 1.15fr;
+    gap: 22px;
+    align-items: center;
+    padding-top: 4px;
+}
+
+.verticalChart {
+    display: flex;
+    align-items: stretch;
+    gap: 12px;
+    height: 156px;
+}
+
+.yAxisLabels {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    font-size: 12.5px;
+    font-weight: var(--primitive-font-normal);
+    color: var(--color-text-secondary);
+    padding-bottom: 22px;
+}
+
+.verticalBars {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-around;
+    gap: 10px;
+    border-bottom: 1px solid rgba(23, 86, 118, 0.1);
+    padding-bottom: 6px;
+}
+
+:global([data-theme='dark']) .verticalBars {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.vBarCol {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    height: 100%;
+    justify-content: flex-end;
+}
+
+.vBarTrack {
+    width: 9px;
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    background: rgba(23, 86, 118, 0.06);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+:global([data-theme='dark']) .vBarTrack {
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.vBarFill {
+    width: 100%;
+    border-radius: 999px;
+    transition: height 0.4s ease;
+}
+
+.vBarLabel {
+    font-size: 12.5px;
+    font-weight: var(--primitive-font-normal);
+    color: var(--color-text-secondary);
+}
+
+.skillLegendList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.skillLegendRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14.5px;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* Strictly Brand Red - Blue Tones from tokens.css */
+.tone_primary {
+    background: var(--color-brand-primary);
+}
+
+.tone_secondary {
+    background: var(--color-brand-secondary);
+}
+
+.tone_cyan {
+    background: var(--color-brand-accent);
+}
+
+.tone_rose {
+    background: var(--primitive-rose-600);
+}
+
+.skillLegendName {
+    flex: 1;
+    font-weight: var(--primitive-font-normal);
+    color: var(--color-text-secondary);
+}
+
+.skillLegendVal {
+    font-weight: var(--primitive-font-semibold);
+    color: var(--color-text-primary);
+}
+
+/* Right: AI Roadmap Milestones Table */
+.milestoneTable {
+    display: flex;
+    flex-direction: column;
+}
+
+.milestoneHead {
+    display: grid;
+    grid-template-columns: 0.9fr 1.4fr 0.8fr;
+    gap: 8px;
+    padding: 2px 0 10px;
+    font-size: 13px;
+    font-weight: var(--primitive-font-normal);
+    color: var(--color-text-secondary);
+    border-bottom: 1px solid rgba(23, 86, 118, 0.08);
+}
+
+:global([data-theme='dark']) .milestoneHead {
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.milestoneRow {
+    display: grid;
+    grid-template-columns: 0.9fr 1.4fr 0.8fr;
+    gap: 8px;
+    align-items: center;
+    padding: 12px 0;
+    font-size: 14.5px;
+    border-bottom: 1px solid rgba(23, 86, 118, 0.06);
+}
+
+:global([data-theme='dark']) .milestoneRow {
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+.milestoneRow:last-child {
+    border-bottom: none;
+    padding-bottom: 2px;
+}
+
+.milestoneStage {
+    font-weight: var(--primitive-font-semibold);
+    color: var(--color-text-primary);
+}
+
+.milestoneFocus {
+    font-weight: var(--primitive-font-normal);
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.milestoneTarget {
+    font-weight: var(--primitive-font-medium);
+    text-align: right;
+}
+
+/* ============================================================================
+   RIGHT SIDEBAR: CALENDAR, QUICK ACTIONS (NO DESCRIPTION), PLACEMENT TEST
+   ============================================================================ */
+
+.scheduleEmpty {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.scheduleEmptyText {
+    margin: 0;
+    font-size: 14.5px;
+    font-weight: var(--primitive-font-normal);
+    color: var(--color-text-secondary);
+    line-height: 1.55;
+}
+
+.calendarList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.calendarItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    padding: 4px 0;
+}
+
+.calendarTime {
+    width: 44px;
+    font-size: 13px;
+    font-weight: var(--primitive-font-normal);
+    color: var(--color-text-secondary);
+    flex-shrink: 0;
+}
+
+.calendarBar {
+    width: 4px;
+    height: 30px;
+    border-radius: 999px;
+    flex-shrink: 0;
+}
+
+.calendarInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.calendarName {
+    font-size: 14.5px;
+    font-weight: var(--primitive-font-semibold);
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.calendarSub {
+    font-size: 13px;
+    font-weight: var(--primitive-font-normal);
+    color: var(--color-text-secondary);
+}
+
+/* Quick Actions List — Clean rows with dot + title ONLY */
+.quickList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.quickRow {
+    width: 100%;
+    appearance: none;
+    border: none;
+    border-bottom: 1px solid rgba(23, 86, 118, 0.07);
+    background: transparent;
+    padding: 12px 4px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    text-align: left;
+    font-family: var(--primitive-font-sans);
+    transition:
+        padding-left 0.15s ease,
+        color 0.15s ease;
+}
+
+:global([data-theme='dark']) .quickRow {
+    border-bottom-color: rgba(255, 255, 255, 0.07);
+}
+
+.quickList li:last-child .quickRow {
+    border-bottom: none;
+    padding-bottom: 2px;
+}
+
+.quickRow:hover {
+    padding-left: 8px;
+}
+
+.quickRowTitle {
+    flex: 1;
+    font-size: 14.5px;
+    font-weight: var(--primitive-font-medium);
+    color: var(--color-text-primary);
+}
+
+.quickRowArrow {
+    font-size: 16px;
+    color: var(--color-text-secondary);
+    opacity: 0.6;
+}
+
+.quickRow:hover .quickRowArrow {
+    opacity: 1;
+    color: var(--color-brand-primary);
+}
+
+.placementBox {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+/* ============================================================================
+   GUEST DASHBOARD FALLBACK CLASSES
+   ============================================================================ */
+
+.dashboardWrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 96px 24px 48px;
+    font-family: var(--primitive-font-sans);
+}
+
+.header {
+    margin-bottom: 24px;
+}
+
+.welcomeText {
+    font-size: 24px;
+    font-weight: var(--primitive-font-semibold);
+    color: var(--color-text-primary);
+    margin: 0 0 6px;
+}
+
+.subtitle {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+.mainGrid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 32px;
-    align-items: flex-start;
+    gap: 20px;
 }
 
-.suggestionTip {
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-start;
-    padding: 4px 12px 4px 0;
-    max-height: 320px;
-    overflow-y: auto;
-    scrollbar-width: thin;
-}
+/* ============================================================================
+   RESPONSIVE BREAKPOINTS
+   ============================================================================ */
 
-.suggestionTip::-webkit-scrollbar {
-    width: 6px;
-}
-.suggestionTip::-webkit-scrollbar-track {
-    background: transparent;
-}
-.suggestionTip::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.1);
-    border-radius: 3px;
-}
-.suggestionTip::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.2);
-}
-
-:global([data-theme='dark']) .suggestionTip::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15);
-}
-:global([data-theme='dark']) .suggestionTip::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.25);
-}
-
-.fab {
-    position: fixed;
-    bottom: 40px;
-    right: 40px;
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    border: none;
-    cursor: pointer;
-    display: grid;
-    place-items: center;
-    background: var(--bg-brand-gradient);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s ease;
-    z-index: 40;
-}
-
-.fab:hover {
-    transform: scale(1.1);
-}
-
-.fab img {
-    width: 28px;
-    height: 28px;
-    filter: invert(1) brightness(2);
-}
-
-/* Responsive */
-@media (max-width: 1200px) {
-    .suggestionBody {
-        grid-template-columns: 1fr;
-        gap: 24px;
-    }
-}
-
-@media (max-width: 1024px) {
-    .mainRow {
+@media (max-width: 1120px) {
+    .dashboardLayout {
         grid-template-columns: 1fr;
     }
 
-    .suggestionBody {
-        grid-template-columns: 1fr;
+    .topSummaryRow {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .rightColumn {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
 @media (max-width: 768px) {
-    .statsGrid {
-        grid-template-columns: repeat(2, 1fr);
+    .mainContent {
+        padding: 8px 16px 0;
     }
 
-    .welcomeMessage {
-        margin-bottom: 24px;
-    }
-
-    .fab {
-        bottom: 20px;
-        right: 20px;
-    }
-
-    .suggestionBody {
+    .topSummaryRow,
+    .aiGrid,
+    .bottomSplit,
+    .rightColumn,
+    .mainGrid {
         grid-template-columns: 1fr;
     }
 
-    .menusContainer {
-        right: 0;
-        left: auto;
-    }
-}
-
-@media (max-width: 480px) {
-    .statsGrid {
-        grid-template-columns: 1fr;
-    }
-
-    .mainRow {
-        grid-template-columns: 1fr;
-    }
-
-    .suggestionBody {
+    .skillBreakdownWrap {
         grid-template-columns: 1fr;
     }
 }

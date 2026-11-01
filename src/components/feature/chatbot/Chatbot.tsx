@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect, memo } from 'react'
 import s from './Chatbot.module.css'
 import { API, getAccessToken } from '@/lib/api'
+import type { ChatbotSourceCitation, RetrievalMode } from '@/lib/chatbot'
 import CloseIcon from '@/assets/X Mark.svg'
 import SendIcon from '@/assets/Send Paper Plane.svg'
 import ResetIcon from '@/assets/Refresh History.svg'
+import BookOpenIcon from '@/assets/Book Open.svg'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
@@ -15,54 +17,165 @@ interface ChatbotProps {
 interface ChatMessage {
     text: string
     sender: 'user' | 'bot'
+    sources?: ChatbotSourceCitation[]
 }
 
-const STORAGE_KEY = 'tungtung_chat_history'
+const STORAGE_KEY = 'tungtung_chat_history_v2'
 const MAX_HISTORY_SEND = 6
 
-const MessageList = memo(({ messages }: { messages: ChatMessage[] }) => {
-    const messagesEndRef = useRef<HTMLDivElement>(null)
+const CitationBadgeGroup = ({
+    sources,
+}: {
+    sources: ChatbotSourceCitation[]
+}) => {
+    const [expanded, setExpanded] = useState(false)
+    const [selectedIdx, setSelectedIdx] = useState<number | null>(null)
 
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-    }, [messages])
+    if (!sources || sources.length === 0) return null
 
     return (
-        <div className={s.messagesContainer}>
-            {messages.map((msg, index) => (
-                <div key={index} className={`${s.message} ${s[msg.sender]}`}>
-                    {msg.sender === 'bot' ? (
-                        <div className={s.markdownContent}>
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                {msg.text}
-                            </ReactMarkdown>
+        <div className={s.citationWrapper}>
+            <button
+                type="button"
+                className={`${s.citationBadgeBtn} ${expanded ? s.citationBadgeActive : ''}`}
+                onClick={() => {
+                    setExpanded((prev) => !prev)
+                    if (!expanded && selectedIdx === null) {
+                        setSelectedIdx(0)
+                    }
+                }}
+            >
+                <img
+                    src={BookOpenIcon}
+                    alt=""
+                    className={s.citationIcon}
+                    aria-hidden="true"
+                />
+                <span>Nguồn trích dẫn ({sources.length})</span>
+            </button>
+
+            {expanded && (
+                <div className={s.citationPanel}>
+                    <div className={s.citationTabs}>
+                        {sources.map((src, idx) => (
+                            <button
+                                key={`${src.doc_id}-${idx}`}
+                                type="button"
+                                className={`${s.citationTab} ${selectedIdx === idx ? s.citationTabActive : ''}`}
+                                onClick={() => setSelectedIdx(idx)}
+                            >
+                                [{idx + 1}] {src.title}
+                            </button>
+                        ))}
+                    </div>
+                    {selectedIdx !== null && sources[selectedIdx] && (
+                        <div className={s.citationDetail}>
+                            <div className={s.citationDetailHeader}>
+                                <span className={s.citationDocTitle}>
+                                    {sources[selectedIdx].title}
+                                </span>
+                                <span className={s.citationCategoryTag}>
+                                    {sources[selectedIdx].doc_category ===
+                                    'learning'
+                                        ? 'Học thuật IELTS'
+                                        : 'Quy chế & Học vụ'}
+                                </span>
+                            </div>
+                            <p className={s.citationSnippet}>
+                                &ldquo;{sources[selectedIdx].snippet}&rdquo;
+                            </p>
+                            <div className={s.citationMeta}>
+                                <span>
+                                    Tệp: {sources[selectedIdx].filename}
+                                </span>
+                            </div>
                         </div>
-                    ) : (
-                        msg.text
                     )}
                 </div>
-            ))}
-            <div ref={messagesEndRef} />
+            )}
         </div>
     )
-})
+}
+
+const MessageList = memo(
+    ({
+        messages,
+        isPending,
+    }: {
+        messages: ChatMessage[]
+        isPending: boolean
+    }) => {
+        const messagesEndRef = useRef<HTMLDivElement>(null)
+
+        useEffect(() => {
+            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+        }, [messages, isPending])
+
+        return (
+            <div className={s.messagesContainer}>
+                {messages.map((msg, index) => (
+                    <div
+                        key={index}
+                        className={`${s.message} ${s[msg.sender]}`}
+                    >
+                        {msg.sender === 'bot' ? (
+                            <>
+                                <div className={s.markdownContent}>
+                                    {msg.text ? (
+                                        <ReactMarkdown
+                                            remarkPlugins={[remarkGfm]}
+                                        >
+                                            {msg.text}
+                                        </ReactMarkdown>
+                                    ) : isPending &&
+                                      index === messages.length - 1 ? (
+                                        <div className={s.typingIndicator}>
+                                            <span className={s.typingDot} />
+                                            <span className={s.typingDot} />
+                                            <span className={s.typingDot} />
+                                        </div>
+                                    ) : null}
+                                </div>
+                                {msg.sources && msg.sources.length > 0 && (
+                                    <CitationBadgeGroup sources={msg.sources} />
+                                )}
+                            </>
+                        ) : (
+                            msg.text
+                        )}
+                    </div>
+                ))}
+                <div ref={messagesEndRef} />
+            </div>
+        )
+    }
+)
 
 export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
     const [messages, setMessages] = useState<ChatMessage[]>(() => {
         const saved = localStorage.getItem(STORAGE_KEY)
-        return saved
-            ? JSON.parse(saved)
-            : [{ text: 'Xin chĂ o! TĂ´i cĂ³ thá»ƒ giĂºp gĂ¬ cho báº¡n?', sender: 'bot' }]
+        if (saved) {
+            try {
+                return JSON.parse(saved)
+            } catch {
+                // ignore malformed storage
+            }
+        }
+        return [
+            {
+                text: 'Xin chào! Tôi là Trợ lý ảo TungTung AI. Tôi có thể hỗ trợ gì cho bạn về lộ trình IELTS, quy chế đào tạo hoặc học phí hôm nay?',
+                sender: 'bot',
+            },
+        ]
     })
 
     const [inputValue, setInputValue] = useState('')
     const [isPending, setIsPending] = useState(false)
-    const messagesEndRef = useRef<HTMLDivElement>(null)
+    const [retrievalMode] = useState<RetrievalMode>('hybrid_rerank')
     const abortControllerRef = useRef<AbortController | null>(null)
 
     useEffect(() => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(messages))
-        scrollToBottom()
     }, [messages])
 
     useEffect(() => {
@@ -72,10 +185,6 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
             }
         }
     }, [])
-
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-    }
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -91,13 +200,18 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
         setInputValue('')
         setIsPending(true)
 
-        // Add a new empty bot response message that we will append to
-        setMessages((prev) => [...prev, { text: '', sender: 'bot' }])
+        // Add empty bot response placeholder for real-time token streaming
+        setMessages((prev) => [
+            ...prev,
+            { text: '', sender: 'bot', sources: [] },
+        ])
 
-        const historyPayload = messages.slice(-MAX_HISTORY_SEND).map((msg) => ({
-            role: msg.sender === 'user' ? 'user' : 'model',
-            content: msg.text,
-        }))
+        const historyPayload = messages
+            .slice(-MAX_HISTORY_SEND)
+            .map((msg) => ({
+                role: msg.sender === 'user' ? 'user' : 'model',
+                content: msg.text,
+            }))
 
         if (abortControllerRef.current) {
             abortControllerRef.current.abort()
@@ -120,6 +234,8 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                 body: JSON.stringify({
                     message: userText,
                     history: historyPayload,
+                    retrieval_mode: retrievalMode,
+                    top_k: 4,
                 }),
                 signal: abortController.signal,
             })
@@ -130,7 +246,8 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                         const next = [...prev]
                         const lastMsg = next[next.length - 1]
                         if (lastMsg && lastMsg.sender === 'bot') {
-                            lastMsg.text = '🛑 **Đã hết lượt sử dụng AI miễn phí hôm nay.**\n\nNâng cấp tài khoản hoặc đăng nhập để tiếp tục sử dụng không giới hạn nhé!'
+                            lastMsg.text =
+                                '**Đã hết lượt sử dụng AI miễn phí hôm nay.**\n\nNâng cấp tài khoản hoặc đăng nhập để tiếp tục sử dụng không giới hạn nhé!'
                         }
                         return next
                     })
@@ -141,7 +258,7 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
             }
 
             if (!response.body) {
-                throw new Error('Dá»¯ liá»‡u stream khĂ´ng kháº£ dá»¥ng')
+                throw new Error('Dữ liệu stream không khả dụng')
             }
 
             const reader = response.body.getReader()
@@ -161,6 +278,16 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                     if (cleanLine.startsWith('data: ')) {
                         try {
                             const parsed = JSON.parse(cleanLine.substring(6))
+                            if (parsed.sources && Array.isArray(parsed.sources)) {
+                                setMessages((prev) => {
+                                    const next = [...prev]
+                                    const lastMsg = next[next.length - 1]
+                                    if (lastMsg && lastMsg.sender === 'bot') {
+                                        lastMsg.sources = parsed.sources
+                                    }
+                                    return next
+                                })
+                            }
                             if (parsed.text) {
                                 setMessages((prev) => {
                                     const next = [...prev]
@@ -173,26 +300,25 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                             }
                         } catch (err) {
                             console.error(
-                                'Lá»—i phĂ¢n tĂ­ch cĂº phĂ¡p stream chunk:',
+                                'Lỗi phân tích cú pháp stream chunk:',
                                 err
                             )
                         }
                     }
                 }
             }
-        } catch (error: any) {
-            if (error.name === 'AbortError') {
-                console.log('Stream request aborted.')
+        } catch (error: unknown) {
+            if (error instanceof Error && error.name === 'AbortError') {
                 return
             }
-            console.error('Lá»—i khi streaming chatbot:', error)
+            console.error('Lỗi khi streaming chatbot:', error)
             setMessages((prev) => {
                 const next = [...prev]
                 const lastMsg = next[next.length - 1]
                 if (lastMsg && lastMsg.sender === 'bot') {
                     lastMsg.text =
                         lastMsg.text ||
-                        'Xin lá»—i, tĂ´i Ä‘ang gáº·p sá»± cá»‘ káº¿t ná»‘i. Vui lĂ²ng thá»­ láº¡i sau.'
+                        'Xin lỗi, tôi đang gặp sự cố kết nối. Vui lòng thử lại sau.'
                 }
                 return next
             })
@@ -204,7 +330,10 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
 
     const handleClearChat = () => {
         const defaultMsg: ChatMessage[] = [
-            { text: 'Xin chĂ o! TĂ´i cĂ³ thá»ƒ giĂºp gĂ¬ cho báº¡n?', sender: 'bot' },
+            {
+                text: 'Xin chào! Tôi là Trợ lý ảo TungTung AI. Tôi có thể hỗ trợ gì cho bạn về lộ trình IELTS, quy chế đào tạo hoặc học phí hôm nay?',
+                sender: 'bot',
+            },
         ]
         setMessages(defaultMsg)
         localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultMsg))
@@ -220,39 +349,35 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                 onClick={(e) => e.stopPropagation()}
             >
                 <header className={s.header}>
-                    <div
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 8,
-                        }}
-                    >
-                        <h4 title="Double click Ä‘á»ƒ xĂ³a lá»‹ch sá»­">TungTung AI</h4>
+                    <div className={s.headerTitleGroup}>
+                        <h4>TungTung AI</h4>
+                        <span className={s.ragModePill}>Hybrid RAG</span>
                     </div>
-                    <div>
+                    <div className={s.headerActions}>
                         <button
                             onClick={handleClearChat}
                             className={s.closeBtn}
-                            aria-label="XĂ³a lá»‹ch sá»­"
+                            aria-label="Xóa lịch sử"
+                            title="Làm mới cuộc trò chuyện"
                         >
                             <img src={ResetIcon} alt="Reset" />
                         </button>
                         <button
                             onClick={onClose}
                             className={s.closeBtn}
-                            aria-label="ÄĂ³ng chatbot"
+                            aria-label="Đóng chatbot"
                         >
                             <img src={CloseIcon} alt="Close" />
                         </button>
                     </div>
                 </header>
 
-                <MessageList messages={messages} />
+                <MessageList messages={messages} isPending={isPending} />
 
                 <form className={s.inputArea} onSubmit={handleSendMessage}>
                     <input
                         type="text"
-                        placeholder="Nháº­p cĂ¢u há»i cá»§a báº¡n..."
+                        placeholder="Nhập câu hỏi về học vụ, lộ trình IELTS..."
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         disabled={isPending}
@@ -260,7 +385,7 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                     />
                     <button
                         type="submit"
-                        aria-label="Gá»­i tin nháº¯n"
+                        aria-label="Gửi tin nhắn"
                         disabled={!inputValue.trim() || isPending}
                     >
                         <img src={SendIcon} alt="Send" />

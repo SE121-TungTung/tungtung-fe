@@ -24,7 +24,7 @@ import { SkillArea } from '@/types/test.types'
 import { ButtonPrimary } from '@/components/common/button/ButtonPrimary'
 import ExamGrid from '@/components/feature/exams/ExamGrid'
 import ButtonGhost from '@/components/common/button/ButtonGhost'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useDialog } from '@/hooks/useDialog'
 import { Modal } from '@/components/core/Modal'
 
@@ -65,11 +65,23 @@ export default function ExamPracticePage() {
     const sessionState = useSession()
     const userRole = sessionState?.user?.role || 'student'
     const navigate = useNavigate()
+    const [searchParams] = useSearchParams()
     const { alert } = useDialog()
 
     const [contentMode, setContentMode] = useState<'skill' | 'all'>('skill')
     const [displayMode, setDisplayMode] = useState<'grid' | 'list'>('grid')
-    const [selectedSkill, setSelectedSkill] = useState<SkillArea | null>(null)
+    const [selectedSkill, setSelectedSkill] = useState<SkillArea | null>(() => {
+        const paramSkill = searchParams.get('skill')?.toLowerCase()
+        if (
+            paramSkill === SkillArea.LISTENING ||
+            paramSkill === SkillArea.READING ||
+            paramSkill === SkillArea.WRITING ||
+            paramSkill === SkillArea.SPEAKING
+        ) {
+            return paramSkill
+        }
+        return null
+    })
 
     const [searchTerm, setSearchTerm] = useState('')
     const [showGradientName, setShowGradientName] = useState(false)

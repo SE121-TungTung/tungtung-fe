@@ -80,6 +80,29 @@
     color: var(--color-text-tertiary);
 }
 
+.markReadAction {
+    background: transparent;
+    border: none;
+    padding: 8px;
+    margin-left: 8px;
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.markReadAction:hover {
+    background-color: rgba(0, 0, 0, 0.06);
+    transform: scale(1.15);
+}
+
+.markReadAction .unreadDot {
+    margin-left: 0;
+}
+
 .unreadDot {
     width: 10px;
     height: 10px;

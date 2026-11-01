@@ -53,6 +53,7 @@
 .media {
     width: 100%;
     aspect-ratio: 16 / 9;
+    max-height: 156px;
     object-fit: cover;
     display: block;
 }
@@ -113,13 +114,14 @@
 
 .dark {
     --bg: var(--color-surface-card);
+    --card-bg: rgba(15, 30, 50, 0.95);
     --divider-color: rgba(255, 255, 255, 0.15);
     --text-primary: var(--color-text-primary);
     --text-secondary: var(--color-text-secondary);
 }
 
-/* Dark theme: light template cards flip to dark appearance */
-:global([data-theme='dark']) .templateCard.light {
+/* Dark theme: template cards flip to dark appearance */
+:global([data-theme='dark']) .templateCard {
     --card-bg: rgba(15, 30, 50, 0.95);
     --text-primary: var(--primitive-blue-900);
     --text-secondary: var(--primitive-blue-800);

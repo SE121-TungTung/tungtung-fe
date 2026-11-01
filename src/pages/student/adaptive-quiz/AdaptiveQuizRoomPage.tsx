@@ -4,7 +4,10 @@ import {
     LogOutIcon,
     LoaderIcon,
     InfoIcon,
+    CheckCircleIcon,
+    XCircleIcon,
 } from '@/components/feature/adaptive-quiz/AdaptiveIcons'
+import { AdaptiveHelpButton } from '@/components/feature/adaptive-quiz/AdaptiveExplanationModal'
 import { adaptiveQuizApi } from '@/lib/adaptive-quiz'
 import type { AdaptiveSession, NextQuestion } from '@/types/adaptive-quiz'
 import { AbilityGauge } from '@/components/feature/adaptive-quiz/AbilityGauge'
@@ -24,13 +27,22 @@ export const AdaptiveQuizRoomPage: React.FC = () => {
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
     const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false)
     const [isFinishing, setIsFinishing] = useState<boolean>(false)
-    const [lastFeedback, setLastFeedback] = useState<{
+    const [toastFeedback, setToastFeedback] = useState<{
+        id: number
         isCorrect: boolean
         correctAnswer?: string | null
-        explanation?: string | null
     } | null>(null)
 
     const questionStartTimeRef = useRef<number>(Date.now())
+
+    // Auto-dismiss floating feedback toast quickly (2.2s)
+    useEffect(() => {
+        if (!toastFeedback) return
+        const timer = window.setTimeout(() => {
+            setToastFeedback(null)
+        }, 2200)
+        return () => window.clearTimeout(timer)
+    }, [toastFeedback])
 
     useEffect(() => {
         if (!sessionId) return
@@ -53,7 +65,6 @@ export const AdaptiveQuizRoomPage: React.FC = () => {
                 questionStartTimeRef.current = Date.now()
             } catch (err: unknown) {
                 console.error('Failed to init adaptive quiz room', err)
-                // If already completed or pool exhausted
                 const errorObj = err as { message?: string; detail?: string }
                 if (
                     errorObj?.message?.includes('đã hoàn thành') ||
@@ -87,11 +98,11 @@ export const AdaptiveQuizRoomPage: React.FC = () => {
                 time_spent_seconds: timeSpent,
             })
 
-            // Update feedback
-            setLastFeedback({
+            // Trigger floating toast feedback that disappears automatically
+            setToastFeedback({
+                id: Date.now(),
                 isCorrect: res.is_correct,
                 correctAnswer: res.correct_answer,
-                explanation: res.explanation,
             })
 
             // Update live session state
@@ -108,10 +119,9 @@ export const AdaptiveQuizRoomPage: React.FC = () => {
             })
 
             if (res.is_finished) {
-                // Short delay to show final feedback, then redirect to result
                 setTimeout(() => {
                     navigate(`/student/adaptive-quiz/${sessionId}/result`)
-                }, 1500)
+                }, 1200)
                 return
             }
 
@@ -150,17 +160,50 @@ export const AdaptiveQuizRoomPage: React.FC = () => {
 
     return (
         <div className={styles.roomContainer}>
+            {/* Floating Toast Notification */}
+            {toastFeedback && (
+                <div
+                    key={toastFeedback.id}
+                    role="status"
+                    aria-live="polite"
+                    className={`${styles.floatingToast} ${
+                        toastFeedback.isCorrect
+                            ? styles.floatingToastCorrect
+                            : styles.floatingToastWrong
+                    }`}
+                >
+                    {toastFeedback.isCorrect ? (
+                        <>
+                            <CheckCircleIcon size={18} />
+                            <span>
+                                Chính xác! Đã cập nhật mức năng lực ước tính.
+                            </span>
+                        </>
+                    ) : (
+                        <>
+                            <XCircleIcon size={18} />
+                            <span>
+                                Chưa chính xác.{' '}
+                                {toastFeedback.correctAnswer &&
+                                    `Đáp án đúng: ${toastFeedback.correctAnswer}`}
+                            </span>
+                        </>
+                    )}
+                </div>
+            )}
+
             {/* Top Bar */}
             <div className={styles.topBar}>
                 <div className={styles.roomInfo}>
                     <h2 className={styles.roomTitle}>
-                        Phòng Thi Thích Ứng Năng Lực
+                        Phòng Thi Đánh Giá Năng Lực
                     </h2>
                     <span className={styles.skillBadge}>
                         {session.skill_area === 'reading'
                             ? 'IELTS Reading'
                             : 'IELTS Listening'}
                     </span>
+                    <AdaptiveHelpButton />
                 </div>
 
                 <button
@@ -195,12 +238,12 @@ export const AdaptiveQuizRoomPage: React.FC = () => {
                     <div className={styles.hintCard}>
                         <div className={styles.hintTitle}>
                             <InfoIcon size={16} />
-                            Cơ Chế Thích Ứng CAT
+                            Cơ Chế Tự Động Điều Chỉnh Độ Khó
                         </div>
                         <p className={styles.hintDesc}>
-                            Câu hỏi tiếp theo được thuật toán chọn lọc tự động
-                            sao cho cung cấp nhiều thông tin nhất về mức năng
-                            lực hiện tại của bạn.
+                            Câu hỏi tiếp theo được hệ thống chọn lọc tự động dựa
+                            trên các câu trả lời trước đó để đánh giá sát nhất
+                            mức trình độ hiện tại của bạn.
                         </p>
                     </div>
                 </div>
@@ -212,7 +255,6 @@ export const AdaptiveQuizRoomPage: React.FC = () => {
                             question={currentQuestion}
                             onSubmit={handleSubmitAnswer}
                             isSubmitting={isSubmitting}
-                            lastFeedback={lastFeedback}
                         />
                     ) : (
                         <div className={styles.loadingWrapper}>

@@ -1,18 +1,39 @@
 .root {
-    --bg: var(--color-surface-card);
-    --bd: var(--color-border-soft);
+    --bg: rgba(255, 255, 255, 0.6);
+    --bd: rgba(255, 255, 255, 0.2);
     --text-primary: var(--color-text-primary);
     --text-secondary: var(--color-text-secondary);
 
     position: relative;
     border-radius: var(--primitive-radius-xl);
-    padding: var(--primitive-space-14);
+    padding: 20px 24px;
     border: 1px solid var(--bd);
-    background: var(--bg);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.6) 0%,
+            rgba(255, 255, 255, 0.5) 100%
+        ),
+        var(--bg);
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.04),
+        0 4px 8px rgba(0, 0, 0, 0.04),
+        0 10px 20px rgba(0, 0, 0, 0.04);
     backdrop-filter: blur(20px);
     display: flex;
     flex-direction: column;
+}
+
+:global([data-theme='dark']) .root {
+    --bg: rgba(12, 28, 44, 0.85);
+    --bd: rgba(255, 255, 255, 0.08);
+    background:
+        linear-gradient(
+            180deg,
+            rgba(15, 30, 50, 0.75) 0%,
+            rgba(10, 22, 38, 0.85) 100%
+        ),
+        var(--bg);
 }
 
 .header {

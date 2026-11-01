@@ -62,7 +62,7 @@
     backdrop-filter: blur(20px) saturate(180%);
     border-radius: var(--primitive-radius-md, 12px);
     border: 1px solid var(--color-border-soft);
-    box-shadow: var(--shadow-blur-sm);
+    box-shadow: var(--primitive-shadow-xl);
     overflow: hidden;
     animation: popupFadeIn 0.2s ease-out;
 }

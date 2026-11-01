@@ -28,6 +28,11 @@ const studyMenuItems: ExtendedSideMenuItem[] = [
         href: '/student/tests',
     },
     {
+        id: 'adaptive-quiz',
+        label: 'Đánh giá năng lực thích ứng',
+        href: '/student/adaptive-quiz',
+    },
+    {
         id: 'roadmap',
         label: 'Lộ trình',
         href: '/student/roadmap',
@@ -114,6 +119,11 @@ const teacherNavItems: AppNavItem[] = [
                 label: 'Quản lý đề thi',
                 href: '/teacher/tests',
             },
+            {
+                id: 'cat-calibration',
+                label: 'Hiệu chỉnh IRT (CAT)',
+                href: '/admin/adaptive-quiz/calibration',
+            },
         ],
     },
     {
@@ -185,6 +195,11 @@ const adminNavItems: AppNavItem[] = [
                 id: 'schedule-ga',
                 label: 'Xếp TKB (GA)',
                 href: '/admin/schedule/ga',
+            },
+            {
+                id: 'cat-calibration',
+                label: 'Hiệu chỉnh IRT (CAT)',
+                href: '/admin/adaptive-quiz/calibration',
             },
             {
                 id: 'kpi-payroll',
@@ -311,6 +326,7 @@ export const getNavItems = (
 
     switch (role) {
         case 'student':
+        case 'guest_student':
             navs = studentNavItems
             break
         case 'teacher':
