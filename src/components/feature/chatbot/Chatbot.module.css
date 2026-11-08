@@ -402,3 +402,96 @@
     font-size: 11px;
     color: var(--color-text-muted);
 }
+
+/* SCRUM-95: Agent Tool Call Status Pills & Navigation Action Badges */
+.toolStatusList {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 8px;
+}
+
+.toolStatusPill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 500;
+    width: fit-content;
+    max-width: 100%;
+    transition: all 0.2s ease;
+}
+
+.toolStatusRunning {
+    background: rgba(23, 86, 118, 0.1);
+    color: var(--color-brand-primary, #175676);
+    border: 1px solid rgba(75, 163, 195, 0.35);
+}
+
+.toolStatusDone {
+    background: rgba(16, 185, 129, 0.1);
+    color: #0f766e;
+    border: 1px solid rgba(16, 185, 129, 0.28);
+}
+
+.toolSpinnerDot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--color-brand-accent, #4ba3c3);
+    animation: bounce 1.2s infinite ease-in-out;
+    flex-shrink: 0;
+}
+
+.toolCheckDot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #10b981;
+    flex-shrink: 0;
+}
+
+.uiActionList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.uiActionBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: var(--primitive-font-sans, 'Inter', sans-serif);
+    color: var(--color-brand-primary, #175676);
+    background: rgba(23, 86, 118, 0.08);
+    border: 1px solid rgba(75, 163, 195, 0.36);
+    cursor: pointer;
+    transition: background 0.18s ease;
+}
+
+.uiActionBtn:hover {
+    background: rgba(23, 86, 118, 0.15);
+}
+
+.uiActionRouteTag {
+    font-size: 11px;
+    font-family: var(--primitive-font-mono, monospace);
+    opacity: 0.78;
+}
+
+.fallbackBanner {
+    font-size: 11.5px;
+    padding: 5px 8px;
+    margin-bottom: 6px;
+    border-radius: 6px;
+    background: rgba(245, 158, 11, 0.12);
+    color: #b45309;
+    border: 1px solid rgba(245, 158, 11, 0.28);
+}

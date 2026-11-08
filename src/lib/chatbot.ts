@@ -20,10 +20,33 @@ export interface ChatbotSourceCitation {
     snippet: string
 }
 
+export interface AgentToolCallEvent {
+    tool: string
+    status: 'running' | 'completed' | 'duplicate_skipped'
+    label: string
+}
+
+export interface AgentUiActionEvent {
+    action: 'navigate'
+    route_key: string
+    route: string
+    label: string
+}
+
 export interface ChatbotResponse {
     reply: string
     sources?: ChatbotSourceCitation[]
     retrieval_mode?: RetrievalMode
+    mode?: 'agent' | 'rag' | 'rag_fallback' | 'quick_chitchat'
+    fallback_reason?: string | null
+    ui_actions?: AgentUiActionEvent[]
+    tool_calls?: Array<{
+        tool: string
+        args: Record<string, unknown>
+        status: string
+    }>
+    steps_used?: number
+    llm_calls?: number
 }
 
 export interface UploadResponse {
@@ -35,11 +58,7 @@ export interface UploadResponse {
 export type DocStatus = 'processing' | 'completed' | 'failed'
 
 export type DocumentAudience =
-    | 'public'
-    | 'student'
-    | 'teacher'
-    | 'staff'
-    | 'admin'
+    'public' | 'student' | 'teacher' | 'staff' | 'admin'
 
 export interface ChatbotDocument {
     id: string

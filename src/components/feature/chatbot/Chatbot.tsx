@@ -1,7 +1,14 @@
 import React, { useState, useRef, useEffect, memo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import s from './Chatbot.module.css'
 import { API, getAccessToken } from '@/lib/api'
-import type { ChatbotSourceCitation, RetrievalMode } from '@/lib/chatbot'
+import type {
+    AgentToolCallEvent,
+    AgentUiActionEvent,
+    ChatbotSourceCitation,
+    RetrievalMode,
+} from '@/lib/chatbot'
+import { useSession } from '@/stores/session.store'
 import CloseIcon from '@/assets/X Mark.svg'
 import SendIcon from '@/assets/Send Paper Plane.svg'
 import ResetIcon from '@/assets/Refresh History.svg'
@@ -18,6 +25,9 @@ interface ChatMessage {
     text: string
     sender: 'user' | 'bot'
     sources?: ChatbotSourceCitation[]
+    toolCalls?: AgentToolCallEvent[]
+    uiActions?: AgentUiActionEvent[]
+    fallbackNotice?: string
 }
 
 const STORAGE_KEY = 'tungtung_chat_history_v2'
@@ -97,13 +107,71 @@ const CitationBadgeGroup = ({
     )
 }
 
+const AgentToolStatusList = ({
+    toolCalls,
+}: {
+    toolCalls?: AgentToolCallEvent[]
+}) => {
+    if (!toolCalls || toolCalls.length === 0) return null
+
+    return (
+        <div className={s.toolStatusList}>
+            {toolCalls.map((tc, idx) => {
+                const isRunning = tc.status === 'running'
+                return (
+                    <div
+                        key={`${tc.tool}-${idx}`}
+                        className={`${s.toolStatusPill} ${isRunning ? s.toolStatusRunning : s.toolStatusDone}`}
+                    >
+                        <span
+                            className={
+                                isRunning ? s.toolSpinnerDot : s.toolCheckDot
+                            }
+                            aria-hidden="true"
+                        />
+                        <span>{tc.label}</span>
+                    </div>
+                )
+            })}
+        </div>
+    )
+}
+
+const AgentNavigationBadges = ({
+    uiActions,
+    onNavigate,
+}: {
+    uiActions?: AgentUiActionEvent[]
+    onNavigate: (route: string) => void
+}) => {
+    if (!uiActions || uiActions.length === 0) return null
+
+    return (
+        <div className={s.uiActionList}>
+            {uiActions.map((act, idx) => (
+                <button
+                    key={`${act.route_key}-${idx}`}
+                    type="button"
+                    className={s.uiActionBtn}
+                    onClick={() => onNavigate(act.route)}
+                >
+                    <span>Đã chuyển đến: {act.label}</span>
+                    <span className={s.uiActionRouteTag}>{act.route}</span>
+                </button>
+            ))}
+        </div>
+    )
+}
+
 const MessageList = memo(
     ({
         messages,
         isPending,
+        onNavigate,
     }: {
         messages: ChatMessage[]
         isPending: boolean
+        onNavigate: (route: string) => void
     }) => {
         const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -120,6 +188,16 @@ const MessageList = memo(
                     >
                         {msg.sender === 'bot' ? (
                             <>
+                                {msg.toolCalls && msg.toolCalls.length > 0 && (
+                                    <AgentToolStatusList
+                                        toolCalls={msg.toolCalls}
+                                    />
+                                )}
+                                {msg.fallbackNotice && (
+                                    <div className={s.fallbackBanner}>
+                                        {msg.fallbackNotice}
+                                    </div>
+                                )}
                                 <div className={s.markdownContent}>
                                     {msg.text ? (
                                         <ReactMarkdown
@@ -136,6 +214,12 @@ const MessageList = memo(
                                         </div>
                                     ) : null}
                                 </div>
+                                {msg.uiActions && msg.uiActions.length > 0 && (
+                                    <AgentNavigationBadges
+                                        uiActions={msg.uiActions}
+                                        onNavigate={onNavigate}
+                                    />
+                                )}
                                 {msg.sources && msg.sources.length > 0 && (
                                     <CitationBadgeGroup sources={msg.sources} />
                                 )}
@@ -152,6 +236,10 @@ const MessageList = memo(
 )
 
 export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
+    const navigate = useNavigate()
+    const user = useSession((state) => state.user)
+    const isStudentAgent = user?.role === 'student'
+
     const [messages, setMessages] = useState<ChatMessage[]>(() => {
         const saved = localStorage.getItem(STORAGE_KEY)
         if (saved) {
@@ -163,7 +251,7 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
         }
         return [
             {
-                text: 'Xin chào! Tôi là Trợ lý ảo TungTung AI. Tôi có thể hỗ trợ gì cho bạn về lộ trình IELTS, quy chế đào tạo hoặc học phí hôm nay?',
+                text: 'Xin chào! Tôi là Trợ lý ảo TungTung AI. Tôi có thể hỗ trợ bạn tra cứu lộ trình IELTS, quy chế đào tạo, xem lịch học, bài tập, thông báo hoặc chuyển nhanh đến trang bạn cần.',
                 sender: 'bot',
             },
         ]
@@ -203,15 +291,19 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
         // Add empty bot response placeholder for real-time token streaming
         setMessages((prev) => [
             ...prev,
-            { text: '', sender: 'bot', sources: [] },
+            {
+                text: '',
+                sender: 'bot',
+                sources: [],
+                toolCalls: [],
+                uiActions: [],
+            },
         ])
 
-        const historyPayload = messages
-            .slice(-MAX_HISTORY_SEND)
-            .map((msg) => ({
-                role: msg.sender === 'user' ? 'user' : 'model',
-                content: msg.text,
-            }))
+        const historyPayload = messages.slice(-MAX_HISTORY_SEND).map((msg) => ({
+            role: msg.sender === 'user' ? 'user' : 'model',
+            content: msg.text,
+        }))
 
         if (abortControllerRef.current) {
             abortControllerRef.current.abort()
@@ -278,7 +370,72 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                     if (cleanLine.startsWith('data: ')) {
                         try {
                             const parsed = JSON.parse(cleanLine.substring(6))
-                            if (parsed.sources && Array.isArray(parsed.sources)) {
+
+                            // 1. Sự kiện trạng thái công cụ Agent (tool_call)
+                            if (parsed.tool_call) {
+                                const tc =
+                                    parsed.tool_call as AgentToolCallEvent
+                                setMessages((prev) => {
+                                    const next = [...prev]
+                                    const lastMsg = next[next.length - 1]
+                                    if (lastMsg && lastMsg.sender === 'bot') {
+                                        const existing = [
+                                            ...(lastMsg.toolCalls || []),
+                                        ]
+                                        const matchIdx = existing.findIndex(
+                                            (item) =>
+                                                item.tool === tc.tool &&
+                                                item.status === 'running'
+                                        )
+                                        if (
+                                            matchIdx >= 0 &&
+                                            tc.status !== 'running'
+                                        ) {
+                                            existing[matchIdx] = tc
+                                        } else {
+                                            existing.push(tc)
+                                        }
+                                        lastMsg.toolCalls = existing
+                                    }
+                                    return next
+                                })
+                            }
+
+                            // 2. Sự kiện điều hướng giao diện (ui_action)
+                            if (parsed.ui_action) {
+                                const act =
+                                    parsed.ui_action as AgentUiActionEvent
+                                if (act.action === 'navigate' && act.route) {
+                                    navigate(act.route)
+                                    setMessages((prev) => {
+                                        const next = [...prev]
+                                        const lastMsg = next[next.length - 1]
+                                        if (
+                                            lastMsg &&
+                                            lastMsg.sender === 'bot'
+                                        ) {
+                                            const currentActions = [
+                                                ...(lastMsg.uiActions || []),
+                                            ]
+                                            if (
+                                                !currentActions.some(
+                                                    (a) => a.route === act.route
+                                                )
+                                            ) {
+                                                currentActions.push(act)
+                                            }
+                                            lastMsg.uiActions = currentActions
+                                        }
+                                        return next
+                                    })
+                                }
+                            }
+
+                            // 3. Sự kiện nguồn trích dẫn RAG (sources)
+                            if (
+                                parsed.sources &&
+                                Array.isArray(parsed.sources)
+                            ) {
                                 setMessages((prev) => {
                                     const next = [...prev]
                                     const lastMsg = next[next.length - 1]
@@ -288,12 +445,33 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                                     return next
                                 })
                             }
+
+                            // 4. Sự kiện văn bản phản hồi (text)
                             if (parsed.text) {
                                 setMessages((prev) => {
                                     const next = [...prev]
                                     const lastMsg = next[next.length - 1]
                                     if (lastMsg && lastMsg.sender === 'bot') {
                                         lastMsg.text += parsed.text
+                                    }
+                                    return next
+                                })
+                            }
+
+                            // 5. Sự kiện kết thúc lượt (done) kèm cảnh báo chuyển về RAG nếu hết hạn mức Agent
+                            if (
+                                parsed.done &&
+                                parsed.mode === 'rag_fallback' &&
+                                parsed.fallback_reason &&
+                                parsed.fallback_reason !==
+                                    'role_or_flag_rag_mode'
+                            ) {
+                                setMessages((prev) => {
+                                    const next = [...prev]
+                                    const lastMsg = next[next.length - 1]
+                                    if (lastMsg && lastMsg.sender === 'bot') {
+                                        lastMsg.fallbackNotice =
+                                            'Đã chuyển sang chế độ hỏi đáp tri thức tiêu chuẩn (hết hạn mức công cụ Agent tạm thời).'
                                     }
                                     return next
                                 })
@@ -331,7 +509,7 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
     const handleClearChat = () => {
         const defaultMsg: ChatMessage[] = [
             {
-                text: 'Xin chào! Tôi là Trợ lý ảo TungTung AI. Tôi có thể hỗ trợ gì cho bạn về lộ trình IELTS, quy chế đào tạo hoặc học phí hôm nay?',
+                text: 'Xin chào! Tôi là Trợ lý ảo TungTung AI. Tôi có thể hỗ trợ bạn tra cứu lộ trình IELTS, quy chế đào tạo, xem lịch học, bài tập, thông báo hoặc chuyển nhanh đến trang bạn cần.',
                 sender: 'bot',
             },
         ]
@@ -351,7 +529,9 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                 <header className={s.header}>
                     <div className={s.headerTitleGroup}>
                         <h4>TungTung AI</h4>
-                        <span className={s.ragModePill}>Hybrid RAG</span>
+                        <span className={s.ragModePill}>
+                            {isStudentAgent ? 'Student Agent' : 'Hybrid RAG'}
+                        </span>
                     </div>
                     <div className={s.headerActions}>
                         <button
@@ -372,12 +552,20 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                     </div>
                 </header>
 
-                <MessageList messages={messages} isPending={isPending} />
+                <MessageList
+                    messages={messages}
+                    isPending={isPending}
+                    onNavigate={(route) => navigate(route)}
+                />
 
                 <form className={s.inputArea} onSubmit={handleSendMessage}>
                     <input
                         type="text"
-                        placeholder="Nhập câu hỏi về học vụ, lộ trình IELTS..."
+                        placeholder={
+                            isStudentAgent
+                                ? 'Hỏi bài tập, lịch học, mở trang hoặc tra cứu IELTS...'
+                                : 'Nhập câu hỏi về học vụ, lộ trình IELTS...'
+                        }
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         disabled={isPending}
