@@ -34,11 +34,20 @@ export interface UploadResponse {
 
 export type DocStatus = 'processing' | 'completed' | 'failed'
 
+export type DocumentAudience =
+    | 'public'
+    | 'student'
+    | 'teacher'
+    | 'staff'
+    | 'admin'
+
 export interface ChatbotDocument {
     id: string
     doc_id: string | null
     filename: string
     category: string
+    audience: DocumentAudience[]
+    audience_reviewed: boolean
     status: DocStatus
     error_message: string | null
     uploaded_by_name: string
@@ -74,16 +83,53 @@ export interface RagasEvaluationPayload {
 export const chatbotApi = {
     uploadDocument: async (
         file: File,
-        docCategory: string = 'business'
+        docCategory: string = 'business',
+        audience: DocumentAudience[] = ['student', 'teacher', 'staff', 'admin']
     ): Promise<ChatbotDocument> => {
         const formData = new FormData()
         formData.append('file', file)
         formData.append('doc_category', docCategory)
+        formData.append('audience', JSON.stringify(audience))
 
         return api<ChatbotDocument>(`${BASE_URL}/admin/upload-doc`, {
             method: 'POST',
             body: formData,
         })
+    },
+
+    updateDocumentAudience: async (
+        docId: string,
+        audience: DocumentAudience[],
+        audienceReviewed: boolean = true
+    ): Promise<ChatbotDocument> => {
+        return api<ChatbotDocument>(
+            `${BASE_URL}/admin/documents/${docId}/audience`,
+            {
+                method: 'PATCH',
+                body: JSON.stringify({
+                    audience,
+                    audience_reviewed: audienceReviewed,
+                }),
+            }
+        )
+    },
+
+    bulkUpdateDocumentAudience: async (
+        documentIds: string[],
+        audience: DocumentAudience[],
+        audienceReviewed: boolean = true
+    ): Promise<ChatbotDocument[]> => {
+        return api<ChatbotDocument[]>(
+            `${BASE_URL}/admin/documents/bulk-audience`,
+            {
+                method: 'PATCH',
+                body: JSON.stringify({
+                    document_ids: documentIds,
+                    audience,
+                    audience_reviewed: audienceReviewed,
+                }),
+            }
+        )
     },
 
     getDocuments: async (params?: {
