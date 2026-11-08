@@ -33,6 +33,89 @@ export interface AgentUiActionEvent {
     label: string
 }
 
+export interface ChatbotStreamPacket {
+    tool_call?: AgentToolCallEvent
+    ui_action?: AgentUiActionEvent
+    sources?: ChatbotSourceCitation[]
+    retrieval_mode?: RetrievalMode
+    text?: string
+    done?: boolean
+    mode?: 'agent' | 'rag' | 'rag_fallback' | 'quick_chitchat'
+    fallback_reason?: string | null
+    steps_used?: number
+    llm_calls?: number
+    error?: string
+}
+
+export interface ChatbotStreamMessageState {
+    text: string
+    sources?: ChatbotSourceCitation[]
+    toolCalls?: AgentToolCallEvent[]
+    uiActions?: AgentUiActionEvent[]
+    fallbackNotice?: string
+}
+
+export function applyChatbotStreamPacket(
+    current: ChatbotStreamMessageState,
+    packet: ChatbotStreamPacket,
+    onNavigate?: (route: string) => void
+): ChatbotStreamMessageState {
+    const next: ChatbotStreamMessageState = {
+        ...current,
+        toolCalls: current.toolCalls ? [...current.toolCalls] : [],
+        uiActions: current.uiActions ? [...current.uiActions] : [],
+        sources: current.sources ? [...current.sources] : [],
+    }
+
+    if (packet.tool_call) {
+        const tc = packet.tool_call
+        const existing = next.toolCalls || []
+        const matchIdx = existing.findIndex(
+            (item) => item.tool === tc.tool && item.status === 'running'
+        )
+        if (matchIdx >= 0 && tc.status !== 'running') {
+            existing[matchIdx] = tc
+        } else {
+            existing.push(tc)
+        }
+        next.toolCalls = existing
+    }
+
+    if (packet.ui_action) {
+        const act = packet.ui_action
+        if (act.action === 'navigate' && act.route) {
+            if (onNavigate) {
+                onNavigate(act.route)
+            }
+            const currentActions = next.uiActions || []
+            if (!currentActions.some((a) => a.route === act.route)) {
+                currentActions.push(act)
+            }
+            next.uiActions = currentActions
+        }
+    }
+
+    if (packet.sources && Array.isArray(packet.sources)) {
+        next.sources = packet.sources
+    }
+
+    if (packet.text) {
+        next.text = (next.text || '') + packet.text
+    }
+
+    if (
+        packet.done &&
+        packet.mode === 'rag_fallback' &&
+        packet.fallback_reason &&
+        packet.fallback_reason !== 'role_or_flag_rag_mode'
+    ) {
+        next.fallbackNotice =
+            'Đã chuyển sang chế độ hỏi đáp tri thức tiêu chuẩn (hết hạn mức công cụ Agent tạm thời).'
+    }
+
+    return next
+}
+
 export interface ChatbotResponse {
     reply: string
     sources?: ChatbotSourceCitation[]

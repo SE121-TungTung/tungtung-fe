@@ -2,11 +2,13 @@ import React, { useState, useRef, useEffect, memo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import s from './Chatbot.module.css'
 import { API, getAccessToken } from '@/lib/api'
-import type {
-    AgentToolCallEvent,
-    AgentUiActionEvent,
-    ChatbotSourceCitation,
-    RetrievalMode,
+import {
+    applyChatbotStreamPacket,
+    type AgentToolCallEvent,
+    type AgentUiActionEvent,
+    type ChatbotSourceCitation,
+    type ChatbotStreamPacket,
+    type RetrievalMode,
 } from '@/lib/chatbot'
 import { useSession } from '@/stores/session.store'
 import CloseIcon from '@/assets/X Mark.svg'
@@ -369,113 +371,32 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                     const cleanLine = line.trim()
                     if (cleanLine.startsWith('data: ')) {
                         try {
-                            const parsed = JSON.parse(cleanLine.substring(6))
+                            const parsed = JSON.parse(
+                                cleanLine.substring(6)
+                            ) as ChatbotStreamPacket
 
-                            // 1. Sự kiện trạng thái công cụ Agent (tool_call)
-                            if (parsed.tool_call) {
-                                const tc =
-                                    parsed.tool_call as AgentToolCallEvent
-                                setMessages((prev) => {
-                                    const next = [...prev]
-                                    const lastMsg = next[next.length - 1]
-                                    if (lastMsg && lastMsg.sender === 'bot') {
-                                        const existing = [
-                                            ...(lastMsg.toolCalls || []),
-                                        ]
-                                        const matchIdx = existing.findIndex(
-                                            (item) =>
-                                                item.tool === tc.tool &&
-                                                item.status === 'running'
-                                        )
-                                        if (
-                                            matchIdx >= 0 &&
-                                            tc.status !== 'running'
-                                        ) {
-                                            existing[matchIdx] = tc
-                                        } else {
-                                            existing.push(tc)
-                                        }
-                                        lastMsg.toolCalls = existing
-                                    }
-                                    return next
-                                })
+                            if (
+                                parsed.ui_action?.action === 'navigate' &&
+                                parsed.ui_action.route
+                            ) {
+                                navigate(parsed.ui_action.route)
                             }
 
-                            // 2. Sự kiện điều hướng giao diện (ui_action)
-                            if (parsed.ui_action) {
-                                const act =
-                                    parsed.ui_action as AgentUiActionEvent
-                                if (act.action === 'navigate' && act.route) {
-                                    navigate(act.route)
-                                    setMessages((prev) => {
-                                        const next = [...prev]
-                                        const lastMsg = next[next.length - 1]
-                                        if (
-                                            lastMsg &&
-                                            lastMsg.sender === 'bot'
-                                        ) {
-                                            const currentActions = [
-                                                ...(lastMsg.uiActions || []),
-                                            ]
-                                            if (
-                                                !currentActions.some(
-                                                    (a) => a.route === act.route
-                                                )
-                                            ) {
-                                                currentActions.push(act)
-                                            }
-                                            lastMsg.uiActions = currentActions
-                                        }
-                                        return next
-                                    })
+                            setMessages((prev) => {
+                                const next = [...prev]
+                                const lastMsg = next[next.length - 1]
+                                if (lastMsg && lastMsg.sender === 'bot') {
+                                    const updated = applyChatbotStreamPacket(
+                                        lastMsg,
+                                        parsed
+                                    )
+                                    next[next.length - 1] = {
+                                        ...lastMsg,
+                                        ...updated,
+                                    }
                                 }
-                            }
-
-                            // 3. Sự kiện nguồn trích dẫn RAG (sources)
-                            if (
-                                parsed.sources &&
-                                Array.isArray(parsed.sources)
-                            ) {
-                                setMessages((prev) => {
-                                    const next = [...prev]
-                                    const lastMsg = next[next.length - 1]
-                                    if (lastMsg && lastMsg.sender === 'bot') {
-                                        lastMsg.sources = parsed.sources
-                                    }
-                                    return next
-                                })
-                            }
-
-                            // 4. Sự kiện văn bản phản hồi (text)
-                            if (parsed.text) {
-                                setMessages((prev) => {
-                                    const next = [...prev]
-                                    const lastMsg = next[next.length - 1]
-                                    if (lastMsg && lastMsg.sender === 'bot') {
-                                        lastMsg.text += parsed.text
-                                    }
-                                    return next
-                                })
-                            }
-
-                            // 5. Sự kiện kết thúc lượt (done) kèm cảnh báo chuyển về RAG nếu hết hạn mức Agent
-                            if (
-                                parsed.done &&
-                                parsed.mode === 'rag_fallback' &&
-                                parsed.fallback_reason &&
-                                parsed.fallback_reason !==
-                                    'role_or_flag_rag_mode'
-                            ) {
-                                setMessages((prev) => {
-                                    const next = [...prev]
-                                    const lastMsg = next[next.length - 1]
-                                    if (lastMsg && lastMsg.sender === 'bot') {
-                                        lastMsg.fallbackNotice =
-                                            'Đã chuyển sang chế độ hỏi đáp tri thức tiêu chuẩn (hết hạn mức công cụ Agent tạm thời).'
-                                    }
-                                    return next
-                                })
-                            }
+                                return next
+                            })
                         } catch (err) {
                             console.error(
                                 'Lỗi phân tích cú pháp stream chunk:',
