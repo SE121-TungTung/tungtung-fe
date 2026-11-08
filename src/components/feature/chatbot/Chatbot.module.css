@@ -46,6 +46,18 @@
     opacity: 1;
 }
 
+@media (max-width: 480px) {
+    .chatWindow {
+        right: 16px;
+        left: 16px;
+        bottom: 84px;
+        width: auto;
+        max-width: none;
+        height: calc(100vh - 104px);
+        max-height: calc(100vh - 104px);
+    }
+}
+
 .header {
     display: flex;
     justify-content: space-between;
@@ -68,7 +80,7 @@
 }
 
 .ragModePill {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
     padding: 2px 8px;
     border-radius: 999px;
@@ -84,12 +96,17 @@
 }
 
 .closeBtn {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     background: none;
     border: none;
     cursor: pointer;
-    padding: 5px;
     border-radius: 8px;
-    opacity: 0.72;
+    opacity: 0.75;
     transition:
         opacity 0.2s,
         background 0.2s;
@@ -113,6 +130,23 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border-medium, rgba(19, 70, 95, 0.25))
+        transparent;
+}
+
+.messagesContainer::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+.messagesContainer::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.messagesContainer::-webkit-scrollbar-thumb {
+    background: var(--color-border-medium, rgba(19, 70, 95, 0.25));
+    border-radius: 999px;
 }
 
 .message {
@@ -140,11 +174,53 @@
     border-bottom-right-radius: 4px;
 }
 
+/* Quick Prompt Suggestions on Empty / Initial Conversation */
+.suggestionsBar {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px 14px 10px;
+    border-top: 1px solid var(--color-border-soft);
+}
+
+.suggestionsLabel {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+}
+
+.suggestionsList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.suggestionChip {
+    font-size: 12px;
+    font-weight: 500;
+    font-family: var(--primitive-font-sans, 'Inter', sans-serif);
+    color: var(--color-text-primary);
+    background: var(--glass-subcard-bg, var(--color-surface-raised));
+    border: 1px solid var(--color-border-soft);
+    border-radius: 10px;
+    padding: 5px 10px;
+    cursor: pointer;
+    text-align: left;
+    transition:
+        background 0.18s ease,
+        border-color 0.18s ease;
+}
+
+.suggestionChip:hover {
+    background: var(--color-surface-card);
+    border-color: var(--color-brand-accent, #4ba3c3);
+}
+
 .inputArea {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 12px 14px;
+    padding: 10px 14px;
     border-top: 1px solid var(--color-border-soft);
 }
 
@@ -159,28 +235,65 @@
     color: var(--color-text-primary);
 }
 
-.inputArea button {
+.inputArea input::placeholder {
+    color: var(--color-text-muted);
+}
+
+.sendBtn,
+.stopBtn {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     background: none;
     border: none;
     cursor: pointer;
-    padding: 8px;
     border-radius: 50%;
-    transition: background 0.2s ease-out;
+    flex-shrink: 0;
+    transition:
+        background 0.2s ease-out,
+        opacity 0.2s ease-out;
 }
 
-.inputArea button:hover:not(:disabled) {
+.sendBtn:hover:not(:disabled) {
     background: var(--color-surface-raised);
 }
 
-.inputArea button:disabled {
-    opacity: 0.45;
+.sendBtn:disabled {
+    opacity: 0.3;
     cursor: not-allowed;
 }
 
-.inputArea button img {
+.sendBtn img {
     width: 18px;
     height: 18px;
     display: block;
+}
+
+.stopBtn {
+    background: rgba(214, 40, 57, 0.12);
+    border: 1px solid rgba(214, 40, 57, 0.32);
+    color: var(--color-brand-secondary, #d62839);
+}
+
+.stopBtn:hover {
+    background: rgba(214, 40, 57, 0.2);
+}
+
+.stopSquareIcon {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    background: currentColor;
+    display: block;
+}
+
+.stoppedNote {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--color-text-muted);
 }
 
 /* Typing Indicator */
@@ -340,7 +453,7 @@
 }
 
 .citationTab {
-    font-size: 11.5px;
+    font-size: 12px;
     font-weight: 500;
     font-family: var(--primitive-font-sans, 'Inter', sans-serif);
     padding: 3px 8px;
@@ -382,7 +495,7 @@
 }
 
 .citationCategoryTag {
-    font-size: 10.5px;
+    font-size: 12px;
     font-weight: 500;
     padding: 1px 6px;
     border-radius: 4px;
@@ -399,7 +512,7 @@
 }
 
 .citationMeta {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--color-text-muted);
 }
 
@@ -417,7 +530,7 @@
     gap: 7px;
     padding: 4px 10px;
     border-radius: 999px;
-    font-size: 11.5px;
+    font-size: 12px;
     font-weight: 500;
     width: fit-content;
     max-width: 100%;
@@ -481,17 +594,69 @@
 }
 
 .uiActionRouteTag {
-    font-size: 11px;
+    font-size: 12px;
     font-family: var(--primitive-font-mono, monospace);
     opacity: 0.78;
 }
 
 .fallbackBanner {
-    font-size: 11.5px;
+    font-size: 12px;
     padding: 5px 8px;
     margin-bottom: 6px;
     border-radius: 6px;
     background: rgba(245, 158, 11, 0.12);
     color: #b45309;
     border: 1px solid rgba(245, 158, 11, 0.28);
+}
+
+/* Dark Mode Contrast & Icon Adaptation */
+:global([data-theme='dark']) .ragModePill,
+:global([data-theme='dark']) .citationBadgeBtn,
+:global([data-theme='dark']) .toolStatusRunning,
+:global([data-theme='dark']) .uiActionBtn {
+    background: rgba(75, 163, 195, 0.16);
+    color: var(--color-brand-accent-hover, #6fb5cf);
+    border-color: rgba(111, 181, 207, 0.35);
+}
+
+:global([data-theme='dark']) .markdownContent strong {
+    color: var(--color-brand-accent-hover, #6fb5cf);
+}
+
+:global([data-theme='dark']) .markdownContent code {
+    background: rgba(75, 163, 195, 0.16);
+    color: var(--color-text-primary);
+}
+
+:global([data-theme='dark']) .markdownContent pre {
+    background: rgba(5, 17, 24, 0.45);
+}
+
+:global([data-theme='dark']) .toolStatusDone {
+    background: rgba(16, 185, 129, 0.16);
+    color: #6ee7b7;
+    border-color: rgba(52, 211, 153, 0.35);
+}
+
+:global([data-theme='dark']) .fallbackBanner {
+    background: rgba(245, 158, 11, 0.16);
+    color: #fcd34d;
+    border-color: rgba(251, 191, 36, 0.35);
+}
+
+:global([data-theme='dark']) .citationCategoryTag {
+    background: rgba(209, 81, 109, 0.2);
+    color: #f48fb1;
+}
+
+:global([data-theme='dark']) .stopBtn {
+    background: rgba(209, 81, 109, 0.2);
+    color: #f48fb1;
+    border-color: rgba(209, 81, 109, 0.4);
+}
+
+:global([data-theme='dark']) .closeBtn img,
+:global([data-theme='dark']) .sendBtn img,
+:global([data-theme='dark']) .citationIcon {
+    filter: invert(1) brightness(1.15);
 }

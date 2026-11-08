@@ -30,10 +30,23 @@ interface ChatMessage {
     toolCalls?: AgentToolCallEvent[]
     uiActions?: AgentUiActionEvent[]
     fallbackNotice?: string
+    stoppedByUser?: boolean
 }
 
 const STORAGE_KEY = 'tungtung_chat_history_v2'
 const MAX_HISTORY_SEND = 6
+
+const STUDENT_QUICK_PROMPTS: ReadonlyArray<string> = [
+    'Lịch học tuần này của mình',
+    'Bài tập nào chưa nộp?',
+    'Mở trang Flashcard FSRS',
+]
+
+const GENERAL_QUICK_PROMPTS: ReadonlyArray<string> = [
+    'Lộ trình khóa IELTS Intensive',
+    'Chính sách bảo lưu & học phí',
+    'Chiến thuật IELTS Reading',
+]
 
 const CitationBadgeGroup = ({
     sources,
@@ -216,6 +229,11 @@ const MessageList = memo(
                                         </div>
                                     ) : null}
                                 </div>
+                                {msg.stoppedByUser && (
+                                    <div className={s.stoppedNote}>
+                                        Đã dừng giữa chừng
+                                    </div>
+                                )}
                                 {msg.uiActions && msg.uiActions.length > 0 && (
                                     <AgentNavigationBadges
                                         uiActions={msg.uiActions}
@@ -276,11 +294,9 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
         }
     }, [])
 
-    const handleSendMessage = async (e: React.FormEvent) => {
-        e.preventDefault()
-        if (inputValue.trim() === '' || isPending) return
-
-        const userText = inputValue.trim()
+    const submitQuestion = async (rawQuestion: string) => {
+        const userText = rawQuestion.trim()
+        if (!userText || isPending) return
 
         const newMessages: ChatMessage[] = [
             ...messages,
@@ -408,6 +424,24 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
             }
         } catch (error: unknown) {
             if (error instanceof Error && error.name === 'AbortError') {
+                setMessages((prev) => {
+                    const next = [...prev]
+                    const lastMsg = next[next.length - 1]
+                    if (lastMsg && lastMsg.sender === 'bot') {
+                        const updatedToolCalls = (lastMsg.toolCalls || []).map(
+                            (tc) =>
+                                tc.status === 'running'
+                                    ? { ...tc, status: 'completed' as const }
+                                    : tc
+                        )
+                        next[next.length - 1] = {
+                            ...lastMsg,
+                            toolCalls: updatedToolCalls,
+                            stoppedByUser: true,
+                        }
+                    }
+                    return next
+                })
                 return
             }
             console.error('Lỗi khi streaming chatbot:', error)
@@ -427,7 +461,21 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
         }
     }
 
+    const handleSendMessage = async (e: React.FormEvent) => {
+        e.preventDefault()
+        await submitQuestion(inputValue)
+    }
+
+    const handleStopGenerating = () => {
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort()
+        }
+    }
+
     const handleClearChat = () => {
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort()
+        }
         const defaultMsg: ChatMessage[] = [
             {
                 text: 'Xin chào! Tôi là Trợ lý ảo TungTung AI. Tôi có thể hỗ trợ bạn tra cứu lộ trình IELTS, quy chế đào tạo, xem lịch học, bài tập, thông báo hoặc chuyển nhanh đến trang bạn cần.',
@@ -437,6 +485,11 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
         setMessages(defaultMsg)
         localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultMsg))
     }
+
+    const quickPrompts = isStudentAgent
+        ? STUDENT_QUICK_PROMPTS
+        : GENERAL_QUICK_PROMPTS
+    const showQuickPrompts = messages.length <= 1 && !isPending
 
     return (
         <div
@@ -456,6 +509,7 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                     </div>
                     <div className={s.headerActions}>
                         <button
+                            type="button"
                             onClick={handleClearChat}
                             className={s.closeBtn}
                             aria-label="Xóa lịch sử"
@@ -464,6 +518,7 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                             <img src={ResetIcon} alt="Reset" />
                         </button>
                         <button
+                            type="button"
                             onClick={onClose}
                             className={s.closeBtn}
                             aria-label="Đóng chatbot"
@@ -479,6 +534,24 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                     onNavigate={(route) => navigate(route)}
                 />
 
+                {showQuickPrompts && (
+                    <div className={s.suggestionsBar}>
+                        <span className={s.suggestionsLabel}>Thử hỏi</span>
+                        <div className={s.suggestionsList}>
+                            {quickPrompts.map((prompt) => (
+                                <button
+                                    key={prompt}
+                                    type="button"
+                                    className={s.suggestionChip}
+                                    onClick={() => void submitQuestion(prompt)}
+                                >
+                                    {prompt}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 <form className={s.inputArea} onSubmit={handleSendMessage}>
                     <input
                         type="text"
@@ -489,16 +562,31 @@ export default function Chatbot({ isOpen, onClose }: ChatbotProps) {
                         }
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
-                        disabled={isPending}
                         autoFocus
                     />
-                    <button
-                        type="submit"
-                        aria-label="Gửi tin nhắn"
-                        disabled={!inputValue.trim() || isPending}
-                    >
-                        <img src={SendIcon} alt="Send" />
-                    </button>
+                    {isPending ? (
+                        <button
+                            type="button"
+                            className={s.stopBtn}
+                            onClick={handleStopGenerating}
+                            aria-label="Dừng trả lời"
+                            title="Dừng trả lời"
+                        >
+                            <span
+                                className={s.stopSquareIcon}
+                                aria-hidden="true"
+                            />
+                        </button>
+                    ) : (
+                        <button
+                            type="submit"
+                            className={s.sendBtn}
+                            aria-label="Gửi tin nhắn"
+                            disabled={!inputValue.trim()}
+                        >
+                            <img src={SendIcon} alt="Send" />
+                        </button>
+                    )}
                 </form>
             </div>
         </div>

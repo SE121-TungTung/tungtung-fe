@@ -471,11 +471,7 @@ export default function ChatbotUploadPage() {
 
     const renderRowActions = (doc: ChatbotDocument) => {
         if (doc.status === 'processing') {
-            return (
-                <span style={{ fontSize: 12, color: '#94a3b8' }}>
-                    Đang xử lý...
-                </span>
-            )
+            return <span className={s.mutedStatusText}>Đang xử lý...</span>
         }
 
         if (doc.status === 'failed') {
@@ -589,18 +585,13 @@ export default function ChatbotUploadPage() {
                                 <img
                                     src={FileIcon}
                                     alt=""
-                                    style={{ width: 24, opacity: 0.6 }}
+                                    className={s.fileIconImg}
                                 />
                                 <div>
-                                    <div style={{ fontWeight: 600 }}>
+                                    <div className={s.fileTitleText}>
                                         {selectedFile.name}
                                     </div>
-                                    <div
-                                        style={{
-                                            fontSize: 12,
-                                            color: '#64748b',
-                                        }}
-                                    >
+                                    <div className={s.secondaryMetaText}>
                                         {(
                                             selectedFile.size /
                                             1024 /
@@ -666,6 +657,7 @@ export default function ChatbotUploadPage() {
                                             >
                                                 <input
                                                     type="checkbox"
+                                                    className={s.checkboxInput}
                                                     checked={checked}
                                                     onChange={() =>
                                                         handleToggleUploadAudience(
@@ -711,10 +703,10 @@ export default function ChatbotUploadPage() {
                     </div>
                 </Card>
 
-                <Card className={s.uploadCard} style={{ marginTop: 0 }}>
+                <Card className={s.uploadCard}>
                     <div className={s.tableHeaderToolbar}>
                         <div>
-                            <h2 style={{ fontSize: '18px', fontWeight: 600 }}>
+                            <h2 className={s.sectionHeading}>
                                 Lịch sử và Phân quyền Tài liệu
                             </h2>
                             <p className={s.uploadSubText}>
@@ -773,6 +765,7 @@ export default function ChatbotUploadPage() {
                                         <th style={{ width: 36 }}>
                                             <input
                                                 type="checkbox"
+                                                className={s.checkboxInput}
                                                 checked={
                                                     documents.length > 0 &&
                                                     selectedDocIds.size ===
@@ -806,6 +799,7 @@ export default function ChatbotUploadPage() {
                                             <td>
                                                 <input
                                                     type="checkbox"
+                                                    className={s.checkboxInput}
                                                     checked={selectedDocIds.has(
                                                         doc.id
                                                     )}
@@ -832,7 +826,7 @@ export default function ChatbotUploadPage() {
                                             <td>{renderAudienceBadges(doc)}</td>
                                             <td>{renderStatusBadge(doc)}</td>
                                             <td>{doc.uploaded_by_name}</td>
-                                            <td style={{ color: '#64748b' }}>
+                                            <td className={s.secondaryMetaText}>
                                                 {formatDate(doc.created_at)}
                                             </td>
                                             <td>{renderRowActions(doc)}</td>
@@ -885,6 +879,7 @@ export default function ChatbotUploadPage() {
                                         >
                                             <input
                                                 type="checkbox"
+                                                className={s.checkboxInput}
                                                 checked={checked}
                                                 onChange={() =>
                                                     handleToggleModalAudience(
